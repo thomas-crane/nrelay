@@ -1,0 +1,21 @@
+{
+  "name": "nrelay",
+  "version": "1.0.0",
+  "description": "A Node.js + TypeScript based middle-man proxy for Realm of the Mad God.",
+  "main": "index.js",
+  "bin": {
+    "nrelay": "./index.js"
+  },
+  "scripts": {
+    "start": "node index"
+  },
+  "author": "thomas-crane",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chalk": "^0.4.31",
+    "@types/es6-promise": "0.0.33",
+    "@types/node": "^8.0.28",
+    "tslint": "^5.7.0",
+    "typescript": "^2.5.2"
+  }
+}
