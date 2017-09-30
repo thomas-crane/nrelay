@@ -1,4 +1,3 @@
-import { encryptGUID } from '../crypto/guid-encrypt';
 import net = require('net');
 import { Log, SeverityLevel } from '../services/logger';
 import { HelloPacket } from './../networking/packets/hello-packet';
@@ -27,8 +26,8 @@ export class Client {
         const hp: HelloPacket = new HelloPacket();
         hp.buildVersion = 'X17.0.0';
         hp.gameId = -2;
-        hp.guid = encryptGUID('email');
-        hp.password = encryptGUID('pass');
+        hp.guid = 'email';
+        hp.password = 'pass';
         hp.random1 = Math.floor(Math.random() * 1000000000);
         hp.random2 = Math.floor(Math.random() * 1000000000);
         hp.secret = '';
@@ -52,6 +51,7 @@ export class Client {
         if (error) {
             Log('Client', 'An error occurred (cause of close)', SeverityLevel.Error);
         }
+        process.exit(0);
     }
     private onData(data: Buffer) {
         Log('Client', 'Data received');
