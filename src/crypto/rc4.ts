@@ -7,7 +7,7 @@ export class RC4 {
     private decrypt: crypto.Decipher;
 
     constructor(key: string) {
-        this.encrypt = crypto.createCipheriv('rc4', Buffer.from(key), '');
+        this.encrypt = crypto.createCipheriv('rc4', Buffer.from(key, 'hex'), '');
         this.decrypt = crypto.createDecipheriv('rc4', key, '');
     }
 
@@ -28,5 +28,5 @@ export class RC4 {
     }
 }
 
-export const SERVER_KEY = '311f80691451c71d09a13a2a6e';
-export const CLIENT_KEY = '72c5583cafb6818995cdd74b80';
+export const OUTGOING_KEY = '311f80691451c71d09a13a2a6e';
+export const INCOMING_KEY = '72c5583cafb6818995cdd74b80';

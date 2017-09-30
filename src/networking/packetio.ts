@@ -1,13 +1,13 @@
 import { Packet } from './packet';
 import stream = require('stream');
-import { RC4, SERVER_KEY } from './../crypto/rc4';
+import { RC4, OUTGOING_KEY } from './../crypto/rc4';
 
 export class PacketIO {
 
     private sendRC4: RC4;
 
     constructor() {
-        this.sendRC4 = new RC4(SERVER_KEY);
+        this.sendRC4 = new RC4(OUTGOING_KEY);
     }
 
     sendPacket(packet: Packet): Buffer {
