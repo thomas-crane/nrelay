@@ -8,7 +8,7 @@ export class RC4 {
 
     constructor(key: string) {
         this.encrypt = crypto.createCipheriv('rc4', Buffer.from(key, 'hex'), '');
-        this.decrypt = crypto.createDecipheriv('rc4', key, '');
+        this.decrypt = crypto.createDecipheriv('rc4', Buffer.from(key, 'hex'), '');
     }
 
     public cipher(data: Buffer): Buffer {
