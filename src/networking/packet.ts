@@ -1,18 +1,17 @@
 import { Log, SeverityLevel } from '../services/logger';
 
 export abstract class Packet implements IPacket {
+
     abstract id: number;
     abstract type: PacketType;
 
     bufferIndex: number;
     data: Buffer;
-    private indexSum: number;
 
     // Network order == Big endian (BE).
     // Host order == Little endian (LE).
 
     constructor(data?: Buffer) {
-        this.indexSum = 0;
         this.bufferIndex = 0;
         this.data = data || Buffer.alloc(1024);
     }
@@ -27,6 +26,15 @@ export abstract class Packet implements IPacket {
     }
     writeInt32(value: number) {
         this.bufferIndex = this.data.writeInt32BE(value, this.bufferIndex);
+    }
+
+    readUInt32(): number {
+        const result = this.data.readUInt32BE(this.bufferIndex);
+        this.bufferIndex += 4;
+        return result;
+    }
+    writeUInt32(value: number) {
+        this.bufferIndex = this.data.writeUInt32BE(value, this.bufferIndex);
     }
 
     readShort(): number {
@@ -45,6 +53,15 @@ export abstract class Packet implements IPacket {
     }
     writeByte(value: number) {
         this.bufferIndex = this.data.writeInt8(value, this.bufferIndex);
+    }
+
+    readBoolean(): boolean {
+        const result = this.readByte();
+        return result !== 0;
+    }
+    writeBoolean(value: boolean) {
+        const byteValue = value ? 1 : 0;
+        this.writeByte(byteValue);
     }
 
     readByteArray(): Int8Array {
@@ -95,24 +112,19 @@ export abstract class Packet implements IPacket {
     }
 
     resizeBuffer(newSize: number) {
-        const retain = this.data.slice(0, 4);
-        this.data = Buffer.alloc(newSize);
-        // retain first 4 bytes.
-        retain.copy(this.data, 0, 0);
+        // TODO: implement
     }
 
     reset(): void {
         this.bufferIndex = 0;
         this.data = Buffer.alloc(1024);
     }
-
 }
 
 export interface IPacket {
     id: number;
     type: PacketType;
 
-    // possibly unneeded.
     data: Buffer;
 
     read(): void;
@@ -120,5 +132,6 @@ export interface IPacket {
 }
 
 export enum PacketType {
-    Hello,
+    Hello = 30,
+    MapInfo = 83
 }
