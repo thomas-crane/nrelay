@@ -11,21 +11,40 @@ export abstract class Packet implements IPacket {
     // Network order == Big endian (BE).
     // Host order == Little endian (LE).
 
-    constructor() {
+    constructor(data?: Buffer) {
         this.indexSum = 0;
         this.bufferIndex = 0;
-        this.data = Buffer.alloc(1024);
+        this.data = data || Buffer.alloc(1024);
     }
 
     abstract read(): void;
     abstract write(): void;
 
+    readInt32(): number {
+        const result = this.data.readInt32BE(this.bufferIndex);
+        this.bufferIndex += 4;
+        return result;
+    }
     writeInt32(value: number) {
-        this.bufferIndex = this.data.writeInt32LE(value, this.bufferIndex);
+        this.bufferIndex = this.data.writeInt32BE(value, this.bufferIndex);
     }
 
+    readShort(): number {
+        const result = this.data.readInt16BE(this.bufferIndex);
+        this.bufferIndex += 2;
+        return result;
+    }
     writeShort(value: number) {
-        this.bufferIndex = this.data.writeInt16LE(value, this.bufferIndex);
+        this.bufferIndex = this.data.writeInt16BE(value, this.bufferIndex);
+    }
+
+    readByte(): number {
+        const result = this.data.readInt8(this.bufferIndex);
+        this.bufferIndex++;
+        return result;
+    }
+    writeByte(value: number) {
+        this.bufferIndex = this.data.writeInt8(value, this.bufferIndex);
     }
 
     writeByteArray(value: Int8Array) {
@@ -34,11 +53,21 @@ export abstract class Packet implements IPacket {
         }
     }
 
+    readString(): string {
+        const strlen = this.readShort();
+        this.bufferIndex += strlen;
+        return this.data.slice(this.bufferIndex - strlen, this.bufferIndex).toString('utf8');
+    }
     writeString(value: string) {
         this.writeShort(value.length);
         this.bufferIndex += this.data.write(value, this.bufferIndex, value.length, 'utf8');
     }
 
+    readStringUTF32(): string {
+        const strlen = this.readInt32();
+        this.bufferIndex += strlen;
+        return this.data.slice(this.bufferIndex - strlen, this.bufferIndex).toString('utf8');
+    }
     writeStringUTF32(value: string) {
         this.writeInt32(value.length);
         this.bufferIndex += this.data.write(value, this.bufferIndex, value.length, 'utf8');
