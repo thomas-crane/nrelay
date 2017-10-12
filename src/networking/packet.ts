@@ -11,9 +11,9 @@ export abstract class Packet implements IPacket {
     // Network order == Big endian (BE).
     // Host order == Little endian (LE).
 
-    constructor(data?: Buffer) {
+    constructor(data?: Buffer, bufferSize?: number) {
         this.bufferIndex = 0;
-        this.data = data || Buffer.alloc(1024);
+        this.data = data || Buffer.alloc(bufferSize || 1024);
     }
 
     abstract read(): void;
