@@ -17,13 +17,11 @@ export class PacketIO {
         const encryptedPacket = this.sendRC4.cipher(packet.data);
         packetSize += 5;
         packet.data = Buffer.concat([Buffer.alloc(5), encryptedPacket], packetSize);
-        /* tslint:disable */
-        packet.data[0] = (packetSize >> 24);
-        packet.data[1] = (packetSize >> 16);
-        packet.data[2] = (packetSize >> 8);
-        packet.data[3] = (packetSize >> 0);
-        /* tslint:enable */
-        packet.data[4] = packet.id;
+
+        packet.bufferIndex = 0;
+        packet.writeInt32(packetSize);
+        packet.writeByte(packet.id);
+
         return packet.data;
     }
 }
