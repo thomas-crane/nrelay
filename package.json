@@ -7,7 +7,8 @@
     "nrelay": "./index.js"
   },
   "scripts": {
-    "start": "node index"
+    "build": "tsc",
+    "start": "tsc && node index"
   },
   "author": "thomas-crane",
   "license": "MIT",
