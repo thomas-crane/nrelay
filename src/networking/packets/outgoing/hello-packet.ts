@@ -1,5 +1,5 @@
-import { Packet, PacketType } from '../packet';
-import { encryptGUID } from '../../crypto/guid-encrypt';
+import { Packet, PacketType } from '../../packet';
+import { encryptGUID } from '../../../crypto/guid-encrypt';
 
 export class HelloPacket extends Packet {
     public id = 30;
@@ -47,8 +47,6 @@ export class HelloPacket extends Packet {
     }
 
     public write(): void {
-        this.reset();
-
         this.writeString(this.buildVersion);
         this.writeInt32(this.gameId);
         this.writeString(encryptGUID(this.guid));
