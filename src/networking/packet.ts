@@ -47,7 +47,20 @@ export abstract class Packet implements IPacket {
         this.bufferIndex = this.data.writeInt8(value, this.bufferIndex);
     }
 
+    readByteArray(): Int8Array {
+        const arraylen = this.readShort();
+        const result = new Int8Array(arraylen);
+        for (let i = 0; i < arraylen; i++, this.bufferIndex++) {
+            result[i] = this.data[this.bufferIndex];
+        }
+        return result;
+    }
     writeByteArray(value: Int8Array) {
+        if (!value) {
+            this.writeShort(0);
+            return;
+        }
+        this.writeShort(value.length);
         for (let i = 0; i < value.length; i++, this.bufferIndex++) {
             this.data[this.bufferIndex] = value[i];
         }
@@ -59,6 +72,10 @@ export abstract class Packet implements IPacket {
         return this.data.slice(this.bufferIndex - strlen, this.bufferIndex).toString('utf8');
     }
     writeString(value: string) {
+        if (!value) {
+            this.writeShort(0);
+            return;
+        }
         this.writeShort(value.length);
         this.bufferIndex += this.data.write(value, this.bufferIndex, value.length, 'utf8');
     }
@@ -69,6 +86,10 @@ export abstract class Packet implements IPacket {
         return this.data.slice(this.bufferIndex - strlen, this.bufferIndex).toString('utf8');
     }
     writeStringUTF32(value: string) {
+        if (!value) {
+            this.writeInt32(0);
+            return;
+        }
         this.writeInt32(value.length);
         this.bufferIndex += this.data.write(value, this.bufferIndex, value.length, 'utf8');
     }
