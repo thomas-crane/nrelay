@@ -24,7 +24,7 @@ export abstract class Packet implements IPacket {
         this.bufferIndex += 4;
         return result;
     }
-    writeInt32(value: number) {
+    writeInt32(value: number): void {
         this.bufferIndex = this.data.writeInt32BE(value, this.bufferIndex);
     }
 
@@ -33,7 +33,7 @@ export abstract class Packet implements IPacket {
         this.bufferIndex += 4;
         return result;
     }
-    writeUInt32(value: number) {
+    writeUInt32(value: number): void {
         this.bufferIndex = this.data.writeUInt32BE(value, this.bufferIndex);
     }
 
@@ -42,7 +42,7 @@ export abstract class Packet implements IPacket {
         this.bufferIndex += 2;
         return result;
     }
-    writeShort(value: number) {
+    writeShort(value: number): void {
         this.bufferIndex = this.data.writeInt16BE(value, this.bufferIndex);
     }
 
@@ -51,7 +51,7 @@ export abstract class Packet implements IPacket {
         this.bufferIndex++;
         return result;
     }
-    writeByte(value: number) {
+    writeByte(value: number): void {
         this.bufferIndex = this.data.writeInt8(value, this.bufferIndex);
     }
 
@@ -59,7 +59,7 @@ export abstract class Packet implements IPacket {
         const result = this.readByte();
         return result !== 0;
     }
-    writeBoolean(value: boolean) {
+    writeBoolean(value: boolean): void {
         const byteValue = value ? 1 : 0;
         this.writeByte(byteValue);
     }
@@ -72,7 +72,7 @@ export abstract class Packet implements IPacket {
         }
         return result;
     }
-    writeByteArray(value: Int8Array) {
+    writeByteArray(value: Int8Array): void {
         if (!value) {
             this.writeShort(0);
             return;
@@ -88,7 +88,7 @@ export abstract class Packet implements IPacket {
         this.bufferIndex += strlen;
         return this.data.slice(this.bufferIndex - strlen, this.bufferIndex).toString('utf8');
     }
-    writeString(value: string) {
+    writeString(value: string): void {
         if (!value) {
             this.writeShort(0);
             return;
@@ -102,7 +102,7 @@ export abstract class Packet implements IPacket {
         this.bufferIndex += strlen;
         return this.data.slice(this.bufferIndex - strlen, this.bufferIndex).toString('utf8');
     }
-    writeStringUTF32(value: string) {
+    writeStringUTF32(value: string): void {
         if (!value) {
             this.writeInt32(0);
             return;
@@ -111,7 +111,7 @@ export abstract class Packet implements IPacket {
         this.bufferIndex += this.data.write(value, this.bufferIndex, value.length, 'utf8');
     }
 
-    resizeBuffer(newSize: number) {
+    resizeBuffer(newSize: number): void {
         // TODO: implement
     }
 
@@ -133,5 +133,6 @@ export interface IPacket {
 
 export enum PacketType {
     Hello = 30,
-    MapInfo = 83
+    MapInfo = 83,
+    Load = 3
 }
