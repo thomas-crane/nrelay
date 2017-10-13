@@ -45,6 +45,10 @@ export class PacketIO extends events.EventEmitter {
     sendPacket(packet: Packet): void {
         packet.reset();
         packet.write();
+
+        // resize to as small as needed.
+        packet.data = packet.data.slice(0, packet.bufferIndex);
+
         let packetSize = packet.data.length;
         const encryptedPacket = this.sendRC4.cipher(packet.data);
         packetSize += 5;
@@ -53,9 +57,6 @@ export class PacketIO extends events.EventEmitter {
         packet.bufferIndex = 0;
         packet.writeInt32(packetSize);
         packet.writeByte(packet.id);
-
-        // resize to as small as needed.
-        packet.data = packet.data.slice(0, packet.bufferIndex);
 
         this.socket.write(packet.data);
     }
