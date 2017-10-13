@@ -1,24 +1,28 @@
 import net = require('net');
 import { Log, SeverityLevel } from '../services/logger';
-import { HelloPacket } from './../networking/packets/hello-packet';
+import { HelloPacket } from './../networking/packets/outgoing/hello-packet';
 import { PacketIO } from './../networking/packetio';
 
 export class Client {
 
-    private clientSocket: net.Socket;
     private serverIp: string;
+    private packetio: PacketIO;
 
     constructor(server: string) {
         this.serverIp = server;
-        this.clientSocket = new net.Socket({
+        const clientSocket = new net.Socket({
             readable: true,
             writable: true
         });
+        this.packetio = new PacketIO(clientSocket);
         Log('Client', 'Starting connection.', SeverityLevel.Info);
-        this.clientSocket.connect(2050, this.serverIp);
-        this.clientSocket.on('connect', this.onConnect);
-        this.clientSocket.on('close', this.onClose);
-        this.clientSocket.on('data', this.onData);
+        clientSocket.connect(2050, this.serverIp);
+        clientSocket.on('connect', this.onConnect.bind(this));
+        clientSocket.on('close', this.onClose);
+
+        this.packetio.on('packet', (data) => {
+            console.log(JSON.stringify(data));
+        });
     }
 
     onConnect(): void {
@@ -42,8 +46,7 @@ export class Client {
         hp.platformToken = '';
         hp.userToken = '';
 
-        const packetio = new PacketIO();
-        this.write(packetio.sendPacket(hp));
+        this.packetio.sendPacket(hp);
     }
 
     onClose(error: boolean) {
@@ -52,9 +55,5 @@ export class Client {
             Log('Client', 'An error occurred (cause of close)', SeverityLevel.Error);
         }
         process.exit(0);
-    }
-    private onData(data: Buffer) {
-        Log('Client', 'Data received');
-        console.log(data);
     }
 }
