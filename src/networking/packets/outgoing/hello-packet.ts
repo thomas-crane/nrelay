@@ -63,8 +63,5 @@ export class HelloPacket extends Packet {
         this.writeString(this.playPlatform);
         this.writeString(this.platformToken);
         this.writeString(this.userToken);
-
-        // resize to as small as needed.
-        this.data = this.data.slice(0, this.bufferIndex);
     }
 }

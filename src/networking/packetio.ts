@@ -54,6 +54,9 @@ export class PacketIO extends events.EventEmitter {
         packet.writeInt32(packetSize);
         packet.writeByte(packet.id);
 
+        // resize to as small as needed.
+        packet.data = packet.data.slice(0, packet.bufferIndex);
+
         this.socket.write(packet.data);
     }
 }
