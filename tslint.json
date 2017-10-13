@@ -5,6 +5,11 @@
   ],
   "jsRules": {},
   "rules": {
+    "typedef": [
+      true,
+      "call-signature",
+      "property-declaration"
+    ],
     "arrow-return-shorthand": true,
     "callable-types": true,
     "class-name": true,
