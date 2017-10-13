@@ -1,5 +1,6 @@
 import { HelloPacket } from './packets/outgoing/hello-packet';
 import { MapInfoPacket } from './packets/incoming/mapinfo-packet';
+import { LoadPacket } from './packets/outgoing/load-packet';
 import { PacketType, Packet } from './packet';
 
 export class Packets {
@@ -14,6 +15,9 @@ export class Packets {
                 break;
             case PacketType.MapInfo:
                 packet = new MapInfoPacket(null, bufferSize);
+                break;
+            case PacketType.Load:
+                packet = new LoadPacket(null, bufferSize);
                 break;
         }
         packet.type = type;
