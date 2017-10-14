@@ -11,10 +11,6 @@ export class CLI {
     private serverList: IServer[];
 
     constructor() {
-        const rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
         Log('NRelay', 'Starting...', SeverityLevel.Info);
         this.getServers().then((servers) => {
             this.serverList = servers;
@@ -22,16 +18,6 @@ export class CLI {
                 Log('NRelay', 'Connecting to ' + servers[4].name);
                 const client = new Client(servers[4].address);
             }
-            // for (let i = 0; i < servers.length; i++) {
-            //     Log(servers[i].name, servers[i].address, SeverityLevel.Info);
-            // }
-            // rl.question('Enter server name: ', (sName) => {
-            //     for (let i = 0; i < this.serverList.length; i++) {
-            //         if (sName.toLowerCase() === this.serverList[i].name.toLowerCase()) {
-            //             const client = new Client(this.serverList[i].address);
-            //         }
-            //     }
-            // });
         });
     }
 
