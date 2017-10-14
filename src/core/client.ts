@@ -49,7 +49,7 @@ export class Client {
         this.packetio.sendPacket(hp);
     }
 
-    onClose(error: boolean) {
+    onClose(error: boolean): void {
         Log('Client', 'The connection was closed.', SeverityLevel.Warning);
         if (error) {
             Log('Client', 'An error occurred (cause of close)', SeverityLevel.Error);
