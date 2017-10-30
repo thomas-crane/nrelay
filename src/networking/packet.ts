@@ -134,5 +134,6 @@ export enum PacketType {
     Hello = 30,
     MapInfo = 83,
     Load = 3,
-    Failure = 0
+    Failure = 0,
+    CreateSuccess = 87
 }
