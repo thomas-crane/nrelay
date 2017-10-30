@@ -12,7 +12,7 @@ export abstract class Packet implements IPacket {
 
     constructor(data?: Buffer, bufferSize?: number) {
         this.bufferIndex = 0;
-        this.data = data || Buffer.alloc(bufferSize || 1024);
+        this.data = data || Buffer.alloc(bufferSize || 8192);
     }
 
     abstract read(): void;
