@@ -2,7 +2,6 @@ import { Log, SeverityLevel } from '../services/logger';
 
 export abstract class Packet implements IPacket {
 
-    abstract id: number;
     abstract type: PacketType;
 
     bufferIndex: number;
@@ -85,6 +84,7 @@ export abstract class Packet implements IPacket {
 
     readString(): string {
         const strlen = this.readShort();
+        Log('Packet', 'Reading string of length: ' + strlen);
         this.bufferIndex += strlen;
         return this.data.slice(this.bufferIndex - strlen, this.bufferIndex).toString('utf8');
     }
@@ -122,7 +122,6 @@ export abstract class Packet implements IPacket {
 }
 
 export interface IPacket {
-    id: number;
     type: PacketType;
 
     data: Buffer;
@@ -134,5 +133,6 @@ export interface IPacket {
 export enum PacketType {
     Hello = 30,
     MapInfo = 83,
-    Load = 3
+    Load = 3,
+    Failure = 0
 }

@@ -2,8 +2,8 @@ import { Packet, PacketType } from '../../packet';
 import { encryptGUID } from '../../../crypto/guid-encrypt';
 
 export class HelloPacket extends Packet {
-    public id = 30;
-    public type: PacketType.Hello;
+
+    public type = PacketType.Hello;
 
     //#region packet-specific members
     buildVersion: string;
@@ -27,7 +27,6 @@ export class HelloPacket extends Packet {
     data: Buffer;
 
     public read(): void {
-        this.bufferIndex = 0;
         this.buildVersion = this.readString();
         this.gameId = this.readInt32();
         this.guid = this.readString();

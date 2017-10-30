@@ -1,8 +1,8 @@
 import { Packet, PacketType } from '../../packet';
 
 export class MapInfoPacket extends Packet {
-    public id = 83;
-    public type: PacketType.MapInfo;
+
+    public type = PacketType.MapInfo;
 
     //#region packet-specific members
     width: number;
