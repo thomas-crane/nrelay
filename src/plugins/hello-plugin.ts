@@ -1,0 +1,47 @@
+// These 4 imports are essential for any plugin.
+import { NrPlugin } from './../decorators/plugin';
+import { HookPacket } from './../decorators/hook-packet';
+import { Packet, PacketType } from './../networking/packet';
+import { Client } from './../core/client';
+
+// These 2 imports are only required because this plugin deals with text packets.
+import { TextPacket } from './../networking/packets/incoming/text-packet';
+import { PlayerTextPacket } from './../networking/packets/outgoing/playertext-packet';
+
+// The NrPlugin decorator gives nrelay some information about
+// your plugin. It isn't actually necessary, but if it is not
+// included, nrelay won't notify the user that the plugin has loaded.
+@NrPlugin({
+    name: 'Hello Plugin',
+    author: 'tcrane'
+})
+// The plugin class should always begin with 'export default'
+// in order to properly expose it to the plugin manager.
+export default class HelloPlugin {
+
+    // The HookPacket decorator will cause the method to be called
+    // whenever a packet with the specified packet type is recieved.
+    @HookPacket(PacketType.Text)
+    // Any method with a HookPacket decorator should always have
+    // the method signature (client: Client, packet: Packet).
+    onText(client: Client, packet: Packet): void {
+
+        // Cast the Packet type to a TextPacket type.
+        const textPacket = packet as TextPacket;
+
+        // Check that the text packet was for the client.
+        if (textPacket.recipent === client.playerData.name) {
+
+            // Check that the message was 'hello'
+            if (textPacket.text === 'hello') {
+
+                // Make a new player text packet in order to reply.
+                const reply = new PlayerTextPacket();
+                reply.text = '/tell ' + textPacket.name + ' Hello!';
+
+                // Send the reply.
+                client.packetio.sendPacket(reply);
+            }
+        }
+    }
+}
