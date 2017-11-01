@@ -103,7 +103,7 @@ export class StatData {
     stringStatValue: string;
 
     public read(packet: Packet): void {
-        this.statType = packet.readUByte();
+        this.statType = packet.readUnsignedByte();
         if (this.isStringStat()) {
             this.stringStatValue = packet.readString();
         } else {

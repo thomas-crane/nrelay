@@ -43,12 +43,12 @@ export abstract class Packet implements IPacket {
         this.bufferIndex = this.data.writeInt16BE(value, this.bufferIndex);
     }
 
-    readUShort(): number {
+    readUnsignedShort(): number {
         const result = this.data.readUInt16BE(this.bufferIndex);
         this.bufferIndex += 2;
         return result;
     }
-    writeUShort(value: number): void {
+    writeUnsignedShort(value: number): void {
         this.bufferIndex = this.data.writeUInt16BE(value, this.bufferIndex);
     }
 
@@ -61,12 +61,12 @@ export abstract class Packet implements IPacket {
         this.bufferIndex = this.data.writeInt8(value, this.bufferIndex);
     }
 
-    readUByte(): number {
+    readUnsignedByte(): number {
         const result = this.data.readUInt8(this.bufferIndex);
         this.bufferIndex++;
         return result;
     }
-    writeUByte(value: number): void {
+    writeUnsigedByte(value: number): void {
         this.bufferIndex = this.data.writeUInt8(value, this.bufferIndex);
     }
 
@@ -169,5 +169,7 @@ export enum PacketType {
     NewTick = 85,
     Ping = 97,
     Pong = 103,
-    Move = 51
+    Move = 51,
+    Text = 23,
+    PlayerText = 84,
 }

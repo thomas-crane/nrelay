@@ -6,13 +6,13 @@ export class ObjectData {
     status: ObjectStatusData;
 
     public read(packet: Packet): void {
-        this.objectType = packet.readUShort();
+        this.objectType = packet.readUnsignedShort();
         this.status = new ObjectStatusData();
         this.status.read(packet);
     }
 
     public write(packet: Packet): void {
-        packet.writeUShort(this.objectType);
+        packet.writeUnsignedShort(this.objectType);
         this.status.write(packet);
     }
 }

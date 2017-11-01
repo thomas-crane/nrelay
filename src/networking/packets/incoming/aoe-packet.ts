@@ -19,20 +19,20 @@ export class AoePacket extends Packet {
         this.pos = new WorldPosData();
         this.pos.read(this);
         this.radius = this.readFloat();
-        this.damage = this.readUShort();
-        this.effect = this.readUByte();
+        this.damage = this.readUnsignedShort();
+        this.effect = this.readUnsignedByte();
         this.duration = this.readFloat();
-        this.origType = this.readUShort();
+        this.origType = this.readUnsignedShort();
         this.color = this.readInt32();
     }
 
     public write(): void {
         this.pos.write(this);
         this.writeFloat(this.radius);
-        this.writeUShort(this.damage);
-        this.writeUByte(this.effect);
+        this.writeUnsignedShort(this.damage);
+        this.writeUnsigedByte(this.effect);
         this.writeFloat(this.duration);
-        this.writeUShort(this.origType);
+        this.writeUnsignedShort(this.origType);
         this.writeInt32(this.color);
     }
 }

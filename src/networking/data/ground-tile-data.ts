@@ -9,12 +9,12 @@ export class GroundTileData {
     public read(packet: Packet): void {
         this.x = packet.readShort();
         this.y = packet.readShort();
-        this.type = packet.readUShort();
+        this.type = packet.readUnsignedShort();
     }
 
     public write(packet: Packet): void {
         packet.writeShort(this.x);
         packet.writeShort(this.y);
-        packet.writeUShort(this.type);
+        packet.writeUnsignedShort(this.type);
     }
 }
