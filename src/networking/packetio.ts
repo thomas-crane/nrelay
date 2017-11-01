@@ -26,6 +26,31 @@ export class PacketIO {
         socket.on('data', this.processData.bind(this));
     }
 
+    public on(event: string | symbol, listener: (...args: any[]) => void): events.EventEmitter {
+        return this.emitter.on(event, listener);
+    }
+
+    public sendPacket(packet: Packet): void {
+        packet.reset();
+        packet.write();
+
+        // resize to as small as needed.
+        packet.data = packet.data.slice(0, packet.bufferIndex);
+
+        let packetSize = packet.data.length;
+        this.sendRC4.cipher(packet.data);
+        packetSize += 5;
+        packet.data = Buffer.concat([Buffer.alloc(5), packet.data], packetSize);
+
+        packet.bufferIndex = 0;
+        packet.writeInt32(packetSize);
+        packet.writeByte(packet.type);
+
+        Log('PacketIO', 'WRITE: id: ' + packet.type + ', size: ' + packetSize, SeverityLevel.Info);
+
+        this.socket.write(packet.data);
+    }
+
     private processData(data: Buffer): void {
         if (this.bytesToRead > 0) {
             if (data.length < this.bytesToRead) {
@@ -36,8 +61,8 @@ export class PacketIO {
                 this.dataQueue = Buffer.concat([this.dataQueue, data.slice(0, this.bytesToRead)], this.dataQueue.length + this.bytesToRead);
                 this.dispatchPacket(this.dataQueue);
                 this.dataQueue = Buffer.alloc(0);
-                
-                if (this.bytesToRead == data.length) {
+
+                if (this.bytesToRead === data.length) {
                     this.bytesToRead = 0;
                     return;
                 } else {
@@ -100,30 +125,5 @@ export class PacketIO {
             packet.read();
             this.emitter.emit('packet', packet);
         }
-    }
-
-    on(event: string | symbol, listener: (...args: any[]) => void): events.EventEmitter {
-        return this.emitter.on(event, listener);
-    }
-
-    sendPacket(packet: Packet): void {
-        packet.reset();
-        packet.write();
-
-        // resize to as small as needed.
-        packet.data = packet.data.slice(0, packet.bufferIndex);
-
-        let packetSize = packet.data.length;
-        this.sendRC4.cipher(packet.data);
-        packetSize += 5;
-        packet.data = Buffer.concat([Buffer.alloc(5), packet.data], packetSize);
-
-        packet.bufferIndex = 0;
-        packet.writeInt32(packetSize);
-        packet.writeByte(packet.type);
-
-        Log('PacketIO', 'WRITE: id: ' + packet.type + ', size: ' + packetSize, SeverityLevel.Info);
-
-        this.socket.write(packet.data);
     }
 }
