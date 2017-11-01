@@ -3,6 +3,17 @@ import { MapInfoPacket } from './packets/incoming/mapinfo-packet';
 import { LoadPacket } from './packets/outgoing/load-packet';
 import { FailurePacket } from './packets/incoming/failure-packet';
 import { CreateSuccessPacket } from './packets/incoming/createsuccess-packet';
+import { UpdatePacket } from './packets/incoming/update-packet';
+import { UpdateAckPacket } from './packets/outgoing/updateack-packet';
+import { AoePacket } from './packets/incoming/aoe-packet';
+import { AoeAckPacket } from './packets/outgoing/aoeack-packet';
+import { NewTickPacket } from './packets/incoming/newtick-packet';
+import { PingPacket } from './packets/incoming/ping-packet';
+import { PongPacket } from './packets/outgoing/pong-packet';
+import { MovePacket } from './packets/outgoing/move-packet';
+import { GotoAckPacket } from './packets/outgoing/gotoack-packet';
+import { ShootAckPacket } from './packets/outgoing/shootack-packet';
+
 import { PacketType, Packet } from './packet';
 
 export class Packets {
@@ -26,6 +37,36 @@ export class Packets {
                 break;
             case PacketType.CreateSuccess:
                 packet = new CreateSuccessPacket(null, bufferSize);
+                break;
+            case PacketType.Update:
+                packet = new UpdatePacket(null, bufferSize);
+                break;
+            case PacketType.UpdateAck:
+                packet = new UpdateAckPacket(null, bufferSize);
+                break;
+            case PacketType.Aoe:
+                packet = new AoePacket(null, bufferSize);
+                break;
+            case PacketType.AoeAck:
+                packet = new AoeAckPacket(null, bufferSize);
+                break;
+            case PacketType.NewTick:
+                packet = new NewTickPacket(null, bufferSize);
+                break;
+            case PacketType.Ping:
+                packet = new PingPacket(null, bufferSize);
+                break;
+            case PacketType.Pong:
+                packet = new PongPacket(null, bufferSize);
+                break;
+            case PacketType.Move:
+                packet = new MovePacket(null, bufferSize);
+                break;
+            case PacketType.GotoAck:
+                packet = new GotoAckPacket(null, bufferSize);
+                break;
+            case PacketType.ShootAck:
+                packet = new ShootAckPacket(null, bufferSize);
                 break;
         }
         packet.type = type;
