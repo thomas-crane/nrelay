@@ -16,6 +16,7 @@ import { WorldPosData } from './../networking/data/world-pos-data';
 import { StatData } from './../networking/data/stat-data';
 import { ObjectStatusData } from './../networking/data/object-status-data';
 import { IPlayerData, getDefaultPlayerData } from './../models/playerdata';
+import { MapInfoPacket } from './../networking/packets/incoming/mapinfo-packet';
 import { PacketIO } from './../networking/packetio';
 import { PluginManager } from './../core/plugin-manager';
 import { HookPacket } from './../decorators/hook-packet';
@@ -25,9 +26,9 @@ export class Client {
     public objectId: number;
     public worldPos: WorldPosData;
     public playerData: IPlayerData;
+    public packetio: PacketIO;
 
     private serverIp: string;
-    private packetio: PacketIO;
     private lastTickTime: number;
     private connectTime: number;
     private guid: string;
@@ -61,15 +62,17 @@ export class Client {
     }
 
     @HookPacket(PacketType.MapInfo)
-    onMapInfo(client: Client, packet: Packet): void {
+    private onMapInfo(client: Client, packet: Packet): void {
+        const mapInfoPacket = packet as MapInfoPacket;
         const loadPacket = Packets.create(PacketType.Load) as LoadPacket;
         loadPacket.charId = this.playerData.charId;
         loadPacket.isFromArena = false;
+        Log('Client', 'Connecting to ' + mapInfoPacket.name, SeverityLevel.Info);
         client.packetio.sendPacket(loadPacket);
     }
 
     @HookPacket(PacketType.Update)
-    onUpdate(client: Client, packet: Packet): void {
+    private onUpdate(client: Client, packet: Packet): void {
         const updatePacket = packet as UpdatePacket;
         // reply
         const updateAck = Packets.create(PacketType.UpdateAck);
@@ -83,13 +86,13 @@ export class Client {
     }
 
     @HookPacket(PacketType.Failure)
-    onFailurePacket(client: Client, packet: Packet): void {
+    private onFailurePacket(client: Client, packet: Packet): void {
         const failurePacket = packet as FailurePacket;
         Log('Client', 'Received failure: "' + failurePacket.errorDescription + '"', SeverityLevel.Error);
     }
 
     @HookPacket(PacketType.NewTick)
-    onNewTick(client: Client, packet: Packet): void {
+    private onNewTick(client: Client, packet: Packet): void {
         const newTickPacket = packet as NewTickPacket;
         // reply
         const movePacket = Packets.create(PacketType.Move) as MovePacket;
@@ -101,7 +104,7 @@ export class Client {
     }
 
     @HookPacket(PacketType.Ping)
-    onPing(client: Client, packet: Packet): void {
+    private onPing(client: Client, packet: Packet): void {
         const pingPacket = packet as PingPacket;
         // reply
         const pongPacket = Packets.create(PacketType.Pong) as PongPacket;
@@ -111,16 +114,17 @@ export class Client {
     }
 
     @HookPacket(PacketType.CreateSuccess)
-    onCreateSuccess(client: Client, packet: Packet): void {
+    private onCreateSuccess(client: Client, packet: Packet): void {
         const createSuccessPacket = packet as CreateSuccessPacket;
         this.objectId = createSuccessPacket.objectId;
+        Log('Client', 'Connected!', SeverityLevel.Success);
     }
 
-    getTime(): number {
+    private getTime(): number {
         return (Date.now() - this.connectTime);
     }
 
-    onConnect(): void {
+    private onConnect(): void {
         Log('Client', 'Connected to server!', SeverityLevel.Success);
         this.connectTime = Date.now();
         const hp: HelloPacket = new HelloPacket();
@@ -144,7 +148,7 @@ export class Client {
         this.packetio.sendPacket(hp);
     }
 
-    onClose(error: boolean): void {
+    private onClose(error: boolean): void {
         Log('Client', 'The connection was closed.', SeverityLevel.Warning);
         if (error) {
             Log('Client', 'An error occurred (cause of close)', SeverityLevel.Error);
@@ -152,11 +156,11 @@ export class Client {
         process.exit(0);
     }
 
-    moveTo(target: WorldPosData): WorldPosData {
+    private moveTo(target: WorldPosData): WorldPosData {
         return target;
     }
 
-    processStatData(data: ObjectStatusData): void {
+    private processStatData(data: ObjectStatusData): void {
         this.worldPos = data.pos;
         for (let i = 0; i < data.stats.length; i++) {
             switch (data.stats[i].statType) {
