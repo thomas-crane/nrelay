@@ -18,6 +18,6 @@ export class FailurePacket extends Packet {
 
     public write(): void {
         this.writeInt32(this.errorId);
-        this.writeString(this.errorDescription);        
+        this.writeString(this.errorDescription);
     }
 }

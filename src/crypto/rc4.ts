@@ -12,7 +12,7 @@ export class RC4 {
      * the Keystream State with the given key.
      * @param key The key to use in the Keystream.
      */
-    constructor (key: Buffer) {
+    constructor(key: Buffer) {
         this.key = key;
         this.reset();
     }
@@ -30,7 +30,9 @@ export class RC4 {
             this.state[this.i] = this.state[this.j];
             this.state[this.j] = tmp;
             const k = this.state[(this.state[this.i] + this.state[this.j]) % 256];
+            /* tslint:disable no-bitwise */
             data[n] = (data[n] ^ k);
+            /* tslint:enable no-bitwise */
         }
     }
 

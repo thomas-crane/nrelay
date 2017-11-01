@@ -18,6 +18,6 @@ export class CreateSuccessPacket extends Packet {
 
     public write(): void {
         this.writeInt32(this.objectId);
-        this.writeInt32(this.charId);        
+        this.writeInt32(this.charId);
     }
 }
