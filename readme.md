@@ -47,7 +47,7 @@ Now that nrelay is installed, you will need to set up your `acc-config.json` fil
 1. Open the nrelay folder in your file explorer
 2. Rename the file `acc-config-sample.json` to `acc-config.json`. (Note: Depending on your computer's settings you might not see the `.json` part of the file name)
 3. Replace the account info with your own account info.
-```json
+```
 // acc-config-sample.json
 {
     "buildVersion": "X18.0.0",      // When the RotMG build version is updated, this should be changed.
