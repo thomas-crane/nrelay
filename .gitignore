@@ -3,3 +3,6 @@ node_modules/
 
 # Build result
 dist/
+
+# Config
+acc-config.json
