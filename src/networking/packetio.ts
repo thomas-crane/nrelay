@@ -5,6 +5,7 @@ import { Packets } from './packets';
 import stream = require('stream');
 import { RC4, OUTGOING_KEY, INCOMING_KEY } from './../crypto/rc4';
 import { Log, SeverityLevel } from './../services/logger';
+import { environment } from './../models/environment';
 
 export class PacketIO {
 
@@ -46,7 +47,9 @@ export class PacketIO {
         packet.writeInt32(packetSize);
         packet.writeByte(packet.type);
 
-        Log('PacketIO', 'WRITE: id: ' + packet.type + ', size: ' + packetSize, SeverityLevel.Info);
+        if (environment.debug) {
+            Log('PacketIO', 'WRITE: id: ' + packet.type + ', size: ' + packetSize, SeverityLevel.Info);
+        }
 
         this.socket.write(packet.data);
     }
@@ -111,14 +114,20 @@ export class PacketIO {
 
         const packetData = data.slice(5, data.length);
         this.receiveRC4.cipher(packetData);
-        Log('PacketIO', 'READ: id: ' + packetId + ', size: ' + packetSize, SeverityLevel.Info);
+
+        if (environment.debug) {
+            Log('PacketIO', 'READ: id: ' + packetId + ', size: ' + packetSize, SeverityLevel.Info);
+        }
+
         let packet;
         try {
             packet = Packets.create(packetId, packetSize - 5);
             packet.data = packetData;
             packet.bufferIndex = 0;
         } catch (error) {
-            Log('PacketIO', error.message, SeverityLevel.Error);
+            if (environment.debug) {
+                Log('PacketIO', error.message, SeverityLevel.Error);
+            }
         }
 
         if (packet) {
