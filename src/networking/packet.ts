@@ -43,6 +43,15 @@ export abstract class Packet implements IPacket {
         this.bufferIndex = this.data.writeInt16BE(value, this.bufferIndex);
     }
 
+    readUShort(): number {
+        const result = this.data.readUInt16BE(this.bufferIndex);
+        this.bufferIndex += 2;
+        return result;
+    }
+    writeUShort(value: number): void {
+        this.bufferIndex = this.data.writeUInt16BE(value, this.bufferIndex);
+    }
+
     readByte(): number {
         const result = this.data.readInt8(this.bufferIndex);
         this.bufferIndex++;
@@ -52,6 +61,15 @@ export abstract class Packet implements IPacket {
         this.bufferIndex = this.data.writeInt8(value, this.bufferIndex);
     }
 
+    readUByte(): number {
+        const result = this.data.readUInt8(this.bufferIndex);
+        this.bufferIndex++;
+        return result;
+    }
+    writeUByte(value: number): void {
+        this.bufferIndex = this.data.writeUInt8(value, this.bufferIndex);
+    }
+
     readBoolean(): boolean {
         const result = this.readByte();
         return result !== 0;
@@ -59,6 +77,15 @@ export abstract class Packet implements IPacket {
     writeBoolean(value: boolean): void {
         const byteValue = value ? 1 : 0;
         this.writeByte(byteValue);
+    }
+
+    readFloat(): number {
+        const result = this.data.readFloatBE(this.bufferIndex);
+        this.bufferIndex += 4;
+        return result;
+    }
+    writeFloat(value: number): void {
+        this.bufferIndex = this.data.writeFloatBE(value, this.bufferIndex);
     }
 
     readByteArray(): Int8Array {
@@ -132,5 +159,15 @@ export enum PacketType {
     MapInfo = 83,
     Load = 3,
     Failure = 0,
-    CreateSuccess = 87
+    CreateSuccess = 87,
+    Update = 79,
+    UpdateAck = 80,
+    AoeAck = 8,
+    ShootAck = 27,
+    GotoAck = 99,
+    Aoe = 40,
+    NewTick = 85,
+    Ping = 97,
+    Pong = 103,
+    Move = 51
 }
