@@ -13,6 +13,8 @@ import { PongPacket } from './packets/outgoing/pong-packet';
 import { MovePacket } from './packets/outgoing/move-packet';
 import { GotoAckPacket } from './packets/outgoing/gotoack-packet';
 import { ShootAckPacket } from './packets/outgoing/shootack-packet';
+import { TextPacket } from './packets/incoming/text-packet';
+import { PlayerTextPacket } from './packets/outgoing/playertext-packet';
 
 import { PacketType, Packet } from './packet';
 
@@ -67,6 +69,12 @@ export class Packets {
                 break;
             case PacketType.ShootAck:
                 packet = new ShootAckPacket(null, bufferSize);
+                break;
+            case PacketType.Text:
+                packet = new TextPacket(null, bufferSize);
+                break;
+                case PacketType.PlayerText:
+                packet = new PlayerTextPacket(null, bufferSize);
                 break;
         }
         packet.type = type;
