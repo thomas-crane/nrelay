@@ -6,13 +6,16 @@ import { IServer } from './models/server';
 import { IAccountInfo } from './models/accinfo';
 import { Client } from './core/client';
 import { Storage } from './services/storage';
+import { PluginManager } from './core/plugin-manager';
 
 export class CLI {
 
     private serverList: { [id: string]: IServer };
 
     constructor() {
-        Log('NRelay', 'Starting...', SeverityLevel.Info);
+        Log('NRelay', 'Starting...');
+        PluginManager.loadPlugins();
+        PluginManager.printPluginInfo();
         const accInfo = Storage.getAccountConfig();
         if (!accInfo) {
             Log('NRelay', 'Couldn\'t load acc-config.json.', SeverityLevel.Error);
