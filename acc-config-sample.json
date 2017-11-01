@@ -1,5 +1,6 @@
 {
+    "buildVersion": "X18.0.0",
     "guid": "john@email.com",
     "password": "SecretPassWord11",
-    "server-preference": "AsiaSouthEast"
+    "serverPref": "AsiaSouthEast"
 }
