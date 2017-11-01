@@ -1,6 +1,6 @@
 import { Log, SeverityLevel } from './services/logger';
 import { Http } from './services/http';
-import { parseServers, parseAccountInfo } from './services/xmltojson';
+import { parseServers, parseAccountInfo, parseError } from './services/xmltojson';
 import { SERVER_ENDPOINT } from './models/api-endpoints';
 import { IServer } from './models/server';
 import { IAccountInfo } from './models/accinfo';
@@ -68,8 +68,7 @@ export class CLI {
                     Log('NRelay', 'Authorized account', SeverityLevel.Success);
                     resolve(info);
                 } else {
-                    console.log(data);
-                    Log('NRelay', 'Error authorizing account', SeverityLevel.Warning);
+                    Log('NRelay', 'Error: ' + parseError(data), SeverityLevel.Warning);
                     reject();
                 }
             }).catch((err) => reject(err));

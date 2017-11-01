@@ -5,6 +5,8 @@ const SERVER_REGEX = /<Server><Name>(\w+)<\/Name><DNS>(\d+\.\d+\.\d+\.\d+)<\/DNS
 
 const ACCOUNT_INFO_REGEX = /<Chars nextCharId="(\d+)" maxNumChars="(\d+)"><Char id="(\d+)">/g;
 
+const ERROR_REGEX = /<Error>(.+)<\/Error>/g;
+
 export class XMLtoJSON {
 
 }
@@ -43,4 +45,12 @@ export function parseAccountInfo(xml: string): IAccountInfo | null {
         return null;
     }
     return info;
+}
+
+export function parseError(xml: string): string {
+    const match = ERROR_REGEX.exec(xml);
+    if (match != null) {
+        return match[1];
+    }
+    return '';
 }
