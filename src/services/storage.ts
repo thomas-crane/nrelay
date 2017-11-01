@@ -1,3 +1,4 @@
+import { IAccountInfo } from './../models/accinfo';
 import fs = require('fs');
 import path = require('path');
 
@@ -24,5 +25,13 @@ export class Storage {
                 }
             });
         });
+    }
+
+    public static getAccountConfig(): IAccountInfo {
+        try {
+            return require('./../../acc-config.json');
+        } catch (err) {
+            return null;
+        }
     }
 }
