@@ -55,7 +55,7 @@ myPacketHookMethod(client: Client, packet: Packet): void {
     ...
 }
 ```
-It doesn't matter if the parameters aren't _called_ client and packet, as long as their _type_ is Client and Packet respectively.
+It doesn't matter if the parameters aren't _called_ `client` and `packet`, as long as their _type_ is `Client` and `Packet` respectively.
 
 The hello packet needs to respond to the text packet, so a packet hook method needs to be added for the text packet
 ```typescript
