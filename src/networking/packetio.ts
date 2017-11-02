@@ -27,6 +27,16 @@ export class PacketIO {
         socket.on('data', this.processData.bind(this));
     }
 
+    public reset(socket: net.Socket): void {
+        this.socket.removeAllListeners('data');
+        this.bytesToRead = 0;
+        this.socket = socket;
+        this.sendRC4 = new RC4(Buffer.from(OUTGOING_KEY, 'hex'));
+        this.receiveRC4 = new RC4(Buffer.from(INCOMING_KEY, 'hex'));
+
+        socket.on('data', this.processData.bind(this));
+    }
+
     public on(event: string | symbol, listener: (...args: any[]) => void): events.EventEmitter {
         return this.emitter.on(event, listener);
     }
@@ -55,6 +65,9 @@ export class PacketIO {
     }
 
     private processData(data: Buffer): void {
+        if (data.length === 1) {
+            return;
+        }
         if (this.bytesToRead > 0) {
             if (data.length < this.bytesToRead) {
                 this.dataQueue = Buffer.concat([this.dataQueue, data], this.dataQueue.length + data.length);
