@@ -1,4 +1,6 @@
-# Foreword
+# Creating Plugins
+
+## Foreword
 Creating custom plugins for nrelay is a simple process. The first thing to do is create the plugin in the right place in order to allow nrelay to find it at runtime.
 
 All plugins should be inside the `src/plugins` folder. When the TypeScript is compiled, the plugins will be compiled to JavaScript and placed in `dist/plugins`. If you want to distribute your plugin, you can distribute either the `.ts` source file from `src/plugins`, or the `.js` source file from `dist/plugins`.
@@ -28,12 +30,10 @@ import { Client } from './../core/client';
 export default class HelloPlugin {
 
 }
-
 ```
 `export default ...` is required in order for the nrelay plugin manager to properly initialize the plugin.
 
 In order for nrelay to recognize this class as a plugin, it needs to be decorated using the `NrPlugin` decorator. The `NrPlugin` decorator requires an object parameter which is used to describe the plugin.
-
 ```typescript
 @NrPlugin({ name: 'Hello plugin', author: 'tcrane' })
 export default class HelloPlugin {
@@ -57,6 +57,20 @@ myPacketHookMethod(client: Client, packet: Packet): void {
 ```
 It doesn't matter if the parameters aren't _called_ `client` and `packet`, as long as their _type_ is `Client` and `Packet` respectively.
 
+### Important note:
+Because all of the specific packets (such as `UpdatePacket` or `NewTickPacket`) are subclasses of the `Packet` class, the specific packet types can be used in the packet hook signature. This means that, for example if you are trying to hook the `UpdatePacket` you can use
+```typescript
+hookUpdate(client: Client, updatePacket: UpdatePacket) {
+    ...
+}
+```
+instead of
+```typescript
+hookUpdate(client: Client, packet: Packet) {
+    const updatePacket = packet as UpdatePacket;
+    ...
+}
+```
 The hello packet needs to respond to the text packet, so a packet hook method needs to be added for the text packet
 ```typescript
 @NrPlugin({ name: 'Hello plugin', author: 'tcrane' })
@@ -67,7 +81,6 @@ export default class HelloPlugin {
     }
 }
 ```
-
 Similarly to the plugin class itself, nrelay doesn't know about the packet hook method yet. This is where the `HookPacket` decorator is used. The `HookPacket` decorator requires a `PacketType` enum value as a parameter. A number can be used, but is not recommended as the packet type numbers can change when RotMG is updated.
 `PacketType` is simply an enum containing all packets which can be hooked.
 ```typescript
