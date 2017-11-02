@@ -13,6 +13,7 @@ import { FailurePacket } from './../networking/packets/incoming/failure-packet';
 import { MovePacket } from './../networking/packets/outgoing/move-packet';
 import { CreateSuccessPacket } from './../networking/packets/incoming/createsuccess-packet';
 import { WorldPosData } from './../networking/data/world-pos-data';
+import { GroundTileData } from './../networking/data/ground-tile-data';
 import { StatData } from './../networking/data/stat-data';
 import { ObjectStatusData } from './../networking/data/object-status-data';
 import { IPlayerData, getDefaultPlayerData } from './../models/playerdata';
@@ -21,12 +22,16 @@ import { PacketIO } from './../networking/packetio';
 import { PluginManager } from './../core/plugin-manager';
 import { HookPacket } from './../decorators/hook-packet';
 
+const MIN_MOVE_SPEED = 0.004;
+const MAX_MOVE_SPEED = 0.0096;
+
 export class Client {
 
     public objectId: number;
     public worldPos: WorldPosData;
     public playerData: IPlayerData;
     public packetio: PacketIO;
+    public mapTiles: GroundTileData[];
 
     private serverIp: string;
     private lastTickTime: number;
@@ -35,6 +40,9 @@ export class Client {
     private password: string;
     private buildVersion: string;
     private clientSocket: net.Socket;
+    private nextPos: WorldPosData;
+    private moveMultiplier: number;
+    private mapInfo: { width: number, height: number, name: string };
 
     constructor(server: string, accInfo?: IAccountInfo) {
         this.playerData = getDefaultPlayerData();
@@ -58,6 +66,8 @@ export class Client {
         loadPacket.isFromArena = false;
         Log('Client', 'Connecting to ' + mapInfoPacket.name, SeverityLevel.Info);
         client.packetio.sendPacket(loadPacket);
+        this.mapTiles = new Array<GroundTileData>(mapInfoPacket.width * mapInfoPacket.height);
+        this.mapInfo = { width: mapInfoPacket.width, height: mapInfoPacket.height, name: mapInfoPacket.name };
     }
 
     @HookPacket(PacketType.Update)
@@ -66,10 +76,17 @@ export class Client {
         const updateAck = Packets.create(PacketType.UpdateAck);
         client.packetio.sendPacket(updateAck);
 
+        // playerdata
         for (let i = 0; i < updatePacket.newObjects.length; i++) {
             if (updatePacket.newObjects[i].status.objectId === this.objectId) {
                 this.processStatData(updatePacket.newObjects[i].status);
             }
+        }
+
+        // map tiles
+        for (let i = 0; i < updatePacket.tiles.length; i++) {
+            const tile = updatePacket.tiles[i];
+            this.mapTiles[tile.y * this.mapInfo.width + tile.x] = tile;
         }
     }
 
@@ -175,6 +192,9 @@ export class Client {
 
     private moveTo(target: WorldPosData): WorldPosData {
         return target;
+    }
+
+    private getSpeed(): void {
     }
 
     private processStatData(data: ObjectStatusData): void {
