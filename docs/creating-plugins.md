@@ -1,5 +1,9 @@
 # Creating Plugins
 
+__Hotlinks__
+___
++ [Plugin template](#plugin-template)
+
 ## Foreword
 Creating custom plugins for nrelay is a simple process. The first thing to do is create the plugin in the right place in order to allow nrelay to find it at runtime.
 
@@ -201,3 +205,25 @@ Then run nrelay using
 nrelay
 ```
 Now, use the regular RotMG client and a second account to send a /tell to the account logged in on nrelay. If you send the text `/tell <yourname> hello` You should receive the reply `<yourname> Hello!`.
+
+## Plugin template
+```typescript
+import { NrPlugin } from './../decorators/plugin';
+import { HookPacket } from './../decorators/hook-packet';
+import { Packet, PacketType } from './../networking/packet';
+import { Client } from './../core/client';
+
+import { UpdatePacket } from './../networking/incoming/update-packet';
+
+@NrPlugin({
+    name: 'Your Plugin Name',
+    author: 'Your Name'
+})
+export default class YourPluginName {
+
+    @HookPacket(PacketType.Update)
+    onUpdate(client: Client, updatePacket: UpdatePacket): void {
+
+    }
+}
+```
