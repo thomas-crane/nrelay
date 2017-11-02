@@ -24,6 +24,7 @@ export default class YourPluginName {
 
     keys: string[];
     players: { [id: number]: IPlayerData };
+    playerNames: { [id: string]: number };
     follow: boolean;
 
     private followObjectId: number;
@@ -31,6 +32,7 @@ export default class YourPluginName {
     constructor() {
         this.keys = Object.keys(Classes);
         this.players = {};
+        this.playerNames = {};
     }
 
     @HookPacket(PacketType.Update)
@@ -41,11 +43,16 @@ export default class YourPluginName {
                 if (!this.players) {
                     this.players = {};
                 }
+                if (!this.playerNames) {
+                    this.playerNames = {};
+                }
+                this.playerNames[player.name.toLowerCase()] = player.objectId;
                 this.players[player.objectId] = player;
             }
         }
         for (let i = 0; i < updatePacket.drops.length; i++) {
             if (this.players[updatePacket.drops[i]]) {
+                delete this.playerNames[updatePacket.drops[i]];
                 delete this.players[updatePacket.drops[i]];
             }
         }
@@ -73,20 +80,13 @@ export default class YourPluginName {
                 }
                 const playerName = match[1].toLowerCase();
 
-                const playerIds = Object.keys(this.players).map((e) => +e);
-                let desiredObjectId = -1;
-                for (let i = 0; i < playerIds.length; i++) {
-                    if (this.players[playerIds[i]].name.toLowerCase() === playerName) {
-                        desiredObjectId = this.players[playerIds[i]].objectId;
-                    }
-                }
-                if (desiredObjectId === -1) {
+                if (!this.playerNames[playerName]) {
                     const ptPacket = new PlayerTextPacket();
                     ptPacket.text = '/tell ' + textPacket.name + ' Cannot find player: ' + playerName;
                     client.packetio.sendPacket(ptPacket);
                     return;
                 }
-                client.nextPos = this.players[desiredObjectId].worldPos;
+                client.nextPos = this.players[this.playerNames[playerName]].worldPos;
             } else if (FOLLOW_REGEX.test(textPacket.text)) {
                 const match = FOLLOW_REGEX.exec(textPacket.text.trim());
                 if (match === null) {
@@ -94,21 +94,14 @@ export default class YourPluginName {
                 }
                 const playerName = match[1].toLowerCase();
 
-                const playerIds = Object.keys(this.players).map((e) => +e);
-                let desiredObjectId = -1;
-                for (let i = 0; i < playerIds.length; i++) {
-                    if (this.players[playerIds[i]].name.toLowerCase() === playerName) {
-                        desiredObjectId = this.players[playerIds[i]].objectId;
-                    }
-                }
-                if (desiredObjectId === -1) {
+                if (!this.playerNames[playerName]) {
                     const ptPacket = new PlayerTextPacket();
                     ptPacket.text = '/tell ' + textPacket.name + ' Cannot find player: ' + playerName;
                     client.packetio.sendPacket(ptPacket);
                     return;
                 }
-                client.nextPos = this.players[desiredObjectId].worldPos;
-                this.followObjectId = desiredObjectId;
+                client.nextPos = this.players[this.playerNames[playerName]].worldPos;
+                this.followObjectId = this.playerNames[playerName];
             }
         }
     }
