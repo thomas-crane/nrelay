@@ -27,11 +27,10 @@ const MAX_MOVE_SPEED = 0.0096;
 
 export class Client {
 
-    public objectId: number;
-    public worldPos: WorldPosData;
     public playerData: IPlayerData;
     public packetio: PacketIO;
     public mapTiles: GroundTileData[];
+    public nextPos: WorldPosData;
 
     private serverIp: string;
     private lastTickTime: number;
@@ -40,12 +39,12 @@ export class Client {
     private password: string;
     private buildVersion: string;
     private clientSocket: net.Socket;
-    private nextPos: WorldPosData;
     private moveMultiplier: number;
     private mapInfo: { width: number, height: number, name: string };
 
     constructor(server: string, accInfo?: IAccountInfo) {
         this.playerData = getDefaultPlayerData();
+        this.nextPos = null;
         if (accInfo) {
             this.playerData.charId = accInfo.charId;
             this.playerData.nextCharId = accInfo.nextCharId;
@@ -78,8 +77,8 @@ export class Client {
 
         // playerdata
         for (let i = 0; i < updatePacket.newObjects.length; i++) {
-            if (updatePacket.newObjects[i].status.objectId === this.objectId) {
-                this.processStatData(updatePacket.newObjects[i].status);
+            if (updatePacket.newObjects[i].status.objectId === this.playerData.objectId) {
+                this.playerData = ObjectStatusData.processStatData(updatePacket.newObjects[i].status);
             }
         }
 
@@ -98,13 +97,23 @@ export class Client {
 
     @HookPacket(PacketType.NewTick)
     private onNewTick(client: Client, newTickPacket: NewTickPacket): void {
+        this.lastTickTime = newTickPacket.tickTime;
         // reply
         const movePacket = Packets.create(PacketType.Move) as MovePacket;
         movePacket.tickId = newTickPacket.tickId;
         movePacket.time = client.getTime();
-        movePacket.newPosition = client.worldPos;
+        movePacket.newPosition = client.playerData.worldPos;
+        if (this.nextPos) {
+            movePacket.newPosition = this.moveTo(this.nextPos, true);
+        }
         movePacket.records = [];
         client.packetio.sendPacket(movePacket);
+
+        for (let i = 0; i < newTickPacket.statuses.length; i++) {
+            if (newTickPacket.statuses[i].objectId === this.playerData.objectId) {
+                this.playerData.worldPos = newTickPacket.statuses[i].pos;
+            }
+        }
     }
 
     @HookPacket(PacketType.Ping)
@@ -118,7 +127,7 @@ export class Client {
 
     @HookPacket(PacketType.CreateSuccess)
     private onCreateSuccess(client: Client, createSuccessPacket: CreateSuccessPacket): void {
-        this.objectId = createSuccessPacket.objectId;
+        this.playerData.objectId = createSuccessPacket.objectId;
         Log('Client', 'Connected!', SeverityLevel.Success);
     }
 
@@ -159,10 +168,10 @@ export class Client {
         if (error) {
             Log('Client', 'An error occurred (cause of close)', SeverityLevel.Error);
         }
-        Log('Client', 'Reconnecting in 3 seconds');
+        Log('Client', 'Reconnecting in 5 seconds');
         setTimeout(() => {
             this.connect();
-        }, 3000);
+        }, 5000);
         // process.exit(0);
     }
 
@@ -190,75 +199,32 @@ export class Client {
         this.clientSocket.on('close', this.onClose.bind(this));
     }
 
-    private moveTo(target: WorldPosData): WorldPosData {
-        return target;
-    }
-
-    private getSpeed(): void {
-    }
-
-    private processStatData(data: ObjectStatusData): void {
-        this.worldPos = data.pos;
-        for (let i = 0; i < data.stats.length; i++) {
-            switch (data.stats[i].statType) {
-                case StatData.NAME_STAT:
-                    this.playerData.name = data.stats[i].stringStatValue;
-                    continue;
-                case StatData.LEVEL_STAT:
-                    this.playerData.level = data.stats[i].statValue;
-                    continue;
-                case StatData.EXP_STAT:
-                    this.playerData.exp = data.stats[i].statValue;
-                    continue;
-                case StatData.CURR_FAME_STAT:
-                    this.playerData.currentFame = data.stats[i].statValue;
-                    continue;
-                case StatData.MAX_HP_STAT:
-                    this.playerData.maxHP = data.stats[i].statValue;
-                    continue;
-                case StatData.MAX_MP_STAT:
-                    this.playerData.maxMP = data.stats[i].statValue;
-                    continue;
-                case StatData.HP_STAT:
-                    this.playerData.hp = data.stats[i].statValue;
-                    continue;
-                case StatData.MP_STAT:
-                    this.playerData.mp = data.stats[i].statValue;
-                    continue;
-                case StatData.ATTACK_STAT:
-                    this.playerData.atk = data.stats[i].statValue;
-                    continue;
-                case StatData.DEFENSE_STAT:
-                    this.playerData.def = data.stats[i].statValue;
-                    continue;
-                case StatData.SPEED_STAT:
-                    this.playerData.spd = data.stats[i].statValue;
-                    continue;
-                case StatData.DEXTERITY_STAT:
-                    this.playerData.dex = data.stats[i].statValue;
-                    continue;
-                case StatData.VITALITY_STAT:
-                    this.playerData.vit = data.stats[i].statValue;
-                    continue;
-                case StatData.WISDOM_STAT:
-                    this.playerData.wis = data.stats[i].statValue;
-                    continue;
-                case StatData.HEALTH_POTION_STACK_STAT:
-                    this.playerData.hpPots = data.stats[i].statValue;
-                    continue;
-                case StatData.MAGIC_POTION_STACK_STAT:
-                    this.playerData.mpPots = data.stats[i].statValue;
-                    continue;
-                case StatData.HASBACKPACK_STAT:
-                    this.playerData.hasBackpack = data.stats[i].statValue === 1;
-                    continue;
-                default:
-                    if (data.stats[i].statType >= StatData.INVENTORY_0_STAT && data.stats[i].statType <= StatData.INVENTORY_11_STAT) {
-                        this.playerData.inventory[data.stats[i].statType - 8] = data.stats[i].statValue;
-                    } else if (data.stats[i].statType >= StatData.BACKPACK_0_STAT && data.stats[i].statType >= StatData.BACKPACK_7_STAT) {
-                        this.playerData.inventory[data.stats[i].statType - 71] = data.stats[i].statValue;
-                    }
+    private moveTo(target: WorldPosData, reset: boolean): WorldPosData {
+        let newPos = new WorldPosData();
+        const step = this.getSpeed();
+        if (this.squareDistanceTo(target) > step) {
+            const angle: number = Math.atan2(target.y - this.playerData.worldPos.y, target.x - this.playerData.worldPos.x);
+            newPos.x = this.playerData.worldPos.x + Math.cos(angle) * step;
+            newPos.y = this.playerData.worldPos.y + Math.sin(angle) * step;
+        } else {
+            newPos = target;
+            if (reset) {
+                this.nextPos = null;
             }
         }
+        return newPos;
+    }
+
+    private squareDistanceTo(location: WorldPosData): number {
+        const a = location.x - this.playerData.worldPos.x;
+        const b = location.y - this.playerData.worldPos.y;
+        return a ** 2 + b ** 2;
+    }
+
+    private getSpeed(): number {
+        // let speed = MIN_MOVE_SPEED + this.playerData.spd / 75 * (MAX_MOVE_SPEED - MIN_MOVE_SPEED);
+        // speed *= this.moveMultiplier;
+        const speed = (4.0 + 5.6 * (this.playerData.spd / 75.0)) / 5.0;
+        return speed;
     }
 }
