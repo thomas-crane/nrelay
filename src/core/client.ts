@@ -34,6 +34,7 @@ export class Client {
     private guid: string;
     private password: string;
     private buildVersion: string;
+    private clientSocket: net.Socket;
 
     constructor(server: string, accInfo?: IAccountInfo) {
         this.playerData = getDefaultPlayerData();
@@ -46,24 +47,12 @@ export class Client {
             this.buildVersion = accInfo.buildVersion;
         }
         this.serverIp = server;
-        const clientSocket = new net.Socket({
-            readable: true,
-            writable: true
-        });
-        this.packetio = new PacketIO(clientSocket);
         Log('Client', 'Starting connection.', SeverityLevel.Info);
-        clientSocket.connect(2050, this.serverIp);
-        clientSocket.on('connect', this.onConnect.bind(this));
-        clientSocket.on('close', this.onClose);
-
-        this.packetio.on('packet', (data: Packet) => {
-            PluginManager.callHooks(data.type, data, this);
-        });
+        this.connect();
     }
 
     @HookPacket(PacketType.MapInfo)
-    private onMapInfo(client: Client, packet: Packet): void {
-        const mapInfoPacket = packet as MapInfoPacket;
+    private onMapInfo(client: Client, mapInfoPacket: MapInfoPacket): void {
         const loadPacket = Packets.create(PacketType.Load) as LoadPacket;
         loadPacket.charId = this.playerData.charId;
         loadPacket.isFromArena = false;
@@ -72,8 +61,7 @@ export class Client {
     }
 
     @HookPacket(PacketType.Update)
-    private onUpdate(client: Client, packet: Packet): void {
-        const updatePacket = packet as UpdatePacket;
+    private onUpdate(client: Client, updatePacket: UpdatePacket): void {
         // reply
         const updateAck = Packets.create(PacketType.UpdateAck);
         client.packetio.sendPacket(updateAck);
@@ -86,14 +74,13 @@ export class Client {
     }
 
     @HookPacket(PacketType.Failure)
-    private onFailurePacket(client: Client, packet: Packet): void {
-        const failurePacket = packet as FailurePacket;
+    private onFailurePacket(client: Client, failurePacket: FailurePacket): void {
+        this.clientSocket.end();
         Log('Client', 'Received failure: "' + failurePacket.errorDescription + '"', SeverityLevel.Error);
     }
 
     @HookPacket(PacketType.NewTick)
-    private onNewTick(client: Client, packet: Packet): void {
-        const newTickPacket = packet as NewTickPacket;
+    private onNewTick(client: Client, newTickPacket: NewTickPacket): void {
         // reply
         const movePacket = Packets.create(PacketType.Move) as MovePacket;
         movePacket.tickId = newTickPacket.tickId;
@@ -104,8 +91,7 @@ export class Client {
     }
 
     @HookPacket(PacketType.Ping)
-    private onPing(client: Client, packet: Packet): void {
-        const pingPacket = packet as PingPacket;
+    private onPing(client: Client, pingPacket: PingPacket): void {
         // reply
         const pongPacket = Packets.create(PacketType.Pong) as PongPacket;
         pongPacket.serial = pingPacket.serial;
@@ -114,8 +100,7 @@ export class Client {
     }
 
     @HookPacket(PacketType.CreateSuccess)
-    private onCreateSuccess(client: Client, packet: Packet): void {
-        const createSuccessPacket = packet as CreateSuccessPacket;
+    private onCreateSuccess(client: Client, createSuccessPacket: CreateSuccessPacket): void {
         this.objectId = createSuccessPacket.objectId;
         Log('Client', 'Connected!', SeverityLevel.Success);
     }
@@ -127,16 +112,20 @@ export class Client {
     private onConnect(): void {
         Log('Client', 'Connected to server!', SeverityLevel.Success);
         this.connectTime = Date.now();
+        this.sendHello(-2, -1, new Int8Array(0));
+    }
+
+    private sendHello(gameId: number, keyTime: number, key: Int8Array): void {
         const hp: HelloPacket = new HelloPacket();
         hp.buildVersion = this.buildVersion;
-        hp.gameId = -2;
+        hp.gameId = gameId;
         hp.guid = this.guid;
         hp.password = this.password;
         hp.random1 = Math.floor(Math.random() * 1000000000);
         hp.random2 = Math.floor(Math.random() * 1000000000);
         hp.secret = '';
-        hp.keyTime = -1;
-        hp.key = new Int8Array(0);
+        hp.keyTime = keyTime;
+        hp.key = key;
         hp.mapJSON = '';
         hp.entryTag = '';
         hp.gameNet = '';
@@ -153,7 +142,35 @@ export class Client {
         if (error) {
             Log('Client', 'An error occurred (cause of close)', SeverityLevel.Error);
         }
-        process.exit(0);
+        Log('Client', 'Reconnecting in 3 seconds');
+        setTimeout(() => {
+            this.connect();
+        }, 3000);
+        // process.exit(0);
+    }
+
+    private connect(): void {
+        if (this.clientSocket) {
+            this.clientSocket.removeAllListeners('connect');
+            this.clientSocket.removeAllListeners('close');
+            this.clientSocket.end();
+        }
+
+        this.clientSocket = new net.Socket({
+            readable: true,
+            writable: true
+        });
+        if (!this.packetio) {
+            this.packetio = new PacketIO(this.clientSocket);
+            this.packetio.on('packet', (data: Packet) => {
+                PluginManager.callHooks(data.type, data, this);
+            });
+        } else {
+            this.packetio.reset(this.clientSocket);
+        }
+        this.clientSocket.connect(2050, this.serverIp);
+        this.clientSocket.on('connect', this.onConnect.bind(this));
+        this.clientSocket.on('close', this.onClose.bind(this));
     }
 
     private moveTo(target: WorldPosData): WorldPosData {
