@@ -213,7 +213,7 @@ import { HookPacket } from './../decorators/hook-packet';
 import { Packet, PacketType } from './../networking/packet';
 import { Client } from './../core/client';
 
-import { UpdatePacket } from './../networking/incoming/update-packet';
+import { UpdatePacket } from './../networking/packets/incoming/update-packet';
 
 @NrPlugin({
     name: 'Your Plugin Name',
