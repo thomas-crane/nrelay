@@ -3,9 +3,6 @@ import { WorldPosData } from './../networking/data/world-pos-data';
 export interface IPlayerData {
     objectId: number;
     worldPos: WorldPosData;
-    charId: number;
-    nextCharId: number;
-    maxNumChars: number;
     name: string;
     level: number;
     exp: number;
@@ -30,9 +27,6 @@ export function getDefaultPlayerData(): IPlayerData {
     return {
         objectId: 0,
         worldPos: null,
-        charId: 0,
-        nextCharId: 0,
-        maxNumChars: 0,
         name: '',
         level: 0,
         exp: 0,
