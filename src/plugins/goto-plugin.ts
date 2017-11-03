@@ -17,8 +17,8 @@ const MOVE_TO_REGEX = /^moveto ([a-zA-Z]+)\.*/;
 const FOLLOW_REGEX = /^follow ([a-zA-Z]+)\.*/;
 
 @NrPlugin({
-    name: 'Your Plugin Name',
-    author: 'Your Name'
+    name: 'Move Commands',
+    author: 'tcrane'
 })
 export default class YourPluginName {
 
