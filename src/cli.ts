@@ -22,27 +22,32 @@ export class CLI {
             return;
         }
 
-        this.getAccountInfo(accInfo.guid, accInfo.password).then((info) => {
-            const keys = Object.keys(this.serverList);
-            if (keys.length > 0) {
-                let server: IServer;
-                if (!this.serverList[accInfo.serverPref]) {
-                    Log('NRelay', 'Preferred server not found. Choosing first server.', SeverityLevel.Warning);
-                    server = this.serverList[keys[0]];
-                } else {
-                    server = this.serverList[accInfo.serverPref];
-                }
-                Log('NRelay', 'Connecting to ' + server.name);
-                info.buildVersion = accInfo.buildVersion;
-                info.guid = accInfo.guid;
-                info.password = accInfo.password;
-                const client = new Client(server.address, info);
-            } else {
-                Log('NRelay', 'Couldn\'t get servers.', SeverityLevel.Error);
-            }
-        }).catch((err) => {
+        for (let i = 0; i < accInfo.length; i++) {
+            const acc = accInfo[i];
+            setTimeout(() => {
+                this.getAccountInfo(acc.guid, acc.password).then((info) => {
+                    const keys = Object.keys(this.serverList);
+                    if (keys.length > 0) {
+                        let server: IServer;
+                        if (!this.serverList[acc.serverPref]) {
+                            Log('NRelay', 'Preferred server not found. Choosing first server.', SeverityLevel.Warning);
+                            server = this.serverList[keys[0]];
+                        } else {
+                            server = this.serverList[acc.serverPref];
+                        }
+                        Log('NRelay', 'Connecting to ' + server.name);
+                        info.buildVersion = acc.buildVersion;
+                        info.guid = acc.guid;
+                        info.password = acc.password;
+                        const client = new Client(server.address, info);
+                    } else {
+                        Log('NRelay', 'Couldn\'t get servers.', SeverityLevel.Error);
+                    }
+                }).catch((err) => {
 
-        });
+                });
+            }, (i * 1000));
+        }
     }
 
     getServers(): Promise<{ [id: string]: IServer }> {

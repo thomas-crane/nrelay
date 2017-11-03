@@ -1,6 +1,8 @@
-{
-    "buildVersion": "X18.0.0",
-    "guid": "john@email.com",
-    "password": "SecretPassWord11",
-    "serverPref": "AsiaSouthEast"
-}
+[
+    {
+        "buildVersion": "X18.0.0",
+        "guid": "john@email.com",
+        "password": "SecretPassWord11",
+        "serverPref": "AsiaSouthEast"
+    }
+]
