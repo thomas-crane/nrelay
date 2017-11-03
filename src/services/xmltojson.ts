@@ -3,9 +3,9 @@ import { IAccountInfo } from './../models/accinfo';
 
 const SERVER_REGEX = /<Server><Name>(\w+)<\/Name><DNS>(\d+\.\d+\.\d+\.\d+)<\/DNS>/g;
 
-const ACCOUNT_INFO_REGEX = /<Chars nextCharId="(\d+)" maxNumChars="(\d+)"><Char id="(\d+)">/g;
+const ACCOUNT_INFO_REGEX = /<Chars nextCharId="(\d+)" maxNumChars="(\d+)">(?:<Char id="(\d+)">)*/;
 
-const ERROR_REGEX = /<Error>(.+)<\/Error>/g;
+const ERROR_REGEX = /<Error\/?>(.+)<\/?Error>/;
 
 export class XMLtoJSON {
 
@@ -40,7 +40,11 @@ export function parseAccountInfo(xml: string): IAccountInfo | null {
     if (match != null) {
         info.nextCharId = +match[1];
         info.maxNumChars = +match[2];
-        info.charId = +match[3];
+        try {
+            info.charId = +match[3];
+        } catch {
+            info.charId = -1;
+        }
     } else {
         return null;
     }
