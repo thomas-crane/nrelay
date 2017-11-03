@@ -9,9 +9,9 @@ export class Http {
                 if (i === 0) {
                     qs += '?';
                 }
-                qs += encodeURI(keys[i]);
+                qs += encodeURIComponent(keys[i]);
                 qs += '=';
-                qs += encodeURI(query[keys[i]]);
+                qs += encodeURIComponent(query[keys[i]]);
                 if (i !== keys.length - 1) {
                     qs += '&';
                 }
