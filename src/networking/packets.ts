@@ -15,6 +15,7 @@ import { GotoAckPacket } from './packets/outgoing/gotoack-packet';
 import { ShootAckPacket } from './packets/outgoing/shootack-packet';
 import { TextPacket } from './packets/incoming/text-packet';
 import { PlayerTextPacket } from './packets/outgoing/playertext-packet';
+import { CreatePacket } from './packets/outgoing/create-packet';
 
 import { PacketType, Packet } from './packet';
 
@@ -73,8 +74,11 @@ export class Packets {
             case PacketType.Text:
                 packet = new TextPacket(null, bufferSize);
                 break;
-                case PacketType.PlayerText:
+            case PacketType.PlayerText:
                 packet = new PlayerTextPacket(null, bufferSize);
+                break;
+            case PacketType.Create:
+                packet = new CreatePacket(null, bufferSize);
                 break;
         }
         packet.type = type;

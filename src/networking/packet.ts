@@ -172,4 +172,5 @@ export enum PacketType {
     Move = 51,
     Text = 23,
     PlayerText = 84,
+    Create = 7
 }
