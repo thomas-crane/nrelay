@@ -1,5 +1,3 @@
-import crypto = require('crypto');
-
 export class RC4 {
 
     private state: number[];

@@ -1,5 +1,5 @@
-import events = require('events');
-import net = require('net');
+import { EventEmitter } from 'events';
+import { Socket } from 'net';
 import { Packet } from './packet';
 import { Packets } from './packets';
 import stream = require('stream');
@@ -11,15 +11,15 @@ export class PacketIO {
 
     private sendRC4: RC4;
     private receiveRC4: RC4;
-    private socket: net.Socket;
-    private emitter: events.EventEmitter;
+    private socket: Socket;
+    private emitter: EventEmitter;
 
     private bytesToRead: number;
     private dataQueue: Buffer;
 
-    constructor(socket: net.Socket) {
+    constructor(socket: Socket) {
         this.bytesToRead = 0;
-        this.emitter = new events.EventEmitter();
+        this.emitter = new EventEmitter();
         this.socket = socket;
         this.sendRC4 = new RC4(Buffer.from(OUTGOING_KEY, 'hex'));
         this.receiveRC4 = new RC4(Buffer.from(INCOMING_KEY, 'hex'));
@@ -27,7 +27,7 @@ export class PacketIO {
         socket.on('data', this.processData.bind(this));
     }
 
-    public reset(socket: net.Socket): void {
+    public reset(socket: Socket): void {
         this.socket.removeAllListeners('data');
         this.bytesToRead = 0;
         this.socket = socket;
@@ -37,7 +37,7 @@ export class PacketIO {
         socket.on('data', this.processData.bind(this));
     }
 
-    public on(event: string | symbol, listener: (...args: any[]) => void): events.EventEmitter {
+    public on(event: string | symbol, listener: (...args: any[]) => void): EventEmitter {
         return this.emitter.on(event, listener);
     }
 

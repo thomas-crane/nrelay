@@ -1,4 +1,3 @@
-import crypto = require('crypto');
 import NodeRSA = require('node-rsa');
 
 const PUBLIC_KEY =

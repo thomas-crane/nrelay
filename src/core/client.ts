@@ -1,4 +1,4 @@
-import net = require('net');
+import { Socket } from 'net';
 import { Log, SeverityLevel } from '../services/logger';
 import { Packet, PacketType } from './../networking/packet';
 import { IAccountInfo } from './../models/accinfo';
@@ -41,7 +41,7 @@ export class Client {
     private guid: string;
     private password: string;
     private buildVersion: string;
-    private clientSocket: net.Socket;
+    private clientSocket: Socket;
     private moveMultiplier: number;
     private mapInfo: { width: number, height: number, name: string };
 
@@ -195,7 +195,7 @@ export class Client {
             this.clientSocket.end();
         }
 
-        this.clientSocket = new net.Socket({
+        this.clientSocket = new Socket({
             readable: true,
             writable: true
         });
