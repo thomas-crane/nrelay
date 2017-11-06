@@ -7,6 +7,7 @@ import { IAccountInfo } from './models/accinfo';
 import { Client } from './core/client';
 import { Storage } from './services/storage';
 import { PluginManager } from './core/plugin-manager';
+import { ResourceManager } from './core/resource-manager';
 
 export class CLI {
 
@@ -14,6 +15,7 @@ export class CLI {
 
     constructor() {
         Log('NRelay', 'Starting...');
+        ResourceManager.loadTileInfo();
         PluginManager.loadPlugins();
         PluginManager.printPluginInfo();
         const accInfo = Storage.getAccountConfig();
