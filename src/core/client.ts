@@ -21,6 +21,7 @@ import { IPlayerData, getDefaultPlayerData } from './../models/playerdata';
 import { MapInfoPacket } from './../networking/packets/incoming/mapinfo-packet';
 import { PacketIO } from './../networking/packetio';
 import { PluginManager } from './../core/plugin-manager';
+import { ResourceManager } from './../core/resource-manager';
 import { HookPacket } from './../decorators/hook-packet';
 import { Classes } from './../models/classes';
 
@@ -37,6 +38,7 @@ export class Client {
 
     private serverIp: string;
     private lastTickTime: number;
+    private currentTickTime: number;
     private connectTime: number;
     private guid: string;
     private password: string;
@@ -108,7 +110,8 @@ export class Client {
 
     @HookPacket(PacketType.NewTick)
     private onNewTick(client: Client, newTickPacket: NewTickPacket): void {
-        this.lastTickTime = newTickPacket.tickTime;
+        this.lastTickTime = this.currentTickTime;
+        this.currentTickTime = this.getTime();
         // reply
         const movePacket = Packets.create(PacketType.Move) as MovePacket;
         movePacket.tickId = newTickPacket.tickId;
@@ -151,6 +154,8 @@ export class Client {
     private onConnect(): void {
         Log(this.guid, 'Connected to server!', SeverityLevel.Success);
         this.connectTime = Date.now();
+        this.lastTickTime = 0;
+        this.currentTickTime = 0;
         this.sendHello(-2, -1, new Int8Array(0));
     }
 
@@ -215,7 +220,7 @@ export class Client {
     private moveTo(target: WorldPosData, reset: boolean): WorldPosData {
         let newPos = new WorldPosData();
         const step = this.getSpeed();
-        if (this.squareDistanceTo(target) > step) {
+        if (this.squareDistanceTo(target) > step ** 2) {
             const angle: number = Math.atan2(target.y - this.playerData.worldPos.y, target.x - this.playerData.worldPos.x);
             newPos.x = this.playerData.worldPos.x + Math.cos(angle) * step;
             newPos.y = this.playerData.worldPos.y + Math.sin(angle) * step;
@@ -235,9 +240,17 @@ export class Client {
     }
 
     private getSpeed(): number {
-        // let speed = MIN_MOVE_SPEED + this.playerData.spd / 75 * (MAX_MOVE_SPEED - MIN_MOVE_SPEED);
-        // speed *= this.moveMultiplier;
-        const speed = (4.0 + 5.6 * (this.playerData.spd / 75.0)) / 5.0;
-        return speed;
+        const speed = MIN_MOVE_SPEED + this.playerData.spd / 75 * (MAX_MOVE_SPEED - MIN_MOVE_SPEED);
+        const x = Math.floor(this.playerData.worldPos.x);
+        const y = Math.floor(this.playerData.worldPos.y);
+        let multiplier = 1;
+        if (ResourceManager.tileInfo[this.mapTiles[y * this.mapInfo.width + x].type]) {
+            multiplier = ResourceManager.tileInfo[this.mapTiles[y * this.mapInfo.width + x].type];
+        }
+        let tickTime = this.currentTickTime - this.lastTickTime;
+        if (tickTime > 200) {
+            tickTime = 200;
+        }
+        return (speed * multiplier * tickTime);
     }
 }
