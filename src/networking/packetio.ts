@@ -30,6 +30,7 @@ export class PacketIO {
     public reset(socket: Socket): void {
         this.socket.removeAllListeners('data');
         this.bytesToRead = 0;
+        this.dataQueue = null;
         this.socket = socket;
         this.sendRC4 = new RC4(Buffer.from(OUTGOING_KEY, 'hex'));
         this.receiveRC4 = new RC4(Buffer.from(INCOMING_KEY, 'hex'));
@@ -65,9 +66,6 @@ export class PacketIO {
     }
 
     private processData(data: Buffer): void {
-        if (data.length === 1) {
-            return;
-        }
         if (this.bytesToRead > 0) {
             if (data.length < this.bytesToRead) {
                 this.dataQueue = Buffer.concat([this.dataQueue, data], this.dataQueue.length + data.length);
@@ -76,7 +74,7 @@ export class PacketIO {
             } else {
                 this.dataQueue = Buffer.concat([this.dataQueue, data.slice(0, this.bytesToRead)], this.dataQueue.length + this.bytesToRead);
                 this.dispatchPacket(this.dataQueue);
-                this.dataQueue = Buffer.alloc(0);
+                this.dataQueue = null;
 
                 if (this.bytesToRead === data.length) {
                     this.bytesToRead = 0;
@@ -93,6 +91,12 @@ export class PacketIO {
         try {
             packetSize = data.readInt32BE(0);
             packetId = data.readInt8(4);
+            if (packetSize < 0) {
+                throw new Error('Invalid packet size.');
+            }
+            if (packetId < 0) {
+                throw new Error('Invalid packet id.');
+            }
         } catch (err) {
             Log('PacketIO', 'Couldn\'t read packet size/id.', SeverityLevel.Error);
             return;
@@ -120,6 +124,12 @@ export class PacketIO {
         try {
             packetSize = data.readInt32BE(0);
             packetId = data.readInt8(4);
+            if (packetSize < 0) {
+                throw new Error('Invalid packet size.');
+            }
+            if (packetId < 0) {
+                throw new Error('Invalid packet id.');
+            }
         } catch (err) {
             Log('PacketIO', 'Couldn\'t read packet size/id.', SeverityLevel.Error);
             return;
