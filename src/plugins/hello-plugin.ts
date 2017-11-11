@@ -24,10 +24,7 @@ export default class HelloPlugin {
     @HookPacket(PacketType.Text)
     // Any method with a HookPacket decorator should always have
     // the method signature (client: Client, packet: Packet).
-    onText(client: Client, packet: Packet): void {
-
-        // Cast the Packet type to a TextPacket type.
-        const textPacket = packet as TextPacket;
+    onText(client: Client, textPacket: TextPacket): void {
 
         // Check that the text packet was for the client.
         if (textPacket.recipent === client.playerData.name) {

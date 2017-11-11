@@ -20,7 +20,7 @@ const FOLLOW_REGEX = /^follow ([a-zA-Z]+)\.*/;
     name: 'Move Commands',
     author: 'tcrane'
 })
-export default class YourPluginName {
+export default class MoveCommands {
 
     keys: string[];
     players: { [id: number]: IPlayerData };
