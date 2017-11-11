@@ -16,6 +16,15 @@ import { ShootAckPacket } from './packets/outgoing/shootack-packet';
 import { TextPacket } from './packets/incoming/text-packet';
 import { PlayerTextPacket } from './packets/outgoing/playertext-packet';
 import { CreatePacket } from './packets/outgoing/create-packet';
+import { TradeAcceptedPacket } from './packets/incoming/trade-accepted';
+import { TradeChangedPacket } from './packets/incoming/trade-changed';
+import { TradeDonePacket } from './packets/incoming/trade-done-packet';
+import { TradeRequestedPacket } from './packets/incoming/trade-requested-packet';
+import { TradeStartPacket } from './packets/incoming/trade-start-packet';
+import { AcceptTradePacket } from './packets/outgoing/accept-trade-packet';
+import { CancelTradePacket } from './packets/outgoing/cancel-trade-packet';
+import { ChangeTradePacket } from './packets/outgoing/change-trade-packet';
+import { RequestTradePacket } from './packets/outgoing/request-trade-packet';
 
 import { PacketType, Packet } from './packet';
 
@@ -79,6 +88,33 @@ export class Packets {
                 break;
             case PacketType.Create:
                 packet = new CreatePacket(null, bufferSize);
+                break;
+            case PacketType.TradeAccepted:
+                packet = new TradeAcceptedPacket(null, bufferSize);
+                break;
+            case PacketType.TradeChanged:
+                packet = new TradeChangedPacket(null, bufferSize);
+                break;
+            case PacketType.TradeDone:
+                packet = new TradeDonePacket(null, bufferSize);
+                break;
+            case PacketType.TradeRequested:
+                packet = new TradeRequestedPacket(null, bufferSize);
+                break;
+            case PacketType.TradeStart:
+                packet = new TradeStartPacket(null, bufferSize);
+                break;
+            case PacketType.AcceptTrade:
+                packet = new AcceptTradePacket(null, bufferSize);
+                break;
+            case PacketType.CancelTrade:
+                packet = new CancelTradePacket(null, bufferSize);
+                break;
+            case PacketType.ChangeTrade:
+                packet = new ChangeTradePacket(null, bufferSize);
+                break;
+            case PacketType.RequestTrade:
+                packet = new RequestTradePacket(null, bufferSize);
                 break;
         }
         packet.type = type;

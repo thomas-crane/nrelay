@@ -172,5 +172,14 @@ export enum PacketType {
     Move = 51,
     Text = 23,
     PlayerText = 84,
-    Create = 7
+    Create = 7,
+    RequestTrade = 60,
+    TradeRequested = 63,
+    TradeStart = 46,
+    ChangeTrade = 47,
+    TradeChanged = 68,
+    AcceptTrade = 20,
+    CancelTrade = 25,
+    TradeDone = 17,
+    TradeAccepted = 94
 }
