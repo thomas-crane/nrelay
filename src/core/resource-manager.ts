@@ -26,9 +26,9 @@ export class ResourceManager {
         while (match != null) {
             const type = +match[1];
             let speed = 1;
-            try {
+            if (match[2]) {
                 speed = +match[2];
-            } catch {}
+            }
             this.tileInfo[type] = speed;
             match = GROUND_TYPES_REGEX.exec(contents);
         }
