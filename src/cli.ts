@@ -17,7 +17,6 @@ export class CLI {
         Log('NRelay', 'Starting...');
         ResourceManager.loadTileInfo();
         PluginManager.loadPlugins();
-        PluginManager.printPluginInfo();
         const accInfo = Storage.getAccountConfig();
         if (!accInfo) {
             Log('NRelay', 'Couldn\'t load acc-config.json.', SeverityLevel.Error);
