@@ -108,18 +108,17 @@ import { Client } from './../core/client';
 
 import { TextPacket } from './../networking/packets/incoming/text-packet'; // Add this line.
 ```
-Now we can simply cast the `packet` to the `TextPacket` type
+Because the `TextPacket` type is a subclass of the `Packet` type, we can simply specify the parameter's type as the subclass `TextPacket`. This will implicitly cast the packet to a `TextPacket` object.
 ```typescript
 @HookPacket(PacketType.Text)
-public onTextPacket(client: Client, packet: Packet): void {
-    const textPacket = packet as TextPacket;
+public onTextPacket(client: Client, textPacket: TextPacket): void {
+
 }
 ```
 The text packet properties such as `text` and `name` can now be accessed. In order to check if the packet was a PM for the client, we need to check the `recipient` property
 ```typescript
 @HookPacket(PacketType.Text)
-public onTextPacket(client: Client, packet: Packet): void {
-    const textPacket = packet as TextPacket;
+public onTextPacket(client: Client, textPacket: TextPacket): void {
 
     if (textPacket.recipent === client.playerData.name) {
         // text packet was a private message to the client.
@@ -149,6 +148,7 @@ import { PlayerTextPacket } from './../networking/packets/outgoing/playertext-pa
 Now all that is left to do is create a new `PlayerTextPacket`, set the text and then send it.
 ```typescript
 if (textPacket.recipent === client.playerData.name) {
+    
     if (textPacket.text === 'hello') {
         // Create the packet.
         const replyTextPacket = new PlayerTextPacket();
@@ -178,9 +178,7 @@ import { PlayerTextPacket } from './../networking/packets/outgoing/playertext-pa
 export default class HelloPlugin {
 
     @HookPacket(PacketType.Text)
-    onText(client: Client, packet: Packet): void {
-
-        const textPacket = packet as TextPacket;
+    onText(client: Client, textPacket: TextPacket): void {
 
         if (textPacket.recipent === client.playerData.name) {
 
@@ -206,6 +204,125 @@ nrelay
 ```
 Now, use the regular RotMG client and a second account to send a /tell to the account logged in on nrelay. If you send the text `/tell <yourname> hello` You should receive the reply `<yourname> Hello!`.
 
+## The next step
+Now that the client is working and responding to commands, more functionality can be added through the use of variables.
+To demonstrate variables and a few other topics we will add a new command for the bot to respond to.
+
+The goal is to add a command which will change the response of the bot when we use the `hello` command.
+
+To do this, we should use a variable to store the bot's response message.
+```typescript
+@NrPlugin({
+    name: 'Hello Plugin',
+    author: 'tcrane'
+})
+export default class HelloPlugin {
+
+    private response: string;
+
+    @HookPacket(PacketType.Text)
+    onText(client: Client, textPacket: TextPacket): void {
+        ...
+    }
+}
+```
+Then we can update the reponse code to use the `response` variable instead of the hard coded string `hello`.
+```typescript
+if (textPacket.text === 'hello') {
+    
+    const reply = new PlayerTextPacket();
+    reply.text = '/tell ' + textPacket.name + ' ' + this.response;
+    
+    client.packetio.sendPacket(reply);
+}
+```
+Notice that the keyword `this` is used to access the variable. Any variables declared within the scope of the class should be accessed with `this`.
+
+Now we need to add an if statement to detect a new keyword to change the response message. However this time we also need to detect the command's argument, which is the new reposnse message. A simple way to do this is to use regex.
+
+Regex won't be explained in a lot of detail here, but [regexr.com](https://regexr.com/) is a great resource to learn and create regex.
+
+We can use another variable to store the regex in case it ever needs to change.
+```typescript
+@NrPlugin({
+    name: 'Hello Plugin',
+    author: 'tcrane'
+})
+export default class HelloPlugin {
+
+    private response: string;
+    private setRegex = /^set\s+(\S+.*)$/;
+
+    @HookPacket(PacketType.Text)
+    onText(client: Client, textPacket: TextPacket): void {
+        ...
+    }
+}
+```
+In short, this regex matches any string which starts with `set` and then has at least one character. For example this will match strings like
+```
+"set Hello There!"     --> returns "Hello There!"
+"set     Spaces!!"     --> returns "Spaces!!"
+"set       "           --> returns null
+"set "                 --> returns null
+"set !@(*#&) test 123" --> returns "!@(*#&) test 123"
+```
+Now we can use the regex to detect the command
+```typescript
+@HookPacket(PacketType.Text)
+onText(client: Client, textPacket: TextPacket): void {
+
+    if (textPacket.recipent === client.playerData.name) {
+        ....
+    }
+    const match = this.setRegex.match(textPacket.text);
+    if (match) {
+        this.reponse = match[1];
+        const reply = new PlayerTextPacket();
+        reply.text = '/tell ' + textPacket.name + ' set response to ' + this.response;
+        client.packetio.sendPacket(reply);
+    }
+}
+```
+If the regex matches the text, the matched group of the regex will be `match[1]`.
+
+There is one more thing to do before we can test the command. When the plugin starts, the variable `response` will be `null`. To give it a default value, we will use the `constructor`. This will only be called once when the plugin loads, so it should be used for initialisation of variables.
+```typescript
+@NrPlugin({
+    name: 'Hello Plugin',
+    author: 'tcrane'
+})
+export default class HelloPlugin {
+
+    private response: string;
+    private setRegex = /^set\s+(\S+.*)$/;
+
+    constructor() {
+        this.respnse = 'Default response';
+    }
+
+    @HookPacket(PacketType.Text)
+    onText(client: Client, textPacket: TextPacket): void {
+        ...
+    }
+}
+```
+Now that `reponse` has a default value, we can test the plugin.
+
+To test the command, rebuild and run nrelay
+```bash
+tsc
+```
+```bash
+nrelay
+```
+
+Now, use the regular RotMG client and a second account to send a /tell to the account logged in on nrelay. If you send the text `/tell <yourname> hello` You should now receive the reply `<yourname> Default response`
+
+Now, if you send the bot `/tell <yourname> set New reposnse text` it should reply `<yourname> set response to New response text`
+
+If you try the `hello` command again, it should now say `<yourname> New response text`
+
 ## Plugin template
 ```typescript
 import { NrPlugin } from './../decorators/plugin';
@@ -220,6 +337,10 @@ import { UpdatePacket } from './../networking/packets/incoming/update-packet';
     author: 'Your Name'
 })
 export default class YourPluginName {
+
+    constructor () {
+
+    }
 
     @HookPacket(PacketType.Update)
     onUpdate(client: Client, updatePacket: UpdatePacket): void {
