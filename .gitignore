@@ -4,5 +4,9 @@ node_modules/
 # Build result
 dist/
 
+# Any plugins except defaults
+src/plugins/*
+!src/plugins/hello-plugin.ts
+
 # Config
 acc-config.json
