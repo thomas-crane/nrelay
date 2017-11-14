@@ -14,4 +14,10 @@ export class WorldPosData {
         packet.writeFloat(this.x);
         packet.writeFloat(this.y);
     }
+
+    public squareDistanceTo(location: WorldPosData): number {
+        const a = location.x - this.x;
+        const b = location.y - this.y;
+        return a ** 2 + b ** 2;
+    }
 }
