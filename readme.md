@@ -1,6 +1,5 @@
 # nrelay
-A console based modular client for Realm of the Mad God build with Node.js and TypeScript.
-
+A console based modular client for Realm of the Mad God built with Node.js and TypeScript.
 
 ## Install
 1. Clone the repo to your computer
@@ -49,12 +48,32 @@ Now that nrelay is installed, you will need to set up your `acc-config.json` fil
 3. Replace the account info with your own account info.
 ```
 // acc-config-sample.json
-{
-    "buildVersion": "X18.0.0",      // When the RotMG build version is updated, this should be changed.
-    "guid": "john@email.com",       // Your RotMG account email.
-    "password": "SecretPassWord11", // Your RotMG account password.
-    "serverPref": "AsiaSouthEast"   // The preferred server to connect to.
-}
+[
+    {
+        "buildVersion": "X18.0.0",      // When the RotMG build version is updated, this should be changed.
+        "guid": "john@email.com",       // Your RotMG account email.
+        "password": "SecretPassWord11", // Your RotMG account password.
+        "serverPref": "AsiaSouthEast"   // The preferred server to connect to.
+    }
+]
+```
+If you have multiple accounts which you want to run at the same time, you can add them to the `acc-config` by duplicating the segment in the curly braces `{ ... }`. E.g.
+```
+// acc-config-sample.json
+[
+    {
+        "buildVersion": "X18.0.0",
+        "guid": "first.account@email.com",
+        "password": "SecretPassWord11",
+        "serverPref": "AsiaSouthEast"
+    },
+    {
+        "buildVersion": "X18.0.0",
+        "guid": "second.account@email.com",
+        "password": "Password22",
+        "serverPref": "USSouth"
+    }
+]
 ```
 
 ## Run
