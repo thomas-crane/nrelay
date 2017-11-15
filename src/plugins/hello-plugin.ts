@@ -1,8 +1,5 @@
-// These 4 imports are essential for any plugin.
-import { NrPlugin } from './../decorators/plugin';
-import { HookPacket } from './../decorators/hook-packet';
-import { Packet, PacketType } from './../networking/packet';
-import { Client } from './../core/client';
+// These 5 imports are essential for any plugin.
+import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core/plugin-module';
 
 // These 2 imports are only required because this plugin deals with text packets.
 import { TextPacket } from './../networking/packets/incoming/text-packet';
