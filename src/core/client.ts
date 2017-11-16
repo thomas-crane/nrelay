@@ -2,6 +2,7 @@ import { Socket } from 'net';
 import { Log, SeverityLevel } from '../services/logger';
 import { Packet, PacketType } from './../networking/packet';
 import { IAccountInfo } from './../models/accinfo';
+import { IServer } from './../models/server';
 import { Packets } from './../networking/packets';
 import { HelloPacket } from './../networking/packets/outgoing/hello-packet';
 import { LoadPacket } from './../networking/packets/outgoing/load-packet';
@@ -49,8 +50,9 @@ export class Client {
     private clientSocket: Socket;
     private moveMultiplier: number;
 
-    constructor(server: string, accInfo?: IAccountInfo) {
+    constructor(server: IServer, accInfo?: IAccountInfo) {
         this.playerData = getDefaultPlayerData();
+        this.playerData.server = server.name;
         this.nextPos = null;
         if (accInfo) {
             this.charInfo = accInfo;
@@ -60,7 +62,7 @@ export class Client {
         } else {
             this.charInfo = { charId: 0, nextCharId: 1, maxNumChars: 1 };
         }
-        this.serverIp = server;
+        this.serverIp = server.address;
         Log('Client', 'Starting connection.', SeverityLevel.Info);
         this.connect();
     }
@@ -93,7 +95,9 @@ export class Client {
         // playerdata
         for (let i = 0; i < updatePacket.newObjects.length; i++) {
             if (updatePacket.newObjects[i].status.objectId === this.playerData.objectId) {
+                const server = this.playerData.server;
                 this.playerData = ObjectStatusData.processStatData(updatePacket.newObjects[i].status);
+                this.playerData.server = server;
             }
         }
 
@@ -246,7 +250,8 @@ export class Client {
         const x = Math.floor(this.playerData.worldPos.x);
         const y = Math.floor(this.playerData.worldPos.y);
         let multiplier = 1;
-        if (ResourceManager.tileInfo[this.mapTiles[y * this.mapInfo.width + x].type]) {
+
+        if (this.mapTiles[y * this.mapInfo.width + x] && ResourceManager.tileInfo[this.mapTiles[y * this.mapInfo.width + x].type]) {
             multiplier = ResourceManager.tileInfo[this.mapTiles[y * this.mapInfo.width + x].type];
         }
         let tickTime = this.currentTickTime - this.lastTickTime;

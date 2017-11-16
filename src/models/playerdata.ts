@@ -21,6 +21,7 @@ export interface IPlayerData {
     mpPots: number;
     hasBackpack: boolean;
     inventory: { [id: number]: number };
+    server: string;
 }
 
 export function getDefaultPlayerData(): IPlayerData {
@@ -44,6 +45,7 @@ export function getDefaultPlayerData(): IPlayerData {
         hpPots: 0,
         mpPots: 0,
         hasBackpack: false,
-        inventory: {}
+        inventory: {},
+        server: ''
     };
 }

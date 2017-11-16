@@ -40,7 +40,7 @@ export class CLI {
                         info.buildVersion = acc.buildVersion;
                         info.guid = acc.guid;
                         info.password = acc.password;
-                        const client = new Client(server.address, info);
+                        const client = new Client(server, info);
                     } else {
                         Log('NRelay', 'Couldn\'t get servers.', SeverityLevel.Error);
                     }
