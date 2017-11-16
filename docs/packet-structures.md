@@ -2,45 +2,45 @@
 This document outlines the structure of all packets which are available. All structures in this document are subclasses of the `Packet` class. Documentation for the `Packet` class is in the `object-structures` document.
 
 ## Table of Contents
-### [Incoming](#Incoming)
- + [Aoe Packet](#AoePacket)
- + [Create Success Packet](#CreateSuccessPacket)
- + [Failure Packet](#FailurePacket)
- + [Goto Packet](#GotoPacket)
- + [Map Info Packet](#MapInfoPacket)
- + [New Tick Packet](#NewTickPacket)
- + [Ping Packet](#PingPacket)
- + [Server Player Shoot Packet](#ServerPlayerShootPacket)
- + [Text Packet](#TextPacket)
- + [Trade Accepted Packet](#TradeAcceptedPacket)
- + [Trade Changed Packet](#TradeChangedPacket)
- + [Trade Done Packet](#TradeDonePacket)
- + [Trade Requested Packet](#TradeRequestedPacket)
- + [Trade Start Packet](#TradeStartPacket)
- + [Update Packet](#UpdatePacket)
-### [Outgoing](#Outgoing)
- + [Accept Trade Packet](#AcceptTradePacket)
- + [Aoe Ack Packet](#AoeAckPacket)
- + [Cancel Trade Packet](#CancelTradePacket)
- + [Change Trade Packet](#ChangeTradePacket)
- + [Create Packet](#CreatePacket)
- + [Goto Ack Packet](#GotoAckPacket)
- + [Hello Packet](#HelloPacket)
- + [Load Packet](#LoadPacket)
- + [Move Packet](#MovePacket)
- + [Player Text Packet](#PlayerTextPacket)
- + [Pong Packet](#PongPacket)
- + [Request Trade Packet](#RequestTradePacket)
- + [Shoot Ack Packet](#ShootAckPacket)
- + [Update Ack Packet](#UpdateAckPacket)
-### [Data Structures](#Data-Structures)
- + [Ground Tile Data](#GroundTileData)
- + [Move Record](#MoveRecord)
- + [Object Data](#ObjectData)
- + [Object Status Data](#ObjectStatusData)
- + [Stat Data](#StatData)
- + [Trade Item](#TradeItem)
- + [World Pos Data](#WorldPosData)
+### [Incoming](#incoming)
+ + [Aoe Packet](#aoepacket)
+ + [Create Success Packet](#createsuccesspacket)
+ + [Failure Packet](#failurepacket)
+ + [Goto Packet](#gotopacket)
+ + [Map Info Packet](#mapinfopacket)
+ + [New Tick Packet](#newtickpacket)
+ + [Ping Packet](#pingpacket)
+ + [Server Player Shoot Packet](#serverplayershootpacket)
+ + [Text Packet](#textpacket)
+ + [Trade Accepted Packet](#tradeacceptedpacket)
+ + [Trade Changed Packet](#tradechangedpacket)
+ + [Trade Done Packet](#tradedonepacket)
+ + [Trade Requested Packet](#traderequestedpacket)
+ + [Trade Start Packet](#tradettartpacket)
+ + [Update Packet](#updatepacket)
+### [Outgoing](#outgoing)
+ + [Accept Trade Packet](#accepttradepacket)
+ + [Aoe Ack Packet](#aoeackpacket)
+ + [Cancel Trade Packet](#canceltradepacket)
+ + [Change Trade Packet](#changetradepacket)
+ + [Create Packet](#createpacket)
+ + [Goto Ack Packet](#gotoackpacket)
+ + [Hello Packet](#hellopacket)
+ + [Load Packet](#loadpacket)
+ + [Move Packet](#movepacket)
+ + [Player Text Packet](#playertextpacket)
+ + [Pong Packet](#pongpacket)
+ + [Request Trade Packet](#requesttradepacket)
+ + [Shoot Ack Packet](#shootackpacket)
+ + [Update Ack Packet](#updateackpacket)
+### [Data Structures](#data-structures)
+ + [Ground Tile Data](#groundtiledata)
+ + [Move Record](#moverecord)
+ + [Object Data](#objectdata)
+ + [Object Status Data](#objectstatusdata)
+ + [Stat Data](#statdata)
+ + [Trade Item](#tradeitem)
+ + [World Pos Data](#worldposdata)
 
 ## Incoming
 ## AoePacket
@@ -142,7 +142,7 @@ The time in ms since the last tick. This is not always accurate, so it is better
 manually by keeping a timestamp of new tick packets.
 
 #### `statuses: ObjectStatusData[]`
-An array of [ObjectStatusData](#ObjectStatusData) objects for all objects visible to the player.
+An array of [ObjectStatusData](#objectstatusdata) objects for all objects visible to the player.
 
 ## PingPacket
 Received by the server occasionally.
@@ -235,25 +235,25 @@ The name of the player who requested the trade.
 Received when a trade is started.
 ### Members
 #### `clientItems: TradeItem[]`
-An array of [TradeItem](#TradeItem) objects which describe the player's inventory.
+An array of [TradeItem](#tradeitem) objects which describe the player's inventory.
 
 #### `partnerName: string`
 The name of the trade partner.
 
 #### `partnerItems: TradeItem[]`
-An array of [TradeItem](#TradeItem) objects which describe the trade partner's inventory.
+An array of [TradeItem](#tradeitem) objects which describe the trade partner's inventory.
 
 ## UpdatePacket
 Received when an update occurs.
 ### Members
 #### `tiles: GroundTileData[]`
-An array of [GroundTileData](#GroundTileData) objects which describe the current map.
+An array of [GroundTileData](#groundtiledata) objects which describe the current map.
 
 #### `newObjects: ObjectData[]`
-An array of [ObjectData](#ObjectData) objects which describe the current objects visible to the player.
+An array of [ObjectData](#objectdata) objects which describe the current objects visible to the player.
 
 #### `drops: number[]`
-An array of numbers which are objectIds of [ObjectData](#ObjectData) objects which have gone out of view of the player.
+An array of numbers which are objectIds of [ObjectData](#objectdata) objects which have gone out of view of the player.
 
 ## Outgoing
 ## AcceptTradePacket
@@ -448,7 +448,7 @@ An array of the stats about the object.
 
 ### Methods
 #### `processStatData(data: ObjectStatuData): IPlayerData`
-Takes an [ObjectStatusData](#ObjectStatusData) method and returns an `IPlayerData` object containing the info which was in the [ObjectStatusData](#ObjectStatusData) object. It is up to the programmer to make sure the [ObjectStatusData](#ObjectStatusData) is a type which can be turned into an `IPlayerData` object or not.
+Takes an [ObjectStatusData](#objectstatusdata) method and returns an `IPlayerData` object containing the info which was in the [ObjectStatusData](#objectstatusdata) object. It is up to the programmer to make sure the [ObjectStatusData](#objectstatusdata) is a type which can be turned into an `IPlayerData` object or not.
 
 ## StatData
 ### Members

@@ -2,10 +2,10 @@
 This document outlines the structure of all types which are available.
 
 ## Table of Contents
- + [Client](#Client)
- + [IPlayerData](#IPlayerData)
- + [IPacket](#IPacket)
- + [Packet](#Packet)
+ + [Client](#client)
+ + [IPlayerData](#iplayerdata)
+ + [IPacket](#ipacket)
+ + [Packet](#packet)
 
 ## Client
 ### Public members
