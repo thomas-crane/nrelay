@@ -24,6 +24,8 @@ import { PluginManager } from './../core/plugin-manager';
 import { ResourceManager } from './../core/resource-manager';
 import { HookPacket } from './../decorators/hook-packet';
 import { Classes } from './../models/classes';
+import { GotoPacket } from './../networking/packets/incoming/goto-packet';
+import { GotoAckPacket } from './../networking/packets/outgoing/gotoack-packet';
 
 const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
@@ -34,6 +36,7 @@ export class Client {
     public packetio: PacketIO;
     public mapTiles: GroundTileData[];
     public nextPos: WorldPosData;
+    public mapInfo: { width: number, height: number, name: string };
     public charInfo: { charId: number, nextCharId: number, maxNumChars: number };
 
     private serverIp: string;
@@ -45,7 +48,6 @@ export class Client {
     private buildVersion: string;
     private clientSocket: Socket;
     private moveMultiplier: number;
-    private mapInfo: { width: number, height: number, name: string };
 
     constructor(server: string, accInfo?: IAccountInfo) {
         this.playerData = getDefaultPlayerData();
@@ -100,6 +102,14 @@ export class Client {
             const tile = updatePacket.tiles[i];
             this.mapTiles[tile.y * this.mapInfo.width + tile.x] = tile;
         }
+    }
+
+    @HookPacket(PacketType.Goto)
+    private onGotoPacket(client: Client, gotoPacket: GotoPacket): void {
+        const ack = new GotoAckPacket();
+        ack.time = this.getTime();
+        client.packetio.sendPacket(ack);
+        client.playerData.worldPos = gotoPacket.position;
     }
 
     @HookPacket(PacketType.Failure)
