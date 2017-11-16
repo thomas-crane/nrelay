@@ -16,20 +16,14 @@ To demonstrate how to create plugins and interact with packets/player data this 
 
 To get started, first delete the contents of the file `src/plugins/hello-plugin.ts`.
 
-The first step of creating a plugin is to import some types from nrelay in order to declare the plugin. __All plugins needs these 4 import statements__:
+The first step of creating a plugin is to import some types from nrelay in order to declare the plugin. __All plugins needs these 4 imports__:
 ```typescript
-import { NrPlugin } from './../decorators/plugin';
-import { HookPacket } from './../decorators/hook-packet';
-import { Packet, PacketType } from './../networking/packet';
-import { Client } from './../core/client';
+import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core/plugin-module';
 ```
 
 Now that we have the essentials imported, we can declare the plugin class.
 ```typescript
-import { NrPlugin } from './../decorators/plugin';
-import { HookPacket } from './../decorators/hook-packet';
-import { Packet, PacketType } from './../networking/packet';
-import { Client } from './../core/client';
+import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core/plugin-module';
 
 export default class HelloPlugin {
 
@@ -101,10 +95,7 @@ Now that the HookPacket decorator is present, nrelay will be able to detect this
 
 In order to access the text packet properties, we need to cast the `packet` parameter to the correct type. To do this we first need to import the type of packet we want to cast to. In this case we want to use the `TextPacket` so we need to add another import to the top of the file
 ```typescript
-import { NrPlugin } from './../decorators/plugin';
-import { HookPacket } from './../decorators/hook-packet';
-import { Packet, PacketType } from './../networking/packet';
-import { Client } from './../core/client';
+import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core/plugin-module';
 
 import { TextPacket } from './../networking/packets/incoming/text-packet'; // Add this line.
 ```
@@ -137,10 +128,7 @@ if (textPacket.recipent === client.playerData.name) {
 ```
 To send a message we need to use the `PlayerTextPacket` which needs to be imported. Once again, add another import to the top of the file
 ```typescript
-import { NrPlugin } from './../decorators/plugin';
-import { HookPacket } from './../decorators/hook-packet';
-import { Packet, PacketType } from './../networking/packet';
-import { Client } from './../core/client';
+import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core/plugin-module';
 
 import { TextPacket } from './../networking/packets/incoming/text-packet';
 import { PlayerTextPacket } from './../networking/packets/outgoing/playertext-packet'; // Add this line.
@@ -163,10 +151,7 @@ if (textPacket.recipent === client.playerData.name) {
 ```
 The entire plugin file should now look similar to the following
 ```typescript
-import { NrPlugin } from './../decorators/plugin';
-import { HookPacket } from './../decorators/hook-packet';
-import { Packet, PacketType } from './../networking/packet';
-import { Client } from './../core/client';
+import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core/plugin-module';
 
 import { TextPacket } from './../networking/packets/incoming/text-packet';
 import { PlayerTextPacket } from './../networking/packets/outgoing/playertext-packet';
@@ -323,12 +308,62 @@ Now, if you send the bot `/tell <yourname> set New reposnse text` it should repl
 
 If you try the `hello` command again, it should now say `<yourname> New response text`
 
+## The Logger class
+If you need to print out some information for debugging or logging purposes, you should use the `Log` method.
+Normally, you could use something like
+```typescript
+console.log('Player name: ' + client.playerData.name);
+
+// prints
+//
+// Player name: Eendi
+//
+```
+The `Logger` class allows you to log messages with senders and log levels.
+Firstly, you need to import the `Logger` class exports
+```typescript
+import { NrPlugin, HookPacket, Packet, PacketType, Client, Log, SeveryityLevel } from './../core/plugin-module';
+//                                                         ^^^^^^^^^^^^^^^^^^^
+```
+`SeverityLevel` is an enum which describes the type of message you are trying to log. It consists of
+```typescript
+enum SeverityLevel {
+    Info,
+    Message,
+    Warning,
+    Error,
+    Success,
+}
+```
+The default value is `Message`, so to log a message you can use
+```typescript
+Log('MyPlugin', 'Player name: ' + client.playerData.name);
+
+// prints
+//
+// [MyPlugin] Player name: Eendi
+//
+```
+The severity level can be provided as a third argument to change the color of the message.
+```
+   Info = Dark gray
+Message = White
+Warning = Yellow
+  Error = Red
+Success = Green
+```
+For example:
+```typescript
+try {
+    this.methodThatThrowsError();
+} catch (error) {
+   Log('MyPlugin', 'Error: ' + error.Message, SeverityLevel.Error); 
+}
+```
+
 ## Plugin template
 ```typescript
-import { NrPlugin } from './../decorators/plugin';
-import { HookPacket } from './../decorators/hook-packet';
-import { Packet, PacketType } from './../networking/packet';
-import { Client } from './../core/client';
+import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core/plugin-module';
 
 import { UpdatePacket } from './../networking/packets/incoming/update-packet';
 
