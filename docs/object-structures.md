@@ -97,6 +97,9 @@ Whether or not the player has a backpack.
 #### `inventory: { [id: number]: number };`
 An array of item ids which represent the players equipment. Slots 0-3 are the currently equipped items, slots 4-11 are the inventory and slots 11-18 are the backpack.
 
+#### `server: string`
+The name of the server the client is connected to.
+
 ## IPacket
 ### Public members
 #### `type: PacketType`
