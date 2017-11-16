@@ -11,6 +11,7 @@ import { NewTickPacket } from './packets/incoming/newtick-packet';
 import { PingPacket } from './packets/incoming/ping-packet';
 import { PongPacket } from './packets/outgoing/pong-packet';
 import { MovePacket } from './packets/outgoing/move-packet';
+import { GotoPacket } from './packets/incoming/goto-packet';
 import { GotoAckPacket } from './packets/outgoing/gotoack-packet';
 import { ShootAckPacket } from './packets/outgoing/shootack-packet';
 import { TextPacket } from './packets/incoming/text-packet';
@@ -25,6 +26,7 @@ import { AcceptTradePacket } from './packets/outgoing/accept-trade-packet';
 import { CancelTradePacket } from './packets/outgoing/cancel-trade-packet';
 import { ChangeTradePacket } from './packets/outgoing/change-trade-packet';
 import { RequestTradePacket } from './packets/outgoing/request-trade-packet';
+import { ServerPlayerShootPacket } from './packets/incoming/server-player-shoot-packet';
 
 import { PacketType, Packet } from './packet';
 
@@ -74,6 +76,9 @@ export class Packets {
             case PacketType.Move:
                 packet = new MovePacket(null, bufferSize);
                 break;
+            case PacketType.Goto:
+                packet = new GotoPacket(null, bufferSize);
+                break;
             case PacketType.GotoAck:
                 packet = new GotoAckPacket(null, bufferSize);
                 break;
@@ -115,6 +120,9 @@ export class Packets {
                 break;
             case PacketType.RequestTrade:
                 packet = new RequestTradePacket(null, bufferSize);
+                break;
+            case PacketType.ServerPlayerShoot:
+                packet = new ServerPlayerShootPacket(null, bufferSize);
                 break;
         }
         packet.type = type;

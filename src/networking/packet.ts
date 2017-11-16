@@ -164,6 +164,7 @@ export enum PacketType {
     UpdateAck = 47,
     AoeAck = 56,
     ShootAck = 93,
+    Goto = 18,
     GotoAck = 81,
     Aoe = 16,
     NewTick = 25,
@@ -181,5 +182,6 @@ export enum PacketType {
     AcceptTrade = 64,
     CancelTrade = 85,
     TradeDone = 97,
-    TradeAccepted = 42
+    TradeAccepted = 42,
+    ServerPlayerShoot = 35
 }
