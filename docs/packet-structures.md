@@ -2,7 +2,7 @@
 This document outlines the structure of all packets which are available. All structures in this document are subclasses of the `Packet` class. Documentation for the `Packet` class is in the `object-structures` document.
 
 ## Table of Contents
-### [Incoming](#incoming)
+### Incoming
  + [Aoe Packet](#aoepacket)
  + [Create Success Packet](#createsuccesspacket)
  + [Failure Packet](#failurepacket)
@@ -18,7 +18,7 @@ This document outlines the structure of all packets which are available. All str
  + [Trade Requested Packet](#traderequestedpacket)
  + [Trade Start Packet](#tradettartpacket)
  + [Update Packet](#updatepacket)
-### [Outgoing](#outgoing)
+### Outgoing
  + [Accept Trade Packet](#accepttradepacket)
  + [Aoe Ack Packet](#aoeackpacket)
  + [Cancel Trade Packet](#canceltradepacket)
@@ -33,7 +33,7 @@ This document outlines the structure of all packets which are available. All str
  + [Request Trade Packet](#requesttradepacket)
  + [Shoot Ack Packet](#shootackpacket)
  + [Update Ack Packet](#updateackpacket)
-### [Data Structures](#data-structures)
+### Data Structures
  + [Ground Tile Data](#groundtiledata)
  + [Move Record](#moverecord)
  + [Object Data](#objectdata)
