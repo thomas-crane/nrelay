@@ -360,6 +360,7 @@ try {
    Log('MyPlugin', 'Error: ' + error.Message, SeverityLevel.Error); 
 }
 ```
+Will print the error message in red.
 
 ## Plugin template
 ```typescript
