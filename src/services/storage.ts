@@ -27,7 +27,7 @@ export class Storage {
         });
     }
 
-    public static getAccountConfig(): IAccountInfo[] {
+    public static getAccountConfig(): IAccountInfo {
         try {
             return require('./../../acc-config.json');
         } catch (err) {

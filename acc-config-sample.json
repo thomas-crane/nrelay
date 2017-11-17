@@ -1,8 +1,10 @@
-[
-    {
-        "buildVersion": "X19.0.1",
-        "guid": "john@email.com",
-        "password": "SecretPassWord11",
-        "serverPref": "AsiaSouthEast"
-    }
-]
+{
+    "buildVersion": "X19.0.1",
+    "accounts": [
+        {
+            "guid": "john@email.com",
+            "password": "SecretPassWord11",
+            "serverPref": "AsiaSouthEast"
+        }
+    ]
+}

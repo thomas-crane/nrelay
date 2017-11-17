@@ -3,7 +3,7 @@ import { Http } from './services/http';
 import { parseServers, parseAccountInfo, parseError } from './services/xmltojson';
 import { SERVER_ENDPOINT } from './models/api-endpoints';
 import { IServer } from './models/server';
-import { IAccountInfo } from './models/accinfo';
+import { IAccountInfo, IAccount } from './models/accinfo';
 import { Client } from './core/client';
 import { Storage } from './services/storage';
 import { PluginManager } from './core/plugin-manager';
@@ -23,8 +23,8 @@ export class CLI {
             return;
         }
 
-        for (let i = 0; i < accInfo.length; i++) {
-            const acc = accInfo[i];
+        for (let i = 0; i < accInfo.accounts.length; i++) {
+            const acc = accInfo.accounts[i];
             setTimeout(() => {
                 this.getAccountInfo(acc.guid, acc.password).then((info) => {
                     const keys = Object.keys(this.serverList);
@@ -37,10 +37,9 @@ export class CLI {
                             server = this.serverList[acc.serverPref];
                         }
                         Log('NRelay', 'Connecting to ' + server.name);
-                        info.buildVersion = acc.buildVersion;
                         info.guid = acc.guid;
                         info.password = acc.password;
-                        const client = new Client(server, info);
+                        const client = new Client(server, accInfo.buildVersion, info);
                     } else {
                         Log('NRelay', 'Couldn\'t get servers.', SeverityLevel.Error);
                     }
@@ -65,7 +64,7 @@ export class CLI {
         });
     }
 
-    getAccountInfo(guid: string, password: string): Promise<IAccountInfo> {
+    getAccountInfo(guid: string, password: string): Promise<IAccount> {
         return new Promise((resolve, reject) => {
             Http.get(SERVER_ENDPOINT, {
                 guid: guid,

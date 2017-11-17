@@ -1,7 +1,7 @@
 import { Socket } from 'net';
 import { Log, SeverityLevel } from '../services/logger';
 import { Packet, PacketType } from './../networking/packet';
-import { IAccountInfo } from './../models/accinfo';
+import { IAccountInfo, IAccount } from './../models/accinfo';
 import { IServer } from './../models/server';
 import { Packets } from './../networking/packets';
 import { HelloPacket } from './../networking/packets/outgoing/hello-packet';
@@ -50,7 +50,7 @@ export class Client {
     private clientSocket: Socket;
     private moveMultiplier: number;
 
-    constructor(server: IServer, accInfo?: IAccountInfo) {
+    constructor(server: IServer, buildVersion: string, accInfo?: IAccount) {
         this.playerData = getDefaultPlayerData();
         this.playerData.server = server.name;
         this.nextPos = null;
@@ -58,7 +58,7 @@ export class Client {
             this.charInfo = accInfo;
             this.guid = accInfo.guid;
             this.password = accInfo.password;
-            this.buildVersion = accInfo.buildVersion;
+            this.buildVersion = buildVersion;
         } else {
             this.charInfo = { charId: 0, nextCharId: 1, maxNumChars: 1 };
         }
