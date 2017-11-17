@@ -6,6 +6,7 @@ This document outlines the structure of all types which are available.
  + [IPlayerData](#iplayerdata)
  + [IPacket](#ipacket)
  + [Packet](#packet)
+ + [Packet IO](#packetio)
 
 ## Client
 ### Public members
@@ -194,3 +195,18 @@ Writes a UTF32 string to the `data` buffer and advances the `bufferIndex` by the
 
 #### `reset(): void`
 Resets the `bufferIndex` and `data` buffer.
+
+## PacketIO
+
+### Public members
+This class has no public members.
+
+### Public methods
+#### `on(event: string | symbol, listener: (...args: any[]) => void): EventEmitter`
+Used to attach an event listener to the packetio.
+
+Events which can be fired are:
+ + `'packet'` - Fired when a packet is recieved.
+
+#### `sendPacket(packet: Packet): void`
+Used to send a packet. The `packet` argument can be any type which is a subclass of `Packet`. This includes all specific packet types such as `PlayerTextPacket` and `UpdateAckPacket`.
