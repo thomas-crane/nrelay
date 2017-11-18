@@ -5,6 +5,9 @@ A console based modular client for Realm of the Mad God built with Node.js and T
 Docs covering how to create plugins, all implemented packet structures and their members, and some of the object structures can be [found in the docs folder.](https://github.com/thomas-crane/nrelay/tree/master/docs)
 
 ## Install
+### Prerequisites
+Make sure you have [Nodejs](https://nodejs.org/en/) installed before running nrelay.
+
 1. Clone the repo to your computer
 ```bash
 git clone https://github.com/thomas-crane/nrelay.git/
