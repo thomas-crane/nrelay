@@ -74,7 +74,7 @@ export class Client {
             this.charInfo = { charId: 0, nextCharId: 1, maxNumChars: 1 };
         }
         this.serverIp = server.address;
-        Log('Client', 'Starting connection.', SeverityLevel.Info);
+        Log('Client', 'Starting connection to ' + server.name, SeverityLevel.Info);
         this.connect();
     }
 

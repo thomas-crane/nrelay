@@ -36,7 +36,6 @@ export class CLI {
                         } else {
                             server = this.serverList[acc.serverPref];
                         }
-                        Log('NRelay', 'Connecting to ' + server.name);
                         info.guid = acc.guid;
                         info.password = acc.password;
                         const client = new Client(server, accInfo.buildVersion, info);
