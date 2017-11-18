@@ -69,13 +69,11 @@ If you have multiple accounts which you want to run at the same time, you can ad
     "buildVersion": "X19.0.1",
     "accounts": [
         {
-            "buildVersion": "X19.0.1",
             "guid": "first.account@email.com",
             "password": "SecretPassWord11",
             "serverPref": "AsiaSouthEast"
         },
         {
-            "buildVersion": "X19.0.1",
             "guid": "second.account@email.com",
             "password": "Password22",
             "serverPref": "USSouth"
