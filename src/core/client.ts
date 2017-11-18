@@ -30,6 +30,7 @@ import { GotoAckPacket } from './../networking/packets/outgoing/gotoack-packet';
 
 const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
+const EMAIL_REPLACE_REGEX = /.+?(.+?)(?:@|\+\d+).+?(.+?)\./;
 
 export class Client {
 
@@ -45,6 +46,7 @@ export class Client {
     private currentTickTime: number;
     private connectTime: number;
     private guid: string;
+    private censoredGuid: string;
     private password: string;
     private buildVersion: string;
     private clientSocket: Socket;
@@ -57,6 +59,15 @@ export class Client {
         if (accInfo) {
             this.charInfo = accInfo;
             this.guid = accInfo.guid;
+            const match = EMAIL_REPLACE_REGEX.exec(this.guid);
+            if (match) {
+                if (match[1]) {
+                    this.censoredGuid = this.guid.replace(match[1], '***');
+                }
+                if (match[2]) {
+                    this.censoredGuid = this.censoredGuid.replace(match[2], '***');
+                }
+            }
             this.password = accInfo.password;
             this.buildVersion = buildVersion;
         } else {
@@ -73,13 +84,13 @@ export class Client {
             const loadPacket = new LoadPacket();
             loadPacket.charId = this.charInfo.charId;
             loadPacket.isFromArena = false;
-            Log(this.guid, 'Connecting to ' + mapInfoPacket.name, SeverityLevel.Info);
+            Log(this.censoredGuid, 'Connecting to ' + mapInfoPacket.name, SeverityLevel.Info);
             client.packetio.sendPacket(loadPacket);
         } else {
             const createPacket = new CreatePacket();
             createPacket.classType = Classes.Wizard;
             createPacket.skinType = 0;
-            Log(this.guid, 'Creating new char', SeverityLevel.Info);
+            Log(this.censoredGuid, 'Creating new char', SeverityLevel.Info);
             client.packetio.sendPacket(createPacket);
         }
         this.mapTiles = new Array<GroundTileData>(mapInfoPacket.width * mapInfoPacket.height);
@@ -119,7 +130,7 @@ export class Client {
     @HookPacket(PacketType.Failure)
     private onFailurePacket(client: Client, failurePacket: FailurePacket): void {
         this.clientSocket.end();
-        Log(this.guid, 'Received failure: "' + failurePacket.errorDescription + '"', SeverityLevel.Error);
+        Log(this.censoredGuid, 'Received failure: "' + failurePacket.errorDescription + '"', SeverityLevel.Error);
     }
 
     @HookPacket(PacketType.NewTick)
@@ -158,7 +169,7 @@ export class Client {
         this.playerData.objectId = createSuccessPacket.objectId;
         this.charInfo.charId = createSuccessPacket.charId;
         this.charInfo.nextCharId = this.charInfo.charId + 1;
-        Log(this.guid, 'Connected!', SeverityLevel.Success);
+        Log(this.censoredGuid, 'Connected!', SeverityLevel.Success);
     }
 
     private getTime(): number {
@@ -166,7 +177,7 @@ export class Client {
     }
 
     private onConnect(): void {
-        Log(this.guid, 'Connected to server!', SeverityLevel.Success);
+        Log(this.censoredGuid, 'Connected to server!', SeverityLevel.Success);
         this.connectTime = Date.now();
         this.lastTickTime = 0;
         this.currentTickTime = 0;
@@ -196,11 +207,11 @@ export class Client {
     }
 
     private onClose(error: boolean): void {
-        Log(this.guid, 'The connection was closed.', SeverityLevel.Warning);
+        Log(this.censoredGuid, 'The connection was closed.', SeverityLevel.Warning);
         if (error) {
-            Log(this.guid, 'An error occurred (cause of close)', SeverityLevel.Error);
+            Log(this.censoredGuid, 'An error occurred (cause of close)', SeverityLevel.Error);
         }
-        Log(this.guid, 'Reconnecting in 5 seconds');
+        Log(this.censoredGuid, 'Reconnecting in 5 seconds');
         setTimeout(() => {
             this.connect();
         }, 5000);
