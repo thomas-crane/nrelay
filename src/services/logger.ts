@@ -1,22 +1,23 @@
 import * as chalk from 'chalk';
 
+const c = chalk.constructor();
 export function Log(sender: string, message: string, level: SeverityLevel = SeverityLevel.Message): void {
     let printString: string;
     switch (level) {
         case SeverityLevel.Info:
-        printString = chalk.gray('[' + sender + '] ' + message);
+        printString = c.gray('[' + sender + '] ' + message);
         break;
         case SeverityLevel.Message:
         printString = ('[' + sender + '] ' + message);
         break;
         case SeverityLevel.Warning:
-        printString = chalk.yellow('[' + sender + '] ' + message);
+        printString = c.yellow('[' + sender + '] ' + message);
         break;
         case SeverityLevel.Error:
-        printString = chalk.red('[' + sender + '] ' + message);
+        printString = c.red('[' + sender + '] ' + message);
         break;
         case SeverityLevel.Success:
-        printString = chalk.green('[' + sender + '] ' + message);
+        printString = c.green('[' + sender + '] ' + message);
         break;
         default:
         printString = message;
