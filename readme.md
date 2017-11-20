@@ -55,7 +55,7 @@ Now that nrelay is installed, you will need to set up your `acc-config.json` fil
 ```
 // acc-config-sample.json
 {
-    "buildVersion": "X19.0.1",              // The current RotMG build version
+    "buildVersion": "X19.0.2",              // The current RotMG build version
     "accounts": [
         {
             "guid": "john@email.com",       // Your RotMG account email.
@@ -69,7 +69,7 @@ If you have multiple accounts which you want to run at the same time, you can ad
 ```
 // acc-config-sample.json
 {
-    "buildVersion": "X19.0.1",
+    "buildVersion": "X19.0.2",
     "accounts": [
         {
             "guid": "first.account@email.com",
