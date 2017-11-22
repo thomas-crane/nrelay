@@ -304,7 +304,7 @@ Sent after the TCP socket is opened to ask for the `MapInfoPacket`.
 The current build version of the game.
 
 #### `gameId: number`
-> Unknown
+The id of the `MapInfo` packet to ask for.
 
 #### `guid: string`
 The unencrypted email address of the rotmg account.
@@ -325,7 +325,7 @@ A randomly generated number.
 > Unknown.
 
 #### `key: Int8Array`
-The key of the `MapInfo` packet to ask for.
+> Unknown.
 
 #### `mapJSON: string`
 > Unknown.
