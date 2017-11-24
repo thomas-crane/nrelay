@@ -1,4 +1,4 @@
-import { Log, SeverityLevel } from './services/logger';
+import { Log, LogLevel } from './services/logger';
 import { Http } from './services/http';
 import { parseServers, parseAccountInfo, parseError } from './services/xmltojson';
 import { SERVER_ENDPOINT } from './models/api-endpoints';
@@ -19,7 +19,7 @@ export class CLI {
         PluginManager.loadPlugins();
         const accInfo = Storage.getAccountConfig();
         if (!accInfo) {
-            Log('NRelay', 'Couldn\'t load acc-config.json.', SeverityLevel.Error);
+            Log('NRelay', 'Couldn\'t load acc-config.json.', LogLevel.Error);
             return;
         }
 
@@ -31,7 +31,7 @@ export class CLI {
                     if (keys.length > 0) {
                         let server: IServer;
                         if (!this.serverList[acc.serverPref]) {
-                            Log('NRelay', 'Preferred server not found. Choosing first server.', SeverityLevel.Warning);
+                            Log('NRelay', 'Preferred server not found. Choosing first server.', LogLevel.Warning);
                             server = this.serverList[keys[0]];
                         } else {
                             server = this.serverList[acc.serverPref];
@@ -40,7 +40,7 @@ export class CLI {
                         info.password = acc.password;
                         const client = new Client(server, accInfo.buildVersion, info);
                     } else {
-                        Log('NRelay', 'Couldn\'t get servers.', SeverityLevel.Error);
+                        Log('NRelay', 'Couldn\'t get servers.', LogLevel.Error);
                     }
                 }).catch((err) => {
 
@@ -50,14 +50,14 @@ export class CLI {
     }
 
     getServers(): Promise<{ [id: string]: IServer }> {
-        Log('NRelay', 'Getting server list...', SeverityLevel.Info);
+        Log('NRelay', 'Getting server list...', LogLevel.Info);
         return new Promise((resolve, reject) => {
             Http.get(SERVER_ENDPOINT).then((data) => {
-                Log('NRelay', 'Got servers!', SeverityLevel.Success);
+                Log('NRelay', 'Got servers!', LogLevel.Success);
                 const servers = parseServers(data);
                 resolve(servers);
             }).catch((serverListError) => {
-                Log('NRelay', 'Error getting servers.', SeverityLevel.Error);
+                Log('NRelay', 'Error getting servers.', LogLevel.Error);
                 reject(serverListError);
             });
         });
@@ -72,10 +72,10 @@ export class CLI {
                 const info = parseAccountInfo(data);
                 this.serverList = parseServers(data);
                 if (info) {
-                    Log('NRelay', 'Authorized account', SeverityLevel.Success);
+                    Log('NRelay', 'Authorized account', LogLevel.Success);
                     resolve(info);
                 } else {
-                    Log('NRelay', 'Error: ' + parseError(data), SeverityLevel.Warning);
+                    Log('NRelay', 'Error: ' + parseError(data), LogLevel.Warning);
                     reject();
                 }
             }).catch((err) => reject(err));

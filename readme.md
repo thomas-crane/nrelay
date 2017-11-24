@@ -28,21 +28,26 @@ npm install
 npm install -g typescript
 ```
 
-5. Compile the typescript. This will generate a folder called `dist` containing the compiled JavaScript.
+5. Install gulp
 ```bash
-tsc
+npm install -g gulp-cli
+```
+
+6. Run the build task to compile the source into JavaScript. This will produce a folder called `dist/`
+```bash
+gulp
 ```
 
 __Note__
 
-Step 6 and 7 are optional, but not performing them will restrict how you can run nrelay. See the [Run](#Run) section for more info.
+Step 7 and 8 are optional, but not performing them will restrict how you can run nrelay. See the [Run](#Run) section for more info.
 
-6. Install nrelay as an npm module. This will let you use nrelay from any directory in the console.
+7. Install nrelay as an npm module. This will let you use nrelay from any directory in the console.
 ```bash
 npm install -g
 ```
 
-7. Link the installed module to this folder to automatically update the module when any code changes happen.
+8. Link the installed module to this folder to automatically update the module when any code changes happen.
 ```bash
 npm link
 ```
@@ -109,7 +114,5 @@ Whenever any changes are made to the TypeScript source files, they will need to 
 
 To recompile the TypeScript simply use
 ```bash
-tsc
+gulp
 ```
-
-Alternatively, if you are using [Visual Studio Code](https://code.visualstudio.com/), you can press `Ctrl` + `Shift` + `B`, then select the build task `tsc: build - tsconfig.json`

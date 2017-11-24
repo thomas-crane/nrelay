@@ -4,7 +4,7 @@ import { Packet } from './packet';
 import { Packets } from './packets';
 import stream = require('stream');
 import { RC4, OUTGOING_KEY, INCOMING_KEY } from './../crypto/rc4';
-import { Log, SeverityLevel } from './../services/logger';
+import { Log, LogLevel } from './../services/logger';
 import { environment } from './../models/environment';
 
 export class PacketIO {
@@ -59,7 +59,7 @@ export class PacketIO {
         packet.writeByte(packet.type);
 
         if (environment.debug) {
-            Log('PacketIO', 'WRITE: id: ' + packet.type + ', size: ' + packetSize, SeverityLevel.Info);
+            Log('PacketIO', 'WRITE: id: ' + packet.type + ', size: ' + packetSize, LogLevel.Info);
         }
 
         this.socket.write(packet.data);
@@ -98,7 +98,7 @@ export class PacketIO {
                 throw new Error('Invalid packet id.');
             }
         } catch (err) {
-            Log('PacketIO', 'Couldn\'t read packet size/id.', SeverityLevel.Error);
+            Log('PacketIO', 'Couldn\'t read packet size/id.', LogLevel.Error);
             return;
         }
         if (packetSize === data.length) {
@@ -131,7 +131,7 @@ export class PacketIO {
                 throw new Error('Invalid packet id.');
             }
         } catch (err) {
-            Log('PacketIO', 'Couldn\'t read packet size/id.', SeverityLevel.Error);
+            Log('PacketIO', 'Couldn\'t read packet size/id.', LogLevel.Error);
             return;
         }
 
@@ -139,7 +139,7 @@ export class PacketIO {
         this.receiveRC4.cipher(packetData);
 
         if (environment.debug) {
-            Log('PacketIO', 'READ: id: ' + packetId + ', size: ' + packetSize, SeverityLevel.Info);
+            Log('PacketIO', 'READ: id: ' + packetId + ', size: ' + packetSize, LogLevel.Info);
         }
 
         let packet;
@@ -149,7 +149,7 @@ export class PacketIO {
             packet.bufferIndex = 0;
         } catch (error) {
             if (environment.debug) {
-                Log('PacketIO', error.message, SeverityLevel.Error);
+                Log('PacketIO', error.message, LogLevel.Error);
             }
         }
 

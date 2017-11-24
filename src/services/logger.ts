@@ -1,22 +1,22 @@
 import * as chalk from 'chalk';
 
 const c = chalk.constructor();
-export function Log(sender: string, message: string, level: SeverityLevel = SeverityLevel.Message): void {
+export function Log(sender: string, message: string, level: LogLevel = LogLevel.Message): void {
     let printString: string;
     switch (level) {
-        case SeverityLevel.Info:
+        case LogLevel.Info:
         printString = c.gray('[' + sender + '] ' + message);
         break;
-        case SeverityLevel.Message:
+        case LogLevel.Message:
         printString = ('[' + sender + '] ' + message);
         break;
-        case SeverityLevel.Warning:
+        case LogLevel.Warning:
         printString = c.yellow('[' + sender + '] ' + message);
         break;
-        case SeverityLevel.Error:
+        case LogLevel.Error:
         printString = c.red('[' + sender + '] ' + message);
         break;
-        case SeverityLevel.Success:
+        case LogLevel.Success:
         printString = c.green('[' + sender + '] ' + message);
         break;
         default:
@@ -26,7 +26,7 @@ export function Log(sender: string, message: string, level: SeverityLevel = Seve
     console.log(printString);
 }
 
-export enum SeverityLevel {
+export enum LogLevel {
     Info,
     Message,
     Warning,

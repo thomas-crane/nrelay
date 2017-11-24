@@ -1,5 +1,5 @@
 import { Packet, PacketType } from './../networking/packet';
-import { Log, SeverityLevel } from './../services/logger';
+import { Log, LogLevel } from './../services/logger';
 import { Client } from './client';
 import { environment } from './../models/environment';
 import fs = require('fs');
@@ -17,14 +17,14 @@ export class PluginManager {
         try {
             files = fs.readdirSync(segments.join(path.sep));
         } catch {
-            Log('PluginManager', 'Couldn\'t find plugins directory', SeverityLevel.Warning);
+            Log('PluginManager', 'Couldn\'t find plugins directory', LogLevel.Warning);
         }
         for (let i = 0; i < files.length; i++) {
             try {
                 const relPath = path.join(...segments, files[i]);
                 if (!PLUGIN_REGEX.test(relPath)) {
                     if (environment.debug) {
-                        Log('PluginManager', 'Skipping ' + relPath, SeverityLevel.Info);
+                        Log('PluginManager', 'Skipping ' + relPath, LogLevel.Info);
                     }
                     continue;
                 }
@@ -36,7 +36,7 @@ export class PluginManager {
                 }
                 this.pluginInstances[type] = plugin;
             } catch {
-                Log('PluginManager', 'Error while loading ' + files[i], SeverityLevel.Warning);
+                Log('PluginManager', 'Error while loading ' + files[i], LogLevel.Warning);
             }
         }
     }
@@ -58,7 +58,7 @@ export class PluginManager {
         if (!this.pluginInfo) {
             this.pluginInfo = [];
         }
-        Log('PluginManager', 'Loaded ' + info.name + ' by ' + info.author, SeverityLevel.Info);
+        Log('PluginManager', 'Loaded ' + info.name + ' by ' + info.author, LogLevel.Info);
         this.pluginInfo.push(info);
     }
 
@@ -79,7 +79,7 @@ export class PluginManager {
             return;
         }
         for (let i = 0; i < this.pluginInfo.length; i++) {
-            Log('PluginManager', 'Loaded ' + this.pluginInfo[i].name + ' by ' + this.pluginInfo[i].author, SeverityLevel.Info);
+            Log('PluginManager', 'Loaded ' + this.pluginInfo[i].name + ' by ' + this.pluginInfo[i].author, LogLevel.Info);
         }
     }
 
