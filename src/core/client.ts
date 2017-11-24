@@ -1,5 +1,5 @@
 import { Socket } from 'net';
-import { Log, SeverityLevel } from '../services/logger';
+import { Log, LogLevel } from '../services/logger';
 import { Packet, PacketType } from './../networking/packet';
 import { IAccountInfo, IAccount } from './../models/accinfo';
 import { IServer } from './../models/server';
@@ -74,7 +74,7 @@ export class Client {
             this.charInfo = { charId: 0, nextCharId: 1, maxNumChars: 1 };
         }
         this.serverIp = server.address;
-        Log('Client', 'Starting connection to ' + server.name, SeverityLevel.Info);
+        Log('Client', 'Starting connection to ' + server.name, LogLevel.Info);
         this.connect();
     }
 
@@ -84,13 +84,13 @@ export class Client {
             const loadPacket = new LoadPacket();
             loadPacket.charId = this.charInfo.charId;
             loadPacket.isFromArena = false;
-            Log(this.censoredGuid, 'Connecting to ' + mapInfoPacket.name, SeverityLevel.Info);
+            Log(this.censoredGuid, 'Connecting to ' + mapInfoPacket.name, LogLevel.Info);
             client.packetio.sendPacket(loadPacket);
         } else {
             const createPacket = new CreatePacket();
             createPacket.classType = Classes.Wizard;
             createPacket.skinType = 0;
-            Log(this.censoredGuid, 'Creating new char', SeverityLevel.Info);
+            Log(this.censoredGuid, 'Creating new char', LogLevel.Info);
             client.packetio.sendPacket(createPacket);
         }
         this.mapTiles = new Array<GroundTileData>(mapInfoPacket.width * mapInfoPacket.height);
@@ -130,7 +130,7 @@ export class Client {
     @HookPacket(PacketType.Failure)
     private onFailurePacket(client: Client, failurePacket: FailurePacket): void {
         this.clientSocket.end();
-        Log(this.censoredGuid, 'Received failure: "' + failurePacket.errorDescription + '"', SeverityLevel.Error);
+        Log(this.censoredGuid, 'Received failure: "' + failurePacket.errorDescription + '"', LogLevel.Error);
     }
 
     @HookPacket(PacketType.NewTick)
@@ -169,7 +169,7 @@ export class Client {
         this.playerData.objectId = createSuccessPacket.objectId;
         this.charInfo.charId = createSuccessPacket.charId;
         this.charInfo.nextCharId = this.charInfo.charId + 1;
-        Log(this.censoredGuid, 'Connected!', SeverityLevel.Success);
+        Log(this.censoredGuid, 'Connected!', LogLevel.Success);
     }
 
     private getTime(): number {
@@ -177,7 +177,7 @@ export class Client {
     }
 
     private onConnect(): void {
-        Log(this.censoredGuid, 'Connected to server!', SeverityLevel.Success);
+        Log(this.censoredGuid, 'Connected to server!', LogLevel.Success);
         this.connectTime = Date.now();
         this.lastTickTime = 0;
         this.currentTickTime = 0;
@@ -207,9 +207,9 @@ export class Client {
     }
 
     private onClose(error: boolean): void {
-        Log(this.censoredGuid, 'The connection was closed.', SeverityLevel.Warning);
+        Log(this.censoredGuid, 'The connection was closed.', LogLevel.Warning);
         if (error) {
-            Log(this.censoredGuid, 'An error occurred (cause of close)', SeverityLevel.Error);
+            Log(this.censoredGuid, 'An error occurred (cause of close)', LogLevel.Error);
         }
         Log(this.censoredGuid, 'Reconnecting in 5 seconds');
         setTimeout(() => {

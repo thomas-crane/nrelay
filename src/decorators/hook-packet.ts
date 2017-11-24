@@ -1,5 +1,5 @@
 import { PacketType } from './../networking/packet';
-import { Log, SeverityLevel } from './../services/logger';
+import { Log, LogLevel } from './../services/logger';
 import { PluginManager } from './../core/plugin-manager';
 import { Client } from './../core/client';
 

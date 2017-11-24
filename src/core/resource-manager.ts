@@ -1,4 +1,4 @@
-import { Log, SeverityLevel } from './../services/logger';
+import { Log, LogLevel } from './../services/logger';
 import fs = require('fs');
 import path = require('path');
 
@@ -19,7 +19,7 @@ export class ResourceManager {
         try {
             contents = fs.readFileSync(segments.join(path.sep), 'utf8');
         } catch {
-            Log('ResourceManager', 'Error reading GroundTypes.xml', SeverityLevel.Warning);
+            Log('ResourceManager', 'Error reading GroundTypes.xml', LogLevel.Warning);
             return;
         }
         let match = GROUND_TYPES_REGEX.exec(contents);
@@ -32,6 +32,6 @@ export class ResourceManager {
             this.tileInfo[type] = speed;
             match = GROUND_TYPES_REGEX.exec(contents);
         }
-        Log('ResourceManager', 'Loaded GroundTypes.xml', SeverityLevel.Info);
+        Log('ResourceManager', 'Loaded GroundTypes.xml', LogLevel.Info);
     }
 }
