@@ -16,7 +16,7 @@ To demonstrate how to create plugins and interact with packets/player data this 
 
 To get started, first delete the contents of the file `src/plugins/hello-plugin.ts`.
 
-The first step of creating a plugin is to import some types from nrelay in order to declare the plugin. __All plugins needs these 4 imports__:
+The first step of creating a plugin is to import some types from nrelay in order to declare the plugin. __All plugins needs these 5 imports__:
 ```typescript
 import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core/plugin-module';
 ```
@@ -322,8 +322,8 @@ console.log('Player name: ' + client.playerData.name);
 The `Logger` class allows you to log messages with senders and log levels.
 Firstly, you need to import the `Logger` class exports
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client, Log, SeveryityLevel } from './../core/plugin-module';
-//                                                         ^^^^^^^^^^^^^^^^^^^
+import { NrPlugin, HookPacket, Packet, PacketType, Client, Log, SeverityLevel } from './../core/plugin-module';
+//                                                         ^^^^^^^^^^^^^^^^^^
 ```
 `SeverityLevel` is an enum which describes the type of message you are trying to log. It consists of
 ```typescript
