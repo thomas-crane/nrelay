@@ -28,9 +28,14 @@ npm install
 npm install -g typescript
 ```
 
-5. Compile the typescript. This will generate a folder called `dist` containing the compiled JavaScript.
+5. Install gulp
 ```bash
-tsc
+npm install -g gulp-cli
+```
+
+5. Run the build task to compile the source into JavaScript. This will produce a folder called `dist/`
+```bash
+gulp
 ```
 
 __Note__
@@ -109,7 +114,5 @@ Whenever any changes are made to the TypeScript source files, they will need to 
 
 To recompile the TypeScript simply use
 ```bash
-tsc
+gulp
 ```
-
-Alternatively, if you are using [Visual Studio Code](https://code.visualstudio.com/), you can press `Ctrl` + `Shift` + `B`, then select the build task `tsc: build - tsconfig.json`
