@@ -22,3 +22,7 @@ Initial
  + Added new gulp tasks:
     + `gulp watch` rebuilds the source any time a `.ts` file changes.
     + `gulp clean` deletes the updater assets which are not needed.
+
+## `3.1.1`
+### Fixes:
+ + Updated `Client` packet hooks to use new uppercase `PacketType` values.

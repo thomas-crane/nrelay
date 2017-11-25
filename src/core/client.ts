@@ -78,7 +78,7 @@ export class Client {
         this.connect();
     }
 
-    @HookPacket(PacketType.MapInfo)
+    @HookPacket(PacketType.MAPINFO)
     private onMapInfo(client: Client, mapInfoPacket: MapInfoPacket): void {
         if (this.charInfo.charId > 0) {
             const loadPacket = new LoadPacket();
@@ -97,10 +97,10 @@ export class Client {
         this.mapInfo = { width: mapInfoPacket.width, height: mapInfoPacket.height, name: mapInfoPacket.name };
     }
 
-    @HookPacket(PacketType.Update)
+    @HookPacket(PacketType.UPDATE)
     private onUpdate(client: Client, updatePacket: UpdatePacket): void {
         // reply
-        const updateAck = Packets.create(PacketType.UpdateAck);
+        const updateAck = Packets.create(PacketType.UPDATEACK);
         client.packetio.sendPacket(updateAck);
 
         // playerdata
@@ -119,7 +119,7 @@ export class Client {
         }
     }
 
-    @HookPacket(PacketType.Goto)
+    @HookPacket(PacketType.GOTO)
     private onGotoPacket(client: Client, gotoPacket: GotoPacket): void {
         const ack = new GotoAckPacket();
         ack.time = this.getTime();
@@ -127,18 +127,18 @@ export class Client {
         client.playerData.worldPos = gotoPacket.position;
     }
 
-    @HookPacket(PacketType.Failure)
+    @HookPacket(PacketType.FAILURE)
     private onFailurePacket(client: Client, failurePacket: FailurePacket): void {
         this.clientSocket.end();
         Log(this.censoredGuid, 'Received failure: "' + failurePacket.errorDescription + '"', LogLevel.Error);
     }
 
-    @HookPacket(PacketType.NewTick)
+    @HookPacket(PacketType.NEWTICK)
     private onNewTick(client: Client, newTickPacket: NewTickPacket): void {
         this.lastTickTime = this.currentTickTime;
         this.currentTickTime = this.getTime();
         // reply
-        const movePacket = Packets.create(PacketType.Move) as MovePacket;
+        const movePacket = Packets.create(PacketType.MOVE) as MovePacket;
         movePacket.tickId = newTickPacket.tickId;
         movePacket.time = client.getTime();
         movePacket.newPosition = client.playerData.worldPos;
@@ -155,16 +155,16 @@ export class Client {
         }
     }
 
-    @HookPacket(PacketType.Ping)
+    @HookPacket(PacketType.PING)
     private onPing(client: Client, pingPacket: PingPacket): void {
         // reply
-        const pongPacket = Packets.create(PacketType.Pong) as PongPacket;
+        const pongPacket = Packets.create(PacketType.PONG) as PongPacket;
         pongPacket.serial = pingPacket.serial;
         pongPacket.time = client.getTime();
         client.packetio.sendPacket(pongPacket);
     }
 
-    @HookPacket(PacketType.CreateSuccess)
+    @HookPacket(PacketType.CREATESUCCESS)
     private onCreateSuccess(client: Client, createSuccessPacket: CreateSuccessPacket): void {
         this.playerData.objectId = createSuccessPacket.objectId;
         this.charInfo.charId = createSuccessPacket.charId;
