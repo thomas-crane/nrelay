@@ -7,7 +7,6 @@ import stream = require('stream');
 import { createWriteStream } from 'fs';
 import { Log, LogLevel } from './../core/plugin-module';
 
-const VERSION_REGEX = /<a href="(\d+)\/">/;
 const ASSET_ENDPOINT = 'https://static.drips.pw/rotmg/production/#/';
 const PACKET_REGEX = /public static const ([A-Z_]+):int = (\d+);/g;
 
