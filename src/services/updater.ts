@@ -33,6 +33,15 @@ export class Updater {
                     try {
                         currentVersion = fs.readFileSync(filename, { encoding: 'utf8' });
                     } catch {
+                        try {
+                            fs.mkdirSync(
+                                path.join(__dirname, path.relative(__dirname, '../nrelay/src/services/updater-assets/'))
+                            );
+                        } catch (error) {
+                            if (error.code !== 'EEXIST') {
+                                reject(error);
+                            }
+                        }
                         fs.writeFileSync(filename, '', { encoding: 'utf8' });
                     }
                     if (currentVersion !== raw) {
@@ -149,15 +158,13 @@ export class Updater {
     private static updatePackets(newPackets: { [id: string]: number }): void {
         const filePath = path.join(__dirname, path.relative(__dirname, '../nrelay/src/networking/packet-type.ts'));
         fs.truncateSync(filePath, 0);
-        const fileStream = fs.createWriteStream(filePath);
         let raw = 'export enum PacketType {\n';
         const keys = Object.keys(newPackets);
         for (let i = 0; i < keys.length; i++) {
             raw += ('    ' + keys[i] + ' = ' + newPackets[keys[i]] + (i === keys.length - 1 ? '\n' : ',\n'));
         }
         raw += '}\n';
-        fileStream.write(raw, 'utf8');
-        fileStream.close();
+        fs.writeFileSync(filePath, raw, { encoding: 'utf8' });
         Log('Updater', 'Updated PacketType enum', LogLevel.Info);
     }
 
