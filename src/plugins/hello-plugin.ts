@@ -18,7 +18,7 @@ export default class HelloPlugin {
 
     // The HookPacket decorator will cause the method to be called
     // whenever a packet with the specified packet type is recieved.
-    @HookPacket(PacketType.Text)
+    @HookPacket(PacketType.TEXT)
     // Any method with a HookPacket decorator should always have
     // the method signature (client: Client, packet: Packet).
     onText(client: Client, textPacket: TextPacket): void {
