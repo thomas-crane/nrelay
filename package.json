@@ -1,6 +1,6 @@
 {
   "name": "nrelay",
-  "version": "2.1.0",
+  "version": "3.2.0",
   "description": "A Node.js + TypeScript based middle-man proxy for Realm of the Mad God.",
   "main": "index.js",
   "bin": {

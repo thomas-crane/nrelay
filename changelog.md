@@ -26,3 +26,7 @@ Initial
 ## `3.1.1`
 ### Fixes:
  + Updated `Client` packet hooks to use new uppercase `PacketType` values.
+
+## `3.2.2`
+### Changes:
+ + Added update service to check for new versions of the game. If a new version is present, the packet ids will be extracted and the `PacketType` enum will be updated.

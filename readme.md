@@ -7,6 +7,7 @@ Docs covering how to create plugins, all implemented packet structures and their
 ## Install
 ### Prerequisites
 Make sure you have [Nodejs](https://nodejs.org/en/) installed before running nrelay.
+You will also need [Java](https://java.com/en/download/) installed in order for the updater to work.
 
 1. Clone the repo to your computer
 ```bash
@@ -116,3 +117,7 @@ To recompile the TypeScript simply use
 ```bash
 gulp
 ```
+
+# Acknowledgements
+This project uses the following open source software:
+ + [JPEXS Free Flash Decompiler](https://github.com/jindrapetrik/jpexs-decompiler)

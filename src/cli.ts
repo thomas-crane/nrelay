@@ -8,6 +8,7 @@ import { Client } from './core/client';
 import { Storage } from './services/storage';
 import { PluginManager } from './core/plugin-manager';
 import { ResourceManager } from './core/resource-manager';
+import { Updater } from './services/updater';
 
 export class CLI {
 
@@ -15,6 +16,24 @@ export class CLI {
 
     constructor() {
         Log('NRelay', 'Starting...');
+        Log('NRelay', 'Checking for updates...', LogLevel.Info);
+        Updater.checkVersion().then((needsUpdate) => {
+            if (needsUpdate) {
+                Log('NRelay', 'An update is available. Downloading...');
+                Updater.getLatest().then(() => {
+                    process.exit(0);
+                }).catch((error) => {
+                    Log('NRelay', 'Error while updating: ' + JSON.stringify(error), LogLevel.Error);
+                });
+            } else {
+                this.proceed();
+            }
+        }).catch(() => {
+            Log('NRelay', 'Error while checking for update', LogLevel.Info);
+        });
+    }
+
+    proceed(): void {
         ResourceManager.loadTileInfo();
         PluginManager.loadPlugins();
         const accInfo = Storage.getAccountConfig();
