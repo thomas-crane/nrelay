@@ -33,4 +33,8 @@ Initial
 
  ## `3.2.1`
  ### Fixes:
-  + Fixed error when trying to read the current version number.
+ + Fixed error when trying to read the current version number.
+
+## `3.2.2`
+### Fixes:
+ + Fixed a bug where the updater filepaths wouldn't correctly resolve if the console was not in the nrelay directory.

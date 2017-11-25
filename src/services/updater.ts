@@ -9,6 +9,7 @@ import { Log, LogLevel } from './../core/plugin-module';
 
 const ASSET_ENDPOINT = 'https://static.drips.pw/rotmg/production/#/';
 const PACKET_REGEX = /public static const ([A-Z_]+):int = (\d+);/g;
+const dir = path.dirname(require.main.filename);
 
 export class Updater {
 
@@ -27,15 +28,13 @@ export class Updater {
                         return;
                     }
                     this.latestVersion = raw;
-                    const filename = path.join(__dirname, path.relative(__dirname, '../nrelay/src/services/updater-assets/version.txt'));
+                    const filename = path.join(dir, 'src', 'services', 'updater-assets', 'version.txt');
                     let currentVersion = null;
                     try {
                         currentVersion = fs.readFileSync(filename, { encoding: 'utf8' });
                     } catch {
                         try {
-                            fs.mkdirSync(
-                                path.join(__dirname, path.relative(__dirname, '../nrelay/src/services/updater-assets/'))
-                            );
+                            fs.mkdirSync(path.join(dir, 'src', 'services', 'updater-assets'));
                         } catch (error) {
                             if (error.code !== 'EEXIST') {
                                 reject(error);
@@ -67,7 +66,7 @@ export class Updater {
             }
             const url = ASSET_ENDPOINT.replace('#', 'current');
 
-            const clientPath = path.join(__dirname, path.relative(__dirname, '../nrelay/src/services/updater-assets/client.swf'));
+            const clientPath = path.join(dir, 'src', 'services', 'updater-assets', 'client.swf');
             try {
                 fs.truncateSync(clientPath, 0);
             } catch {
@@ -108,11 +107,11 @@ export class Updater {
         return new Promise((resolve, reject) => {
             const args = [
                 '-jar',
-                ('"' + path.join(__dirname, path.relative(__dirname, '../nrelay/lib/jpexs/ffdec.jar')) + '"'),
+                ('"' + path.join(dir, 'lib', 'jpexs', 'ffdec.jar') + '"'),
                 '-selectclass kabam.rotmg.messaging.impl.GameServerConnection',
                 '-export script',
-                ('"' + path.join(__dirname, path.relative(__dirname, '../nrelay/src/services/updater-assets/decompiled')) + '"'),
-                ('"' + path.join(__dirname, path.relative(__dirname, '../nrelay/src/services/updater-assets/client.swf')) + '"')
+                ('"' + path.join(dir, 'src', 'services', 'updater-assets', 'decompiled') + '"'),
+                ('"' + path.join(dir, 'src', 'services', 'updater-assets', 'client.swf') + '"')
             ];
             exec('java ' + args.join(' '), (error, stdout, stderr) => {
                 if (error) {
@@ -129,13 +128,10 @@ export class Updater {
             let raw = null;
             try {
                 raw = fs.readFileSync(path.join(
-                    __dirname, path.relative(
-                        __dirname,
-                        '../nrelay/src/services/updater-assets/decompiled/scripts/kabam/rotmg/messaging/impl/GameServerConnection.as'
-                    )
-                ), {
-                        encoding: 'utf8'
-                    });
+                    dir,
+                    'src', 'services', 'updater-assets', 'decompiled', 'scripts',
+                    'kabam', 'rotmg', 'messaging', 'impl', 'GameServerConnection.as'
+                ), { encoding: 'utf8' });
             } catch {
                 reject();
                 return;
@@ -155,7 +151,7 @@ export class Updater {
     }
 
     private static updatePackets(newPackets: { [id: string]: number }): void {
-        const filePath = path.join(__dirname, path.relative(__dirname, '../nrelay/src/networking/packet-type.ts'));
+        const filePath = path.join(dir, 'src', 'networking', 'packet-type.ts');
         fs.truncateSync(filePath, 0);
         let raw = 'export enum PacketType {\n';
         const keys = Object.keys(newPackets);
@@ -168,7 +164,7 @@ export class Updater {
     }
 
     private static updateVersion(): void {
-        const filePath = path.join(__dirname, path.relative(__dirname, '../nrelay/src/services/updater-assets/version.txt'));
+        const filePath = path.join(dir, 'src', 'services', 'updater-assets', 'version.txt');
         try {
             fs.truncateSync(filePath, 0);
         } catch {
