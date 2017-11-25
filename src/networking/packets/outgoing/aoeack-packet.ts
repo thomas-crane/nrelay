@@ -3,7 +3,7 @@ import { WorldPosData } from './../../../networking/data/world-pos-data';
 
 export class AoeAckPacket extends Packet {
 
-    public type = PacketType.AoeAck;
+    public type = PacketType.AOEACK;
 
     //#region packet-specific members
     time: number;

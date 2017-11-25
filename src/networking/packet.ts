@@ -1,3 +1,6 @@
+import { PacketType } from './packet-type';
+export * from './packet-type';
+
 export abstract class Packet implements IPacket {
 
     abstract type: PacketType;
@@ -152,36 +155,4 @@ export interface IPacket {
 
     read(): void;
     write(): void;
-}
-
-export enum PacketType {
-    Hello = 41,
-    MapInfo = 67,
-    Load = 97,
-    Failure = 0,
-    CreateSuccess = 21,
-    Update = 5,
-    UpdateAck = 62,
-    AoeAck = 50,
-    ShootAck = 79,
-    Goto = 95,
-    GotoAck = 19,
-    Aoe = 88,
-    NewTick = 68,
-    Ping = 83,
-    Pong = 80,
-    Move = 84,
-    Text = 26,
-    PlayerText = 76,
-    Create = 46,
-    RequestTrade = 36,
-    TradeRequested = 24,
-    TradeStart = 17,
-    ChangeTrade = 7,
-    TradeChanged = 96,
-    AcceptTrade = 91,
-    CancelTrade = 100,
-    TradeDone = 25,
-    TradeAccepted = 6,
-    ServerPlayerShoot = 90
 }

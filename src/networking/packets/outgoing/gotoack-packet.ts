@@ -2,7 +2,7 @@ import { Packet, PacketType } from '../../packet';
 
 export class GotoAckPacket extends Packet {
 
-    public type = PacketType.GotoAck;
+    public type = PacketType.GOTOACK;
 
     //#region packet-specific members
     time: number;

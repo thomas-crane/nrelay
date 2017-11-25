@@ -2,7 +2,7 @@ import { Packet, PacketType } from '../../packet';
 
 export class RequestTradePacket extends Packet {
 
-    public type = PacketType.RequestTrade;
+    public type = PacketType.REQUESTTRADE;
 
     //#region packet-specific members
     name: string;

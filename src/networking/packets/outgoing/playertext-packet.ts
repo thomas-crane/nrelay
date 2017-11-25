@@ -2,7 +2,7 @@ import { Packet, PacketType } from '../../packet';
 
 export class PlayerTextPacket extends Packet {
 
-    public type = PacketType.PlayerText;
+    public type = PacketType.PLAYERTEXT;
 
     //#region packet-specific members
     text: string;

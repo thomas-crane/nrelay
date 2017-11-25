@@ -3,7 +3,7 @@ import { TradeItem } from './../../data/trade-item';
 
 export class TradeStartPacket extends Packet {
 
-    public type = PacketType.TradeStart;
+    public type = PacketType.TRADESTART;
 
     //#region packet-specific members
     clientItems: TradeItem[];

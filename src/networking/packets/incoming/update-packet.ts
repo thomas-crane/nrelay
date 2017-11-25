@@ -4,7 +4,7 @@ import { ObjectData } from '../../data/object-data';
 
 export class UpdatePacket extends Packet {
 
-    public type = PacketType.Update;
+    public type = PacketType.UPDATE;
 
     //#region packet-specific members
     tiles: GroundTileData[];

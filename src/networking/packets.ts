@@ -37,91 +37,91 @@ export class Packets {
         }
         let packet: Packet;
         switch (type) {
-            case PacketType.Hello:
+            case PacketType.HELLO:
                 packet = new HelloPacket(null, bufferSize);
                 break;
-            case PacketType.MapInfo:
+            case PacketType.MAPINFO:
                 packet = new MapInfoPacket(null, bufferSize);
                 break;
-            case PacketType.Load:
+            case PacketType.LOAD:
                 packet = new LoadPacket(null, bufferSize);
                 break;
-            case PacketType.Failure:
+            case PacketType.FAILURE:
                 packet = new FailurePacket(null, bufferSize);
                 break;
-            case PacketType.CreateSuccess:
+            case PacketType.CREATESUCCESS:
                 packet = new CreateSuccessPacket(null, bufferSize);
                 break;
-            case PacketType.Update:
+            case PacketType.UPDATE:
                 packet = new UpdatePacket(null, bufferSize);
                 break;
-            case PacketType.UpdateAck:
+            case PacketType.UPDATEACK:
                 packet = new UpdateAckPacket(null, bufferSize);
                 break;
-            case PacketType.Aoe:
+            case PacketType.AOE:
                 packet = new AoePacket(null, bufferSize);
                 break;
-            case PacketType.AoeAck:
+            case PacketType.AOEACK:
                 packet = new AoeAckPacket(null, bufferSize);
                 break;
-            case PacketType.NewTick:
+            case PacketType.NEWTICK:
                 packet = new NewTickPacket(null, bufferSize);
                 break;
-            case PacketType.Ping:
+            case PacketType.PING:
                 packet = new PingPacket(null, bufferSize);
                 break;
-            case PacketType.Pong:
+            case PacketType.PONG:
                 packet = new PongPacket(null, bufferSize);
                 break;
-            case PacketType.Move:
+            case PacketType.MOVE:
                 packet = new MovePacket(null, bufferSize);
                 break;
-            case PacketType.Goto:
+            case PacketType.GOTO:
                 packet = new GotoPacket(null, bufferSize);
                 break;
-            case PacketType.GotoAck:
+            case PacketType.GOTOACK:
                 packet = new GotoAckPacket(null, bufferSize);
                 break;
-            case PacketType.ShootAck:
+            case PacketType.SHOOTACK:
                 packet = new ShootAckPacket(null, bufferSize);
                 break;
-            case PacketType.Text:
+            case PacketType.TEXT:
                 packet = new TextPacket(null, bufferSize);
                 break;
-            case PacketType.PlayerText:
+            case PacketType.PLAYERTEXT:
                 packet = new PlayerTextPacket(null, bufferSize);
                 break;
-            case PacketType.Create:
+            case PacketType.CREATE:
                 packet = new CreatePacket(null, bufferSize);
                 break;
-            case PacketType.TradeAccepted:
+            case PacketType.TRADEACCEPTED:
                 packet = new TradeAcceptedPacket(null, bufferSize);
                 break;
-            case PacketType.TradeChanged:
+            case PacketType.TRADECHANGED:
                 packet = new TradeChangedPacket(null, bufferSize);
                 break;
-            case PacketType.TradeDone:
+            case PacketType.TRADEDONE:
                 packet = new TradeDonePacket(null, bufferSize);
                 break;
-            case PacketType.TradeRequested:
+            case PacketType.TRADEREQUESTED:
                 packet = new TradeRequestedPacket(null, bufferSize);
                 break;
-            case PacketType.TradeStart:
+            case PacketType.TRADESTART:
                 packet = new TradeStartPacket(null, bufferSize);
                 break;
-            case PacketType.AcceptTrade:
+            case PacketType.ACCEPTTRADE:
                 packet = new AcceptTradePacket(null, bufferSize);
                 break;
-            case PacketType.CancelTrade:
+            case PacketType.CANCELTRADE:
                 packet = new CancelTradePacket(null, bufferSize);
                 break;
-            case PacketType.ChangeTrade:
+            case PacketType.CHANGETRADE:
                 packet = new ChangeTradePacket(null, bufferSize);
                 break;
-            case PacketType.RequestTrade:
+            case PacketType.REQUESTTRADE:
                 packet = new RequestTradePacket(null, bufferSize);
                 break;
-            case PacketType.ServerPlayerShoot:
+            case PacketType.SERVERPLAYERSHOOT:
                 packet = new ServerPlayerShootPacket(null, bufferSize);
                 break;
         }

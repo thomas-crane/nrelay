@@ -2,7 +2,7 @@ import { Packet, PacketType } from '../../packet';
 
 export class MapInfoPacket extends Packet {
 
-    public type = PacketType.MapInfo;
+    public type = PacketType.MAPINFO;
 
     //#region packet-specific members
     width: number;

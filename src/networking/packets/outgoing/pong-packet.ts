@@ -2,7 +2,7 @@ import { Packet, PacketType } from '../../packet';
 
 export class PongPacket extends Packet {
 
-    public type = PacketType.Pong;
+    public type = PacketType.PONG;
 
     //#region packet-specific members
     serial: number;

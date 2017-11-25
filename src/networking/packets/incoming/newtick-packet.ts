@@ -3,7 +3,7 @@ import { ObjectStatusData } from './../../data/object-status-data';
 
 export class NewTickPacket extends Packet {
 
-    public type = PacketType.NewTick;
+    public type = PacketType.NEWTICK;
 
     //#region packet-specific members
     tickId: number;

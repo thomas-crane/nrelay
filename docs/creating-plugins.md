@@ -85,7 +85,7 @@ Similarly to the plugin class itself, nrelay doesn't know about the packet hook 
 @NrPlugin({ name: 'Hello plugin', author: 'tcrane' })
 export default class HelloPlugin {
 
-    @HookPacket(PacketType.Text)
+    @HookPacket(PacketType.TEXT)
     public onTextPacket(client: Client, packet: Packet): void {
 
     }
@@ -101,14 +101,14 @@ import { TextPacket } from './../networking/packets/incoming/text-packet'; // Ad
 ```
 Because the `TextPacket` type is a subclass of the `Packet` type, we can simply specify the parameter's type as the subclass `TextPacket`. This will implicitly cast the packet to a `TextPacket` object.
 ```typescript
-@HookPacket(PacketType.Text)
+@HookPacket(PacketType.TEXT)
 public onTextPacket(client: Client, textPacket: TextPacket): void {
 
 }
 ```
 The text packet properties such as `text` and `name` can now be accessed. In order to check if the packet was a PM for the client, we need to check the `recipient` property
 ```typescript
-@HookPacket(PacketType.Text)
+@HookPacket(PacketType.TEXT)
 public onTextPacket(client: Client, textPacket: TextPacket): void {
 
     if (textPacket.recipent === client.playerData.name) {
@@ -162,7 +162,7 @@ import { PlayerTextPacket } from './../networking/packets/outgoing/playertext-pa
 })
 export default class HelloPlugin {
 
-    @HookPacket(PacketType.Text)
+    @HookPacket(PacketType.TEXT)
     onText(client: Client, textPacket: TextPacket): void {
 
         if (textPacket.recipent === client.playerData.name) {
@@ -205,7 +205,7 @@ export default class HelloPlugin {
 
     private response: string;
 
-    @HookPacket(PacketType.Text)
+    @HookPacket(PacketType.TEXT)
     onText(client: Client, textPacket: TextPacket): void {
         ...
     }
@@ -238,7 +238,7 @@ export default class HelloPlugin {
     private response: string;
     private setRegex = /^set\s+(\S+.*)$/;
 
-    @HookPacket(PacketType.Text)
+    @HookPacket(PacketType.TEXT)
     onText(client: Client, textPacket: TextPacket): void {
         ...
     }
@@ -254,7 +254,7 @@ In short, this regex matches any string which starts with `set` and then has at 
 ```
 Now we can use the regex to detect the command
 ```typescript
-@HookPacket(PacketType.Text)
+@HookPacket(PacketType.TEXT)
 onText(client: Client, textPacket: TextPacket): void {
 
     if (textPacket.recipent === client.playerData.name) {
@@ -286,7 +286,7 @@ export default class HelloPlugin {
         this.respnse = 'Default response';
     }
 
-    @HookPacket(PacketType.Text)
+    @HookPacket(PacketType.TEXT)
     onText(client: Client, textPacket: TextPacket): void {
         ...
     }
@@ -378,7 +378,7 @@ export default class YourPluginName {
 
     }
 
-    @HookPacket(PacketType.Update)
+    @HookPacket(PacketType.UPDATE)
     onUpdate(client: Client, updatePacket: UpdatePacket): void {
 
     }

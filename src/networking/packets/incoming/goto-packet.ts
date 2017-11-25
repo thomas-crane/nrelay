@@ -3,7 +3,7 @@ import { WorldPosData } from './../../../networking/data/world-pos-data';
 
 export class GotoPacket extends Packet {
 
-    public type = PacketType.Goto;
+    public type = PacketType.GOTO;
 
     //#region packet-specific members
     objectId: number;

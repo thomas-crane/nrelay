@@ -2,7 +2,7 @@ import { Packet, PacketType } from '../../packet';
 
 export class FailurePacket extends Packet {
 
-    public type = PacketType.Failure;
+    public type = PacketType.FAILURE;
 
     //#region packet-specific members
     errorId: number;

@@ -2,7 +2,7 @@ import { Packet, PacketType } from '../../packet';
 
 export class CreateSuccessPacket extends Packet {
 
-    public type = PacketType.CreateSuccess;
+    public type = PacketType.CREATESUCCESS;
 
     //#region packet-specific members
     objectId: number;

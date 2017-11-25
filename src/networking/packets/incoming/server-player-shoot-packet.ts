@@ -3,7 +3,7 @@ import { WorldPosData } from './../../../networking/data/world-pos-data';
 
 export class ServerPlayerShootPacket extends Packet {
 
-    public type = PacketType.ServerPlayerShoot;
+    public type = PacketType.SERVERPLAYERSHOOT;
 
     //#region packet-specific members
     bulletId: number;

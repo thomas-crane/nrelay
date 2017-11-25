@@ -2,7 +2,7 @@ import { Packet, PacketType } from '../../packet';
 
 export class LoadPacket extends Packet {
 
-    public type = PacketType.Load;
+    public type = PacketType.LOAD;
 
     //#region packet-specific members
     charId: number;

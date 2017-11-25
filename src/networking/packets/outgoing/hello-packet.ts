@@ -3,7 +3,7 @@ import { encryptGUID } from '../../../crypto/guid-encrypt';
 
 export class HelloPacket extends Packet {
 
-    public type = PacketType.Hello;
+    public type = PacketType.HELLO;
 
     //#region packet-specific members
     buildVersion: string;

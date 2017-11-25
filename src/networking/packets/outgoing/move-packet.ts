@@ -4,7 +4,7 @@ import { MoveRecord } from './../../data/move-record';
 
 export class MovePacket extends Packet {
 
-    public type = PacketType.Move;
+    public type = PacketType.MOVE;
 
     //#region packet-specific members
     tickId: number;

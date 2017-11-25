@@ -2,7 +2,7 @@ import { Packet, PacketType } from '../../packet';
 
 export class CancelTradePacket extends Packet {
 
-    public type = PacketType.CancelTrade;
+    public type = PacketType.CANCELTRADE;
 
     //#region packet-specific members
     objectId: number;

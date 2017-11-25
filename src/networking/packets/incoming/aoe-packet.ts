@@ -3,7 +3,7 @@ import { WorldPosData } from '../../data/world-pos-data';
 
 export class AoePacket extends Packet {
 
-    public type = PacketType.Aoe;
+    public type = PacketType.AOE;
 
     //#region packet-specific members
     pos: WorldPosData;
