@@ -16,3 +16,9 @@ Initial
 > Not backwards compatible.
 ### Changes:
  + Changed the `PacketType` enum to use all uppercase packet names instead of pascal case. This is to make the update process easier. This change is not backwards compatible with plugins written for `2.x.x` if the plugin uses any values from the `PacketType` enum.
+
+## `3.1.0`
+### Changes:
+ + Added new gulp tasks:
+    + `gulp watch` rebuilds the source any time a `.ts` file changes.
+    + `gulp clean` deletes the updater assets which are not needed.
