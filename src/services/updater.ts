@@ -67,6 +67,9 @@ export class Updater {
             const url = ASSET_ENDPOINT.replace('#', 'current');
 
             const clientPath = path.join(dir, 'src', 'services', 'updater-assets', 'client.swf');
+            if (!fs.existsSync(path.join(dir, 'resources'))) {
+                fs.mkdirSync(path.join(dir, 'resources'));
+            }
             const groundTypesPath = path.join(dir, 'resources', 'GroundTypes.xml');
             const objectsPath = path.join(dir, 'resources', 'Objects.xml');
 

@@ -48,3 +48,7 @@ Initial
 ### Changes:
  + Added `ReconnectPacket` and `UsePortalPacket`.
  + Added reconnect packet hook on `Client`.
+
+## `3.4.1`
+### Fixes:
+ + Fixed a bug where updating would fail if the `resources` folder didn't exist.
