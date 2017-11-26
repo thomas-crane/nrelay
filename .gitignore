@@ -13,3 +13,4 @@ acc-config.json
 
 # Updater assets
 src/services/updater-assets/*
+resources/*

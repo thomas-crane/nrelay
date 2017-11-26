@@ -38,3 +38,8 @@ Initial
 ## `3.2.2`
 ### Fixes:
  + Fixed a bug where the updater filepaths wouldn't correctly resolve if the console was not in the nrelay directory.
+
+## `3.3.0`
+## Changes:
+ + Added `Objects.xml` and `GrounTypes.xml` to updater.
+ + Added `resources/` to `.gitignore`. Manually change your version to force an update which will download the latest xml resources.
