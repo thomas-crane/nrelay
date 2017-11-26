@@ -4,7 +4,7 @@ var runSequence = require('run-sequence');
 var tsProject = ts.createProject('tsconfig.json');
 
 gulp.task('default', function (callback) {
-    return runSequence('ts', 'copy-files', function (error) {
+    return runSequence('ts', function (error) {
         if (error) {
             console.error(error);
         }
