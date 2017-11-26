@@ -27,6 +27,7 @@ import { CancelTradePacket } from './packets/outgoing/cancel-trade-packet';
 import { ChangeTradePacket } from './packets/outgoing/change-trade-packet';
 import { RequestTradePacket } from './packets/outgoing/request-trade-packet';
 import { ServerPlayerShootPacket } from './packets/incoming/server-player-shoot-packet';
+import { ReconnectPacket } from './../networking/packets/incoming/reconnect-packet';
 
 import { PacketType, Packet } from './packet';
 
@@ -123,6 +124,9 @@ export class Packets {
                 break;
             case PacketType.SERVERPLAYERSHOOT:
                 packet = new ServerPlayerShootPacket(null, bufferSize);
+                break;
+            case PacketType.RECONNECT:
+                packet = new ReconnectPacket(null, bufferSize);
                 break;
         }
         packet.type = type;
