@@ -27,6 +27,7 @@ import { HookPacket } from './../decorators/hook-packet';
 import { Classes } from './../models/classes';
 import { GotoPacket } from './../networking/packets/incoming/goto-packet';
 import { GotoAckPacket } from './../networking/packets/outgoing/gotoack-packet';
+import { ReconnectPacket } from './../networking/packets/incoming/reconnect-packet';
 
 const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
@@ -52,7 +53,14 @@ export class Client {
     private clientSocket: Socket;
     private moveMultiplier: number;
 
+    private key: Int8Array;
+    private keyTime: number;
+    private gameId: number;
+
     constructor(server: IServer, buildVersion: string, accInfo?: IAccount) {
+        this.key = new Int8Array(0);
+        this.keyTime = -1;
+        this.gameId = -2;
         this.playerData = getDefaultPlayerData();
         this.playerData.server = server.name;
         this.nextPos = null;
@@ -119,6 +127,16 @@ export class Client {
         }
     }
 
+    @HookPacket(PacketType.Reconnect)
+    private onReconnectPacket(client: Client, reconnectPacket: ReconnectPacket): void {
+        this.serverIp = reconnectPacket.host;
+        this.gameId = reconnectPacket.gameId;
+        this.key = reconnectPacket.key;
+        this.keyTime = reconnectPacket.keyTime;
+        Log('Client', 'Reconnect packet!');
+        this.connect();
+    }
+
     @HookPacket(PacketType.Goto)
     private onGotoPacket(client: Client, gotoPacket: GotoPacket): void {
         const ack = new GotoAckPacket();
@@ -129,6 +147,7 @@ export class Client {
 
     @HookPacket(PacketType.Failure)
     private onFailurePacket(client: Client, failurePacket: FailurePacket): void {
+        this.playerData = getDefaultPlayerData();
         this.clientSocket.end();
         Log(this.censoredGuid, 'Received failure: "' + failurePacket.errorDescription + '"', LogLevel.Error);
     }
@@ -181,20 +200,20 @@ export class Client {
         this.connectTime = Date.now();
         this.lastTickTime = 0;
         this.currentTickTime = 0;
-        this.sendHello(-2, -1, new Int8Array(0));
+        this.sendHello();
     }
 
-    private sendHello(gameId: number, keyTime: number, key: Int8Array): void {
+    private sendHello(): void {
         const hp: HelloPacket = new HelloPacket();
         hp.buildVersion = this.buildVersion;
-        hp.gameId = gameId;
+        hp.gameId = this.gameId;
         hp.guid = this.guid;
         hp.password = this.password;
         hp.random1 = Math.floor(Math.random() * 1000000000);
         hp.random2 = Math.floor(Math.random() * 1000000000);
         hp.secret = '';
-        hp.keyTime = keyTime;
-        hp.key = key;
+        hp.keyTime = this.keyTime;
+        hp.key = this.key;
         hp.mapJSON = '';
         hp.entryTag = '';
         hp.gameNet = '';
