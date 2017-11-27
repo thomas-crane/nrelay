@@ -42,6 +42,7 @@ export class Client {
     public mapInfo: { width: number, height: number, name: string };
     public charInfo: { charId: number, nextCharId: number, maxNumChars: number };
 
+    private nexusServerIp: string;
     private serverIp: string;
     private lastTickTime: number;
     private currentTickTime: number;
@@ -82,6 +83,7 @@ export class Client {
             this.charInfo = { charId: 0, nextCharId: 1, maxNumChars: 1 };
         }
         this.serverIp = server.address;
+        this.nexusServerIp = server.address;
         Log('Client', 'Starting connection to ' + server.name, LogLevel.Info);
         this.connect();
     }
@@ -133,7 +135,6 @@ export class Client {
         this.gameId = reconnectPacket.gameId;
         this.key = reconnectPacket.key;
         this.keyTime = reconnectPacket.keyTime;
-        Log('Client', 'Reconnect packet!');
         this.connect();
     }
 
@@ -148,6 +149,10 @@ export class Client {
     @HookPacket(PacketType.Failure)
     private onFailurePacket(client: Client, failurePacket: FailurePacket): void {
         this.playerData = getDefaultPlayerData();
+        this.key = new Int8Array(0);
+        this.keyTime = -1;
+        this.gameId = -2;
+        this.serverIp = this.nexusServerIp;
         this.clientSocket.end();
         Log(this.censoredGuid, 'Received failure: "' + failurePacket.errorDescription + '"', LogLevel.Error);
     }

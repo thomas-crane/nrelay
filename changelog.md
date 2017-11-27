@@ -13,7 +13,12 @@ Initial
  + Added `gulp` to automate builds and add extra functionality such as copying files.
 
 ## `2.2.0`
-## Changes"
+### Changes:
  + Added `ReconnectPacket` and `UsePortalPacket`.
  + Modified `Client` to respond to `ReconnectPackets` correctly.
  + Added player data reset on failure packet to reset state.
+
+## `2.2.1`
+### Fixes:
+ + Fixed player key state not being reset when a failure packet is received.
+ + Fixed player trying to reconnect to wrong server ip when a failure packet is received.
