@@ -1,5 +1,9 @@
 # Changelog
 
+## `3.5.1`
+### Fixes:
+ + Updated packet ids and docs to X20.0.0
+
 ## `3.5.0`
 ### Changes:
  + Added `enemy-shoot-packet.ts` and relevant packet handler to client.
