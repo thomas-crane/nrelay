@@ -28,6 +28,10 @@ import { Classes } from './../models/classes';
 import { GotoPacket } from './../networking/packets/incoming/goto-packet';
 import { GotoAckPacket } from './../networking/packets/outgoing/gotoack-packet';
 import { ReconnectPacket } from './../networking/packets/incoming/reconnect-packet';
+import { AoePacket } from './../networking/packets/incoming/aoe-packet';
+import { AoeAckPacket } from './../networking/packets/outgoing/aoeack-packet';
+import { EnemyShootPacket } from './../networking/packets/incoming/enemy-shoot-packet';
+import { ShootAckPacket } from './../networking/packets/outgoing/shootack-packet';
 
 const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
@@ -42,6 +46,7 @@ export class Client {
     public mapInfo: { width: number, height: number, name: string };
     public charInfo: { charId: number, nextCharId: number, maxNumChars: number };
 
+    private nexusServerIp: string;
     private serverIp: string;
     private lastTickTime: number;
     private currentTickTime: number;
@@ -83,6 +88,7 @@ export class Client {
             this.charInfo = { charId: 0, nextCharId: 1, maxNumChars: 1 };
         }
         this.serverIp = server.address;
+        this.nexusServerIp = server.address;
         Log('Client', 'Starting connection to ' + server.name, LogLevel.Info);
         this.connect();
     }
@@ -148,8 +154,22 @@ export class Client {
     @HookPacket(PacketType.FAILURE)
     private onFailurePacket(client: Client, failurePacket: FailurePacket): void {
         this.playerData = getDefaultPlayerData();
+        this.gameId = -2;
+        this.keyTime = -1;
+        this.key = new Int8Array(0);
+        this.serverIp = this.nexusServerIp;
         this.clientSocket.end();
         Log(this.censoredGuid, 'Received failure: "' + failurePacket.errorDescription + '"', LogLevel.Error);
+    }
+
+    @HookPacket(PacketType.AOE)
+    private onAoe(client: Client, aoePacket: AoePacket): void {
+        const aoeAck = new AoeAckPacket();
+        aoeAck.time = this.getTime();
+        aoeAck.position = new WorldPosData();
+        aoeAck.position.x = this.playerData.worldPos.x;
+        aoeAck.position.y = this.playerData.worldPos.y;
+        this.packetio.sendPacket(aoeAck);
     }
 
     @HookPacket(PacketType.NEWTICK)
@@ -181,6 +201,13 @@ export class Client {
         pongPacket.serial = pingPacket.serial;
         pongPacket.time = client.getTime();
         client.packetio.sendPacket(pongPacket);
+    }
+
+    @HookPacket(PacketType.ENEMYSHOOT)
+    private onEnemyShoot(client: Client, enemyShootPacket: EnemyShootPacket): void {
+        const shootAck = new ShootAckPacket();
+        shootAck.time = this.getTime();
+        this.packetio.sendPacket(shootAck);
     }
 
     @HookPacket(PacketType.CREATESUCCESS)
