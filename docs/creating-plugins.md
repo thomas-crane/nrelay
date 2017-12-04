@@ -40,7 +40,7 @@ export default class HelloPlugin {
 ```
 This is the bare essentials for a plugin. You can verify that nrelay recognizes this plugin by building the source and running nrelay
 ```bash
-C:\Documents\nrelay>tsc
+C:\Documents\nrelay>gulp
 C:\Documents\nrelay>nrelay
 [NRelay] Starting...
 [PluginManager] Loaded Hello Plugin by tcrane
@@ -181,7 +181,7 @@ export default class HelloPlugin {
 ```
 To test the plugin, first compile the TypeScript using the command
 ```bash
-tsc
+gulp
 ```
 Then run nrelay using
 ```bash
@@ -223,7 +223,7 @@ if (textPacket.text === 'hello') {
 ```
 Notice that the keyword `this` is used to access the variable. Any variables declared within the scope of the class should be accessed with `this`.
 
-Now we need to add an if statement to detect a new keyword to change the response message. However this time we also need to detect the command's argument, which is the new reposnse message. A simple way to do this is to use regex.
+Now we need to add an if statement to detect a new keyword to change the response message. However this time we also need to detect the command's argument, which is the new response message. A simple way to do this is to use regex.
 
 Regex won't be explained in a lot of detail here, but [regexr.com](https://regexr.com/) is a great resource to learn and create regex.
 
@@ -296,7 +296,7 @@ Now that `reponse` has a default value, we can test the plugin.
 
 To test the command, rebuild and run nrelay
 ```bash
-tsc
+gulp
 ```
 ```bash
 nrelay
@@ -322,12 +322,12 @@ console.log('Player name: ' + client.playerData.name);
 The `Logger` class allows you to log messages with senders and log levels.
 Firstly, you need to import the `Logger` class exports
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client, Log, SeverityLevel } from './../core/plugin-module';
-//                                                         ^^^^^^^^^^^^^^^^^^
+import { NrPlugin, HookPacket, Packet, PacketType, Client, Log, LogLevel } from './../core/plugin-module';
+//                                                         ^^^^^^^^^^^^^
 ```
-`SeverityLevel` is an enum which describes the type of message you are trying to log. It consists of
+`LogLevel` is an enum which describes the type of message you are trying to log. It consists of
 ```typescript
-enum SeverityLevel {
+enum LogLevel {
     Info,
     Message,
     Warning,
@@ -344,7 +344,7 @@ Log('MyPlugin', 'Player name: ' + client.playerData.name);
 // [MyPlugin] Player name: Eendi
 //
 ```
-The severity level can be provided as a third argument to change the color of the message.
+The log level can be provided as a third argument to change the color of the message.
 ```
    Info = Dark gray
 Message = White
@@ -357,7 +357,7 @@ For example:
 try {
     this.methodThatThrowsError();
 } catch (error) {
-   Log('MyPlugin', 'Error: ' + error.Message, SeverityLevel.Error); 
+   Log('MyPlugin', 'Error: ' + error.Message, LogLevel.Error); 
 }
 ```
 Will print the error message in red.
