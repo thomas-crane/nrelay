@@ -29,7 +29,8 @@ export class CLI {
                 this.proceed();
             }
         }).catch(() => {
-            Log('NRelay', 'Error while checking for update', LogLevel.Info);
+            Log('NRelay', 'Error while checking for update, starting anyway.', LogLevel.Info);
+            this.proceed();
         });
     }
 
