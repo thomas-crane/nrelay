@@ -180,18 +180,12 @@ export class Client {
         const movePacket = Packets.create(PacketType.MOVE) as MovePacket;
         movePacket.tickId = newTickPacket.tickId;
         movePacket.time = client.getTime();
-        movePacket.newPosition = client.playerData.worldPos;
         if (this.nextPos) {
-            movePacket.newPosition = this.moveTo(this.nextPos);
+            this.moveTo(this.nextPos);
         }
+        movePacket.newPosition = client.playerData.worldPos;
         movePacket.records = [];
         client.packetio.sendPacket(movePacket);
-
-        for (let i = 0; i < newTickPacket.statuses.length; i++) {
-            if (newTickPacket.statuses[i].objectId === this.playerData.objectId) {
-                this.playerData.worldPos = newTickPacket.statuses[i].pos;
-            }
-        }
     }
 
     @HookPacket(PacketType.PING)
@@ -288,18 +282,18 @@ export class Client {
         this.clientSocket.on('close', this.onClose.bind(this));
     }
 
-    private moveTo(target: WorldPosData): WorldPosData {
-        let newPos = new WorldPosData();
+    private moveTo(target: WorldPosData): void {
+        const newPos = new WorldPosData();
         const step = this.getSpeed();
         if (this.playerData.worldPos.squareDistanceTo(target) > step ** 2) {
             const angle: number = Math.atan2(target.y - this.playerData.worldPos.y, target.x - this.playerData.worldPos.x);
-            newPos.x = this.playerData.worldPos.x + Math.cos(angle) * step;
-            newPos.y = this.playerData.worldPos.y + Math.sin(angle) * step;
+            this.playerData.worldPos.x += Math.cos(angle) * step;
+            this.playerData.worldPos.y += Math.sin(angle) * step;
         } else {
-            newPos = target;
+            this.playerData.worldPos.x = target.x;
+            this.playerData.worldPos.y = target.y;
             this.nextPos = null;
         }
-        return newPos;
     }
 
     private getSpeed(): number {
@@ -313,18 +307,10 @@ export class Client {
         }
         let tickTime = this.currentTickTime - this.lastTickTime;
 
-        // abnormally high or low tick times tend to cause disconnects
-        // if the player attempts to move. Until this bug can be fixed
-        // just return a speed of 0 to prevent movement.
-        if (tickTime > 220 || tickTime < 180) {
-            return 0;
-        }
         if (tickTime > 200) {
             tickTime = 200;
         }
-        // only going 50% of the potential speed reduces disconnects
-        // while moving from frequent to almost never. This is another
-        // bug that needs to be fixed, but for now just reduce the move speed.
-        return (speed * multiplier * tickTime * 0.75);
+
+        return (speed * multiplier * tickTime);
     }
 }
