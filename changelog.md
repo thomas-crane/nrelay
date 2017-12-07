@@ -1,5 +1,9 @@
 # Changelog
 
+## `3.5.3`
+### Fixes:
+ + Updated packet ids and docs to X20.0.1
+
 ## `3.5.2`
 ### Fixes:
  + Fixed a bug which prevented the player from moving at 100% of their potential speed.
