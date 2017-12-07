@@ -258,14 +258,14 @@ Now we can use the regex to detect the command
 onText(client: Client, textPacket: TextPacket): void {
 
     if (textPacket.recipent === client.playerData.name) {
-        ....
-    }
-    const match = this.setRegex.match(textPacket.text);
-    if (match) {
-        this.reponse = match[1];
-        const reply = new PlayerTextPacket();
-        reply.text = '/tell ' + textPacket.name + ' set response to ' + this.response;
-        client.packetio.sendPacket(reply);
+        const match = this.setRegex.match(textPacket.text);
+        if (match) {
+            this.reponse = match[1];
+            const reply = new PlayerTextPacket();
+            reply.text = '/tell ' + textPacket.name + ' set response to ' + this.response;
+            client.packetio.sendPacket(reply);
+        }
+        ...
     }
 }
 ```

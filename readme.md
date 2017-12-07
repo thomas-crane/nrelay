@@ -24,31 +24,26 @@ cd nrelay
 npm install
 ```
 
-4. Install typescript globally
-```bash
-npm install -g typescript
-```
-
-5. Install gulp
+4. Install gulp
 ```bash
 npm install -g gulp-cli
 ```
 
-6. Run the build task to compile the source into JavaScript. This will produce a folder called `dist/`
+5. Run the build task to compile the source into JavaScript. This will produce a folder called `dist/`
 ```bash
 gulp
 ```
 
 __Note__
 
-Step 7 and 8 are optional, but not performing them will restrict how you can run nrelay. See the [Run](#Run) section for more info.
+Step 6 and 7 are optional, but not performing them will restrict how you can run nrelay. See the [Run](#Run) section for more info.
 
-7. Install nrelay as an npm module. This will let you use nrelay from any directory in the console.
+6. Install nrelay as an npm module. This will let you use nrelay from any directory in the console.
 ```bash
 npm install -g
 ```
 
-8. Link the installed module to this folder to automatically update the module when any code changes happen.
+7. Link the installed module to this folder to automatically update the module when any code changes happen.
 ```bash
 npm link
 ```
