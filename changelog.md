@@ -1,5 +1,10 @@
 # Changelog
 
+## `4.0.0`
+> Not backwards compatible.
+### Changes:
+ + Fixed typo in `TextPacket` property `recipient` (was `recipent`). This change is not backwards compatible with plugins written for `3.x.x` if the plugin uses the `recipent` property of the `TextPacket` class.
+
 ## `3.5.3`
 ### Fixes:
  + Updated packet ids and docs to X20.0.1

@@ -111,7 +111,7 @@ The text packet properties such as `text` and `name` can now be accessed. In ord
 @HookPacket(PacketType.TEXT)
 public onTextPacket(client: Client, textPacket: TextPacket): void {
 
-    if (textPacket.recipent === client.playerData.name) {
+    if (textPacket.recipient === client.playerData.name) {
         // text packet was a private message to the client.
     } else {
         // text packet was not a private message.
@@ -120,7 +120,7 @@ public onTextPacket(client: Client, textPacket: TextPacket): void {
 ```
 Now we just need to check if the message was 'hello'
 ```typescript
-if (textPacket.recipent === client.playerData.name) {
+if (textPacket.recipient === client.playerData.name) {
     if (textPacket.text === 'hello') {
         // send a reply!
     }
@@ -135,7 +135,7 @@ import { PlayerTextPacket } from './../networking/packets/outgoing/playertext-pa
 ```
 Now all that is left to do is create a new `PlayerTextPacket`, set the text and then send it.
 ```typescript
-if (textPacket.recipent === client.playerData.name) {
+if (textPacket.recipient === client.playerData.name) {
     
     if (textPacket.text === 'hello') {
         // Create the packet.
@@ -165,7 +165,7 @@ export default class HelloPlugin {
     @HookPacket(PacketType.TEXT)
     onText(client: Client, textPacket: TextPacket): void {
 
-        if (textPacket.recipent === client.playerData.name) {
+        if (textPacket.recipient === client.playerData.name) {
 
             if (textPacket.text === 'hello') {
 
@@ -257,7 +257,7 @@ Now we can use the regex to detect the command
 @HookPacket(PacketType.TEXT)
 onText(client: Client, textPacket: TextPacket): void {
 
-    if (textPacket.recipent === client.playerData.name) {
+    if (textPacket.recipient === client.playerData.name) {
         const match = this.setRegex.match(textPacket.text);
         if (match) {
             this.reponse = match[1];

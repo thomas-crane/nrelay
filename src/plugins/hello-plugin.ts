@@ -24,7 +24,7 @@ export default class HelloPlugin {
     onText(client: Client, textPacket: TextPacket): void {
 
         // Check that the text packet was for the client.
-        if (textPacket.recipent === client.playerData.name) {
+        if (textPacket.recipient === client.playerData.name) {
 
             // Check that the message was 'hello'
             if (textPacket.text === 'hello') {

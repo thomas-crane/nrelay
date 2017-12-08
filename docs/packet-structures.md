@@ -186,7 +186,7 @@ The number of stars of the person who sent the chat message.
 #### `bubbleTime: number`
 The length of time to display the chat bubble for.
 
-#### `recipent: string`
+#### `recipient: string`
 The recipient of the chat message. This is only used if the message is a private message.
 
 #### `text: string`

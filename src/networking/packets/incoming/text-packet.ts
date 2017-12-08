@@ -9,7 +9,7 @@ export class TextPacket extends Packet {
     objectId: number;
     numStars: number;
     bubbleTime: number;
-    recipent: string;
+    recipient: string;
     text: string;
     cleanText: string;
     //#endregion
@@ -19,7 +19,7 @@ export class TextPacket extends Packet {
         this.objectId = this.readInt32();
         this.numStars = this.readInt32();
         this.bubbleTime = this.readUnsignedByte();
-        this.recipent = this.readString();
+        this.recipient = this.readString();
         this.text = this.readString();
         this.cleanText = this.readString();
     }
@@ -29,7 +29,7 @@ export class TextPacket extends Packet {
         this.writeInt32(this.objectId);
         this.writeInt32(this.numStars);
         this.writeUnsigedByte(this.bubbleTime);
-        this.writeString(this.recipent);
+        this.writeString(this.recipient);
         this.writeString(this.text);
         this.writeString(this.cleanText);
     }
