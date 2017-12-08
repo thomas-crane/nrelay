@@ -1,4 +1,5 @@
 # Changelog
+This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
 ## `4.0.0`
 > Not backwards compatible.
