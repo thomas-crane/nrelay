@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `4.0.1`
+### Fixes:
+ + Properly implemented write method for `EnemyShootPacket` class.
+
 ## `4.0.0`
 > Not backwards compatible.
 ### Changes:

@@ -40,6 +40,11 @@ export class EnemyShootPacket extends Packet {
         this.startingPos.write(this);
         this.writeFloat(this.angle);
         this.writeShort(this.damage);
-        // TODO numshots, angleInc.
+        if (this.numShots !== 1) {
+            this.writeUnsigedByte(this.numShots);
+        }
+        if (this.angleInc !== 0) {
+            this.writeFloat(this.angleInc);
+        }
     }
 }
