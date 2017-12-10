@@ -1,15 +1,17 @@
-# Object Structures
+# Packet Structures
 This document outlines the structure of all packets which are available. All structures in this document are subclasses of the `Packet` class. Documentation for the `Packet` class is in the `object-structures` document.
 
 ## Table of Contents
 ### Incoming
  + [Aoe Packet](#aoepacket)
  + [Create Success Packet](#createsuccesspacket)
+ + [Enemy Shoot Packet](#enemyshootpacket)
  + [Failure Packet](#failurepacket)
  + [Goto Packet](#gotopacket)
  + [Map Info Packet](#mapinfopacket)
  + [New Tick Packet](#newtickpacket)
  + [Ping Packet](#pingpacket)
+ + [Reconnect Packet](#reconnectpacket)
  + [Server Player Shoot Packet](#serverplayershootpacket)
  + [Text Packet](#textpacket)
  + [Trade Accepted Packet](#tradeacceptedpacket)
@@ -33,6 +35,7 @@ This document outlines the structure of all packets which are available. All str
  + [Request Trade Packet](#requesttradepacket)
  + [Shoot Ack Packet](#shootackpacket)
  + [Update Ack Packet](#updateackpacket)
+ + [Use Portal Packet](#useportalpacket)
 ### Data Structures
  + [Ground Tile Data](#groundtiledata)
  + [Move Record](#moverecord)
@@ -42,7 +45,7 @@ This document outlines the structure of all packets which are available. All str
  + [Trade Item](#tradeitem)
  + [World Pos Data](#worldposdata)
 
-## Incoming
+# Incoming
 ## AoePacket
 Received when an aoe bullet is fired.
 ### Members
@@ -76,6 +79,33 @@ The objectId of the connected player.
 
 #### `charId: number`
 The characterId of the connected player.
+
+## EnemyShootPacket
+Received when a visible enemy shoots a projectile.
+### Members
+#### `bulletId: number`
+A unique identifer for the projectile.
+
+#### `ownerId: number`
+The object id of the enemy who fired the projectile.
+
+#### `bulletType: number`
+The type of the projectile. The bullet type can be used to find the projectile in the `Objects.xml` resource.
+
+#### `startingPos: WorldPosData`
+The position at which the projectile was fired.
+
+#### `angle: number`
+The angle at which the projectile was fired.
+
+#### `damage: number`
+The damage the projectile will deal to the player.
+
+#### `numShots: number`
+> Unknown. Probably the number of shots which are fired.
+
+#### `angleInc: number`
+> Unknown. Probably either the increase to `angle` over time or the increment between shots with regards to `numShots`.
 
 ## FailurePacket
 Received when the client is deliberately disconnected.
@@ -149,6 +179,30 @@ Received by the server occasionally.
 ### Members
 #### `serial: number`
 A unique number which is used in the reply to this packet.
+
+## ReconnectPacket
+Sent to prompt the client to reconnect to a different host.
+### Members
+#### `name: string`
+The name of the host to reconnect to.
+
+#### `host: string`
+The IP of the host to reconnect to.
+
+#### `port: number`
+The port of the host to reconnect to.
+
+#### `gameId: number`
+The unique id of the host to reconnect to.
+
+#### `keyTime: number`
+The length of time which the host will be available to connect to for. If this is negative then the host will not expire.
+
+#### `key: Int8Array`
+> Unknown.
+
+#### `isFromArena: boolean`
+Whether or not the client is reconnecting from the arena.
 
 ## ServerPlayerShootPacket
 Received when another player shoots.
@@ -255,7 +309,7 @@ An array of [ObjectData](#objectdata) objects which describe the current objects
 #### `drops: number[]`
 An array of numbers which are objectIds of [ObjectData](#objectdata) objects which have gone out of view of the player.
 
-## Outgoing
+# Outgoing
 ## AcceptTradePacket
 Sent to accept the active trade.
 ### Members
@@ -394,7 +448,7 @@ Sent to request a trade.
 The name of the player to request a trade with.
 
 ## ShootAckPacket
-Sent to acknowledge a `ServerPlayerShootPacket`.
+Sent to acknowledge an `EnemyShootPacket`.
 ### Members
 #### `time: number`
 The current client time.
@@ -404,7 +458,13 @@ Sent to acknowledge an `UpdatePacket`.
 ### Members
 This packet has no members.
 
-## Data Structures
+## UsePortalPacket
+Sent to use a portal.
+### Members
+#### `objectId: number`
+The object id of the portal to use.
+
+# Data Structures
 ## GroundTileData
 ### Members
 #### `x: number`
