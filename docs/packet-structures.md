@@ -11,16 +11,34 @@ This document outlines the structure of all packets which are available. All str
     + [Evolved Pet Message](#evolvedpetmessage)
     + [Hatch Pet Message](#hatchpetmessage)
  + [Account List Packet](#accountlistpacket)
+ + [Ally Shoot Packet](#allyshootpacket)
  + [Aoe Packet](#aoepacket)
+ + [Buy Result Packet](#buyresultpacket)
+ + [Client Stat Packet](#clientstatpacket)
  + [Create Success Packet](#createsuccesspacket)
+ + [Damage Packet](#damagepacket)
+ + [Death Packet](#deathpacket)
  + [Enemy Shoot Packet](#enemyshootpacket)
  + [Failure Packet](#failurepacket)
+ + [Global Notification Packet](#globalnotificationpacket)
  + [Goto Packet](#gotopacket)
+ + [Guild Result Packet](#guildresultpacket)
+ + [Inv Result Packet](#invresultpacket)
+ + [Invited To Guild Packet](#invitedtoguildpacket)
+ + [Key Info Response Packet](#keyinforesponsepacket)
  + [Map Info Packet](#mapinfopacket)
+ + [Name Result Packet](#nameresultpacket)
+ + [New Ability Packet](#newabilitypacket)
  + [New Tick Packet](#newtickpacket)
+ + [Notification Packet](#notificationpacket)
+ + [Password Prompt Packet](#passwordpromptpacket)
  + [Ping Packet](#pingpacket)
+ + [Quest ObjectId Packet](#questobjectidpacket)
+ + [Quest Redeem Response Packet](#questredeemresponsepacket)
  + [Reconnect Packet](#reconnectpacket)
+ + [Reskin Unlock Packet](#reskinunlockpacket)
  + [Server Player Shoot Packet](#serverplayershootpacket)
+ + [Show Effect Packet](#showeffectpacket)
  + [Text Packet](#textpacket)
  + [Trade Accepted Packet](#tradeacceptedpacket)
  + [Trade Changed Packet](#tradechangedpacket)
@@ -28,6 +46,7 @@ This document outlines the structure of all packets which are available. All str
  + [Trade Requested Packet](#traderequestedpacket)
  + [Trade Start Packet](#tradettartpacket)
  + [Update Packet](#updatepacket)
+ + [Verify Email Packet](#verifyemailpacket)
 ### Outgoing
  + [Accept Trade Packet](#accepttradepacket)
  + [Aoe Ack Packet](#aoeackpacket)
@@ -96,6 +115,33 @@ The name of the hatched pet.
 #### `petSkin: number`
 The id of the pets skin.
 
+## AccountListPacket
+> Unknown.
+### Members
+#### `accountListId: number`
+The id of the account list.
+
+#### `accountIds: string[]`
+The account ids associated with this account list.
+
+#### `lockAction: number`
+> Unknown.
+
+## AllyShootPacket
+Received when another player shoots a projectile.
+### Members
+#### `bulletId: number`
+A unique identifer for the projectile.
+
+#### `ownerId: number`
+The object id of the player who fired the projectile.
+
+#### `containerType: number`
+> Unknown.
+
+#### `angle: number`
+The angle at which the projectile was fired at.
+
 ## AoePacket
 Received when an aoe bullet is fired.
 ### Members
@@ -121,6 +167,24 @@ The duration of the aoe effect.
 The color of the aoe particle.
 > The encoding is unknown.
 
+## BuyResult
+Received in response to a `BuyPacket`.
+### Members
+#### `result: number`
+The code of the result.
+
+#### `resultString: string`
+A string version of the result.
+
+## ClientStatPacket
+Received to give the player information about their stats.
+### Members
+#### `name: string`
+The name of the stat which the information is for.
+
+#### `value: number`
+The value of the stat.
+
 ## CreateSuccessPacket
 Received in response to the `Create` packet.
 ### Members
@@ -129,6 +193,48 @@ The objectId of the connected player.
 
 #### `charId: number`
 The characterId of the connected player.
+
+## DamagePacket
+Received when the player takes damage.
+### Members
+#### `targetId: number`
+> Unknown. Probably the object id of the target of the damage.
+
+#### `effects: number[]`
+An array of status effects which are applied along with the damage.
+
+#### `damageAmount: number`
+The amount of damage taken.
+
+#### `kill: boolean`
+Whether or not the damage will kill the player.
+
+#### `bulletId: number`
+The bullet id of the projectile which caused the damage.
+
+#### `objectId: number`
+> Unknown. Probably the object id of the enemy which fired the projectile.
+
+## DeathPacket
+Received when a player has died.
+### Members
+#### `accountId: string`
+The account id of the player who died.
+
+#### `charId: number`
+The character id of the character who died.
+
+#### `killedBy: string`
+The cause of the death.
+
+#### `zombieId: number`
+The object id of the zombie if one has been spawned.
+
+#### `zombieType: number`
+The type of zombie if one has been spawned.
+
+#### `isZombie: boolean`
+This property is the result of `zombieId != -1`.
 
 ## EnemyShootPacket
 Received when a visible enemy shoots a projectile.
@@ -166,6 +272,15 @@ The id of the error received.
 #### `errorDescription: string`
 A description of the error which caused the client to be disconnected.
 
+## GlobalNotificationPacket
+Received when a global notification is sent out to all players.
+### Members
+#### `notificationType: number`
+An id to identify the type of notification which has been sent.
+
+#### `text: string`
+The notification message.
+
 ## GotoPacket
 Received when an object goes to a new position.
 ### Members
@@ -174,6 +289,42 @@ The objectId of the object moving.
 
 #### `position: WorldPosData`
 The new position of the object.
+
+## GuildResultPacket
+> Unknown.
+### Members
+#### `success: boolean`
+Whether the result of the guild operation was successful or not.
+
+#### `lineBuilderJSON: string`
+> Unknown.
+
+## InvResultPacket
+> Unknown.
+### Members
+#### `result: number`
+> Unknown.
+
+## InvitedToGuildPacket
+Received when the player is invited to a guild.
+### Members
+#### `name: string`
+The name of player who sent the invite.
+
+#### `guildName: string`
+The name of the guild.
+
+## KeyInfoResponsePacket
+> Unknown.
+### Members
+#### `name: string`
+> Unknown.
+
+#### `description: string`
+> Unknown.
+
+#### `creator: string`
+> Unknown.
 
 ## MapInfoPacket
 Received in response to the `Hello` packet. To load the map this should be replied to with a `Load` packet.
@@ -211,6 +362,21 @@ Whether or not players can teleport to other players on the map.
 #### `extraXML: string[]`
 > Unknown.
 
+## NameResultPacket
+Received to provide information about a player's request to set their name.
+### Members
+#### `success: boolean`
+Whether or not the name has been given to the player.
+
+#### `errorText: string`
+The error if one has occurred.
+
+## NewAbilityPacket
+Received when a new ability has been unlocked by the player.
+### Members
+#### `abilityType: number`
+The type of ability which has been unlocked.
+
 ## NewTickPacket
 Received every tick.
 ### Members
@@ -224,11 +390,45 @@ manually by keeping a timestamp of new tick packets.
 #### `statuses: ObjectStatusData[]`
 An array of [ObjectStatusData](#objectstatusdata) objects for all objects visible to the player.
 
+## NotificationPacket
+Received when a notification is received by the player.
+### Members
+#### `objectId: number`
+The object id of the object to display the notification for.
+
+#### `message: string`
+The message of the notification.
+
+#### `color: number`
+The color of the notification.
+> The encoding is unknown.
+
+## PasswordPromptPacket
+Received to prompt the player to enter their password.
+### Members
+#### `cleanPasswordStatus: number`
+> Unknown.
+
 ## PingPacket
 Received by the server occasionally.
 ### Members
 #### `serial: number`
 A unique number which is used in the reply to this packet.
+
+## QuestObjectIdPacket
+Received to tell the player the object id of their current quest.
+### Members
+#### `objectId: number`
+The object id of the current quest.
+
+## QuestRedeemResponsePacket
+> Unknown.
+### Members
+#### `ok: boolean`
+> Unknown.
+
+#### `message: string`
+> Unknown.
 
 ## ReconnectPacket
 Sent to prompt the client to reconnect to a different host.
@@ -254,6 +454,12 @@ The length of time which the host will be available to connect to for. If this i
 #### `isFromArena: boolean`
 Whether or not the client is reconnecting from the arena.
 
+## ReskinUnlockPacket
+Received to notify the player that a reskin has been unlocked.
+### Members
+#### `skinId: number`
+The id of the skin which has been unlocked.
+
 ## ServerPlayerShootPacket
 Received when another player shoots.
 ### Members
@@ -274,6 +480,28 @@ The angle the bullet was fired at. It is unknown whether the angle is in radians
 
 #### `damage: number`
 The damage the bullet will do if it hits an enemy.
+
+## ShowEffectPacket
+Received to tell the player to display an effect such as an AOE grenade.
+### Members
+#### `effectType: number`
+The type of effect to display.
+
+#### `targetObjectId: number`
+> Unknown.
+
+#### `pos1: WorldPosData`
+> Unknown. Probably the start position of the effect.
+
+#### `pos2: WorldPosData`
+> Unknown. Probably the end position of the effect.
+
+#### `color: number`
+The color of the effect
+> The encoding is unknown.
+
+#### `duration: number`
+The duration of the effect.
 
 ## TextPacket
 Received when there is a new chat message
@@ -358,6 +586,11 @@ An array of [ObjectData](#objectdata) objects which describe the current objects
 
 #### `drops: number[]`
 An array of numbers which are objectIds of [ObjectData](#objectdata) objects which have gone out of view of the player.
+
+## VerifyEmailPacket
+Received to prompt the player to verify their email.
+### Members
+> This packet has no members.
 
 # Outgoing
 ## AcceptTradePacket
