@@ -1,6 +1,13 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `4.1.0`
+### Changes:
+ + Changed resources to JSON instead of XML.
+ + Changed updater to fetch JSON resources.
+ + Added object loading to `ResourceManager`.
+ + Added new models `Object` and `Tile` which hold information loaded from resources.
+
 ## `4.0.2`
 ### Fixes:
  + Fixed error in the `write` implementation of the `AcceptTradePacket` class.

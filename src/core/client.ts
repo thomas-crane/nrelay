@@ -302,8 +302,8 @@ export class Client {
         const y = Math.floor(this.playerData.worldPos.y);
         let multiplier = 1;
 
-        if (this.mapTiles[y * this.mapInfo.width + x] && ResourceManager.tileInfo[this.mapTiles[y * this.mapInfo.width + x].type]) {
-            multiplier = ResourceManager.tileInfo[this.mapTiles[y * this.mapInfo.width + x].type];
+        if (this.mapTiles[y * this.mapInfo.width + x] && ResourceManager.tiles[this.mapTiles[y * this.mapInfo.width + x].type]) {
+            multiplier = ResourceManager.tiles[this.mapTiles[y * this.mapInfo.width + x].type].speed;
         }
         let tickTime = this.currentTickTime - this.lastTickTime;
 

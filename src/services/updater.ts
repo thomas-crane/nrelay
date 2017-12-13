@@ -70,8 +70,8 @@ export class Updater {
             if (!fs.existsSync(path.join(dir, 'resources'))) {
                 fs.mkdirSync(path.join(dir, 'resources'));
             }
-            const groundTypesPath = path.join(dir, 'resources', 'GroundTypes.xml');
-            const objectsPath = path.join(dir, 'resources', 'Objects.xml');
+            const groundTypesPath = path.join(dir, 'resources', 'GroundTypes.json');
+            const objectsPath = path.join(dir, 'resources', 'Objects.json');
 
             this.emptyFile(clientPath);
             this.emptyFile(groundTypesPath);
@@ -99,13 +99,13 @@ export class Updater {
                     });
                 }),
                 new Promise((resolve2, reject2) => {
-                    Log('Updater', 'Downloading latest GroundTypes.xml', LogLevel.Info);
-                    https.get(url + 'xmlc/GroundTypes.xml', (res) => {
+                    Log('Updater', 'Downloading latest GroundTypes.json', LogLevel.Info);
+                    https.get(url + 'json/GroundTypes.json', (res) => {
                         res.on('data', (chunk) => {
                             groundTypesStream.write(chunk);
                         });
                         res.on('end', () => {
-                            Log('Updater', 'Downloaded GroundTypes.xml', LogLevel.Success);
+                            Log('Updater', 'Downloaded GroundTypes.json', LogLevel.Success);
                             groundTypesStream.end();
                             resolve2();
                         });
@@ -115,13 +115,13 @@ export class Updater {
                     });
                 }),
                 new Promise((resolve3, reject3) => {
-                    Log('Updater', 'Downloading latest Objects.xml', LogLevel.Info);
-                    https.get(url + 'xmlc/Objects.xml', (res) => {
+                    Log('Updater', 'Downloading latest Objects.json', LogLevel.Info);
+                    https.get(url + 'json/Objects.json', (res) => {
                         res.on('data', (chunk) => {
                             objectsStream.write(chunk);
                         });
                         res.on('end', () => {
-                            Log('Updater', 'Downloaded Objects.xml', LogLevel.Success);
+                            Log('Updater', 'Downloaded Objects.json', LogLevel.Success);
                             objectsStream.end();
                             resolve3();
                         });

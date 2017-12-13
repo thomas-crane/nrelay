@@ -36,6 +36,7 @@ export class CLI {
 
     proceed(): void {
         ResourceManager.loadTileInfo();
+        ResourceManager.loadObjects();
         PluginManager.loadPlugins();
         const accInfo = Storage.getAccountConfig();
         if (!accInfo) {
