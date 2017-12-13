@@ -3,6 +3,14 @@ This document outlines the structure of all packets which are available. All str
 
 ## Table of Contents
 ### Incoming
+ + [Arena](#arena)
+    + [Arena Death](#arenadeath)
+    + [Imminent Arena Wave](#imminentarenawave)
+ + [Pets](#pets)
+    + [Delete Pet Message](#deletepetmessage)
+    + [Evolved Pet Message](#evolvedpetmessage)
+    + [Hatch Pet Message](#hatchpetmessage)
+ + [Account List Packet](#accountlistpacket)
  + [Aoe Packet](#aoepacket)
  + [Create Success Packet](#createsuccesspacket)
  + [Enemy Shoot Packet](#enemyshootpacket)
@@ -41,11 +49,53 @@ This document outlines the structure of all packets which are available. All str
  + [Move Record](#moverecord)
  + [Object Data](#objectdata)
  + [Object Status Data](#objectstatusdata)
+ + [Slot Object Data](#slotobjectdata)
  + [Stat Data](#statdata)
  + [Trade Item](#tradeitem)
  + [World Pos Data](#worldposdata)
 
 # Incoming
+## Arena
+## ArenaDeath
+Received when the player has been killed in the arena.
+### Members
+#### `cost: number`
+The cost in gold to be revived.
+
+## ImminentArenaWave
+Received when a new arena wave is about to begin.
+### Members
+#### `currentRuntime: number`
+The time which the player has been in the arena for.
+
+## Pets
+## DeletePetMessage
+Received to notify the player that a pet has been deleted.
+### Members
+#### `petId: number`
+The id of the pet which has been deleted.
+
+## EvolvedPetMessage
+Received to give the player information about a newly evolved pet.
+### Members
+#### `petId: number`
+The id of the pet which has evolved.
+
+#### `initialSkin: number`
+The id of the current skin of the pet.
+
+#### `finalSkin: number`
+The id of the pets new skin.
+
+## HatchPet
+Recieved to give the player information about a newly hatched pet.
+### Members
+#### `petName: string`
+The name of the hatched pet.
+
+#### `petSkin: number`
+The id of the pets skin.
+
 ## AoePacket
 Received when an aoe bullet is fired.
 ### Members
@@ -509,6 +559,17 @@ An array of the stats about the object.
 ### Methods
 #### `processStatData(data: ObjectStatuData): IPlayerData`
 Takes an [ObjectStatusData](#objectstatusdata) method and returns an `IPlayerData` object containing the info which was in the [ObjectStatusData](#objectstatusdata) object. It is up to the programmer to make sure the [ObjectStatusData](#objectstatusdata) is a type which can be turned into an `IPlayerData` object or not.
+
+## SlotObjectData
+### Members
+#### `objectId: number`
+The object id of the owner of the slot object.
+
+#### `slotId: number`
+The index of the slot. This includes the player's equiped items, so the first slot in the inventory is `4`.
+
+#### `objectType: number`
+The `type` of the object in the slot, or `-1` if it is empty.
 
 ## StatData
 ### Members

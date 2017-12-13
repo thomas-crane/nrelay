@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `4.2.0`
+### Changes:
+ + Added incoming packets for arena and pets.
+
 ## `4.1.0`
 ### Changes:
  + Changed resources to JSON instead of XML.
