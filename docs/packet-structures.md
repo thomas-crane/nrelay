@@ -224,10 +224,10 @@ The objectId of the connected player.
 The characterId of the connected player.
 
 ## DamagePacket
-Received when the player takes damage.
+Received to tell the player about damage done to other players and enemies.
 ### Members
 #### `targetId: number`
-> Unknown. Probably the object id of the target of the damage.
+The object id of the target of the damage.
 
 #### `effects: number[]`
 An array of status effects which are applied along with the damage.
@@ -236,13 +236,13 @@ An array of status effects which are applied along with the damage.
 The amount of damage taken.
 
 #### `kill: boolean`
-Whether or not the damage will kill the player.
+Whether or not the damage will kill target of the damage.
 
 #### `bulletId: number`
 The bullet id of the projectile which caused the damage.
 
 #### `objectId: number`
-> Unknown. Probably the object id of the enemy which fired the projectile.
+> Unknown. Probably the object id of the object which fired the projectile.
 
 ## DeathPacket
 Received when a player has died.
@@ -909,13 +909,13 @@ The bullet id of the bullet which hit.
 > Unknown. Probably the id of the object which was hit.
 
 ## PlayerHit
-> Unknown. Probably sent when the player is hit.
+Sent when the player is hit.
 ### Members
 #### `bulletId: number`
 The bullet id of the bullet which hit.
 
 #### `objectId: number`
-> Unknown. Probably the object id of the player.
+The object id of the source of the projectile which hit the player.
 
 ## PlayerShootPacket
 Sent when the player shoots.
@@ -963,10 +963,10 @@ Sent to activate a reskin.
 The id of the reskin to activate.
 
 ## SetConditionPacket
-Sent to set a condition effect on the player.
+Sent to tell the server about a condition effect on the player.
 ### Members
 #### `conditionEffect: number`
-The id of the condition effect to activate.
+The id of the condition effect.
 
 #### `conditionDuration: number`
 The duration of the condition effect.
