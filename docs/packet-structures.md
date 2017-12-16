@@ -3,10 +3,10 @@ This document outlines the structure of all packets which are available. All str
 
 ## Table of Contents
 ### Incoming
- + [Arena](#arena)
+ + Arena
     + [Arena Death](#arenadeath)
     + [Imminent Arena Wave](#imminentarenawave)
- + [Pets](#pets)
+ + Pets
     + [Delete Pet Message](#deletepetmessage)
     + [Evolved Pet Message](#evolvedpetmessage)
     + [Hatch Pet Message](#hatchpetmessage)
@@ -48,20 +48,48 @@ This document outlines the structure of all packets which are available. All str
  + [Update Packet](#updatepacket)
  + [Verify Email Packet](#verifyemailpacket)
 ### Outgoing
+ + Arena
+    + [Enter Arena Packet](#enterarenapacket)
+    + [Quest Redeem Packet](#questredeempacket)
+ + Pets
+    + [Active Pet Update Request Packet](#activepetupdaterequestpacket)
  + [Accept Trade Packet](#accepttradepacket)
  + [Aoe Ack Packet](#aoeackpacket)
+ + [Buy Packet](#buypacket)
  + [Cancel Trade Packet](#canceltradepacket)
+ + [Change Guild Rank Packet](#changeguildrankpacket)
  + [Change Trade Packet](#changetradepacket)
+ + [Check Credits Packet](#checkcreditspacket)
+ + [Choose Name Packet](#choosenamepacket)
+ + [Create Guild Packet](#createguildpacket)
  + [Create Packet](#createpacket)
+ + [Edit Account List Packet](#editaccountlistpacket)
+ + [Enemy Hit Packet](#enemyhitpacket)
+ + [Escape Packet](#escapepacket)
+ + [Go To Quest Room Packet](#gotoquestrealmpacket)
  + [Goto Ack Packet](#gotoackpacket)
+ + [Ground Damage Packet](#grounddamagepacket)
+ + [Guild Invite Packet](#guildinvitepacket)
+ + [Guild Remove Packet](#guildremovepacket)
  + [Hello Packet](#hellopacket)
+ + [Inv Drop Packet](#invdroppacket)
+ + [Inv Swap Packet](#invswappacket)
+ + [Join Guild Packet](#joinguildpacket)
+ + [Key Info Request Packet](#keyinforequestpacket)
  + [Load Packet](#loadpacket)
  + [Move Packet](#movepacket)
+ + [Other Hit Packet](#otherhitpacket)
+ + [Player Hit Packet](#playerhitpacket)
+ + [Player Shoot Packet](#playershootpacket)
  + [Player Text Packet](#playertextpacket)
  + [Pong Packet](#pongpacket)
  + [Request Trade Packet](#requesttradepacket)
- + [Shoot Ack Packet](#shootackpacket)
+ + [Reskin Packet](#reskinpacket)
+ + [Set Condition Packet](#setconditionpacket)
+ + [Square Hit Packet](#shootackpacket)
+ + [Teleport Packet](#teleportpacket)
  + [Update Ack Packet](#updateackpacket)
+ + [Use Item Packet](#useitempacket)
  + [Use Portal Packet](#useportalpacket)
 ### Data Structures
  + [Ground Tile Data](#groundtiledata)
@@ -115,6 +143,7 @@ The name of the hatched pet.
 #### `petSkin: number`
 The id of the pets skin.
 
+## Other incoming packets.
 ## AccountListPacket
 > Unknown.
 ### Members
@@ -593,6 +622,33 @@ Received to prompt the player to verify their email.
 > This packet has no members.
 
 # Outgoing
+
+## Arena
+## EnterArenaPacket
+Sent to enter the arena.
+### Members
+#### `currency: number`
+The cost in gold of entering the arena.
+
+## QuestRedeemPacket
+### Members
+#### `questId: string`
+The id of the quest to redeem.
+
+#### `slots: SlotObjectData[]`
+> Unkown.
+
+## Pets
+## ActivePetUpdateRequestPacket
+Sent to request an update to the pet currently following the player.
+### Members
+#### `commandType: number`
+> Unknown. Probably the type of update to perform (e.g. New pet, possibly pet feed, pet fuse, e.t.c.).
+
+#### `instanceId: number`
+> Unknown. Possibly the id of the pet.
+
+## Other outgoing packets.
 ## AcceptTradePacket
 Sent to accept the active trade.
 ### Members
@@ -607,17 +663,53 @@ Sent to acknowledge the `AoePacket`
 ### Members
 > This packet has no members.
 
+## BuyPacket
+Sent to buy an item.
+### Members
+#### `objectId: number`
+The object id of the item to buy.
+
+#### `quantity: number`
+The number of items wanted.
+
 ## CancelTradePacket
 Sent to cancel the active trade.
 ### Members
 #### `objectId: number`
 The objectId of the active trade partner.
 
+## ChangeGuildRankPacket
+Sent to change the guild rank of a member in your guild.
+### Members
+#### `name: string`
+The name of the player to change the rank of.
+
+#### `guildRank: number`
+The guild rank to assign to the player.
+> The values for each rank are unknown.
+
 ## ChangeTradePacket
 Sent to change your offer in the active trade.
 ### Members
 #### `offer: boolean[]`
 An array of booleans which describe which items in your inventory are selected.
+
+## CheckCreditsPacket
+> Unknown.
+### Members
+> This packet has no members.
+
+## ChooseNamePacket
+Sent to choose the player's name.
+### Members
+#### `name: string`
+The name to choose.
+
+## CreateGuildPacket
+Sent to create a new guild.
+### Members
+#### `name: string`
+The name of the guild to create.
 
 ## CreatePacket
 Sent to create a new character.
@@ -628,11 +720,70 @@ The class of the new character. This should be a value of the `Class` enum.
 #### `skinType: number`
 The skinId of the skin for the new character. `0` is the default skin.
 
+## EditAccountListPacket
+Sent to edit the account list.
+### Members
+#### `accountListId: number`
+The id of the account list to edit.
+
+#### `add: boolean`
+> Unknown. Possibly whether the items should be added if `true` or removed (or updated) if `false`
+
+#### `objectId: number`
+> Unknown. Probably the object id of the character to add to the account list.
+
+## EnemyHitPacket
+Sent when an ememy has been hit by the player.
+### Members
+#### `time: number`
+The current client time.
+
+#### `add: boolean`
+The id of the bullet which hit the enemy
+
+#### `targetId: number`
+The object id of the enemy which was hit.
+
+#### `kill: boolean`
+Whether or not the projectile will kill the enemy.
+
+## EscapePacket
+Sent to send the player back to the nexus.
+### Members
+> This packet has no members.
+
+## GoToQuestRoomPacket
+> Unknown. Probably sent to go to the quest room.
+Sent to send the player back to the nexus.
+### Members
+> This packet has no members.
+
 ## GotoAckPacket
 Sent to acknowledge a `GotoPacket`.
 ### Members
 #### `time: number`
 The current client time.
+
+## GroundDamagePacket
+> Unknown. Probably sent when the player steps on a tile which damages (such as lava).
+### Members
+#### `time: number`
+The current client time.
+
+#### `position: WorldPosData`
+> Unknown. Probably the position of the tile which damages.
+
+## GuildInvitePacket
+Sent to invite a player to your guild.
+### Members
+#### `name: string`
+The name of the player to invite to the guild.
+
+## GuildRemovePacket
+Sent to remove a player from your guild.
+### Members
+#### `name: string`
+The name of the player to remove from the guild.
 
 ## HelloPacket
 Sent after the TCP socket is opened to ask for the `MapInfoPacket`.
@@ -685,6 +836,39 @@ A randomly generated number.
 #### `userToken: string`
 > Unknown
 
+## InvDropPacket
+Sent to drop an item from the players inventory.
+### Members
+#### `slotObject: SlotObjectData`
+The slot object to drop.
+
+## InvSwapPacket
+Sent to swap two slot objects.
+### Members
+#### `time: number`
+The current client time.
+
+#### `position: WorldPosData`
+The current position of the player.
+
+#### `slotObject1: SlotObjectData`
+The slot object to swap from.
+
+#### `slotObject2: SlotObjectData`
+The slot object to swap to.
+
+## JoinGuildPacket
+Sent to join a guild in response to a `InvitedToGuildPacket`;
+### Members
+#### `guildName: string`
+The name of the guild to join.
+
+## KeyInfoRequestPacket
+> Unknown.
+### Members
+#### `itemType: number`
+> Unknown.
+
 ## LoadPacket
 Sent in reply to a `MapInfoPacket` to connect to the map.
 ### Members
@@ -709,6 +893,48 @@ The client's current position.
 #### `records: MoveRecord[]`
 > Unknown.
 
+## OtherHitPacket
+> Unknown.
+### Members
+#### `time: number`
+The current client time.
+
+#### `bulletId: number`
+The bullet id of the bullet which hit.
+
+#### `objectId: number`
+> Unknown. Probably the object id of the player.
+
+#### `targetId: number`
+> Unknown. Probably the id of the object which was hit.
+
+## PlayerHit
+> Unknown. Probably sent when the player is hit.
+### Members
+#### `bulletId: number`
+The bullet id of the bullet which hit.
+
+#### `objectId: number`
+> Unknown. Probably the object id of the player.
+
+## PlayerShootPacket
+Sent when the player shoots.
+### Members
+#### `time: number`
+The current client time.
+
+#### `bulletId: number`
+The bullet id of the projectile which was fired.
+
+#### `containerType: number`
+> Unknown. Possibly the type of weapon which fired the projectile.
+
+#### `startingPos: WorldPosData`
+The starting position of the projectile.
+
+#### `angle: number`
+The angle which the projectile was fired at.
+
 ## PlayerTextPacket
 Sent to send a chat message.
 ### Members
@@ -730,17 +956,65 @@ Sent to request a trade.
 #### `name: string`
 The name of the player to request a trade with.
 
+## ReskinPacket
+Sent to activate a reskin.
+### Members
+#### `skinId: number`
+The id of the reskin to activate.
+
+## SetConditionPacket
+Sent to set a condition effect on the player.
+### Members
+#### `conditionEffect: number`
+The id of the condition effect to activate.
+
+#### `conditionDuration: number`
+The duration of the condition effect.
+
 ## ShootAckPacket
 Sent to acknowledge an `EnemyShootPacket`.
 ### Members
 #### `time: number`
 The current client time.
 
+## SquareHitPacket
+> Unknown.
+### Members
+#### `time: number`
+The current client time.
+
+#### `bulletId: number`
+The id of the projectile which hit.
+
+#### `objectId: number`
+> Unknown. Probably the object id of the player.
+
+## TeleportPacket
+Sent to teleport to a player.
+### Members
+#### `objectId: number`
+The object id of the player to teleport to.
+
 ## UpdateAckPacket
 Sent to acknowledge an `UpdatePacket`.
 ### Members
-This packet has no members.
+> This packet has no members.
 
+## UseItemPacket
+Sent to use an item.
+### Members
+#### `time: number`
+The current client time.
+
+#### `slotObject: SlotObjectData`
+The slot object of the item to use.
+
+#### `itemUsePos: WorldPosData`
+The position at which the item was used.
+
+#### `useType: number`
+> Unknown. Probably the type of use, such as consume item or activate ability.
+ 
 ## UsePortalPacket
 Sent to use a portal.
 ### Members

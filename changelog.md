@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `4.4.0`
+### Changes:
+ + Added 27 more general outgoing packets. See the `packet-structures` doc for the full list.
+
 ## `4.3.0`
 ### Changes:
  + Added 20 more general incoming packets. See the `packet-structures` doc for the full list.
