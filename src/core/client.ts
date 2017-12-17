@@ -41,6 +41,9 @@ const EMAIL_REPLACE_REGEX = /.+?(.+?)(?:@|\+\d+).+?(.+?)\./;
 export class Client {
 
     public static on(event: string | symbol, listener: (...args: any[]) => void): EventEmitter {
+        if (!this.emitter) {
+            this.emitter = new EventEmitter();
+        }
         return this.emitter.on(event, listener);
     }
     private static emitter: EventEmitter;
@@ -70,9 +73,6 @@ export class Client {
     private gameId: number;
 
     constructor(server: IServer, buildVersion: string, accInfo?: IAccount) {
-        if (!Client.emitter) {
-            Client.emitter = new EventEmitter();
-        }
         this.key = new Int8Array(0);
         this.keyTime = -1;
         this.gameId = -2;

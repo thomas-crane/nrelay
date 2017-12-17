@@ -35,8 +35,11 @@ export class PluginManager {
                     this.pluginInstances = {};
                 }
                 this.pluginInstances[type] = plugin;
-            } catch {
+            } catch (err) {
                 Log('PluginManager', 'Error while loading ' + files[i], LogLevel.Warning);
+                if (environment.debug) {
+                    Log('PluginManager', err.message || err);
+                }
             }
         }
     }

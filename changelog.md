@@ -1,6 +1,11 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `5.0.1`
+### Fixes:
+ + Fixed a bug where the Client event emitter was not initialised before plugins could use it.
+ + Added some logging in debug mode to the plugin manager.
+
 ## `5.0.0`
 > Not backwards compatible.
 ### Changes:
