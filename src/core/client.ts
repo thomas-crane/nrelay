@@ -226,7 +226,7 @@ export class Client {
     }
 
     private onConnect(): void {
-        Client.emitter.emit('connect', this);
+        Client.emitter.emit('connect', Object.assign({}, this.playerData));
         Log(this.censoredGuid, 'Connected to server!', LogLevel.Success);
         this.connectTime = Date.now();
         this.lastTickTime = 0;
@@ -257,7 +257,7 @@ export class Client {
     }
 
     private onClose(error: boolean): void {
-        Client.emitter.emit('disconnect', this);
+        Client.emitter.emit('disconnect', Object.assign({}, this.playerData));
         Log(this.censoredGuid, 'The connection was closed.', LogLevel.Warning);
         if (error) {
             Log(this.censoredGuid, 'An error occurred (cause of close)', LogLevel.Error);

@@ -1,6 +1,11 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.0.0`
+> Not backwards compatible.
+### Changes:
+ + Fixed a bug in the client event emitter where it would emit references to values instead of cloned values. This change is not backwards compatible with plugins written for `5.x.x` if the plugin uses the `Client.on('disconnect|connect', (client: Client) => void)` method.
+
 ## `5.0.1`
 ### Fixes:
  + Fixed a bug where the Client event emitter was not initialised before plugins could use it.
