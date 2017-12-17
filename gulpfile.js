@@ -6,7 +6,7 @@ var watch = require('gulp-watch');
 var del = require('del');
 
 gulp.task('default', function (callback) {
-    return runSequence('clean', 'ts', function (error) {
+    return runSequence('clean', 'ts', 'copy-files', function (error) {
         if (error) {
             console.error(error);
         }
@@ -21,7 +21,7 @@ gulp.task('ts', function () {
 });
 
 gulp.task('copy-files', function () {
-    return gulp.src('src/**/*.txt')
+    return gulp.src('src/**/*.json')
         .pipe(gulp.dest('dist'));
 });
 

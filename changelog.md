@@ -1,6 +1,12 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `5.0.0`
+> Not backwards compatible.
+### Changes:
+ + Changed the `Storage` service methods to accept different args. The signatures are now similar to the `path.join` method signature. This change is not backwards compatible with plugins written for `4.x.x` if the plugin uses the `Storage.get` or `Storage.set` methods.
+ + Added the `copy-files` gulp task to the default tasks to allow for json files to be copied.
+
 ## `4.6.0`
 ### Changes:
  + Added `error` event to packtio.
