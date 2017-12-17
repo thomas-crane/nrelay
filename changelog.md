@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `4.5.0`
+### Changes:
+ + Added missing packets to `packets.ts`. Most packets are now available.
+
 ## `4.4.0`
 ### Changes:
  + Added 27 more general outgoing packets. See the `packet-structures` doc for the full list.
