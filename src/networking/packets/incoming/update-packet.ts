@@ -34,8 +34,7 @@ export class UpdatePacket extends Packet {
         const dropsLen = this.readShort();
         this.drops = new Array<number>(dropsLen);
         for (let i = 0; i < dropsLen; i++) {
-            const drop = this.readInt32();
-            this.drops[i] = drop;
+            this.drops[i] = this.readInt32();
         }
     }
 

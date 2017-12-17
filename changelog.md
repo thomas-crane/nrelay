@@ -1,6 +1,30 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `4.6.0`
+### Changes:
+ + Added `error` event to packtio.
+ + `Client` will now just reconnect when there is an error reading the packet size or id. This way nrelay will not crash when the error occurs.
+ + Added a static event emitter to `Client`. There currently 2 events:
+
+ __`connect`__ is fired when a client connects.
+```typescript
+Client.on('connect', (client: Client) => {
+    // note that client.playerData will still contain default values
+    // because the client has not received any player data yet.
+    Log('MyPlugin', 'Client connected');
+});
+```
+ __`disconnect`__ is fired when a client disconnects.
+```typescript
+Client.on('disconnect', (client: Client) => {
+    Log('MyPlugin', client.playerData.objectId + ' disconnected');
+});
+```
+
+ + Added a default value to the `statType` member of `StatData`.
+ + Cleaned up `UpdatePacket slightly.
+
 ## `4.5.0`
 ### Changes:
  + Added missing packets to `packets.ts`. Most packets are now available.

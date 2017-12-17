@@ -98,7 +98,7 @@ export class StatData {
     static NEW_CON_STAT = 96;
     static FORTUNE_TOKEN_STAT = 97;
 
-    statType: number;
+    statType = 0;
     statValue: number;
     stringStatValue: string;
 

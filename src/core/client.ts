@@ -32,12 +32,18 @@ import { AoePacket } from './../networking/packets/incoming/aoe-packet';
 import { AoeAckPacket } from './../networking/packets/outgoing/aoeack-packet';
 import { EnemyShootPacket } from './../networking/packets/incoming/enemy-shoot-packet';
 import { ShootAckPacket } from './../networking/packets/outgoing/shootack-packet';
+import { EventEmitter } from 'events';
 
 const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
 const EMAIL_REPLACE_REGEX = /.+?(.+?)(?:@|\+\d+).+?(.+?)\./;
 
 export class Client {
+
+    public static on(event: string | symbol, listener: (...args: any[]) => void): EventEmitter {
+        return this.emitter.on(event, listener);
+    }
+    private static emitter: EventEmitter;
 
     public playerData: IPlayerData;
     public packetio: PacketIO;
@@ -64,6 +70,9 @@ export class Client {
     private gameId: number;
 
     constructor(server: IServer, buildVersion: string, accInfo?: IAccount) {
+        if (!Client.emitter) {
+            Client.emitter = new EventEmitter();
+        }
         this.key = new Int8Array(0);
         this.keyTime = -1;
         this.gameId = -2;
@@ -217,6 +226,7 @@ export class Client {
     }
 
     private onConnect(): void {
+        Client.emitter.emit('connect', this);
         Log(this.censoredGuid, 'Connected to server!', LogLevel.Success);
         this.connectTime = Date.now();
         this.lastTickTime = 0;
@@ -247,6 +257,7 @@ export class Client {
     }
 
     private onClose(error: boolean): void {
+        Client.emitter.emit('disconnect', this);
         Log(this.censoredGuid, 'The connection was closed.', LogLevel.Warning);
         if (error) {
             Log(this.censoredGuid, 'An error occurred (cause of close)', LogLevel.Error);
@@ -273,6 +284,10 @@ export class Client {
             this.packetio = new PacketIO(this.clientSocket);
             this.packetio.on('packet', (data: Packet) => {
                 PluginManager.callHooks(data.type, data, this);
+            });
+            this.packetio.on('error', () => {
+                Log(this.censoredGuid, 'Received PacketIO error. Reconnecting.');
+                this.clientSocket.destroy();
             });
         } else {
             this.packetio.reset(this.clientSocket);

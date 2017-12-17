@@ -99,6 +99,10 @@ export class PacketIO {
             }
         } catch (err) {
             Log('PacketIO', 'Couldn\'t read packet size/id.', LogLevel.Error);
+            if (environment.debug) {
+                Log('PacketIO', 'READ: id: ' + packetId + ', size: ' + packetSize, LogLevel.Info);
+            }
+            this.emitter.emit('error');
             return;
         }
         if (packetSize === data.length) {
@@ -119,21 +123,8 @@ export class PacketIO {
     }
 
     private dispatchPacket(data: Buffer): void {
-        let packetSize: number;
-        let packetId: number;
-        try {
-            packetSize = data.readInt32BE(0);
-            packetId = data.readInt8(4);
-            if (packetSize < 0) {
-                throw new Error('Invalid packet size.');
-            }
-            if (packetId < 0) {
-                throw new Error('Invalid packet id.');
-            }
-        } catch (err) {
-            Log('PacketIO', 'Couldn\'t read packet size/id.', LogLevel.Error);
-            return;
-        }
+        const packetSize = data.readInt32BE(0);
+        const packetId = data.readInt8(4);
 
         const packetData = data.slice(5, data.length);
         this.receiveRC4.cipher(packetData);
