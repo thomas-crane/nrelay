@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.0.1`
+### Fixes:
+ + Fixed a bug where the client event emitter would be null if there were no subscribers.
+
 ## `6.0.0`
 > Not backwards compatible.
 ### Changes:

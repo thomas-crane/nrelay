@@ -73,6 +73,9 @@ export class Client {
     private gameId: number;
 
     constructor(server: IServer, buildVersion: string, accInfo?: IAccount) {
+        if (!Client.emitter) {
+            Client.emitter = new EventEmitter();
+        }
         this.key = new Int8Array(0);
         this.keyTime = -1;
         this.gameId = -2;
