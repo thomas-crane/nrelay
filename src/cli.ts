@@ -9,13 +9,23 @@ import { Storage } from './services/storage';
 import { PluginManager } from './core/plugin-manager';
 import { ResourceManager } from './core/resource-manager';
 import { Updater } from './services/updater';
+import { environment } from './models/environment';
+
+const args = process.argv;
 
 export class CLI {
 
     private serverList: { [id: string]: IServer };
 
     constructor() {
-        Log('NRelay', 'Starting...');
+        if (this.hasFlag('--debug')) {
+            environment.debug = true;
+        }
+        if (environment.debug) {
+            Log('NRelay', 'Starting in debug mode...');
+        } else {
+            Log('NRelay', 'Starting...');
+        }
         Log('NRelay', 'Checking for updates...', LogLevel.Info);
         Updater.checkVersion().then((needsUpdate) => {
             if (needsUpdate) {
@@ -101,5 +111,14 @@ export class CLI {
                 }
             }).catch((err) => reject(err));
         });
+    }
+
+    private hasFlag(flag: string): boolean {
+        for (let i = 0; i < args.length; i++) {
+            if (args[i] === flag) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -1,6 +1,12 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.1.0`
+### Changes:
+ + Added error handling to packet hook calls. If a plugin throws an error while executing a plugin hook, the error will be handled instead of nrelay crashing.
+ + Added command line argument handling to the cli. The currently supported arguments are:
+    + __`--debug`__ Starts nrelay in debug mode.
+
 ## `6.0.1`
 ### Fixes:
  + Fixed a bug where the client event emitter would be null if there were no subscribers.

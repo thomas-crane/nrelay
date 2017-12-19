@@ -30,7 +30,7 @@ export class PluginManager {
                 }
                 const pluginClass = require(relPath).default;
                 const plugin = new pluginClass();
-                const type = (plugin as typeof Object.prototype).constructor.name;
+                const type = (plugin as object).constructor.name;
                 if (!this.pluginInstances) {
                     this.pluginInstances = {};
                 }
@@ -72,7 +72,14 @@ export class PluginManager {
         if (this.hooks[packetType]) {
             for (let i = 0; i < this.hooks[packetType].length; i++) {
                 const hook = this.hooks[packetType][i];
-                hook.action.apply(this.pluginInstances[hook.caller] || client, [client, packet]);
+                try {
+                    hook.action.apply(this.pluginInstances[hook.caller] || client, [client, packet]);
+                } catch (error) {
+                    Log('PluginManager', 'Error while calling ' + PacketType[packetType] + ' hook on ' + hook.caller, LogLevel.Warning);
+                    if (environment.debug) {
+                        Log('PluginManager', error, LogLevel.Info);
+                    }
+                }
             }
         }
     }
