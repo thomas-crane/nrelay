@@ -1,8 +1,10 @@
 # Creating Plugins
 
-__Hotlinks__
-___
-+ [Plugin template](#plugin-template)
+### Contents
+ + [Creating your first plugin](#creating-your-first-plugin)
+ + [The next step](#the-next-step)
+ + [The Logger class](#the-logger-class)
+ + [Plugin template](#plugin-template)
 
 ## Foreword
 Creating custom plugins for nrelay is a simple process. The first thing to do is create the plugin in the right place in order to allow nrelay to find it at runtime.
@@ -258,7 +260,7 @@ Now we can use the regex to detect the command
 onText(client: Client, textPacket: TextPacket): void {
 
     if (textPacket.recipient === client.playerData.name) {
-        const match = this.setRegex.match(textPacket.text);
+        const match = this.setRegex.exec(textPacket.text);
         if (match) {
             this.reponse = match[1];
             const reply = new PlayerTextPacket();
