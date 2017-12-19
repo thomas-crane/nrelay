@@ -55,4 +55,12 @@ The bot crashes with the error:
 ````
 
 ## Submitting a pull request
-`TODO`
+Pull requests can be submitted to add or change code, add more documentation, or fix typos and errors in existing documentation. Some of these guidelines only apply to code related pull requests, and some only apply to documentation pull requests, but most apply to both.
+
+When submitting a pull request, there are a few things you can do to increase the chance of your pull request being accepted:
+ + __If your pull request addresses any issues, mention them.__ This helps developers verify that the issues you intended to fix have actually been fixed.
+ + __Keep the formatting consistent with existing formatting.__ Minor inconsistencies are OK (such as a bracket being on a newline instead of the same line). However, if your pull request changes a large amount of existing formatting, or isn't consistent with existing formatting at all, then it will not be accepted. If the code still _works_ and the formatting issue is the only one, then it is likely that a request for review will be made requesting a format change, rather than the pull request being closed straight away.
+
+There are also a few things which you should __always__ do when making a pull request:
+ + __Update the `changelog.md` and `package.json` version numbers. This only applies to code related pull requests__ The `changelog.md` is used to describe what has changed between versions of nrelay. It uses [Semantic Versioning 2.0.0](https://semver.org/), so you should make sure to increment the correct number for your change.
+ + __Don't include 'Work in Progress' code.__ Don't make a pull request if the code you are adding is not fully complete or is still a work in progress. Code which has room for improvement or only has basic functionality is fine. Just don't include features which aren't fully implemented or don't properly work.
