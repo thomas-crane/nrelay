@@ -32,6 +32,7 @@ import { AoePacket } from './../networking/packets/incoming/aoe-packet';
 import { AoeAckPacket } from './../networking/packets/outgoing/aoeack-packet';
 import { EnemyShootPacket } from './../networking/packets/incoming/enemy-shoot-packet';
 import { ShootAckPacket } from './../networking/packets/outgoing/shootack-packet';
+import { UpdateAckPacket } from './../networking/packets/outgoing/updateack-packet';
 import { EventEmitter } from 'events';
 
 const MIN_MOVE_SPEED = 0.004;
@@ -127,7 +128,7 @@ export class Client {
     @HookPacket(PacketType.UPDATE)
     private onUpdate(client: Client, updatePacket: UpdatePacket): void {
         // reply
-        const updateAck = Packets.create(PacketType.UPDATEACK);
+        const updateAck = new UpdateAckPacket();
         client.packetio.sendPacket(updateAck);
 
         // playerdata
@@ -160,7 +161,6 @@ export class Client {
         const ack = new GotoAckPacket();
         ack.time = this.getTime();
         client.packetio.sendPacket(ack);
-        client.playerData.worldPos = gotoPacket.position;
     }
 
     @HookPacket(PacketType.FAILURE)
@@ -189,7 +189,7 @@ export class Client {
         this.lastTickTime = this.currentTickTime;
         this.currentTickTime = this.getTime();
         // reply
-        const movePacket = Packets.create(PacketType.MOVE) as MovePacket;
+        const movePacket = new MovePacket();
         movePacket.tickId = newTickPacket.tickId;
         movePacket.time = client.getTime();
         if (this.nextPos) {
@@ -203,7 +203,7 @@ export class Client {
     @HookPacket(PacketType.PING)
     private onPing(client: Client, pingPacket: PingPacket): void {
         // reply
-        const pongPacket = Packets.create(PacketType.PONG) as PongPacket;
+        const pongPacket = new PongPacket();
         pongPacket.serial = pingPacket.serial;
         pongPacket.time = client.getTime();
         client.packetio.sendPacket(pongPacket);

@@ -1,6 +1,11 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.1.1`
+### Fixes:
+ + Fixed a bug where if there were no plugins loaded the client packet hooks wouldn't be called.
+ + Fixed a bug in the client `GOTO` packet hook implementation. (thanks to @xd-x)
+
 ## `6.1.0`
 ### Changes:
  + Added error handling to packet hook calls. If a plugin throws an error while executing a plugin hook, the error will be handled instead of nrelay crashing.

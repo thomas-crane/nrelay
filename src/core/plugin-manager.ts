@@ -73,7 +73,11 @@ export class PluginManager {
             for (let i = 0; i < this.hooks[packetType].length; i++) {
                 const hook = this.hooks[packetType][i];
                 try {
-                    hook.action.apply(this.pluginInstances[hook.caller] || client, [client, packet]);
+                    let caller: object = client;
+                    if (this.pluginInstances && this.pluginInstances[hook.caller]) {
+                        caller = this.pluginInstances[hook.caller];
+                    }
+                    hook.action.apply(caller, [client, packet]);
                 } catch (error) {
                     Log('PluginManager', 'Error while calling ' + PacketType[packetType] + ' hook on ' + hook.caller, LogLevel.Warning);
                     if (environment.debug) {
