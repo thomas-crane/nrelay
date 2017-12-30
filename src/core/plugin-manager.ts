@@ -3,25 +3,23 @@ import { Log, LogLevel } from './../services/logger';
 import { Client } from './client';
 import { environment } from './../models/environment';
 import fs = require('fs');
-import path = require('path');
+import { Storage } from '../services/storage';
 
 const PLUGIN_REGEX = /^.+\.js$/;
 
 export class PluginManager {
 
     static loadPlugins(): void {
-        const segments = __dirname.split(path.sep);
-        segments.pop();
-        segments.push('plugins');
+        const folderPath = Storage.makePath('dist', 'plugins');
         let files: string[] = [];
         try {
-            files = fs.readdirSync(segments.join(path.sep));
+            files = fs.readdirSync(folderPath);
         } catch {
             Log('PluginManager', 'Couldn\'t find plugins directory', LogLevel.Warning);
         }
         for (let i = 0; i < files.length; i++) {
             try {
-                const relPath = path.join(...segments, files[i]);
+                const relPath = Storage.makePath('dist', 'plugins', files[i]);
                 if (!PLUGIN_REGEX.test(relPath)) {
                     if (environment.debug) {
                         Log('PluginManager', 'Skipping ' + relPath, LogLevel.Info);
@@ -38,7 +36,7 @@ export class PluginManager {
             } catch (err) {
                 Log('PluginManager', 'Error while loading ' + files[i], LogLevel.Warning);
                 if (environment.debug) {
-                    Log('PluginManager', err.message || err);
+                    Log('PluginManager', err);
                 }
             }
         }

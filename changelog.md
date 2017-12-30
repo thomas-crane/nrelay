@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.1.2`
+### Fixes:
+ + Fixed a bug in the plugin manager which would stop plugins from loading on a mac.
+
 ## `6.1.1`
 ### Fixes:
  + Fixed a bug where if there were no plugins loaded the client packet hooks wouldn't be called.
@@ -34,7 +38,7 @@ This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
 ## `4.6.0`
 ### Changes:
- + Added `error` event to packtio.
+ + Added `error` event to packetio.
  + `Client` will now just reconnect when there is an error reading the packet size or id. This way nrelay will not crash when the error occurs.
  + Added a static event emitter to `Client`. There currently 2 events:
 
