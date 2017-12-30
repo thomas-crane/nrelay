@@ -85,263 +85,263 @@ import { UseItemPacket } from './../networking/packets/outgoing/use-item-packet'
 import { UsePortalPacket } from './../networking/packets/outgoing/use-portal-packet';
 
 export class Packets {
-    public static create(type: PacketType, bufferSize?: number): Packet {
+    public static create(type: PacketType, data: Buffer): Packet {
         if (!PacketType[type]) {
             throw new Error('Invalid packet type: ' + type);
         }
         let packet: Packet;
         switch (type) {
             case PacketType.ARENADEATH:
-                packet = new ArenaDeathPacket(null, bufferSize);
+                packet = new ArenaDeathPacket(data);
                 break;
             case PacketType.IMMINENTARENA_WAVE:
-                packet = new ImminentArenaWavePacket(null, bufferSize);
+                packet = new ImminentArenaWavePacket(data);
                 break;
             case PacketType.DELETEPET:
-                packet = new DeletePetMessage(null, bufferSize);
+                packet = new DeletePetMessage(data);
                 break;
             case PacketType.PETCHANGE_FORM_MSG:
-                packet = new EvolvedPetMessage(null, bufferSize);
+                packet = new EvolvedPetMessage(data);
                 break;
             case PacketType.HATCHPET:
-                packet = new HatchPetMessage(null, bufferSize);
+                packet = new HatchPetMessage(data);
                 break;
             case PacketType.ACCOUNTLIST:
-                packet = new AccountListPacket(null, bufferSize);
+                packet = new AccountListPacket(data);
                 break;
             case PacketType.ALLYSHOOT:
-                packet = new AllyShootPacket(null, bufferSize);
+                packet = new AllyShootPacket(data);
                 break;
             case PacketType.AOE:
-                packet = new AoePacket(null, bufferSize);
+                packet = new AoePacket(data);
                 break;
             case PacketType.BUYRESULT:
-                packet = new BuyResultPacket(null, bufferSize);
+                packet = new BuyResultPacket(data);
                 break;
             case PacketType.CLIENTSTAT:
-                packet = new ClientStatPacket(null, bufferSize);
+                packet = new ClientStatPacket(data);
                 break;
             case PacketType.CREATESUCCESS:
-                packet = new CreateSuccessPacket(null, bufferSize);
+                packet = new CreateSuccessPacket(data);
                 break;
             case PacketType.DAMAGE:
-                packet = new DamagePacket(null, bufferSize);
+                packet = new DamagePacket(data);
                 break;
             case PacketType.DEATH:
-                packet = new DeathPacket(null, bufferSize);
+                packet = new DeathPacket(data);
                 break;
             case PacketType.ENEMYSHOOT:
-                packet = new EnemyShootPacket(null, bufferSize);
+                packet = new EnemyShootPacket(data);
                 break;
             case PacketType.FAILURE:
-                packet = new FailurePacket(null, bufferSize);
+                packet = new FailurePacket(data);
                 break;
             case PacketType.GLOBALNOTIFICATION:
-                packet = new GlobalNotificationPacket(null, bufferSize);
+                packet = new GlobalNotificationPacket(data);
                 break;
             case PacketType.GOTO:
-                packet = new GotoPacket(null, bufferSize);
+                packet = new GotoPacket(data);
                 break;
             case PacketType.GUILDRESULT:
-                packet = new GuildResultPacket(null, bufferSize);
+                packet = new GuildResultPacket(data);
                 break;
             case PacketType.INVRESULT:
-                packet = new InvResultPacket(null, bufferSize);
+                packet = new InvResultPacket(data);
                 break;
             case PacketType.INVITEDTOGUILD:
-                packet = new InvitedToGuildPacket(null, bufferSize);
+                packet = new InvitedToGuildPacket(data);
                 break;
             case PacketType.KEYINFO_RESPONSE:
-                packet = new KeyInfoResponsePacket(null, bufferSize);
+                packet = new KeyInfoResponsePacket(data);
                 break;
             case PacketType.MAPINFO:
-                packet = new MapInfoPacket(null, bufferSize);
+                packet = new MapInfoPacket(data);
                 break;
             case PacketType.NAMERESULT:
-                packet = new NameResultPacket(null, bufferSize);
+                packet = new NameResultPacket(data);
                 break;
             case PacketType.NEWABILITY:
-                packet = new NewAbilityMessage(null, bufferSize);
+                packet = new NewAbilityMessage(data);
                 break;
             case PacketType.NEWTICK:
-                packet = new NewTickPacket(null, bufferSize);
+                packet = new NewTickPacket(data);
                 break;
             case PacketType.NOTIFICATION:
-                packet = new NotificationPacket(null, bufferSize);
+                packet = new NotificationPacket(data);
                 break;
             case PacketType.PASSWORDPROMPT:
-                packet = new PasswordPromptPacket(null, bufferSize);
+                packet = new PasswordPromptPacket(data);
                 break;
             case PacketType.PING:
-                packet = new PingPacket(null, bufferSize);
+                packet = new PingPacket(data);
                 break;
             case PacketType.QUESTOBJID:
-                packet = new QuestObjectIdPacket(null, bufferSize);
+                packet = new QuestObjectIdPacket(data);
                 break;
             case PacketType.QUESTREDEEM_RESPONSE:
-                packet = new QuestRedeemResponsePacket(null, bufferSize);
+                packet = new QuestRedeemResponsePacket(data);
                 break;
             case PacketType.RECONNECT:
-                packet = new ReconnectPacket(null, bufferSize);
+                packet = new ReconnectPacket(data);
                 break;
             case PacketType.RESKINUNLOCK:
-                packet = new ReskinUnlockPacket(null, bufferSize);
+                packet = new ReskinUnlockPacket(data);
                 break;
             case PacketType.SERVERPLAYERSHOOT:
-                packet = new ServerPlayerShootPacket(null, bufferSize);
+                packet = new ServerPlayerShootPacket(data);
                 break;
             case PacketType.SHOWEFFECT:
-                packet = new ShowEffectPacket(null, bufferSize);
+                packet = new ShowEffectPacket(data);
                 break;
             case PacketType.TEXT:
-                packet = new TextPacket(null, bufferSize);
+                packet = new TextPacket(data);
                 break;
             case PacketType.TRADEACCEPTED:
-                packet = new TradeAcceptedPacket(null, bufferSize);
+                packet = new TradeAcceptedPacket(data);
                 break;
             case PacketType.TRADECHANGED:
-                packet = new TradeChangedPacket(null, bufferSize);
+                packet = new TradeChangedPacket(data);
                 break;
             case PacketType.TRADEDONE:
-                packet = new TradeDonePacket(null, bufferSize);
+                packet = new TradeDonePacket(data);
                 break;
             case PacketType.TRADEREQUESTED:
-                packet = new TradeRequestedPacket(null, bufferSize);
+                packet = new TradeRequestedPacket(data);
                 break;
             case PacketType.TRADESTART:
-                packet = new TradeStartPacket(null, bufferSize);
+                packet = new TradeStartPacket(data);
                 break;
             case PacketType.UPDATE:
-                packet = new UpdatePacket(null, bufferSize);
+                packet = new UpdatePacket(data);
                 break;
             case PacketType.VERIFYEMAIL:
-                packet = new VerifyEmailPacket(null, bufferSize);
+                packet = new VerifyEmailPacket(data);
                 break;
             case PacketType.ENTERARENA:
-                packet = new EnterArenaPacket(null, bufferSize);
+                packet = new EnterArenaPacket(data);
                 break;
             case PacketType.QUESTREDEEM:
-                packet = new QuestRedeemPacket(null, bufferSize);
+                packet = new QuestRedeemPacket(data);
                 break;
             case PacketType.ACTIVEPET_UPDATE_REQUEST:
-                packet = new ActivePetUpdateRequestPacket(null, bufferSize);
+                packet = new ActivePetUpdateRequestPacket(data);
                 break;
             case PacketType.ACCEPTTRADE:
-                packet = new AcceptTradePacket(null, bufferSize);
+                packet = new AcceptTradePacket(data);
                 break;
             case PacketType.AOEACK:
-                packet = new AoeAckPacket(null, bufferSize);
+                packet = new AoeAckPacket(data);
                 break;
             case PacketType.BUY:
-                packet = new BuyPacket(null, bufferSize);
+                packet = new BuyPacket(data);
                 break;
             case PacketType.CANCELTRADE:
-                packet = new CancelTradePacket(null, bufferSize);
+                packet = new CancelTradePacket(data);
                 break;
             case PacketType.CHANGEGUILDRANK:
-                packet = new ChangeGuildRankPacket(null, bufferSize);
+                packet = new ChangeGuildRankPacket(data);
                 break;
             case PacketType.CHANGETRADE:
-                packet = new ChangeTradePacket(null, bufferSize);
+                packet = new ChangeTradePacket(data);
                 break;
             case PacketType.CHECKCREDITS:
-                packet = new CheckCreditsPacket(null, bufferSize);
+                packet = new CheckCreditsPacket(data);
                 break;
             case PacketType.CHOOSENAME:
-                packet = new ChooseNamePacket(null, bufferSize);
+                packet = new ChooseNamePacket(data);
                 break;
             case PacketType.CREATEGUILD:
-                packet = new CreateGuildPacket(null, bufferSize);
+                packet = new CreateGuildPacket(data);
                 break;
             case PacketType.CREATE:
-                packet = new CreatePacket(null, bufferSize);
+                packet = new CreatePacket(data);
                 break;
             case PacketType.EDITACCOUNTLIST:
-                packet = new EditAccountListPacket(null, bufferSize);
+                packet = new EditAccountListPacket(data);
                 break;
             case PacketType.ENEMYHIT:
-                packet = new EnemyHitPacket(null, bufferSize);
+                packet = new EnemyHitPacket(data);
                 break;
             case PacketType.ESCAPE:
-                packet = new EscapePacket(null, bufferSize);
+                packet = new EscapePacket(data);
                 break;
             case PacketType.QUESTROOM_MSG:
-                packet = new GoToQuestRoomPacket(null, bufferSize);
+                packet = new GoToQuestRoomPacket(data);
                 break;
             case PacketType.GOTOACK:
-                packet = new GotoAckPacket(null, bufferSize);
+                packet = new GotoAckPacket(data);
                 break;
             case PacketType.GROUNDDAMAGE:
-                packet = new GroundDamagePacket(null, bufferSize);
+                packet = new GroundDamagePacket(data);
                 break;
             case PacketType.GUILDINVITE:
-                packet = new GuildInvitePacket(null, bufferSize);
+                packet = new GuildInvitePacket(data);
                 break;
             case PacketType.GUILDREMOVE:
-                packet = new GuildRemovePacket(null, bufferSize);
+                packet = new GuildRemovePacket(data);
                 break;
             case PacketType.HELLO:
-                packet = new HelloPacket(null, bufferSize);
+                packet = new HelloPacket(data);
                 break;
             case PacketType.INVDROP:
-                packet = new InvDropPacket(null, bufferSize);
+                packet = new InvDropPacket(data);
                 break;
             case PacketType.INVSWAP:
-                packet = new InvSwapPacket(null, bufferSize);
+                packet = new InvSwapPacket(data);
                 break;
             case PacketType.JOINGUILD:
-                packet = new JoinGuildPacket(null, bufferSize);
+                packet = new JoinGuildPacket(data);
                 break;
             case PacketType.KEYINFO_REQUEST:
-                packet = new KeyInfoRequestPacket(null, bufferSize);
+                packet = new KeyInfoRequestPacket(data);
                 break;
             case PacketType.LOAD:
-                packet = new LoadPacket(null, bufferSize);
+                packet = new LoadPacket(data);
                 break;
             case PacketType.MOVE:
-                packet = new MovePacket(null, bufferSize);
+                packet = new MovePacket(data);
                 break;
             case PacketType.OTHERHIT:
-                packet = new OtherHitPacket(null, bufferSize);
+                packet = new OtherHitPacket(data);
                 break;
             case PacketType.PLAYERHIT:
-                packet = new PlayerHitPacket(null, bufferSize);
+                packet = new PlayerHitPacket(data);
                 break;
             case PacketType.PLAYERSHOOT:
-                packet = new PlayerShootPacket(null, bufferSize);
+                packet = new PlayerShootPacket(data);
                 break;
             case PacketType.PLAYERTEXT:
-                packet = new PlayerTextPacket(null, bufferSize);
+                packet = new PlayerTextPacket(data);
                 break;
             case PacketType.PONG:
-                packet = new PongPacket(null, bufferSize);
+                packet = new PongPacket(data);
                 break;
             case PacketType.REQUESTTRADE:
-                packet = new RequestTradePacket(null, bufferSize);
+                packet = new RequestTradePacket(data);
                 break;
             case PacketType.RESKIN:
-                packet = new ReskinPacket(null, bufferSize);
+                packet = new ReskinPacket(data);
                 break;
             case PacketType.SETCONDITION:
-                packet = new SetConditionPacket(null, bufferSize);
+                packet = new SetConditionPacket(data);
                 break;
             case PacketType.SHOOTACK:
-                packet = new ShootAckPacket(null, bufferSize);
+                packet = new ShootAckPacket(data);
                 break;
             case PacketType.SQUAREHIT:
-                packet = new SquareHitPacket(null, bufferSize);
+                packet = new SquareHitPacket(data);
                 break;
             case PacketType.TELEPORT:
-                packet = new TeleportPacket(null, bufferSize);
+                packet = new TeleportPacket(data);
                 break;
             case PacketType.UPDATEACK:
-                packet = new UpdateAckPacket(null, bufferSize);
+                packet = new UpdateAckPacket(data);
                 break;
             case PacketType.USEITEM:
-                packet = new UseItemPacket(null, bufferSize);
+                packet = new UseItemPacket(data);
                 break;
             case PacketType.USEPORTAL:
-                packet = new UsePortalPacket(null, bufferSize);
+                packet = new UsePortalPacket(data);
                 break;
         }
         packet.type = type;

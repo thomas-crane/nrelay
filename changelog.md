@@ -1,6 +1,14 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.2.0`
+### Changes:
+ + Refactored the resource manager to use promises for loading data.
+ + Changed the order of operations in the cli.
+    + Resource loading happens in parallel.
+    + Plugin loading happens after resource loading to prevent race conditions.
+ + Change packet creation slightly to simplify packet io.
+
 ## `6.1.2`
 ### Fixes:
  + Fixed a bug in the plugin manager which would stop plugins from loading on a mac.

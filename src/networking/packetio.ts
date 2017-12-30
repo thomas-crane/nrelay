@@ -63,6 +63,7 @@ export class PacketIO {
         }
 
         this.socket.write(packet.data);
+        packet = null;
     }
 
     private processData(data: Buffer): void {
@@ -135,8 +136,7 @@ export class PacketIO {
 
         let packet;
         try {
-            packet = Packets.create(packetId, packetSize - 5);
-            packet.data = packetData;
+            packet = Packets.create(packetId, packetData);
             packet.bufferIndex = 0;
         } catch (error) {
             if (environment.debug) {
@@ -146,6 +146,7 @@ export class PacketIO {
 
         if (packet) {
             packet.read();
+            packet.data = null;
             this.emitter.emit('packet', packet);
         }
     }

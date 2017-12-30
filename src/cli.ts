@@ -45,9 +45,12 @@ export class CLI {
     }
 
     proceed(): void {
-        ResourceManager.loadTileInfo();
-        ResourceManager.loadObjects();
-        PluginManager.loadPlugins();
+        Promise.all([ResourceManager.loadTileInfo(), ResourceManager.loadObjects()]).then(() => {
+            PluginManager.loadPlugins();
+        }).catch((error) => {
+            Log('NRelay', 'An error occurred while loading tiles and objects. There may be some problems with plugins', LogLevel.Warning);
+            PluginManager.loadPlugins();
+        });
         const accInfo = Storage.getAccountConfig();
         if (!accInfo) {
             Log('NRelay', 'Couldn\'t load acc-config.json.', LogLevel.Error);
