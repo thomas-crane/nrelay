@@ -41,6 +41,17 @@ const EMAIL_REPLACE_REGEX = /.+?(.+?)(?:@|\+\d+).+?(.+?)\./;
 
 export class Client {
 
+    /**
+     * Attaches an event listener to the client.
+     * @example
+     * ```
+     * Client.on('disconnect', (data: IPlayerData) => {
+     *   delete this.clients[data.name];
+     * });
+     * ```
+     * @param event The name of the event to listen for. Available events are 'connect'|'disconnect'
+     * @param listener The callback to invoke when the event is fired.
+     */
     public static on(event: string | symbol, listener: (...args: any[]) => void): EventEmitter {
         if (!this.emitter) {
             this.emitter = new EventEmitter();
@@ -49,11 +60,55 @@ export class Client {
     }
     private static emitter: EventEmitter;
 
+    /**
+     * The player data of the client.
+     * @see `IPlayerData` for more info.
+     */
     public playerData: IPlayerData;
+    /**
+     * The PacketIO instance associated with the client.
+     * @see `PacketIO` for more info.
+     */
     public packetio: PacketIO;
+    /**
+     * The tiles of the current map. These are stored in a
+     * 1d array, so to access the tile at x, y the index
+     * y * height + x should be used where height is the height
+     * of the map.
+     * @example
+     * ```
+     * public getTile(client: Client, x: number, y: number): GroundTileData {
+     *   const tileX = Math.floor(x);
+     *   const tileY = Math.floor(y);
+     *   return client.mapTiles.mapTiles[tileY * client.mapInfo.height + tileX];
+     * }
+     * ```
+     */
     public mapTiles: GroundTileData[];
+    /**
+     * The position the client will try to move towards.
+     * If this is `null` then the client will not move.
+     * @example
+     * ```
+     * pos: WorldPosData = new WorldPosData();
+     * pos.x = client.playerData.worldPos.x + 1;
+     * pos.y = client.playerData.worldPos.y + 1;
+     * client.nextPos = pos;
+     */
     public nextPos: WorldPosData;
+    /**
+     * Info about the current map including
+     *  + `width: number` the width of the map.
+     *  + `height: number` the height of the name.
+     *  + `name: string` the name of the map.
+     */
     public mapInfo: { width: number, height: number, name: string };
+    /**
+     * Info about the account's characters including
+     *  + `charId: number` the last selected character's id.
+     *  + `nextCharId: number` the next character id that the account will receive.
+     *  + `maxNumChars: number` the number of character slots available.
+     */
     public charInfo: { charId: number, nextCharId: number, maxNumChars: number };
 
     private nexusServerIp: string;
@@ -73,6 +128,12 @@ export class Client {
     private keyTime: number;
     private gameId: number;
 
+    /**
+     * Creates a new instance of the client and begins the connection process to the specified server.
+     * @param server The server to connect to.
+     * @param buildVersion The current build version of RotMG.
+     * @param accInfo The account info to connect with.
+     */
     constructor(server: IServer, buildVersion: string, accInfo?: IAccount) {
         if (!Client.emitter) {
             Client.emitter = new EventEmitter();
