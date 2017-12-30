@@ -34,7 +34,25 @@ public getTile(x: number, y: number): GroundTileData {
 Holds meta data about the account's character ids.
 
 ### Public methods
-This class has no public methods.
+#### `on(event: string | symbol, listener: (...args: any[]) => void)`
+Used to attach event listeners to the `Client` events.
+
+The available events are:
+```typescript
+// fired when a client connects to the server.
+Client.on('connect', (playerData: IPlayerData) => {
+    // note that playerData will still be the default values
+    // because no player data has been received yet.
+});
+```
+```typescript
+// fired when a client disconnects from the server.
+Client.on('disconnect', (playerData: IPlayerData) => {
+    // last known playerData.
+    // example usage
+    delete this.clients[playerData.name];
+});
+```
 
 ## IPlayerData
 ### Public members
