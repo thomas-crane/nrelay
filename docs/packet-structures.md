@@ -908,7 +908,7 @@ The bullet id of the bullet which hit.
 #### `targetId: number`
 > Unknown. Probably the id of the object which was hit.
 
-## PlayerHit
+## PlayerHitPacket
 Sent when the player is hit.
 ### Members
 #### `bulletId: number`
