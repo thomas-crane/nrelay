@@ -33,10 +33,14 @@ import { AoeAckPacket } from './../networking/packets/outgoing/aoeack-packet';
 import { EnemyShootPacket } from './../networking/packets/incoming/enemy-shoot-packet';
 import { ShootAckPacket } from './../networking/packets/outgoing/shootack-packet';
 import { UpdateAckPacket } from './../networking/packets/outgoing/updateack-packet';
+import { ServerPlayerShootPacket } from './../networking/packets/incoming/server-player-shoot-packet';
+import { PlayerShootPacket } from './../networking/packets/outgoing/player-shoot-packet';
 import { EventEmitter } from 'events';
 
 const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
+const MIN_ATTACK_FREQ = 0.0015;
+const MAX_ATTACK_FREQ = 0.008;
 const EMAIL_REPLACE_REGEX = /.+?(.+?)(?:@|\+\d+).+?(.+?)\./;
 
 export class Client {
@@ -122,6 +126,8 @@ export class Client {
     private buildVersion: string;
     private clientSocket: Socket;
     private moveMultiplier: number;
+    private currentBulletId: number;
+    private lastAttackTime: number;
 
     // reconnect info
     private key: Int8Array;
@@ -144,6 +150,8 @@ export class Client {
         this.playerData = getDefaultPlayerData();
         this.playerData.server = server.name;
         this.nextPos = null;
+        this.currentBulletId = 0;
+        this.lastAttackTime = 0;
         if (accInfo) {
             this.charInfo = accInfo;
             this.guid = accInfo.guid;
@@ -167,6 +175,25 @@ export class Client {
         this.connect();
     }
 
+    public shoot(angle: number): boolean {
+        const time = this.getTime();
+        const item = ResourceManager.items[this.playerData.inventory[0]];
+        const attackPeriod = 1 / this.getAttackFrequency() * (1 / item.rateOfFire);
+        if (time < this.lastAttackTime + attackPeriod) {
+            return false;
+        }
+
+        this.lastAttackTime = time;
+        const shootPacket = new PlayerShootPacket();
+        shootPacket.bulletId = this.getBulletId();
+        shootPacket.angle = angle;
+        shootPacket.containerType = item.type;
+        shootPacket.time = time;
+        shootPacket.startingPos = this.playerData.worldPos.clone();
+        this.packetio.sendPacket(shootPacket);
+        return true;
+    }
+
     @HookPacket(PacketType.MAPINFO)
     private onMapInfo(client: Client, mapInfoPacket: MapInfoPacket): void {
         if (this.charInfo.charId > 0) {
@@ -174,13 +201,13 @@ export class Client {
             loadPacket.charId = this.charInfo.charId;
             loadPacket.isFromArena = false;
             Log(this.censoredGuid, 'Connecting to ' + mapInfoPacket.name, LogLevel.Info);
-            client.packetio.sendPacket(loadPacket);
+            this.packetio.sendPacket(loadPacket);
         } else {
             const createPacket = new CreatePacket();
             createPacket.classType = Classes.Wizard;
             createPacket.skinType = 0;
             Log(this.censoredGuid, 'Creating new char', LogLevel.Info);
-            client.packetio.sendPacket(createPacket);
+            this.packetio.sendPacket(createPacket);
         }
         this.mapTiles = new Array<GroundTileData>(mapInfoPacket.width * mapInfoPacket.height);
         this.mapInfo = { width: mapInfoPacket.width, height: mapInfoPacket.height, name: mapInfoPacket.name };
@@ -190,7 +217,7 @@ export class Client {
     private onUpdate(client: Client, updatePacket: UpdatePacket): void {
         // reply
         const updateAck = new UpdateAckPacket();
-        client.packetio.sendPacket(updateAck);
+        this.packetio.sendPacket(updateAck);
 
         // playerdata
         for (let i = 0; i < updatePacket.newObjects.length; i++) {
@@ -221,7 +248,7 @@ export class Client {
     private onGotoPacket(client: Client, gotoPacket: GotoPacket): void {
         const ack = new GotoAckPacket();
         ack.time = this.getTime();
-        client.packetio.sendPacket(ack);
+        this.packetio.sendPacket(ack);
     }
 
     @HookPacket(PacketType.FAILURE)
@@ -239,9 +266,7 @@ export class Client {
     private onAoe(client: Client, aoePacket: AoePacket): void {
         const aoeAck = new AoeAckPacket();
         aoeAck.time = this.getTime();
-        aoeAck.position = new WorldPosData();
-        aoeAck.position.x = this.playerData.worldPos.x;
-        aoeAck.position.y = this.playerData.worldPos.y;
+        aoeAck.position = this.playerData.worldPos.clone();
         this.packetio.sendPacket(aoeAck);
     }
 
@@ -252,13 +277,13 @@ export class Client {
         // reply
         const movePacket = new MovePacket();
         movePacket.tickId = newTickPacket.tickId;
-        movePacket.time = client.getTime();
+        movePacket.time = this.getTime();
         if (this.nextPos) {
             this.moveTo(this.nextPos);
         }
-        movePacket.newPosition = client.playerData.worldPos;
+        movePacket.newPosition = this.playerData.worldPos;
         movePacket.records = [];
-        client.packetio.sendPacket(movePacket);
+        this.packetio.sendPacket(movePacket);
     }
 
     @HookPacket(PacketType.PING)
@@ -266,8 +291,8 @@ export class Client {
         // reply
         const pongPacket = new PongPacket();
         pongPacket.serial = pingPacket.serial;
-        pongPacket.time = client.getTime();
-        client.packetio.sendPacket(pongPacket);
+        pongPacket.time = this.getTime();
+        this.packetio.sendPacket(pongPacket);
     }
 
     @HookPacket(PacketType.ENEMYSHOOT)
@@ -275,6 +300,15 @@ export class Client {
         const shootAck = new ShootAckPacket();
         shootAck.time = this.getTime();
         this.packetio.sendPacket(shootAck);
+    }
+
+    @HookPacket(PacketType.SERVERPLAYERSHOOT)
+    private onServerPlayerShoot(client: Client, serverPlayerShoot: ServerPlayerShootPacket): void {
+        if (serverPlayerShoot.ownerId === this.playerData.objectId) {
+            const ack = new ShootAckPacket();
+            ack.time = this.getTime();
+            this.packetio.sendPacket(ack);
+        }
     }
 
     @HookPacket(PacketType.CREATESUCCESS)
@@ -320,6 +354,12 @@ export class Client {
         this.packetio.sendPacket(hp);
     }
 
+    private getBulletId(): number {
+        const bId = this.currentBulletId;
+        this.currentBulletId = (this.currentBulletId + 1) % 128;
+        return bId;
+    }
+
     private onClose(error: boolean): void {
         Client.emitter.emit('disconnect', Object.assign({}, this.playerData));
         Log(this.censoredGuid, 'The connection was closed.', LogLevel.Warning);
@@ -362,7 +402,6 @@ export class Client {
     }
 
     private moveTo(target: WorldPosData): void {
-        const newPos = new WorldPosData();
         const step = this.getSpeed();
         if (this.playerData.worldPos.squareDistanceTo(target) > step ** 2) {
             const angle: number = Math.atan2(target.y - this.playerData.worldPos.y, target.x - this.playerData.worldPos.x);
@@ -391,5 +430,9 @@ export class Client {
         }
 
         return (speed * multiplier * tickTime);
+    }
+
+    private getAttackFrequency(): number {
+        return MIN_ATTACK_FREQ + this.playerData.dex / 75 * (MAX_ATTACK_FREQ - MIN_ATTACK_FREQ);
     }
 }

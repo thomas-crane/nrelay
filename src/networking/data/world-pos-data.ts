@@ -20,4 +20,11 @@ export class WorldPosData {
         const b = location.y - this.y;
         return a ** 2 + b ** 2;
     }
+
+    public clone(): WorldPosData {
+        const clone = new WorldPosData();
+        clone.x = this.x;
+        clone.y = this.y;
+        return clone;
+    }
 }

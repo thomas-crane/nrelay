@@ -1,6 +1,11 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.3.0`
+### Changes:
+ + Added shoot method to Client. This method can be used to make the player fire the currently equipped weapon.
+ + Added the `--no-update` command line argument option. Use this to skip checking for updates.
+
 ## `6.2.0`
 ### Changes:
  + Refactored the resource manager to use promises for loading data.

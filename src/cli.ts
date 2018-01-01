@@ -26,22 +26,27 @@ export class CLI {
         } else {
             Log('NRelay', 'Starting...');
         }
-        Log('NRelay', 'Checking for updates...', LogLevel.Info);
-        Updater.checkVersion().then((needsUpdate) => {
-            if (needsUpdate) {
-                Log('NRelay', 'An update is available. Downloading...');
-                Updater.getLatest().then(() => {
-                    process.exit(0);
-                }).catch((error) => {
-                    Log('NRelay', 'Error while updating: ' + JSON.stringify(error), LogLevel.Error);
-                });
-            } else {
-                this.proceed();
-            }
-        }).catch(() => {
-            Log('NRelay', 'Error while checking for update, starting anyway.', LogLevel.Info);
+        if (this.hasFlag('--no-update')) {
+            Log('NRelay', 'Not checking for updates.', LogLevel.Info);
             this.proceed();
-        });
+        } else {
+            Log('NRelay', 'Checking for updates...', LogLevel.Info);
+            Updater.checkVersion().then((needsUpdate) => {
+                if (needsUpdate) {
+                    Log('NRelay', 'An update is available. Downloading...');
+                    Updater.getLatest().then(() => {
+                        process.exit(0);
+                    }).catch((error) => {
+                        Log('NRelay', 'Error while updating: ' + JSON.stringify(error), LogLevel.Error);
+                    });
+                } else {
+                    this.proceed();
+                }
+            }).catch(() => {
+                Log('NRelay', 'Error while checking for update, starting anyway.', LogLevel.Info);
+                this.proceed();
+            });
+        }
     }
 
     proceed(): void {
