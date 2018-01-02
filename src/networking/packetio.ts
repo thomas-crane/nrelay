@@ -6,6 +6,7 @@ import stream = require('stream');
 import { RC4, OUTGOING_KEY, INCOMING_KEY } from './../crypto/rc4';
 import { Log, LogLevel } from './../services/logger';
 import { environment } from './../models/environment';
+import { PacketHead } from './packet-head';
 
 export class PacketIO {
 
@@ -14,11 +15,13 @@ export class PacketIO {
     private socket: Socket;
     private emitter: EventEmitter;
 
-    private bytesToRead: number;
-    private dataQueue: Buffer;
+    private currentHead: PacketHead;
+    private packetBuffer: Buffer;
+    private index: number;
 
     constructor(socket: Socket) {
-        this.bytesToRead = 0;
+        this.index = 0;
+        this.currentHead = null;
         this.emitter = new EventEmitter();
         this.socket = socket;
         this.sendRC4 = new RC4(Buffer.from(OUTGOING_KEY, 'hex'));
@@ -29,9 +32,9 @@ export class PacketIO {
 
     public reset(socket: Socket): void {
         this.socket.removeAllListeners('data');
-        this.bytesToRead = 0;
-        this.dataQueue = null;
         this.socket = socket;
+        this.index = 0;
+        this.currentHead = null;
         this.sendRC4 = new RC4(Buffer.from(OUTGOING_KEY, 'hex'));
         this.receiveRC4 = new RC4(Buffer.from(INCOMING_KEY, 'hex'));
 
@@ -66,27 +69,7 @@ export class PacketIO {
         packet = null;
     }
 
-    private processData(data: Buffer): void {
-        if (this.bytesToRead > 0) {
-            if (data.length < this.bytesToRead) {
-                this.dataQueue = Buffer.concat([this.dataQueue, data], this.dataQueue.length + data.length);
-                this.bytesToRead -= data.length;
-                return;
-            } else {
-                this.dataQueue = Buffer.concat([this.dataQueue, data.slice(0, this.bytesToRead)], this.dataQueue.length + this.bytesToRead);
-                this.dispatchPacket(this.dataQueue);
-                this.dataQueue = null;
-
-                if (this.bytesToRead === data.length) {
-                    this.bytesToRead = 0;
-                    return;
-                } else {
-                    data = data.slice(this.bytesToRead, data.length);
-                }
-                this.bytesToRead = 0;
-            }
-        }
-
+    private processHead(data: Buffer): void {
         let packetSize: number;
         let packetId: number;
         try {
@@ -99,55 +82,69 @@ export class PacketIO {
                 throw new Error('Invalid packet id.');
             }
         } catch (err) {
-            Log('PacketIO', 'Couldn\'t read packet size/id.', LogLevel.Error);
             if (environment.debug) {
-                Log('PacketIO', 'READ: id: ' + packetId + ', size: ' + packetSize, LogLevel.Info);
+                Log('PacketIO', 'READ: id: ' + packetId + ', size: ' + packetSize, LogLevel.Error);
             }
             this.emitter.emit('error');
             return;
         }
-        if (packetSize === data.length) {
-            this.dispatchPacket(data);
-            return;
-        }
-        if (packetSize < data.length) {
-            this.dispatchPacket(data.slice(0, packetSize));
-            this.processData(data.slice(packetSize, data.length));
-            return;
-        }
-        if (packetSize > data.length) {
-            this.bytesToRead = packetSize;
-            this.dataQueue = Buffer.from(data);
-            this.bytesToRead -= data.length;
-            return;
+        this.currentHead = new PacketHead(packetId, packetSize);
+        this.index = 5;
+        this.packetBuffer = Buffer.alloc(packetSize);
+        if (data.length > 5) {
+            this.processData(data.slice(5));
         }
     }
 
-    private dispatchPacket(data: Buffer): void {
-        const packetSize = data.readInt32BE(0);
-        const packetId = data.readInt8(4);
+    private processData(data: Buffer): void {
+        if (!this.currentHead) {
+            this.processHead(data);
+            return;
+        }
 
-        const packetData = data.slice(5, data.length);
+        // process all data which has arrived.
+        for (let i = 0; i < data.length; i++) {
+            if (this.index < this.packetBuffer.length) {
+                this.packetBuffer[this.index++] = data[i];
+            } else {
+                // packet buffer is full, emit a packet before continuing.
+                this.emitPacket();
+                if (i < data.length - 1) {
+                    this.processData(data.slice(i));
+                }
+                return;
+            }
+        }
+
+        // if the packet buffer is full, emit a packet.
+        if (this.index === this.packetBuffer.length) {
+            this.emitPacket();
+        }
+        return;
+    }
+
+    private emitPacket(): void {
+        const packetData = this.packetBuffer.slice(5);
         this.receiveRC4.cipher(packetData);
 
         if (environment.debug) {
-            Log('PacketIO', 'READ: id: ' + packetId + ', size: ' + packetSize, LogLevel.Info);
+            Log('PacketIO', 'READ: id: ' + this.currentHead.id + ', size: ' + this.currentHead.length, LogLevel.Info);
         }
 
         let packet;
         try {
-            packet = Packets.create(packetId, packetData);
+            packet = Packets.create(this.currentHead.id, packetData);
             packet.bufferIndex = 0;
         } catch (error) {
             if (environment.debug) {
                 Log('PacketIO', error.message, LogLevel.Error);
             }
         }
-
         if (packet) {
             packet.read();
             packet.data = null;
             this.emitter.emit('packet', packet);
+            this.currentHead = null;
         }
     }
 }
