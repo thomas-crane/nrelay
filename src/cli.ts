@@ -53,7 +53,7 @@ export class CLI {
         Promise.all([ResourceManager.loadTileInfo(), ResourceManager.loadObjects()]).then(() => {
             PluginManager.loadPlugins();
         }).catch((error) => {
-            Log('NRelay', 'An error occurred while loading tiles and objects. There may be some problems with plugins', LogLevel.Warning);
+            Log('NRelay', 'An error occurred while loading tiles and objects.', LogLevel.Warning);
             PluginManager.loadPlugins();
         });
         const accInfo = Storage.getAccountConfig();
@@ -86,20 +86,6 @@ export class CLI {
                 });
             }, (i * 1000));
         }
-    }
-
-    getServers(): Promise<{ [id: string]: IServer }> {
-        Log('NRelay', 'Getting server list...', LogLevel.Info);
-        return new Promise((resolve, reject) => {
-            Http.get(SERVER_ENDPOINT).then((data) => {
-                Log('NRelay', 'Got servers!', LogLevel.Success);
-                const servers = parseServers(data);
-                resolve(servers);
-            }).catch((serverListError) => {
-                Log('NRelay', 'Error getting servers.', LogLevel.Error);
-                reject(serverListError);
-            });
-        });
     }
 
     getAccountInfo(guid: string, password: string): Promise<IAccount> {

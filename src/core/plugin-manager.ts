@@ -86,15 +86,6 @@ export class PluginManager {
         }
     }
 
-    static printPluginInfo(): void {
-        if (!this.pluginInfo) {
-            return;
-        }
-        for (let i = 0; i < this.pluginInfo.length; i++) {
-            Log('PluginManager', 'Loaded ' + this.pluginInfo[i].name + ' by ' + this.pluginInfo[i].author, LogLevel.Info);
-        }
-    }
-
     private static hooks: { [id: number]: Array<{ action: typeof Function, caller: string }> };
     private static pluginInfo: Array<{ name: string, author: string, description?: string }>;
     private static pluginInstances: { [id: string]: object };
