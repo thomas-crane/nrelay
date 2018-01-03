@@ -1,3 +1,4 @@
 export const environment = {
-    debug: false
+    debug: false,
+    log: true
 };

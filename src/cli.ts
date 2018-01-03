@@ -1,4 +1,4 @@
-import { Log, LogLevel } from './services/logger';
+import { Log, LogLevel, Logger } from './services/logger';
 import { Http } from './services/http';
 import { parseServers, parseAccountInfo, parseError } from './services/xmltojson';
 import { SERVER_ENDPOINT } from './models/api-endpoints';
@@ -10,6 +10,7 @@ import { PluginManager } from './core/plugin-manager';
 import { ResourceManager } from './core/resource-manager';
 import { Updater } from './services/updater';
 import { environment } from './models/environment';
+import fs = require('fs');
 
 const args = process.argv;
 
@@ -18,8 +19,11 @@ export class CLI {
     private serverList: { [id: string]: IServer };
 
     constructor() {
-        if (this.hasFlag('--debug')) {
-            environment.debug = true;
+        this.checkFlags();
+        if (environment.log) {
+            const logStream = fs.createWriteStream(Storage.makePath('nrelay-log.log'));
+            logStream.write('Log Start (time: ' + Date.now() + ')\n');
+            Logger.logStream = logStream;
         }
         if (environment.debug) {
             Log('NRelay', 'Starting in debug mode...');
@@ -105,6 +109,15 @@ export class CLI {
                 }
             }).catch((err) => reject(err));
         });
+    }
+
+    private checkFlags(): void {
+        if (this.hasFlag('--no-log')) {
+            environment.log = false;
+        }
+        if (this.hasFlag('--debug')) {
+            environment.debug = true;
+        }
     }
 
     private hasFlag(flag: string): boolean {

@@ -389,8 +389,8 @@ export class Client {
             this.packetio.on('packet', (data: Packet) => {
                 PluginManager.callHooks(data.type, data, this);
             });
-            this.packetio.on('error', () => {
-                Log(this.censoredGuid, 'Received PacketIO error. Reconnecting.', LogLevel.Error);
+            this.packetio.on('error', (err) => {
+                Log(this.censoredGuid, 'Received PacketIO error: ' + err, LogLevel.Error);
                 this.clientSocket.destroy();
             });
         } else {

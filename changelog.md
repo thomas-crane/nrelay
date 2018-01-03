@@ -1,6 +1,16 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.4.0`
+### Changes:
+ + Added timestamp (`hh:mm:ss`) to the Logger
+ + Added string padding to the Logger to improve readability
+ + Added a log file which mirrors the output to the console
+ + Added a new environment property `log: boolean`. If this is `true`, the log file will be written to. If it is `false` the console logs will not be written to the log file. The default value is `true`.
+ + Added a new command line flag `--no-log` to disable file logging. This does not persist, to always disable file logging change the `log` property of `environment.ts` to `false`.
+### Fixes:
+ + Improved `PacketIO` stability. The error `Couldn't read size/id.` appears to have been fixed as a result of the improvements.
+
 ## `6.3.0`
 ### Changes:
  + Added shoot method to Client. This method can be used to make the player fire the currently equipped weapon.

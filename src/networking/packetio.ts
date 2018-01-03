@@ -83,7 +83,7 @@ export class PacketIO {
             if (environment.debug) {
                 Log('PacketIO', 'READ: id: ' + packetId + ', size: ' + packetSize, LogLevel.Error);
             }
-            this.emitter.emit('error');
+            this.emitter.emit('error', err);
             return;
         }
         this.currentHead = new PacketHead(packetId, packetSize);

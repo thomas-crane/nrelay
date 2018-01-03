@@ -17,3 +17,6 @@ resources/*
 
 # User prefs
 .vscode/
+
+# Log files
+nrelay-log.log
