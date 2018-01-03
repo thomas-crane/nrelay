@@ -105,6 +105,24 @@ You will only be able to use the command `nrelay` if you performed step 6 and 7 
 
 `npm start` will only work if the console is in the nrelay directory, whereas the `nrelay` command can be run anywhere.
 
+### Command line arguments
+There are several command line arguments which can be provided when starting nrelay to change the behaviour.
+
+#### `--debug`
+This will start nrelay in debug mode. Debug mode provides a higher detail of logging. It is not recommended to use debug mode unless you are experiencing errors and need more info.
+
+#### `--no-update`
+This will stop nrelay from checking for updates when it starts.
+
+#### `--no-log`
+This will stop nrelay from writing to the log file.
+
+#### Example
+To start nrelay without checking for updates or log file writing, use
+```bash
+nrelay --no-update --no-log
+```
+
 ## Build
 Whenever any changes are made to the TypeScript source files, they will need to be recompiled in order for the changes to take effect.
 

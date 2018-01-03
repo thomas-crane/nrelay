@@ -54,6 +54,11 @@ Client.on('disconnect', (playerData: IPlayerData) => {
 });
 ```
 
+#### `shoot(angle: number): boolean`
+Used to fire the currently equiped weapon. `angle` should be in radians.
+
+This will return `true` if a shoot packet was actually sent, and `false` if a shoot packet is not sent. A shoot packet will not be sent if the required time between shots has not elapsed.
+
 ## IPlayerData
 ### Public members
 #### `objectId: number;`
@@ -231,6 +236,7 @@ Used to attach an event listener to the packetio.
 
 Events which can be fired are:
  + `'packet'` - Fired when a packet is recieved.
+ + `'error'`  - Fired when an error occurs.
 
 #### `sendPacket(packet: Packet): void`
 Used to send a packet. The `packet` argument can be any type which is a subclass of `Packet`. This includes all specific packet types such as `PlayerTextPacket` and `UpdateAckPacket`.
