@@ -20,8 +20,7 @@ export class PacketIO {
     private index: number;
 
     constructor(socket: Socket) {
-        this.index = 0;
-        this.currentHead = null;
+        this.resetBuffer();
         this.emitter = new EventEmitter();
         this.socket = socket;
         this.sendRC4 = new RC4(Buffer.from(OUTGOING_KEY, 'hex'));
@@ -33,8 +32,7 @@ export class PacketIO {
     public reset(socket: Socket): void {
         this.socket.removeAllListeners('data');
         this.socket = socket;
-        this.index = 0;
-        this.currentHead = null;
+        this.resetBuffer();
         this.sendRC4 = new RC4(Buffer.from(OUTGOING_KEY, 'hex'));
         this.receiveRC4 = new RC4(Buffer.from(INCOMING_KEY, 'hex'));
 
@@ -69,12 +67,12 @@ export class PacketIO {
         packet = null;
     }
 
-    private processHead(data: Buffer): void {
+    private processHead(): void {
         let packetSize: number;
         let packetId: number;
         try {
-            packetSize = data.readInt32BE(0);
-            packetId = data.readInt8(4);
+            packetSize = this.packetBuffer.readInt32BE(0);
+            packetId = this.packetBuffer.readInt8(4);
             if (packetSize < 0) {
                 throw new Error('Invalid packet size.');
             }
@@ -89,38 +87,34 @@ export class PacketIO {
             return;
         }
         this.currentHead = new PacketHead(packetId, packetSize);
-        this.index = 5;
-        this.packetBuffer = Buffer.alloc(packetSize);
-        if (data.length > 5) {
-            this.processData(data.slice(5));
-        }
+        this.packetBuffer = Buffer.concat([this.packetBuffer, Buffer.alloc(packetSize - 5)], packetSize);
     }
 
     private processData(data: Buffer): void {
-        if (!this.currentHead) {
-            this.processHead(data);
-            return;
-        }
-
         // process all data which has arrived.
         for (let i = 0; i < data.length; i++) {
             if (this.index < this.packetBuffer.length) {
                 this.packetBuffer[this.index++] = data[i];
             } else {
-                // packet buffer is full, emit a packet before continuing.
-                this.emitPacket();
-                if (i < data.length - 1) {
-                    this.processData(data.slice(i));
+                if (!this.currentHead) {
+                    this.processHead();
+                } else {
+                    // packet buffer is full, emit a packet before continuing.
+                    this.emitPacket();
                 }
-                return;
+                this.packetBuffer[this.index++] = data[i];
             }
         }
 
         // if the packet buffer is full, emit a packet.
         if (this.index === this.packetBuffer.length) {
-            this.emitPacket();
+            if (!this.currentHead) {
+                this.processHead();
+            } else {
+                // packet buffer is full, emit a packet before continuing.
+                this.emitPacket();
+            }
         }
-        return;
     }
 
     private emitPacket(): void {
@@ -143,8 +137,14 @@ export class PacketIO {
         if (packet) {
             packet.read();
             packet.data = null;
+            this.resetBuffer();
             this.emitter.emit('packet', packet);
-            this.currentHead = null;
         }
+    }
+
+    private resetBuffer(): void {
+        this.packetBuffer = Buffer.alloc(5);
+        this.index = 0;
+        this.currentHead = null;
     }
 }
