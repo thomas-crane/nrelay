@@ -350,12 +350,9 @@ export class Client {
         return bId;
     }
 
-    private onClose(error: any): void {
+    private onClose(error: boolean): void {
         Client.emitter.emit('disconnect', Object.assign({}, this.playerData));
         Log(this.alias, 'The connection was closed.', LogLevel.Warning);
-        if (error) {
-            Log(this.alias, 'Cause of close: ' + error, LogLevel.Info);
-        }
         Log(this.alias, 'Reconnecting in 5 seconds');
         setTimeout(() => {
             this.connect();
@@ -364,7 +361,7 @@ export class Client {
     }
 
     private onError(error: Error): void {
-        this.onClose(error);
+        Log(this.alias, 'Received socket error: ' + error, LogLevel.Error);
     }
 
     private connect(): void {

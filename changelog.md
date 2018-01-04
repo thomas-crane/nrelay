@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.4.3`
+### Fixes:
+ + Stopped socket errors being processed twice.
+
 ## `6.4.2`
 ### Fixes:
  + `ECONN` errors thrown by the client socket no longer crash nrelay.
