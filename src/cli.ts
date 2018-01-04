@@ -13,6 +13,7 @@ import { environment } from './models/environment';
 import fs = require('fs');
 
 const args = process.argv;
+const EMAIL_REPLACE_REGEX = /.+?(.+?)(?:@|\+\d+).+?(.+?)\./;
 
 export class CLI {
 
@@ -69,7 +70,7 @@ export class CLI {
         for (let i = 0; i < accInfo.accounts.length; i++) {
             const acc = accInfo.accounts[i];
             setTimeout(() => {
-                this.getAccountInfo(acc.guid, acc.password).then((info) => {
+                this.getAccountInfo(acc).then((info) => {
                     const keys = Object.keys(this.serverList);
                     if (keys.length > 0) {
                         let server: IServer;
@@ -79,32 +80,42 @@ export class CLI {
                         } else {
                             server = this.serverList[acc.serverPref];
                         }
-                        info.guid = acc.guid;
-                        info.password = acc.password;
                         const client = new Client(server, accInfo.buildVersion, info);
                     } else {
                         Log('NRelay', 'Couldn\'t get servers.', LogLevel.Error);
                     }
                 }).catch((err) => {
-
+                    // error already handled.
                 });
             }, (i * 1000));
         }
     }
 
-    getAccountInfo(guid: string, password: string): Promise<IAccount> {
+    getAccountInfo(account: IAccount): Promise<IAccount> {
+        if (!account.alias) {
+            const match = EMAIL_REPLACE_REGEX.exec(account.guid);
+            if (match) {
+                if (match[1]) {
+                    account.alias = account.guid.replace(match[1], '***');
+                }
+                if (match[2]) {
+                    account.alias = account.alias.replace(match[2], '***');
+                }
+            }
+        }
         return new Promise((resolve, reject) => {
             Http.get(SERVER_ENDPOINT, {
-                guid: guid,
-                password: password
+                guid: account.guid,
+                password: account.password
             }).then((data) => {
                 const info = parseAccountInfo(data);
                 this.serverList = parseServers(data);
                 if (info) {
-                    Log('NRelay', 'Authorized account', LogLevel.Success);
-                    resolve(info);
+                    account.charInfo = info;
+                    Log(account.alias, 'Authorized account', LogLevel.Success);
+                    resolve(account);
                 } else {
-                    Log('NRelay', 'Error: ' + parseError(data), LogLevel.Warning);
+                    Log(account.alias, 'Error: ' + parseError(data), LogLevel.Warning);
                     reject();
                 }
             }).catch((err) => reject(err));

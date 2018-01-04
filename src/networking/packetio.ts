@@ -93,6 +93,11 @@ export class PacketIO {
     private processData(data: Buffer): void {
         // process all data which has arrived.
         for (let i = 0; i < data.length; i++) {
+            // reconnecting to the nexus causes a 'buffer' byte to be sent
+            // which should be skipped.
+            if (this.index === 0 && data[i] === 255) {
+                continue;
+            }
             if (this.index < this.packetBuffer.length) {
                 this.packetBuffer[this.index++] = data[i];
             } else {
@@ -101,6 +106,9 @@ export class PacketIO {
                 } else {
                     // packet buffer is full, emit a packet before continuing.
                     this.emitPacket();
+                }
+                if (this.index === 0 && data[i] === 255) {
+                    continue;
                 }
                 this.packetBuffer[this.index++] = data[i];
             }
@@ -137,9 +145,9 @@ export class PacketIO {
         if (packet) {
             packet.read();
             packet.data = null;
-            this.resetBuffer();
             this.emitter.emit('packet', packet);
         }
+        this.resetBuffer();
     }
 
     private resetBuffer(): void {

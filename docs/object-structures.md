@@ -30,11 +30,13 @@ public getTile(x: number, y: number): GroundTileData {
 }
 ```
 
-#### `charInfo: { charId: number, nextCharId: number, maxNumChars: number };`
+#### `charInfo: ICharacterInfo`
 Holds meta data about the account's character ids.
 
 ### Public methods
 #### `on(event: string | symbol, listener: (...args: any[]) => void)`
+> This method is **static**
+
 Used to attach event listeners to the `Client` events.
 
 The available events are:

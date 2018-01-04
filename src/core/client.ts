@@ -1,7 +1,7 @@
 import { Socket } from 'net';
 import { Log, LogLevel } from '../services/logger';
 import { Packet, PacketType } from './../networking/packet';
-import { IAccountInfo, IAccount } from './../models/accinfo';
+import { IAccountInfo, IAccount, ICharacterInfo } from './../models/accinfo';
 import { IServer } from './../models/server';
 import { Packets } from './../networking/packets';
 import { HelloPacket } from './../networking/packets/outgoing/hello-packet';
@@ -41,7 +41,6 @@ const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
 const MIN_ATTACK_FREQ = 0.0015;
 const MAX_ATTACK_FREQ = 0.008;
-const EMAIL_REPLACE_REGEX = /.+?(.+?)(?:@|\+\d+).+?(.+?)\./;
 
 export class Client {
 
@@ -94,10 +93,11 @@ export class Client {
      * If this is `null` then the client will not move.
      * @example
      * ```
-     * pos: WorldPosData = new WorldPosData();
-     * pos.x = client.playerData.worldPos.x + 1;
-     * pos.y = client.playerData.worldPos.y + 1;
+     * const pos: WorldPosData = client.playerData.worldPos.clone();
+     * pos.x += 1;
+     * pos.y += 1;
      * client.nextPos = pos;
+     * ```
      */
     public nextPos: WorldPosData;
     /**
@@ -108,12 +108,10 @@ export class Client {
      */
     public mapInfo: { width: number, height: number, name: string };
     /**
-     * Info about the account's characters including
-     *  + `charId: number` the last selected character's id.
-     *  + `nextCharId: number` the next character id that the account will receive.
-     *  + `maxNumChars: number` the number of character slots available.
+     * Info about the account's characters.
+     * @see `ICharacterInfo` for more information.
      */
-    public charInfo: { charId: number, nextCharId: number, maxNumChars: number };
+    public charInfo: ICharacterInfo;
 
     private nexusServerIp: string;
     private serverIp: string;
@@ -121,7 +119,7 @@ export class Client {
     private currentTickTime: number;
     private connectTime: number;
     private guid: string;
-    private censoredGuid: string;
+    private alias: string;
     private password: string;
     private buildVersion: string;
     private clientSocket: Socket;
@@ -140,7 +138,7 @@ export class Client {
      * @param buildVersion The current build version of RotMG.
      * @param accInfo The account info to connect with.
      */
-    constructor(server: IServer, buildVersion: string, accInfo?: IAccount) {
+    constructor(server: IServer, buildVersion: string, accInfo: IAccount) {
         if (!Client.emitter) {
             Client.emitter = new EventEmitter();
         }
@@ -152,26 +150,18 @@ export class Client {
         this.nextPos = null;
         this.currentBulletId = 0;
         this.lastAttackTime = 0;
-        if (accInfo) {
-            this.charInfo = accInfo;
-            this.guid = accInfo.guid;
-            const match = EMAIL_REPLACE_REGEX.exec(this.guid);
-            if (match) {
-                if (match[1]) {
-                    this.censoredGuid = this.guid.replace(match[1], '***');
-                }
-                if (match[2]) {
-                    this.censoredGuid = this.censoredGuid.replace(match[2], '***');
-                }
-            }
-            this.password = accInfo.password;
-            this.buildVersion = buildVersion;
+        this.guid = accInfo.guid;
+        this.password = accInfo.password;
+        this.buildVersion = buildVersion;
+        this.alias = accInfo.alias;
+        if (accInfo.charInfo) {
+            this.charInfo = accInfo.charInfo;
         } else {
             this.charInfo = { charId: 0, nextCharId: 1, maxNumChars: 1 };
         }
         this.serverIp = server.address;
         this.nexusServerIp = server.address;
-        Log('Client', 'Starting connection to ' + server.name, LogLevel.Info);
+        Log(this.alias, 'Starting connection to ' + server.name, LogLevel.Info);
         this.connect();
     }
 
@@ -200,13 +190,13 @@ export class Client {
             const loadPacket = new LoadPacket();
             loadPacket.charId = this.charInfo.charId;
             loadPacket.isFromArena = false;
-            Log(this.censoredGuid, 'Connecting to ' + mapInfoPacket.name, LogLevel.Info);
+            Log(this.alias, 'Connecting to ' + mapInfoPacket.name, LogLevel.Info);
             this.packetio.sendPacket(loadPacket);
         } else {
             const createPacket = new CreatePacket();
             createPacket.classType = Classes.Wizard;
             createPacket.skinType = 0;
-            Log(this.censoredGuid, 'Creating new char', LogLevel.Info);
+            Log(this.alias, 'Creating new char', LogLevel.Info);
             this.packetio.sendPacket(createPacket);
         }
         this.mapTiles = new Array<GroundTileData>(mapInfoPacket.width * mapInfoPacket.height);
@@ -258,8 +248,8 @@ export class Client {
         this.keyTime = -1;
         this.key = new Int8Array(0);
         this.serverIp = this.nexusServerIp;
-        this.clientSocket.end();
-        Log(this.censoredGuid, 'Received failure: "' + failurePacket.errorDescription + '"', LogLevel.Error);
+        this.clientSocket.destroy();
+        Log(this.alias, 'Received failure: "' + failurePacket.errorDescription + '"', LogLevel.Error);
     }
 
     @HookPacket(PacketType.AOE)
@@ -316,7 +306,7 @@ export class Client {
         this.playerData.objectId = createSuccessPacket.objectId;
         this.charInfo.charId = createSuccessPacket.charId;
         this.charInfo.nextCharId = this.charInfo.charId + 1;
-        Log(this.censoredGuid, 'Connected!', LogLevel.Success);
+        Log(this.alias, 'Connected!', LogLevel.Success);
     }
 
     private getTime(): number {
@@ -325,7 +315,7 @@ export class Client {
 
     private onConnect(): void {
         Client.emitter.emit('connect', Object.assign({}, this.playerData));
-        Log(this.censoredGuid, 'Connected to server!', LogLevel.Success);
+        Log(this.alias, 'Connected to server!', LogLevel.Success);
         this.connectTime = Date.now();
         this.lastTickTime = 0;
         this.currentTickTime = 0;
@@ -362,11 +352,11 @@ export class Client {
 
     private onClose(error: boolean): void {
         Client.emitter.emit('disconnect', Object.assign({}, this.playerData));
-        Log(this.censoredGuid, 'The connection was closed.', LogLevel.Warning);
+        Log(this.alias, 'The connection was closed.', LogLevel.Warning);
         if (error) {
-            Log(this.censoredGuid, 'An error occurred (cause of close)', LogLevel.Error);
+            Log(this.alias, 'An error occurred (cause of close)', LogLevel.Error);
         }
-        Log(this.censoredGuid, 'Reconnecting in 5 seconds');
+        Log(this.alias, 'Reconnecting in 5 seconds');
         setTimeout(() => {
             this.connect();
         }, 5000);
@@ -377,7 +367,7 @@ export class Client {
         if (this.clientSocket) {
             this.clientSocket.removeAllListeners('connect');
             this.clientSocket.removeAllListeners('close');
-            this.clientSocket.end();
+            this.clientSocket.destroy();
         }
 
         this.clientSocket = new Socket({
@@ -390,7 +380,7 @@ export class Client {
                 PluginManager.callHooks(data.type, data, this);
             });
             this.packetio.on('error', (err) => {
-                Log(this.censoredGuid, 'Received PacketIO error: ' + err, LogLevel.Error);
+                Log(this.alias, 'Received PacketIO error: ' + err, LogLevel.Error);
                 this.clientSocket.destroy();
             });
         } else {

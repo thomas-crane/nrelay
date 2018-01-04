@@ -1,6 +1,15 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.4.1`
+### Changes:
+ + Added a new property `alias: string` to the `acc-config` structure. Use this to replace the censored email in log messages.
+ + Improved log messages for account auth.
+### Fixes:
+ + Fixed a bug where receiving a `Reconnect` packet to the nexus would cause an error.
+ + Receiving an unimplemented packet no longer causes a disconnect.
+ + Reconnecting to a new host no longer causes an `ECONNRESET` error.
+
 ## `6.4.0`
 ### Changes:
  + Added timestamp (`hh:mm:ss`) to the Logger

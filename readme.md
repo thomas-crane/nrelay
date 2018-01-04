@@ -59,6 +59,7 @@ Now that nrelay is installed, you will need to set up your `acc-config.json` fil
     "buildVersion": "X20.1.0",              // The current RotMG build version
     "accounts": [
         {
+            "alias": "Main Client",         // The name which appears in logs. This is optional.
             "guid": "john@email.com",       // Your RotMG account email.
             "password": "SecretPassWord11", // Your RotMG account password.
             "serverPref": "AsiaSouthEast"   // The preferred server to connect to.
@@ -73,11 +74,13 @@ If you have multiple accounts which you want to run at the same time, you can ad
     "buildVersion": "X20.1.0",
     "accounts": [
         {
+            "alias": "Main Client",
             "guid": "first.account@email.com",
             "password": "SecretPassWord11",
             "serverPref": "AsiaSouthEast"
         },
         {
+            "alias": "Secondary Client",
             "guid": "second.account@email.com",
             "password": "Password22",
             "serverPref": "USSouth"
@@ -89,12 +92,20 @@ If you have multiple accounts which you want to run at the same time, you can ad
 ## Run
 After setting up the `acc-config.json` file, nrelay is ready to go. To run nrelay, simply use the command `nrelay` in the console. If you have setup your `acc-config` properly (and used the correct credentials) you should see an output similar to this
 ```bash
-C:\Documents>nrelay
-[NRelay] Starting...
-[NRelay] Authorized account
-[NRelay] Connecting to AsiaSouthEast
-[Client] Starting connection.
-[Client] Connected to server!
+C:\Documents> nrelay
+[17:25:23 | NRelay]           Starting...
+...
+[17:25:26 | Main Client]      Authorized account
+[17:25:26 | Main Client]      Starting connection to AsiaSouthEast
+[17:25:26 | Main Client]      Connected to server!
+[17:25:26 | Main Client]      Connecting to Nexus
+[17:25:27 | Main Client]      Connected!
+```
+The `alias` property in the account config is optional. If one is not specified, the log will use a censored email instead
+```
+[17:25:26 | f***@e***.com]    Authorized account
+[17:25:26 | f***@e***.com]    Starting connection to AsiaSouthEast
+[17:25:26 | f***@e***.com]    Connected to server!
 ```
 
 __Note__

@@ -1,5 +1,5 @@
 import { IServer } from './../models/server';
-import { IAccount } from './../models/accinfo';
+import { IAccount, ICharacterInfo } from './../models/accinfo';
 
 const SERVER_REGEX = /<Server><Name>(\w+)<\/Name><DNS>(\d+\.\d+\.\d+\.\d+)<\/DNS>/g;
 
@@ -26,11 +26,8 @@ export function parseServers(xml: string): { [id: string]: IServer } {
     return servers;
 }
 
-export function parseAccountInfo(xml: string): IAccount | null {
+export function parseAccountInfo(xml: string): ICharacterInfo | null {
     const acc = {
-        guid: '',
-        password: '',
-        serverPref: 'USWest',
         nextCharId: 2,
         charId: 1,
         maxNumChars: 1

@@ -2,6 +2,7 @@
     "buildVersion": "X20.1.0",
     "accounts": [
         {
+            "alias": "Main Client",
             "guid": "john@email.com",
             "password": "SecretPassWord11",
             "serverPref": "AsiaSouthEast"
