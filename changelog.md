@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.4.2`
+### Fixes:
+ + `ECONN` errors thrown by the client socket no longer crash nrelay.
+
 ## `6.4.1`
 ### Changes:
  + Added a new property `alias: string` to the `acc-config` structure. Use this to replace the censored email in log messages.

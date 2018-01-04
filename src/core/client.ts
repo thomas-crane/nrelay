@@ -350,11 +350,11 @@ export class Client {
         return bId;
     }
 
-    private onClose(error: boolean): void {
+    private onClose(error: any): void {
         Client.emitter.emit('disconnect', Object.assign({}, this.playerData));
         Log(this.alias, 'The connection was closed.', LogLevel.Warning);
         if (error) {
-            Log(this.alias, 'An error occurred (cause of close)', LogLevel.Error);
+            Log(this.alias, 'Cause of close: ' + error, LogLevel.Info);
         }
         Log(this.alias, 'Reconnecting in 5 seconds');
         setTimeout(() => {
@@ -363,10 +363,15 @@ export class Client {
         // process.exit(0);
     }
 
+    private onError(error: Error): void {
+        this.onClose(error);
+    }
+
     private connect(): void {
         if (this.clientSocket) {
             this.clientSocket.removeAllListeners('connect');
             this.clientSocket.removeAllListeners('close');
+            this.clientSocket.removeAllListeners('error');
             this.clientSocket.destroy();
         }
 
@@ -389,6 +394,7 @@ export class Client {
         this.clientSocket.connect(2050, this.serverIp);
         this.clientSocket.on('connect', this.onConnect.bind(this));
         this.clientSocket.on('close', this.onClose.bind(this));
+        this.clientSocket.on('error', this.onError.bind(this));
     }
 
     private moveTo(target: WorldPosData): void {
