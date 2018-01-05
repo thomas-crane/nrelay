@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.4.4`
+### Fixes:
+ + Fixed incorrect implementation of `CancelTradePacket`.
+
 ## `6.4.3`
 ### Fixes:
  + Stopped socket errors being processed twice.

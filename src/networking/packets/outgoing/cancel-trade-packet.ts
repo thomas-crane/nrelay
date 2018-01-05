@@ -5,14 +5,17 @@ export class CancelTradePacket extends Packet {
     public type = PacketType.CANCELTRADE;
 
     //#region packet-specific members
+    /**
+     * @deprecated This is not written to the packet when sending.
+     */
     objectId: number;
     //#endregion
 
     public read(): void {
-        this.objectId = this.readInt32();
+
     }
 
     public write(): void {
-        this.writeInt32(this.objectId);
+
     }
 }
