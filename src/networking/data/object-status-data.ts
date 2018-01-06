@@ -5,68 +5,74 @@ import { IPlayerData, getDefaultPlayerData } from './../../models/playerdata';
 
 export class ObjectStatusData {
 
-    public static processStatData(data: ObjectStatusData): IPlayerData {
-        const playerData = getDefaultPlayerData();
+    public static processObjectStatus(data: ObjectStatusData): IPlayerData {
+        const playerData = this.processStatData(data.stats);
         playerData.worldPos = data.pos;
         playerData.objectId = data.objectId;
-        for (let i = 0; i < data.stats.length; i++) {
-            switch (data.stats[i].statType) {
+
+        return playerData;
+    }
+
+    public static processStatData(data: StatData[]): IPlayerData {
+        const playerData = getDefaultPlayerData();
+        for (let i = 0; i < data.length; i++) {
+            switch (data[i].statType) {
                 case StatData.NAME_STAT:
-                    playerData.name = data.stats[i].stringStatValue;
+                    playerData.name = data[i].stringStatValue;
                     continue;
                 case StatData.LEVEL_STAT:
-                    playerData.level = data.stats[i].statValue;
+                    playerData.level = data[i].statValue;
                     continue;
                 case StatData.EXP_STAT:
-                    playerData.exp = data.stats[i].statValue;
+                    playerData.exp = data[i].statValue;
                     continue;
                 case StatData.CURR_FAME_STAT:
-                    playerData.currentFame = data.stats[i].statValue;
+                    playerData.currentFame = data[i].statValue;
                     continue;
                 case StatData.MAX_HP_STAT:
-                    playerData.maxHP = data.stats[i].statValue;
+                    playerData.maxHP = data[i].statValue;
                     continue;
                 case StatData.MAX_MP_STAT:
-                    playerData.maxMP = data.stats[i].statValue;
+                    playerData.maxMP = data[i].statValue;
                     continue;
                 case StatData.HP_STAT:
-                    playerData.hp = data.stats[i].statValue;
+                    playerData.hp = data[i].statValue;
                     continue;
                 case StatData.MP_STAT:
-                    playerData.mp = data.stats[i].statValue;
+                    playerData.mp = data[i].statValue;
                     continue;
                 case StatData.ATTACK_STAT:
-                    playerData.atk = data.stats[i].statValue;
+                    playerData.atk = data[i].statValue;
                     continue;
                 case StatData.DEFENSE_STAT:
-                    playerData.def = data.stats[i].statValue;
+                    playerData.def = data[i].statValue;
                     continue;
                 case StatData.SPEED_STAT:
-                    playerData.spd = data.stats[i].statValue;
+                    playerData.spd = data[i].statValue;
                     continue;
                 case StatData.DEXTERITY_STAT:
-                    playerData.dex = data.stats[i].statValue;
+                    playerData.dex = data[i].statValue;
                     continue;
                 case StatData.VITALITY_STAT:
-                    playerData.vit = data.stats[i].statValue;
+                    playerData.vit = data[i].statValue;
                     continue;
                 case StatData.WISDOM_STAT:
-                    playerData.wis = data.stats[i].statValue;
+                    playerData.wis = data[i].statValue;
                     continue;
                 case StatData.HEALTH_POTION_STACK_STAT:
-                    playerData.hpPots = data.stats[i].statValue;
+                    playerData.hpPots = data[i].statValue;
                     continue;
                 case StatData.MAGIC_POTION_STACK_STAT:
-                    playerData.mpPots = data.stats[i].statValue;
+                    playerData.mpPots = data[i].statValue;
                     continue;
                 case StatData.HASBACKPACK_STAT:
-                    playerData.hasBackpack = data.stats[i].statValue === 1;
+                    playerData.hasBackpack = data[i].statValue === 1;
                     continue;
                 default:
-                    if (data.stats[i].statType >= StatData.INVENTORY_0_STAT && data.stats[i].statType <= StatData.INVENTORY_11_STAT) {
-                        playerData.inventory[data.stats[i].statType - 8] = data.stats[i].statValue;
-                    } else if (data.stats[i].statType >= StatData.BACKPACK_0_STAT && data.stats[i].statType >= StatData.BACKPACK_7_STAT) {
-                        playerData.inventory[data.stats[i].statType - 71] = data.stats[i].statValue;
+                    if (data[i].statType >= StatData.INVENTORY_0_STAT && data[i].statType <= StatData.INVENTORY_11_STAT) {
+                        playerData.inventory[data[i].statType - 8] = data[i].statValue;
+                    } else if (data[i].statType >= StatData.BACKPACK_0_STAT && data[i].statType <= StatData.BACKPACK_7_STAT) {
+                        playerData.inventory[data[i].statType - 59] = data[i].statValue;
                     }
             }
         }

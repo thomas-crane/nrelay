@@ -20,7 +20,7 @@ export interface IPlayerData {
     hpPots: number;
     mpPots: number;
     hasBackpack: boolean;
-    inventory: { [id: number]: number };
+    inventory: number[];
     server: string;
 }
 
@@ -45,7 +45,7 @@ export function getDefaultPlayerData(): IPlayerData {
         hpPots: 0,
         mpPots: 0,
         hasBackpack: false,
-        inventory: {},
+        inventory: new Array<number>(20).fill(-1),
         server: ''
     };
 }

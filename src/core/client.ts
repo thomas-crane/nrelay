@@ -213,7 +213,7 @@ export class Client {
         for (let i = 0; i < updatePacket.newObjects.length; i++) {
             if (updatePacket.newObjects[i].status.objectId === this.playerData.objectId) {
                 const server = this.playerData.server;
-                this.playerData = ObjectStatusData.processStatData(updatePacket.newObjects[i].status);
+                this.playerData = ObjectStatusData.processObjectStatus(updatePacket.newObjects[i].status);
                 this.playerData.server = server;
             }
         }

@@ -1,6 +1,13 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.4.5`
+### Changes:
+ + Changed `IPlayerData.inventory` type from `{ [id: number]: number }` to `number[]`. Since both types are `ArrayLike` objects backwards compatibility should be maintained.
+ + Separated logic in `ObjectStatusData.processStatData` into `processStatData` and `processObjectStatus` to provide additional functionality for plugins.
+### Fixes:
+ + Fixed a bug where the `IPlayerData.inventory` property was populated incorrectly.
+
 ## `6.4.4`
 ### Fixes:
  + Fixed incorrect implementation of `CancelTradePacket`.
