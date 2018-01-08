@@ -1,6 +1,6 @@
 {
   "name": "nrelay",
-  "version": "6.4.5",
+  "version": "6.4.6",
   "description": "A console based modular client for Realm of the Mad God built with Node.js and TypeScript.",
   "main": "index.js",
   "bin": {

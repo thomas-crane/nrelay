@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.4.6`
+### Fixes:
+ + Fixed a bug in the client reconnect handler where an empty host field would default to localhost.
+
 ## `6.4.5`
 ### Changes:
  + Changed `IPlayerData.inventory` type from `{ [id: number]: number }` to `number[]`. Since both types are `ArrayLike` objects backwards compatibility should be maintained.

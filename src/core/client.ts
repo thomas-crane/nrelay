@@ -227,7 +227,7 @@ export class Client {
 
     @HookPacket(PacketType.RECONNECT)
     private onReconnectPacket(client: Client, reconnectPacket: ReconnectPacket): void {
-        this.serverIp = reconnectPacket.host;
+        this.serverIp = (reconnectPacket.host === '' ? this.nexusServerIp : reconnectPacket.host);
         this.gameId = reconnectPacket.gameId;
         this.key = reconnectPacket.key;
         this.keyTime = reconnectPacket.keyTime;
