@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.4.7`
+### Changes:
+ + Deprecated `IPlayerData.server` in favor of a new `server: IServer` property on the `Client` class. `IPlayerData.server` is still populated but not gauranteed to be correct after a server restart.
+
 ## `6.4.6`
 ### Fixes:
  + Fixed a bug in the client reconnect handler where an empty host field would default to localhost.

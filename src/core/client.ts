@@ -112,6 +112,11 @@ export class Client {
      * @see `ICharacterInfo` for more information.
      */
     public charInfo: ICharacterInfo;
+    /**
+     * The server the client is connected to.
+     * @see `IServer` for more info.
+     */
+    public server: IServer;
 
     private nexusServerIp: string;
     private serverIp: string;
@@ -146,6 +151,7 @@ export class Client {
         this.keyTime = -1;
         this.gameId = -2;
         this.playerData = getDefaultPlayerData();
+        this.server = server;
         this.playerData.server = server.name;
         this.nextPos = null;
         this.currentBulletId = 0;

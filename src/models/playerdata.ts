@@ -21,6 +21,10 @@ export interface IPlayerData {
     mpPots: number;
     hasBackpack: boolean;
     inventory: number[];
+    /**
+     * @deprecated Use `Client.server` instead.
+     * This is not gauranteed to be correct.
+     */
     server: string;
 }
 
