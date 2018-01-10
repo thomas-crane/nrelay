@@ -1,6 +1,11 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.4.7`
+### Fixes:
+ + Updated `packet-type` to latest packet ids
+ + Updated `ReconnectPacket` to correct structure (thanks @armst198).
+
 ## `6.4.6`
 ### Fixes:
  + Fixed a bug in the client reconnect handler where an empty host field would default to localhost.
