@@ -1,9 +1,14 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
-## `6.4.7`
+## `6.4.8`
 ### Changes:
  + Deprecated `IPlayerData.server` in favor of a new `server: IServer` property on the `Client` class. `IPlayerData.server` is still populated but not gauranteed to be correct after a server restart.
+
+## `6.4.7`
+### Fixes:
+ + Updated `packet-type` to latest packet ids
+ + Updated `ReconnectPacket` to correct structure (thanks @armst198).
 
 ## `6.4.6`
 ### Fixes:

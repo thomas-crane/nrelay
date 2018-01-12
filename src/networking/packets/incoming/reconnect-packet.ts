@@ -7,6 +7,7 @@ export class ReconnectPacket extends Packet {
     //#region packet-specific members
     name: string;
     host: string;
+    stats: string;
     port: number;
     gameId: number;
     keyTime: number;
@@ -17,6 +18,7 @@ export class ReconnectPacket extends Packet {
     public read(): void {
         this.name = this.readString();
         this.host = this.readString();
+        this.stats = this.readString();
         this.port = this.readInt32();
         this.gameId = this.readInt32();
         this.keyTime = this.readInt32();
@@ -31,6 +33,7 @@ export class ReconnectPacket extends Packet {
     public write(): void {
         this.writeString(this.name);
         this.writeString(this.host);
+        this.writeString(this.stats);
         this.writeInt32(this.port);
         this.writeInt32(this.gameId);
         this.writeInt32(this.keyTime);
