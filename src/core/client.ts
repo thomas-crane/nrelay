@@ -118,17 +118,38 @@ export class Client {
      */
     public server: IServer;
 
+    /**
+     * The alias of the client.
+     */
+    public alias: string;
+
+    /**
+     * A number between 0 and 1 which can be used to modify the speed
+     * of the player. A value of 1 will be 100% move speed for the client,
+     * a value of 0.5 will be 50% of the max speed. etc.
+     *
+     * @example
+     * ```
+     * client.moveMultiplier = 0.8;
+     * ```
+     */
+    public set moveMultiplier(value: number) {
+        this.internalMoveMultiplier = Math.max(0, Math.min(value, 1));
+    }
+    public get moveMultiplier(): number {
+        return this.internalMoveMultiplier;
+    }
+    private internalMoveMultiplier: number;
+
     private nexusServerIp: string;
     private serverIp: string;
     private lastTickTime: number;
     private currentTickTime: number;
     private connectTime: number;
     private guid: string;
-    private alias: string;
     private password: string;
     private buildVersion: string;
     private clientSocket: Socket;
-    private moveMultiplier: number;
     private currentBulletId: number;
     private lastAttackTime: number;
 
@@ -154,6 +175,7 @@ export class Client {
         this.server = server;
         this.playerData.server = server.name;
         this.nextPos = null;
+        this.internalMoveMultiplier = 1;
         this.currentBulletId = 0;
         this.lastAttackTime = 0;
         this.guid = accInfo.guid;
@@ -188,6 +210,19 @@ export class Client {
         shootPacket.startingPos = this.playerData.worldPos.clone();
         this.packetio.sendPacket(shootPacket);
         return true;
+    }
+
+    public destroy(): void {
+        if (this.packetio) {
+            this.packetio.destroy();
+        }
+        if (this.clientSocket) {
+            Client.emitter.emit('disconnect', Object.assign({}, this.playerData), this);
+            this.clientSocket.removeAllListeners('connect');
+            this.clientSocket.removeAllListeners('close');
+            this.clientSocket.removeAllListeners('error');
+            this.clientSocket.destroy();
+        }
     }
 
     @HookPacket(PacketType.MAPINFO)
@@ -320,7 +355,7 @@ export class Client {
     }
 
     private onConnect(): void {
-        Client.emitter.emit('connect', Object.assign({}, this.playerData));
+        Client.emitter.emit('connect', Object.assign({}, this.playerData), this);
         Log(this.alias, 'Connected to server!', LogLevel.Success);
         this.connectTime = Date.now();
         this.lastTickTime = 0;
@@ -357,7 +392,7 @@ export class Client {
     }
 
     private onClose(error: boolean): void {
-        Client.emitter.emit('disconnect', Object.assign({}, this.playerData));
+        Client.emitter.emit('disconnect', Object.assign({}, this.playerData), this);
         Log(this.alias, 'The connection was closed.', LogLevel.Warning);
         Log(this.alias, 'Reconnecting in 5 seconds');
         setTimeout(() => {
@@ -428,7 +463,7 @@ export class Client {
             tickTime = 200;
         }
 
-        return (speed * multiplier * tickTime);
+        return (speed * multiplier * tickTime * this.internalMoveMultiplier);
     }
 
     private getAttackFrequency(): number {

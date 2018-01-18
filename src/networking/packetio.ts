@@ -43,6 +43,18 @@ export class PacketIO {
         return this.emitter.on(event, listener);
     }
 
+    public destroy(): void {
+        if (this.socket) {
+            this.socket.removeAllListeners('data');
+        }
+        this.receiveRC4 = null;
+        this.sendRC4 = null;
+        this.currentHead = null;
+        this.packetBuffer = null;
+        this.emitter.removeAllListeners('error');
+        this.emitter.removeAllListeners('packet');
+    }
+
     public sendPacket(packet: Packet): void {
         packet.reset();
         packet.write();

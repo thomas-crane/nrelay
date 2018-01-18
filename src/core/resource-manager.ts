@@ -77,6 +77,7 @@ export class ResourceManager {
                             maxHitPoints: (+objectsArray[i].MaxHitPoints || -1),
                             defense: (+objectsArray[i].Defense || -1),
                             xpMultiplier: (+objectsArray[i].XpMult || -1),
+                            activateOnEquip: [],
                             projectile: (objectsArray[i].Projectile ? {
                                 id: +objectsArray[i].Projectile.id,
                                 objectId: objectsArray[i].Projectile.ObjectId,
@@ -94,6 +95,24 @@ export class ResourceManager {
                         };
                         // map items.
                         if (this.objects[+objectsArray[i].type].item) {
+                            // stat bonuses
+                            if (Array.isArray(objectsArray[i].ActivateOnEquip)) {
+                                for (let j = 0; j < objectsArray[i].ActivateOnEquip.length; j++) {
+                                    if (objectsArray[i].ActivateOnEquip[j]['_'] === 'IncrementStat') {
+                                        this.objects[+objectsArray[i].type].activateOnEquip.push({
+                                            statType: objectsArray[i].ActivateOnEquip[j].stat,
+                                            amount: objectsArray[i].ActivateOnEquip[j].amount
+                                        });
+                                    }
+                                }
+                            } else if (typeof objectsArray[i].ActivateOnEquip === 'object') {
+                                if (objectsArray[i].ActivateOnEquip._ === 'IncrementStat') {
+                                    this.objects[+objectsArray[i].type].activateOnEquip.push({
+                                        statType: objectsArray[i].ActivateOnEquip.stat,
+                                        amount: objectsArray[i].ActivateOnEquip.amount
+                                    });
+                                }
+                            }
                             this.items[+objectsArray[i].type] = this.objects[+objectsArray[i].type];
                             itemCount++;
                         }
@@ -114,9 +133,11 @@ export class ResourceManager {
                     }
                 }
                 Log('ResourceManager', 'Loaded ' + objectsArray.length + ' objects.', LogLevel.Info);
-                Log('ResourceManager', 'Loaded ' + itemCount + ' items.', LogLevel.Info);
-                Log('ResourceManager', 'Loaded ' + enemyCount + ' enemies.', LogLevel.Info);
-                Log('ResourceManager', 'Loaded ' + petCount + ' pets.', LogLevel.Info);
+                if (environment.debug) {
+                    Log('ResourceManager', 'Loaded ' + itemCount + ' items.', LogLevel.Info);
+                    Log('ResourceManager', 'Loaded ' + enemyCount + ' enemies.', LogLevel.Info);
+                    Log('ResourceManager', 'Loaded ' + petCount + ' pets.', LogLevel.Info);
+                }
                 objectsArray = null;
                 data = null;
                 resolve();

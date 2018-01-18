@@ -1,4 +1,5 @@
 import { IAccountInfo } from './../models/accinfo';
+import { Logger } from './logger';
 import fs = require('fs');
 import path = require('path');
 const dir = path.dirname(require.main.filename);
@@ -40,5 +41,11 @@ export class Storage {
         } catch (err) {
             return null;
         }
+    }
+
+    public static createLog(): void {
+        const logStream = fs.createWriteStream(Storage.makePath('nrelay-log.log'));
+        logStream.write('Log Start (time: ' + Date.now() + ')\n');
+        Logger.logStream = logStream;
     }
 }

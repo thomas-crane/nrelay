@@ -1,4 +1,4 @@
-import { Log, LogLevel, Logger } from './services/logger';
+import { Log, LogLevel } from './services/logger';
 import { Http } from './services/http';
 import { parseServers, parseAccountInfo, parseError } from './services/xmltojson';
 import { SERVER_ENDPOINT } from './models/api-endpoints';
@@ -17,44 +17,93 @@ const EMAIL_REPLACE_REGEX = /.+?(.+?)(?:@|\+\d+).+?(.+?)\./;
 
 export class CLI {
 
-    private serverList: { [id: string]: IServer };
-
-    constructor() {
-        this.checkFlags();
-        if (environment.log) {
-            const logStream = fs.createWriteStream(Storage.makePath('nrelay-log.log'));
-            logStream.write('Log Start (time: ' + Date.now() + ')\n');
-            Logger.logStream = logStream;
-        }
-        if (environment.debug) {
-            Log('NRelay', 'Starting in debug mode...');
-        } else {
-            Log('NRelay', 'Starting...');
-        }
-        if (this.hasFlag('--no-update')) {
-            Log('NRelay', 'Not checking for updates.', LogLevel.Info);
-            this.proceed();
-        } else {
-            Log('NRelay', 'Checking for updates...', LogLevel.Info);
-            Updater.checkVersion().then((needsUpdate) => {
-                if (needsUpdate) {
-                    Log('NRelay', 'An update is available. Downloading...');
-                    Updater.getLatest().then(() => {
-                        process.exit(0);
-                    }).catch((error) => {
-                        Log('NRelay', 'Error while updating: ' + JSON.stringify(error), LogLevel.Error);
-                    });
-                } else {
-                    this.proceed();
+    public static addClient(account: IAccount): Promise<any> {
+        return new Promise((resolve, reject) => {
+            if (!account.alias) {
+                const match = EMAIL_REPLACE_REGEX.exec(account.guid);
+                if (match) {
+                    if (match[1]) {
+                        account.alias = account.guid.replace(match[1], '***');
+                    }
+                    if (match[2]) {
+                        account.alias = account.alias.replace(match[2], '***');
+                    }
                 }
-            }).catch(() => {
-                Log('NRelay', 'Error while checking for update, starting anyway.', LogLevel.Info);
-                this.proceed();
+            }
+            if (this.clients[account.alias]) {
+                const err = new Error(account.alias + ' has already been added.');
+                reject(err);
+                return;
+            }
+            Log('NRelay', 'Adding ' + account.alias, LogLevel.Info);
+            this.getAccountInfo(account).then((info) => {
+                const keys = Object.keys(this.serverList);
+                if (keys.length > 0) {
+                    let server = this.serverList[account.serverPref];
+                    if (!server) {
+                        Log('NRelay', 'Preferred server not found. Choosing first server.', LogLevel.Warning);
+                        server = this.serverList[keys[0]];
+                    }
+                    const client = new Client(server, this.buildVersion, account);
+                    this.clients[account.alias] = client;
+                    resolve(client);
+                } else {
+                    reject(new Error(account.alias + ' couldn\'t get servers.'));
+                }
+            }).catch((error) => {
+                const err = new Error(account.alias + ' received an error: ' + error);
+                reject(err);
             });
-        }
+        });
     }
 
-    proceed(): void {
+    public static removeClient(alias: string): boolean {
+        if (this.clients[alias]) {
+            this.clients[alias].destroy();
+            delete this.clients[alias];
+            Log('NRelay', 'Removed ' + alias, LogLevel.Info);
+            return true;
+        }
+        return false;
+    }
+
+    public static getClient(alias: string): Client | null {
+        return this.clients[alias];
+    }
+
+    public static getClients(): Client[] {
+        if (!this.clients) {
+            return new Array<Client>(0);
+        }
+        return Object.keys(this.clients).map((k) => this.clients[k]);
+    }
+
+    private static clients: {
+        [guid: string]: Client
+    };
+
+    private static serverList: { [id: string]: IServer };
+    private static buildVersion: string;
+
+    private static getAccountInfo(account: IAccount): Promise<IAccount> {
+        return new Promise((resolve, reject) => {
+            Http.get(SERVER_ENDPOINT, {
+                guid: account.guid,
+                password: account.password
+            }).then((data) => {
+                const info = parseAccountInfo(data);
+                this.serverList = parseServers(data);
+                if (info) {
+                    account.charInfo = info;
+                    resolve(account);
+                } else {
+                    reject(parseError(data));
+                }
+            }).catch((err) => reject(err));
+        });
+    }
+
+    private static proceed(): void {
         Promise.all([ResourceManager.loadTileInfo(), ResourceManager.loadObjects()]).then(() => {
             PluginManager.loadPlugins();
         }).catch((error) => {
@@ -67,59 +116,52 @@ export class CLI {
             return;
         }
 
+        this.buildVersion = accInfo.buildVersion;
+
         for (let i = 0; i < accInfo.accounts.length; i++) {
             const acc = accInfo.accounts[i];
             setTimeout(() => {
-                this.getAccountInfo(acc).then((info) => {
-                    const keys = Object.keys(this.serverList);
-                    if (keys.length > 0) {
-                        let server: IServer;
-                        if (!this.serverList[acc.serverPref]) {
-                            Log('NRelay', 'Preferred server not found. Choosing first server.', LogLevel.Warning);
-                            server = this.serverList[keys[0]];
-                        } else {
-                            server = this.serverList[acc.serverPref];
-                        }
-                        const client = new Client(server, accInfo.buildVersion, info);
-                    } else {
-                        Log('NRelay', 'Couldn\'t get servers.', LogLevel.Error);
-                    }
-                }).catch((err) => {
-                    // error already handled.
+                this.addClient(acc).then(() => {
+                    Log('NRelay', 'Authorized ' + acc.alias, LogLevel.Success);
+                }).catch((error) => {
+                    Log('NRelay', error, LogLevel.Error);
                 });
             }, (i * 1000));
         }
     }
 
-    getAccountInfo(account: IAccount): Promise<IAccount> {
-        if (!account.alias) {
-            const match = EMAIL_REPLACE_REGEX.exec(account.guid);
-            if (match) {
-                if (match[1]) {
-                    account.alias = account.guid.replace(match[1], '***');
-                }
-                if (match[2]) {
-                    account.alias = account.alias.replace(match[2], '***');
-                }
-            }
+    constructor() {
+        this.checkFlags();
+        CLI.clients = {};
+        if (environment.log) {
+            Storage.createLog();
         }
-        return new Promise((resolve, reject) => {
-            Http.get(SERVER_ENDPOINT, {
-                guid: account.guid,
-                password: account.password
-            }).then((data) => {
-                const info = parseAccountInfo(data);
-                this.serverList = parseServers(data);
-                if (info) {
-                    account.charInfo = info;
-                    Log(account.alias, 'Authorized account', LogLevel.Success);
-                    resolve(account);
+        if (environment.debug) {
+            Log('NRelay', 'Starting in debug mode...');
+        } else {
+            Log('NRelay', 'Starting...');
+        }
+        if (this.hasFlag('--no-update')) {
+            Log('NRelay', 'Not checking for updates.', LogLevel.Info);
+            CLI.proceed();
+        } else {
+            Log('NRelay', 'Checking for updates...', LogLevel.Info);
+            Updater.checkVersion().then((needsUpdate) => {
+                if (needsUpdate) {
+                    Log('NRelay', 'An update is available. Downloading...');
+                    Updater.getLatest().then(() => {
+                        process.exit(0);
+                    }).catch((error) => {
+                        Log('NRelay', 'Error while updating: ' + JSON.stringify(error), LogLevel.Error);
+                    });
                 } else {
-                    Log(account.alias, 'Error: ' + parseError(data), LogLevel.Warning);
-                    reject();
+                    CLI.proceed();
                 }
-            }).catch((err) => reject(err));
-        });
+            }).catch(() => {
+                Log('NRelay', 'Error while checking for update, starting anyway.', LogLevel.Info);
+                CLI.proceed();
+            });
+        }
     }
 
     private checkFlags(): void {

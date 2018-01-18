@@ -20,6 +20,10 @@ export interface IObject {
         speed: number;
         lifetimeMS: number;
     };
+    activateOnEquip: Array<{
+        statType: number;
+        amount: number;
+    }>;
     rateOfFire: number;
     fameBonus: number;
     feedPower: number;

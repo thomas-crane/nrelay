@@ -1,13 +1,25 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
-<<<<<<< HEAD
-=======
+## `6.5.0`
+## Changes:
+ + Added new `public static` methods to the `CLI` class.
+    + `addClient(account: IAccount): Promise<any>` This can be used to add an account at runtime.
+    + `removeClient(alias: string): boolean` This can be used to remove a client at runtime.
+    + `getClient(alias: string): Client | null` Returns a reference to the client with that `alias`.
+    + `getClients(): Client[]` Returns an array of references to all clients.
+ + Changed visibility of some `Client` properties.
+    + `alias: string` The alias of the client.
+    + `moveMultiplier: number` A number between 0 and 1 which controls the move speed of the client.
+ + Added a `Client` parameter to the `'connect' | 'disconnect'` client events. The parameter will contain a reference to the client which fired the event. The new event payload signature is `(playerData: IPlayerData, client: Client)`. The `playerData` property still contains the client's playerData in order to maintain backwards compatibility.
+ + Added `destroy(): void` methods to `Client` and `PacketIO`. These should only be used when the client is no longer needed and can be freed from memory.
+ + Added `activateOnEquip: { statType: number, value: number }[]` property to `IObject`. This contains the stat bonuses which are applied by items.
+ + Changed some `ResourceManager` log messages to only appear in debug mode.
+
 ## `6.4.9`
 ### Fixes:
  + Updated `packet-type` to latest packet ids
 
->>>>>>> ad7a59ce7dbd8f190463e00af7918bdc679a5738
 ## `6.4.8`
 ### Changes:
  + Deprecated `IPlayerData.server` in favor of a new `server: IServer` property on the `Client` class. `IPlayerData.server` is still populated but not gauranteed to be correct after a server restart.
