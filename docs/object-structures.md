@@ -33,6 +33,15 @@ public getTile(x: number, y: number): GroundTileData {
 #### `charInfo: ICharacterInfo`
 Holds meta data about the account's character ids.
 
+#### `server: IServer`
+The server the client is connected to.
+
+#### `alias: string`
+The alias of the client.
+
+#### `moveMultiplier: number`
+The percentage of the possible max speed the player will move at. This should be a number between 0 and 1 where 0 represents 0% and 1 represents 100%.
+
 ### Public methods
 #### `on(event: string | symbol, listener: (...args: any[]) => void)`
 > This method is **static**
@@ -42,16 +51,19 @@ Used to attach event listeners to the `Client` events.
 The available events are:
 ```typescript
 // fired when a client connects to the server.
-Client.on('connect', (playerData: IPlayerData) => {
+Client.on('connect', (playerData: IPlayerData, client: Client) => {
     // note that playerData will still be the default values
     // because no player data has been received yet.
+
+    // the client parameter is a reference to the
+    // client which fired the event.
 });
 ```
 ```typescript
 // fired when a client disconnects from the server.
-Client.on('disconnect', (playerData: IPlayerData) => {
-    // last known playerData.
-    // example usage
+Client.on('disconnect', (playerData: IPlayerData, client: Client) => {
+    // last known playerData and a reference to the client
+    // which fired the event. example usage:
     delete this.clients[playerData.name];
 });
 ```
@@ -60,6 +72,9 @@ Client.on('disconnect', (playerData: IPlayerData) => {
 Used to fire the currently equiped weapon. `angle` should be in radians.
 
 This will return `true` if a shoot packet was actually sent, and `false` if a shoot packet is not sent. A shoot packet will not be sent if the required time between shots has not elapsed.
+
+#### `destroy(): void`
+This should only be used when the client is no longer required. This will remove all listeners and free any memory possible.
 
 ## IPlayerData
 ### Public members
@@ -124,6 +139,9 @@ Whether or not the player has a backpack.
 An array of item ids which represent the players equipment. Slots 0-3 are the currently equipped items, slots 4-11 are the inventory and slots 11-18 are the backpack.
 
 #### `server: string`
+> **Deprecated** This property should not be used. Use `Client.server` instead.
+
+
 The name of the server the client is connected to.
 
 ## IPacket
@@ -242,3 +260,6 @@ Events which can be fired are:
 
 #### `sendPacket(packet: Packet): void`
 Used to send a packet. The `packet` argument can be any type which is a subclass of `Packet`. This includes all specific packet types such as `PlayerTextPacket` and `UpdateAckPacket`.
+
+#### `destroy(): void`
+This should only be used when the client is no longer required. This will remove all listeners and free any memory possible.

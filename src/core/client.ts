@@ -117,12 +117,10 @@ export class Client {
      * @see `IServer` for more info.
      */
     public server: IServer;
-
     /**
      * The alias of the client.
      */
     public alias: string;
-
     /**
      * A number between 0 and 1 which can be used to modify the speed
      * of the player. A value of 1 will be 100% move speed for the client,
@@ -193,6 +191,10 @@ export class Client {
         this.connect();
     }
 
+    /**
+     * Shoots a projectile at the specified angle.
+     * @param angle The angle in radians to shoot towards.
+     */
     public shoot(angle: number): boolean {
         const time = this.getTime();
         const item = ResourceManager.items[this.playerData.inventory[0]];
@@ -212,6 +214,10 @@ export class Client {
         return true;
     }
 
+    /**
+     * Removes all event listeners and destroys any resources held by the client.
+     * This should only be used when the client is no longer needed.
+     */
     public destroy(): void {
         if (this.packetio) {
             this.packetio.destroy();
