@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.5.2`
+### Fixes:
+ + Fixed a bug where some `playerData` properties would get reset in the `NewTickPacket` handler.
+
 ## `6.5.1`
 ### Changes:
  + Added `worldPos` and `objectId` properties to the `Client` class as aliases of the `playerData.worldPos` and `playerData.objectId` properties. The aliases should be used instead of the `playerData` properties when possible.

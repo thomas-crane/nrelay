@@ -13,8 +13,8 @@ export class ObjectStatusData {
         return playerData;
     }
 
-    public static processStatData(data: StatData[]): IPlayerData {
-        const playerData = getDefaultPlayerData();
+    public static processStatData(data: StatData[], currentData?: IPlayerData): IPlayerData {
+        const playerData = currentData || getDefaultPlayerData();
         for (let i = 0; i < data.length; i++) {
             switch (data[i].statType) {
                 case StatData.NAME_STAT:

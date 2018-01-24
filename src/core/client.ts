@@ -332,7 +332,7 @@ export class Client {
         for (let i = 0; i < newTickPacket.statuses.length; i++) {
             const status = newTickPacket.statuses[i];
             if (status.objectId === this.objectId) {
-                this.playerData = ObjectStatusData.processStatData(status.stats);
+                this.playerData = ObjectStatusData.processStatData(status.stats, this.playerData);
                 this.playerData.objectId = this.objectId;
                 this.playerData.worldPos = this.worldPos;
                 this.playerData.server = this.server.name;
