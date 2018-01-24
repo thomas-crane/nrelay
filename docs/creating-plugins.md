@@ -4,6 +4,7 @@
  + [Creating your first plugin](#creating-your-first-plugin)
  + [The next step](#the-next-step)
  + [The Logger class](#the-logger-class)
+ + [Advanced Topic - Plugin Interop](#plugin-interop)
  + [Plugin template](#plugin-template)
 
 ## Foreword
@@ -27,20 +28,44 @@ Now that we have the essentials imported, we can declare the plugin class.
 ```typescript
 import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core/plugin-module';
 
-export default class HelloPlugin {
+class HelloPlugin {
 
 }
 ```
-`export default ...` is required in order for the nrelay plugin manager to properly initialize the plugin.
 
 In order for nrelay to recognize this class as a plugin, it needs to be decorated using the `NrPlugin` decorator. The `NrPlugin` decorator requires an object parameter which is used to describe the plugin.
 ```typescript
 @NrPlugin({ name: 'Hello plugin', author: 'tcrane' })
-export default class HelloPlugin {
+class HelloPlugin {
 
 }
 ```
-This is the bare essentials for a plugin. You can verify that nrelay recognizes this plugin by building the source and running nrelay
+If the `@NrPlugin` decorator is not present, the plugin will not be loaded. A `description` can optionally be included to describe the plugin, and `enabled` can be used to tell nrelay whether or not to load the plugin
+```typescript
+// this plugin will be loaded
+@NrPlugin({
+    name: 'CoolPlugin',
+    author: 'tcrane',
+    description: 'A cool plugin'
+    enabled: true
+})
+class CoolPlugin {
+    ...
+}
+
+// this plugin won't be loaded
+@NrPlugin({
+    name: 'CoolPlugin',
+    author: 'tcrane',
+    enabled: false
+})
+class UnusedPlugin {
+    ...
+}
+```
+All plugins are enabled by default, so if `enabled` is not included, the plugin will still load anyway.
+
+These are the bare essentials for a plugin. You can verify that nrelay recognizes this plugin by building the source and running nrelay
 ```bash
 C:\Documents\nrelay>gulp
 C:\Documents\nrelay>nrelay
@@ -74,7 +99,7 @@ hookUpdate(client: Client, packet: Packet) {
 The hello packet needs to respond to the text packet, so a packet hook method needs to be added for the text packet
 ```typescript
 @NrPlugin({ name: 'Hello plugin', author: 'tcrane' })
-export default class HelloPlugin {
+class HelloPlugin {
 
     public onTextPacket(client: Client, packet: Packet): void {
 
@@ -85,7 +110,7 @@ Similarly to the plugin class itself, nrelay doesn't know about the packet hook 
 `PacketType` is simply an enum containing all packets which can be hooked.
 ```typescript
 @NrPlugin({ name: 'Hello plugin', author: 'tcrane' })
-export default class HelloPlugin {
+class HelloPlugin {
 
     @HookPacket(PacketType.TEXT)
     public onTextPacket(client: Client, packet: Packet): void {
@@ -162,7 +187,7 @@ import { PlayerTextPacket } from './../networking/packets/outgoing/playertext-pa
     name: 'Hello Plugin',
     author: 'tcrane'
 })
-export default class HelloPlugin {
+class HelloPlugin {
 
     @HookPacket(PacketType.TEXT)
     onText(client: Client, textPacket: TextPacket): void {
@@ -203,7 +228,7 @@ To do this, we should use a variable to store the bot's response message.
     name: 'Hello Plugin',
     author: 'tcrane'
 })
-export default class HelloPlugin {
+class HelloPlugin {
 
     private response: string;
 
@@ -235,7 +260,7 @@ We can use another variable to store the regex in case it ever needs to change.
     name: 'Hello Plugin',
     author: 'tcrane'
 })
-export default class HelloPlugin {
+class HelloPlugin {
 
     private response: string;
     private setRegex = /^set\s+(\S+.*)$/;
@@ -279,7 +304,7 @@ There is one more thing to do before we can test the command. When the plugin st
     name: 'Hello Plugin',
     author: 'tcrane'
 })
-export default class HelloPlugin {
+class HelloPlugin {
 
     private response: string;
     private setRegex = /^set\s+(\S+.*)$/;
@@ -364,6 +389,62 @@ try {
 ```
 Will print the error message in red.
 
+## Plugin Interop
+nrelay supports plugin interoperability through the `PluginManager` class. For larger or more complex plugins, it may be desirable to split the plugin up into multiple different 'modules' which have only a single responsibility. The plugin interop can be used to achieve such a design pattern.
+
+To expose a class to the `PluginManager`, the `export` keyword should be used when declaring the class.
+```typescript
+// this plugin can be accessed by other plugins.
+@NrPlugin({ name: 'Component A', author: 'tcrane' })
+export class MyPluginComponent {
+    ...
+}
+
+// this plugin won't be exposed and is inaccessible by other plugins.
+@NrPlugin({ name: 'Cool Plugin', author: 'tcrane' })
+class CoolPlugin {
+    ...
+}
+```
+The `PluginManager` manages instances of all loaded plugins. To access the plugin instances, the `PluginManager.getInstanceOf(...)` method can be used.
+`PluginManager.getInstanceOf(...)` is a static method which takes a `class` as its parameter and returns the managed instance of the same type as the `class` parameter. If there is no managed instance of the `class` type, then the method will return `null`.
+
+Since some plugins may be loaded before others, it is **strongly recommended** to use the static helper method `PluginManager.afterInit(method: () => void)` to defer the call to `getInstanceOf` to ensure that the instance you are trying to retreive has actually loaded.
+The `afterInit` method takes a method as a parameter, and will invoke that method once all of the plugins have been loaded. For example
+```typescript
+PluginManager.afterInit(() => {
+    console.log('All plugins have been loaded.');
+});
+```
+
+If you have a plugin component `ComponentA`
+```typescript
+@NrPlugin({ name: 'Component A', author: 'tcrane' })
+export class ComponentA {
+    public myString = 'Test String';
+}
+```
+The managed instance of `ComponentA` can be accessed from another class using the `getInstanceOf` method.
+```typescript
+import { PluginManager } from './../core/plugin-module';
+import { ComponentA } from './component-a'; // the class needs to be imported to be used.
+
+@NrPlugin({ name: 'Component A', author: 'tcrane' })
+class PluginCore {
+
+    private componentInstance: ComponentA;
+
+    constructor() {
+        PluginManager.afterInit(() => {
+            this.componentInstance = PluginManager.getInstanceOf(ComponentA);
+            console.log('My string: ' + this.componentInstance.myString);
+            // Prints:
+            // My string: Test String
+        });
+    }
+}
+```
+
 ## Plugin template
 ```typescript
 import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core/plugin-module';
@@ -374,9 +455,9 @@ import { UpdatePacket } from './../networking/packets/incoming/update-packet';
     name: 'Your Plugin Name',
     author: 'Your Name'
 })
-export default class YourPluginName {
+class YourPluginName {
 
-    constructor () {
+    constructor() {
 
     }
 

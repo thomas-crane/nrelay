@@ -1,6 +1,14 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.6.0`
+### Changes:
+ + Added plugin interop through the `PluginManager` class.
+ + Added `PluginManager.getInstanceOf<T extends object>(instance: new () => T): T | null` method to get the managed instance of a plugin.
+ + Added `PluginManager.afterInit(method: () => void)` method to defer the invocation of a method until after all plugins have been loaded.
+ + Added `enabled?: boolean` to the `@NrPlugin` decorator object. This can be set to `false` to stop a plugin from loading. It will default to true if not included.
+ + Added `PluginManager` to the `plugin-module` for convenience.
+
 ## `6.5.2`
 ### Fixes:
  + Fixed a bug where some `playerData` properties would get reset in the `NewTickPacket` handler.
