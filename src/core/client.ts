@@ -69,6 +69,14 @@ export class Client {
      */
     public playerData: IPlayerData;
     /**
+     * The objectId of the client.
+     */
+    public objectId: number;
+    /**
+     * The current position of the client.
+     */
+    public worldPos: WorldPosData;
+    /**
      * The PacketIO instance associated with the client.
      * @see `PacketIO` for more info.
      */
@@ -93,7 +101,7 @@ export class Client {
      * If this is `null` then the client will not move.
      * @example
      * ```
-     * const pos: WorldPosData = client.playerData.worldPos.clone();
+     * const pos: WorldPosData = client.worldPos.clone();
      * pos.x += 1;
      * pos.y += 1;
      * client.nextPos = pos;
@@ -209,7 +217,7 @@ export class Client {
         shootPacket.angle = angle;
         shootPacket.containerType = item.type;
         shootPacket.time = time;
-        shootPacket.startingPos = this.playerData.worldPos.clone();
+        shootPacket.startingPos = this.worldPos.clone();
         this.packetio.sendPacket(shootPacket);
         return true;
     }
@@ -258,10 +266,10 @@ export class Client {
 
         // playerdata
         for (let i = 0; i < updatePacket.newObjects.length; i++) {
-            if (updatePacket.newObjects[i].status.objectId === this.playerData.objectId) {
-                const server = this.playerData.server;
+            if (updatePacket.newObjects[i].status.objectId === this.objectId) {
+                this.worldPos = updatePacket.newObjects[i].status.pos;
                 this.playerData = ObjectStatusData.processObjectStatus(updatePacket.newObjects[i].status);
-                this.playerData.server = server;
+                this.playerData.server = this.server.name;
             }
         }
 
@@ -290,7 +298,6 @@ export class Client {
 
     @HookPacket(PacketType.FAILURE)
     private onFailurePacket(client: Client, failurePacket: FailurePacket): void {
-        this.playerData = getDefaultPlayerData();
         this.gameId = -2;
         this.keyTime = -1;
         this.key = new Int8Array(0);
@@ -303,7 +310,7 @@ export class Client {
     private onAoe(client: Client, aoePacket: AoePacket): void {
         const aoeAck = new AoeAckPacket();
         aoeAck.time = this.getTime();
-        aoeAck.position = this.playerData.worldPos.clone();
+        aoeAck.position = this.worldPos.clone();
         this.packetio.sendPacket(aoeAck);
     }
 
@@ -318,9 +325,20 @@ export class Client {
         if (this.nextPos) {
             this.moveTo(this.nextPos);
         }
-        movePacket.newPosition = this.playerData.worldPos;
+        movePacket.newPosition = this.worldPos;
         movePacket.records = [];
         this.packetio.sendPacket(movePacket);
+
+        for (let i = 0; i < newTickPacket.statuses.length; i++) {
+            const status = newTickPacket.statuses[i];
+            if (status.objectId === this.objectId) {
+                this.playerData = ObjectStatusData.processStatData(status.stats);
+                this.playerData.objectId = this.objectId;
+                this.playerData.worldPos = this.worldPos;
+                this.playerData.server = this.server.name;
+                break;
+            }
+        }
     }
 
     @HookPacket(PacketType.PING)
@@ -341,7 +359,7 @@ export class Client {
 
     @HookPacket(PacketType.SERVERPLAYERSHOOT)
     private onServerPlayerShoot(client: Client, serverPlayerShoot: ServerPlayerShootPacket): void {
-        if (serverPlayerShoot.ownerId === this.playerData.objectId) {
+        if (serverPlayerShoot.ownerId === this.objectId) {
             const ack = new ShootAckPacket();
             ack.time = this.getTime();
             this.packetio.sendPacket(ack);
@@ -350,7 +368,7 @@ export class Client {
 
     @HookPacket(PacketType.CREATESUCCESS)
     private onCreateSuccess(client: Client, createSuccessPacket: CreateSuccessPacket): void {
-        this.playerData.objectId = createSuccessPacket.objectId;
+        this.objectId = createSuccessPacket.objectId;
         this.charInfo.charId = createSuccessPacket.charId;
         this.charInfo.nextCharId = this.charInfo.charId + 1;
         Log(this.alias, 'Connected!', LogLevel.Success);
@@ -443,21 +461,21 @@ export class Client {
 
     private moveTo(target: WorldPosData): void {
         const step = this.getSpeed();
-        if (this.playerData.worldPos.squareDistanceTo(target) > step ** 2) {
-            const angle: number = Math.atan2(target.y - this.playerData.worldPos.y, target.x - this.playerData.worldPos.x);
-            this.playerData.worldPos.x += Math.cos(angle) * step;
-            this.playerData.worldPos.y += Math.sin(angle) * step;
+        if (this.worldPos.squareDistanceTo(target) > step ** 2) {
+            const angle: number = Math.atan2(target.y - this.worldPos.y, target.x - this.worldPos.x);
+            this.worldPos.x += Math.cos(angle) * step;
+            this.worldPos.y += Math.sin(angle) * step;
         } else {
-            this.playerData.worldPos.x = target.x;
-            this.playerData.worldPos.y = target.y;
+            this.worldPos.x = target.x;
+            this.worldPos.y = target.y;
             this.nextPos = null;
         }
     }
 
     private getSpeed(): number {
         const speed = MIN_MOVE_SPEED + this.playerData.spd / 75 * (MAX_MOVE_SPEED - MIN_MOVE_SPEED);
-        const x = Math.floor(this.playerData.worldPos.x);
-        const y = Math.floor(this.playerData.worldPos.y);
+        const x = Math.floor(this.worldPos.x);
+        const y = Math.floor(this.worldPos.y);
         let multiplier = 1;
 
         if (this.mapTiles[y * this.mapInfo.width + x] && ResourceManager.tiles[this.mapTiles[y * this.mapInfo.width + x].type]) {

@@ -1,6 +1,12 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.5.1`
+### Changes:
+ + Added `worldPos` and `objectId` properties to the `Client` class as aliases of the `playerData.worldPos` and `playerData.objectId` properties. The aliases should be used instead of the `playerData` properties when possible.
+### Fixes:
+ + Fixed a bug where the client wouldn't update its own `playerData` even when new information was available in the `NewTickPacket`.
+
 ## `6.5.0`
 ## Changes:
  + Added new `public static` methods to the `CLI` class.
