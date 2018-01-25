@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.7.0`
+### Changes:
+ + Added `PlayerTracker` plugin component. This can be used as part of other plugins to avoid having to implement the player tracking logic for any plugin which requires it. See the `plugin-components` doc for more info.
+
 ## `6.6.0`
 ### Changes:
  + Added plugin interop through the `PluginManager` class.
