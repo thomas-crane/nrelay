@@ -661,7 +661,11 @@ An array of booleans which describe which items are selected in the trade partne
 ## AoeAckPacket
 Sent to acknowledge the `AoePacket`
 ### Members
-> This packet has no members.
+#### `time: number`
+The current client time.
+
+#### `position: WorldPosData`
+The current client position.
 
 ## BuyPacket
 Sent to buy an item.
