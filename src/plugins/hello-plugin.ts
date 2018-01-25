@@ -12,9 +12,7 @@ import { PlayerTextPacket } from './../networking/packets/outgoing/playertext-pa
     name: 'Hello Plugin',
     author: 'tcrane'
 })
-// The plugin class should always begin with 'export default'
-// in order to properly expose it to the plugin manager.
-export default class HelloPlugin {
+class HelloPlugin {
 
     // The HookPacket decorator will cause the method to be called
     // whenever a packet with the specified packet type is recieved.
