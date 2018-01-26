@@ -2,8 +2,16 @@ import { Packet } from './../packet';
 import { WorldPosData } from './world-pos-data';
 import { StatData } from './stat-data';
 import { IPlayerData, getDefaultPlayerData } from './../../models/playerdata';
+import { ObjectData } from './object-data';
+import { Classes } from './../../models/classes';
 
 export class ObjectStatusData {
+
+    public static processObject(data: ObjectData): IPlayerData {
+        const playerData = this.processObjectStatus(data.status);
+        playerData.class = data.objectType;
+        return playerData;
+    }
 
     public static processObjectStatus(data: ObjectStatusData): IPlayerData {
         const playerData = this.processStatData(data.stats);
@@ -28,6 +36,18 @@ export class ObjectStatusData {
                     continue;
                 case StatData.CURR_FAME_STAT:
                     playerData.currentFame = data[i].statValue;
+                    continue;
+                case StatData.NUM_STARS_STAT:
+                    playerData.stars = data[i].statValue;
+                    continue;
+                case StatData.ACCOUNT_ID_STAT:
+                    playerData.accountId = data[i].stringStatValue;
+                    continue;
+                case StatData.FAME_STAT:
+                    playerData.accountFame = data[i].statValue;
+                    continue;
+                case StatData.CREDITS_STAT:
+                    playerData.gold = data[i].statValue;
                     continue;
                 case StatData.MAX_HP_STAT:
                     playerData.maxHP = data[i].statValue;

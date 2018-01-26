@@ -268,7 +268,7 @@ export class Client {
         for (let i = 0; i < updatePacket.newObjects.length; i++) {
             if (updatePacket.newObjects[i].status.objectId === this.objectId) {
                 this.worldPos = updatePacket.newObjects[i].status.pos;
-                this.playerData = ObjectStatusData.processObjectStatus(updatePacket.newObjects[i].status);
+                this.playerData = ObjectStatusData.processObject(updatePacket.newObjects[i]);
                 this.playerData.server = this.server.name;
             }
         }

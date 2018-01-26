@@ -1,4 +1,5 @@
 import { WorldPosData } from './../networking/data/world-pos-data';
+import { Classes } from './classes';
 
 export interface IPlayerData {
     objectId: number;
@@ -7,6 +8,11 @@ export interface IPlayerData {
     level: number;
     exp: number;
     currentFame: number;
+    stars: number;
+    accountId: string;
+    accountFame: number;
+    gold: number;
+    class: Classes;
     maxHP: number;
     maxMP: number;
     hp: number;
@@ -36,6 +42,11 @@ export function getDefaultPlayerData(): IPlayerData {
         level: 0,
         exp: 0,
         currentFame: 0,
+        stars: 0,
+        accountId: '',
+        accountFame: 0,
+        gold: 0,
+        class: Classes.Wizard,
         maxHP: 0,
         maxMP: 0,
         hp: 0,

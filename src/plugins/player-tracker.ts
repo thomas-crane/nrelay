@@ -47,7 +47,7 @@ export class PlayerTracker {
         }
         for (let i = 0; i < update.newObjects.length; i++) {
             if (Classes[update.newObjects[i].objectType]) {
-                const pd = ObjectStatusData.processObjectStatus(update.newObjects[i].status);
+                const pd = ObjectStatusData.processObject(update.newObjects[i]);
                 this.trackedPlayers[client.alias].push(pd);
             }
         }
@@ -66,6 +66,7 @@ export class PlayerTracker {
                 if (newTick.statuses[i].objectId === this.trackedPlayers[client.alias][n].objectId) {
                     this.trackedPlayers[client.alias][n] =
                         ObjectStatusData.processStatData(newTick.statuses[i].stats, this.trackedPlayers[client.alias][n]);
+                    this.trackedPlayers[client.alias][n].worldPos = newTick.statuses[i].pos;
                     break;
                 }
             }
