@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## 6.7.2`
+### Changes:
+ + Added `Http.post` to `Http` service class.
+
 ## `6.7.1`
 ### Changes:
  + Added new fields to `IPlayerData`.
