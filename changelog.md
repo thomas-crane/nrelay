@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.8.1`
+### Fixes:
+ + Added missing `userId` and `password` strings to proxy socket constructors.
+
 ## `6.8.0`
 ### Changes:
  + Added SOCKSv4, SOCKSv4a, and SOCKSv5 proxy support.

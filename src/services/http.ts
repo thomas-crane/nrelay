@@ -39,7 +39,9 @@ export class Http {
                 proxy: {
                     ipaddress: proxy.host,
                     port: proxy.port,
-                    type: proxy.type
+                    type: proxy.type,
+                    userId: proxy.userId,
+                    password: proxy.password
                 }
             }).then((info) => {
                 Log('Http', 'Established proxy!', LogLevel.Success);

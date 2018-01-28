@@ -457,7 +457,9 @@ export class Client {
                 proxy: {
                     ipaddress: this.proxy.host,
                     port: this.proxy.port,
-                    type: this.proxy.type
+                    type: this.proxy.type,
+                    userId: this.proxy.userId,
+                    password: this.proxy.password
                 },
                 command: 'connect',
                 destination: {
