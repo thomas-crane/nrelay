@@ -1,6 +1,14 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.8.0`
+### Changes:
+ + Added SOCKSv4, SOCKSv4a, and SOCKSv5 proxy support.
+ + Added `proxiedGet(path: string, proxy: IProxy, params?: { [id: string]: string })` method to `Http` service to route GET requests through a proxy.
+ + Added `switchProxy(proxy: IProxy): void` method to `Client` to connect to a different proxy.
+### Fixes:
+ + Added a guard to prevent the `PacketIO` writing to a destroyed socket.
+
 ## 6.7.2`
 ### Changes:
  + Added `Http.post` to `Http` service class.

@@ -1,3 +1,5 @@
+import { IProxy } from './proxy';
+
 export interface IAccountInfo {
     buildVersion: string;
     accounts: IAccount[];
@@ -8,6 +10,7 @@ export interface IAccount {
     password: string;
     serverPref: string;
     charInfo: ICharacterInfo;
+    proxy: IProxy;
 }
 
 export interface ICharacterInfo {

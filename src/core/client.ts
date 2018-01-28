@@ -2,6 +2,7 @@ import { Socket } from 'net';
 import { Log, LogLevel } from '../services/logger';
 import { Packet, PacketType } from './../networking/packet';
 import { IAccountInfo, IAccount, ICharacterInfo } from './../models/accinfo';
+import { IProxy } from './../models/proxy';
 import { IServer } from './../models/server';
 import { Packets } from './../networking/packets';
 import { HelloPacket } from './../networking/packets/outgoing/hello-packet';
@@ -36,6 +37,7 @@ import { UpdateAckPacket } from './../networking/packets/outgoing/updateack-pack
 import { ServerPlayerShootPacket } from './../networking/packets/incoming/server-player-shoot-packet';
 import { PlayerShootPacket } from './../networking/packets/outgoing/player-shoot-packet';
 import { EventEmitter } from 'events';
+import { SocksClient, SocksClientOptions } from 'socks';
 
 const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
@@ -156,6 +158,7 @@ export class Client {
     private password: string;
     private buildVersion: string;
     private clientSocket: Socket;
+    private proxy: IProxy;
     private currentBulletId: number;
     private lastAttackTime: number;
 
@@ -188,6 +191,7 @@ export class Client {
         this.password = accInfo.password;
         this.buildVersion = buildVersion;
         this.alias = accInfo.alias;
+        this.proxy = accInfo.proxy;
         if (accInfo.charInfo) {
             this.charInfo = accInfo.charInfo;
         } else {
@@ -237,6 +241,16 @@ export class Client {
             this.clientSocket.removeAllListeners('error');
             this.clientSocket.destroy();
         }
+    }
+
+    public setProxy(proxy: IProxy): void {
+        if (proxy) {
+            Log(this.alias, 'Connecting to new proxy.');
+        } else {
+            Log(this.alias, 'Connecting without proxy.');
+        }
+        this.proxy = proxy;
+        this.connect();
     }
 
     @HookPacket(PacketType.MAPINFO)
@@ -437,10 +451,37 @@ export class Client {
             this.clientSocket.destroy();
         }
 
-        this.clientSocket = new Socket({
-            readable: true,
-            writable: true
-        });
+        if (this.proxy) {
+            Log(this.alias, 'Establishing proxy', LogLevel.Info);
+            SocksClient.createConnection({
+                proxy: {
+                    ipaddress: this.proxy.host,
+                    port: this.proxy.port,
+                    type: this.proxy.type
+                },
+                command: 'connect',
+                destination: {
+                    host: this.serverIp,
+                    port: 2050
+                }
+            }).then((info) => {
+                Log(this.alias, 'Established proxy!', LogLevel.Success);
+                this.clientSocket = info.socket;
+                this.initSocket(false);
+            }).catch((error) => {
+                Log(this.alias, 'Error establishing proxy', LogLevel.Error);
+                Log(this.alias, error, LogLevel.Error);
+            });
+        } else {
+            this.clientSocket = new Socket({
+                readable: true,
+                writable: true
+            });
+            this.initSocket(true);
+        }
+    }
+
+    private initSocket(connect: boolean): void {
         if (!this.packetio) {
             this.packetio = new PacketIO(this.clientSocket);
             this.packetio.on('packet', (data: Packet) => {
@@ -453,7 +494,11 @@ export class Client {
         } else {
             this.packetio.reset(this.clientSocket);
         }
-        this.clientSocket.connect(2050, this.serverIp);
+        if (connect) {
+            this.clientSocket.connect(2050, this.serverIp);
+        } else {
+            this.onConnect();
+        }
         this.clientSocket.on('connect', this.onConnect.bind(this));
         this.clientSocket.on('close', this.onClose.bind(this));
         this.clientSocket.on('error', this.onError.bind(this));

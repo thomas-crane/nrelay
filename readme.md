@@ -1,6 +1,17 @@
 # nrelay
 A console based modular client for Realm of the Mad God built with Node.js and TypeScript.
 
+## Contents
+ + [Docs](#docs)
+ + [Install](#install)
+    + [Prerequisites](#prerequisites)
+ + [Setup](#setup)
+    + [Using proxies](#using-proxies)
+ + [Run](#run)
+ + [Command line arguments](#command-line-arguments)
+ + [Build](#build)
+ + [Acknowledgements](#acknowledgements)
+
 ## Docs
 Docs covering how to create plugins, all implemented packet structures and their members, and some of the object structures can be [found in the docs folder.](https://github.com/thomas-crane/nrelay/tree/master/docs)
 
@@ -88,6 +99,23 @@ If you have multiple accounts which you want to run at the same time, you can ad
     ]
 }
 ```
+### Using proxies
+nrelay supports the use of SOCKSv4, SOCKSv4a, and SOCKSv5 proxies to route client connections through. Proxies can be added in the account config as a property of the account
+```
+{
+    "alias": "Main Client",
+    "guid": "first.account@email.com",
+    "password": "SecretPassWord11",
+    "serverPref": "AsiaSouthEast",
+    "proxy": {
+        "host": "127.0.0.1", // The ip of the proxy
+        "port": "8080",      // The port of the proxy
+        "type": 5            // The type of the proxy. Use 5 for SOCKSv5 and 4 for SOCKSv4 or SOCKSv4a
+    }
+}
+```
+If a proxy is specified, nrelay will route all traffic including the initial web request to get the character lists. Because of this, there may be greater delays when using proxies.
+The proxy a client is using can also be changed during runtime by using the `Client.setProxy(proxy: IProxy): void` method.
 
 ## Run
 After setting up the `acc-config.json` file, nrelay is ready to go. To run nrelay, simply use the command `nrelay` in the console. If you have setup your `acc-config` properly (and used the correct credentials) you should see an output similar to this
@@ -116,7 +144,7 @@ You will only be able to use the command `nrelay` if you performed step 6 and 7 
 
 `npm start` will only work if the console is in the nrelay directory, whereas the `nrelay` command can be run anywhere.
 
-### Command line arguments
+## Command line arguments
 There are several command line arguments which can be provided when starting nrelay to change the behaviour.
 
 #### `--debug`

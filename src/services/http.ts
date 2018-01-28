@@ -1,23 +1,15 @@
 import http = require('http');
 import querystring = require('querystring');
 import url = require('url');
+import { IProxy } from './../models/proxy';
+import { Socket } from 'net';
+import { SocksClient, SocksClientOptions } from 'socks';
+import { Log, LogLevel } from './logger';
 
 export class Http {
     static get(path: string, query?: { [id: string]: string }): Promise<any> {
         return new Promise((resolve, reject) => {
-            let qs = '';
-            const keys = Object.keys(query);
-            for (let i = 0; i < keys.length; i++) {
-                if (i === 0) {
-                    qs += '?';
-                }
-                qs += encodeURIComponent(keys[i]);
-                qs += '=';
-                qs += encodeURIComponent(query[keys[i]]);
-                if (i !== keys.length - 1) {
-                    qs += '&';
-                }
-            }
+            const qs = this.parseQueryString(query);
             http.get(path + qs, (response) => {
                 response.setEncoding('utf8');
                 let data = '';
@@ -29,6 +21,44 @@ export class Http {
                 });
             }).on('error', (error) => {
                 reject(error);
+            });
+        });
+    }
+
+    static proxiedGet(path: string, proxy: IProxy, query?: { [id: string]: string }): Promise<any> {
+        return new Promise((resolve, reject) => {
+            const endpoint = url.parse(path);
+            const qs = this.parseQueryString(query);
+            Log('Http', 'Establishing proxy for GET request.', LogLevel.Info);
+            const socket = SocksClient.createConnection({
+                destination: {
+                    host: endpoint.host,
+                    port: 80
+                },
+                command: 'connect',
+                proxy: {
+                    ipaddress: proxy.host,
+                    port: proxy.port,
+                    type: proxy.type
+                }
+            }).then((info) => {
+                Log('Http', 'Established proxy!', LogLevel.Success);
+                let data = '';
+                info.socket.setEncoding('utf8');
+                info.socket.write('GET /char/list' + qs + ' HTTP/1.1\r\n');
+                info.socket.write('Host: ' + endpoint.host + '\r\n');
+                info.socket.write('Connection: close\r\n\r\n');
+                info.socket.on('data', (chunk) => {
+                    data += chunk.toString('utf8');
+                });
+                info.socket.on('close', (err) => {
+                    info.socket.destroy();
+                    info.socket.removeAllListeners('data');
+                    info.socket.removeAllListeners('close');
+                    resolve(data);
+                });
+            }).catch((err) => {
+                reject(err);
             });
         });
     }
@@ -46,7 +76,7 @@ export class Http {
                     'Content-Length': Buffer.byteLength(postData)
                 }
             };
-            const request = http.request(options, (response) => {
+            const req = http.request(options, (response) => {
                 response.setEncoding('utf8');
                 let data = '';
                 response.on('data', (chunk) => {
@@ -58,8 +88,28 @@ export class Http {
             }).on('error', (error) => {
                 reject(error);
             });
-            request.write(postData);
-            request.end();
+            req.write(postData);
+            req.end();
         });
+    }
+
+    private static parseQueryString(query: { [id: string]: string } | null): string {
+        if (!query) {
+            return '';
+        }
+        let qs = '';
+        const keys = Object.keys(query);
+        for (let i = 0; i < keys.length; i++) {
+            if (i === 0) {
+                qs += '?';
+            }
+            qs += encodeURIComponent(keys[i]);
+            qs += '=';
+            qs += encodeURIComponent(query[keys[i]]);
+            if (i !== keys.length - 1) {
+                qs += '&';
+            }
+        }
+        return qs;
     }
 }

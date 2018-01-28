@@ -74,6 +74,9 @@ export class PacketIO {
      * @param packet The packet to send.
      */
     public sendPacket(packet: Packet): void {
+        if (this.socket.destroyed) {
+            return;
+        }
         packet.reset();
         packet.write();
 

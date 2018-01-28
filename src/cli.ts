@@ -51,7 +51,7 @@ export class CLI {
                     reject(new Error(account.alias + ' couldn\'t get servers.'));
                 }
             }).catch((error) => {
-                const err = new Error(account.alias + ' received an error: ' + error);
+                const err = new Error(account.alias + ': ' + error);
                 reject(err);
             });
         });
@@ -68,6 +68,9 @@ export class CLI {
     }
 
     public static getClient(alias: string): Client | null {
+        if (!this.clients.hasOwnProperty(alias)) {
+            return null;
+        }
         return this.clients[alias];
     }
 
@@ -87,10 +90,7 @@ export class CLI {
 
     private static getAccountInfo(account: IAccount): Promise<IAccount> {
         return new Promise((resolve, reject) => {
-            Http.get(SERVER_ENDPOINT, {
-                guid: account.guid,
-                password: account.password
-            }).then((data) => {
+            const handler = (data: any) => {
                 const info = parseAccountInfo(data);
                 this.serverList = parseServers(data);
                 if (info) {
@@ -99,7 +99,18 @@ export class CLI {
                 } else {
                     reject(parseError(data));
                 }
-            }).catch((err) => reject(err));
+            };
+            if (account.proxy) {
+                Http.proxiedGet(SERVER_ENDPOINT, account.proxy, {
+                    guid: account.guid,
+                    password: account.password
+                }).then(handler).catch((err) => reject(err));
+            } else {
+                Http.get(SERVER_ENDPOINT, {
+                    guid: account.guid,
+                    password: account.password
+                }).then(handler).catch((err) => reject(err));
+            }
         });
     }
 
