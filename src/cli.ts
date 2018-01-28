@@ -11,6 +11,8 @@ import { ResourceManager } from './core/resource-manager';
 import { Updater } from './services/updater';
 import { environment } from './models/environment';
 import fs = require('fs');
+import net = require('net');
+import dns = require('dns');
 
 const args = process.argv;
 const EMAIL_REPLACE_REGEX = /.+?(.+?)(?:@|\+\d+).+?(.+?)\./;
@@ -101,10 +103,26 @@ export class CLI {
                 }
             };
             if (account.proxy) {
-                Http.proxiedGet(SERVER_ENDPOINT, account.proxy, {
-                    guid: account.guid,
-                    password: account.password
-                }).then(handler).catch((err) => reject(err));
+                if (net.isIP(account.proxy.host) === 0) {
+                    Log('NRelay', 'Resolving proxy hostname.', LogLevel.Info);
+                    dns.lookup(account.proxy.host, (err, address, family) => {
+                        if (err) {
+                            reject(err);
+                            return;
+                        }
+                        Log('NRelay', 'Proxy hostname resolved!', LogLevel.Success);
+                        account.proxy.host = address;
+                        Http.proxiedGet(SERVER_ENDPOINT, account.proxy, {
+                            guid: account.guid,
+                            password: account.password
+                        }).then(handler).catch((error) => reject(error));
+                    });
+                } else {
+                    Http.proxiedGet(SERVER_ENDPOINT, account.proxy, {
+                        guid: account.guid,
+                        password: account.password
+                    }).then(handler).catch((err) => reject(err));
+                }
             } else {
                 Http.get(SERVER_ENDPOINT, {
                     guid: account.guid,

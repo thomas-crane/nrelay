@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.8.2`
+### Fixes:
+ + Proxy hostnames are now resolved before attempting to connect.
+
 ## `6.8.1`
 ### Fixes:
  + Added missing `userId` and `password` strings to proxy socket constructors.
