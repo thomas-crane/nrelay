@@ -68,6 +68,9 @@ Client.on('disconnect', (playerData: IPlayerData, client: Client) => {
 });
 ```
 
+#### `setProxy(proxy: IProxy): void`
+Used to connect the client to a new proxy. If the `proxy` parameter is `null` then the client will connect without a proxy.
+
 #### `shoot(angle: number): boolean`
 Used to fire the currently equiped weapon. `angle` should be in radians.
 
