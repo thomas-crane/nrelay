@@ -1,6 +1,11 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.8.3`
+### Changes:
+ + Changed client connection/disconnection messages to include server.
+ + `IAccount.charInfo` and `IAccount.proxy` are now optional.
+
 ## `6.8.2`
 ### Fixes:
  + Proxy hostnames are now resolved before attempting to connect.

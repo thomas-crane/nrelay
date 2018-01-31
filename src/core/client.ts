@@ -394,7 +394,7 @@ export class Client {
 
     private onConnect(): void {
         Client.emitter.emit('connect', Object.assign({}, this.playerData), this);
-        Log(this.alias, 'Connected to server!', LogLevel.Success);
+        Log(this.alias, 'Connected to ' + this.server.name + '!', LogLevel.Success);
         this.connectTime = Date.now();
         this.lastTickTime = 0;
         this.currentTickTime = 0;
@@ -431,7 +431,7 @@ export class Client {
 
     private onClose(error: boolean): void {
         Client.emitter.emit('disconnect', Object.assign({}, this.playerData), this);
-        Log(this.alias, 'The connection was closed.', LogLevel.Warning);
+        Log(this.alias, 'The connection to ' + this.server.name + ' was closed.', LogLevel.Warning);
         Log(this.alias, 'Reconnecting in 5 seconds');
         setTimeout(() => {
             this.connect();

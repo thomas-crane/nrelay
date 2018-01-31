@@ -9,8 +9,8 @@ export interface IAccount {
     guid: string;
     password: string;
     serverPref: string;
-    charInfo: ICharacterInfo;
-    proxy: IProxy;
+    charInfo?: ICharacterInfo;
+    proxy?: IProxy;
 }
 
 export interface ICharacterInfo {
