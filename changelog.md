@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.8.4`
+### Changes:
+ + Added path mapping for incoming/outgoing packets and networking/data classes.
+
 ## `6.8.3`
 ### Changes:
  + Changed client connection/disconnection messages to include server.
