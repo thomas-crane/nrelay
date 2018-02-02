@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.8.5`
+### Changes:
+ + Added path mapping for all `src/` folders. These should be preferred for imports over absolute paths.
+
 ## `6.8.4`
 ### Changes:
  + Added path mapping for incoming/outgoing packets and networking/data classes.

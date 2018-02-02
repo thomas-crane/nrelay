@@ -24,6 +24,18 @@
             ],
             "networking/data": [
                 "src/networking/data"
+            ],
+            "networking": [
+                "src/networking"
+            ],
+            "models": [
+                "src/models"
+            ],
+            "core": [
+                "src/core"
+            ],
+            "services": [
+                "src/services"
             ]
         }
     }
