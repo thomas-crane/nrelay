@@ -1,6 +1,13 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.9.0`
+### Changes:
+ + Updated packet ids and docs to X22.0.0
+ + Added event emitter to the PlayerTracker component. Available events are `'enter'` for when a player enters, and `'leave'` for when a player leaves. Both events have a single parameter which is the `IPlayerData` of the player.
+### Fixes:
+ + Fixed some path mappings not working correctly. These path mappings are still unstable and likely to change in the future. It is recommended **not** to use them until a later time.
+
 ## `6.8.5`
 ### Changes:
  + Added path mapping for all `src/` folders. These should be preferred for imports over absolute paths.

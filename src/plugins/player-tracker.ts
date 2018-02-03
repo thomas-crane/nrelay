@@ -4,6 +4,7 @@ import { Classes } from './../models/classes';
 import { UpdatePacket } from './../networking/packets/incoming/update-packet';
 import { ObjectStatusData } from './../networking/data/object-status-data';
 import { NewTickPacket } from './../networking/packets/incoming/newtick-packet';
+import { EventEmitter } from 'events';
 
 @NrPlugin({
     name: 'Player Tracker',
@@ -11,17 +12,28 @@ import { NewTickPacket } from './../networking/packets/incoming/newtick-packet';
 })
 export class PlayerTracker {
 
+    private emitter: EventEmitter;
     private readonly trackedPlayers: {
         [guid: string]: IPlayerData[]
     };
 
     constructor() {
+        if (!this.emitter) {
+            this.emitter = new EventEmitter();
+        }
         this.trackedPlayers = {};
         Client.on('disconnect', (pd, client: Client) => {
             if (this.trackedPlayers.hasOwnProperty(client.alias)) {
                 this.trackedPlayers[client.alias] = [];
             }
         });
+    }
+
+    public on(event: string | symbol, listener: (...args: any[]) => void): EventEmitter {
+        if (!this.emitter) {
+            this.emitter = new EventEmitter();
+        }
+        return this.emitter.on(event, listener);
     }
 
     public trackPlayersFor(client: Client): void {
@@ -48,12 +60,20 @@ export class PlayerTracker {
         for (let i = 0; i < update.newObjects.length; i++) {
             if (Classes[update.newObjects[i].objectType]) {
                 const pd = ObjectStatusData.processObject(update.newObjects[i]);
+                pd.server = client.server.name;
                 this.trackedPlayers[client.alias].push(pd);
+                this.emitter.emit('enter', (pd));
             }
         }
-        this.trackedPlayers[client.alias] = this.trackedPlayers[client.alias].filter((pd) => {
-            return update.drops.indexOf(pd.objectId) === -1;
-        });
+        for (let i = 0; i < update.drops.length; i++) {
+            for (let n = 0; n < this.trackedPlayers[client.alias].length; n++) {
+                if (this.trackedPlayers[client.alias][n].objectId === update.drops[i]) {
+                    const pd = this.trackedPlayers[client.alias].splice(n, 1)[0];
+                    this.emitter.emit('leave', pd);
+                    break;
+                }
+            }
+        }
     }
 
     @HookPacket(PacketType.NEWTICK)
