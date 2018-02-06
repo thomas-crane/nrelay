@@ -56,7 +56,7 @@ class ExamplePlugin {
 
     constructor() {
         PluginManager.afterInit(() => {
-            this.playerTracker.getInstanceOf(PlayerTracker);
+            this.playerTracker = PluginManager.getInstanceOf(PlayerTracker);
         });
     }
 }
