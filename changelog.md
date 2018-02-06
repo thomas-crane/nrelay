@@ -1,6 +1,13 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.10.0`
+### Changes:
+ + Removed path mappings for all modules for now.
+ + Added account in use handler to CLI
+ + Added a `packet: Packet` parameter to `PacketIO.emitPacket(...)`. Plugins can use this method to emit server packets to other clients.
+ + Added `blockNext(packetType: PacketType): void` method to `Client`. This can be used to stop the next packet of the `packetType` type from getting to the client or any plugins.
+
 ## `6.9.0`
 ### Changes:
  + Updated packet ids and docs to X22.0.0

@@ -16,6 +16,7 @@ import dns = require('dns');
 
 const args = process.argv;
 const EMAIL_REPLACE_REGEX = /.+?(.+?)(?:@|\+\d+).+?(.+?)\./;
+const ACCOUNT_IN_USE_REGEX = /Account in use \((\d+) seconds? until timeout\)/;
 
 export class CLI {
 
@@ -54,6 +55,7 @@ export class CLI {
                 }
             }).catch((error) => {
                 const err = new Error(account.alias + ': ' + error);
+                this.handleConnectionError(error, account);
                 reject(err);
             });
         });
@@ -156,6 +158,21 @@ export class CLI {
                     Log('NRelay', error, LogLevel.Error);
                 });
             }, (i * 1000));
+        }
+    }
+
+    private static handleConnectionError(error: string, acc: IAccount): void {
+        if (!error) {
+            return;
+        }
+        const accInUse = ACCOUNT_IN_USE_REGEX.exec(error);
+        if (accInUse) {
+            const time = +accInUse[1] + 1;
+            Log('NRelay', acc.alias + ' Received account in use error. Reconnecting in ' + time + ' seconds.', LogLevel.Warning);
+            setTimeout(() => {
+                this.addClient(acc);
+            }, time * 1000);
+            return;
         }
     }
 

@@ -15,27 +15,6 @@
         "paths": {
             "*": [
                 "node_modules/*"
-            ],
-            "networking/packets/incoming": [
-                "src/networking/packets/incoming.d.ts"
-            ],
-            "networking/packets/outgoing": [
-                "src/networking/packets/outgoing.d.ts"
-            ],
-            "networking/data/*": [
-                "src/networking/data/*"
-            ],
-            "networking/*": [
-                "src/networking/*"
-            ],
-            "models/*": [
-                "src/models/*"
-            ],
-            "core/*": [
-                "src/core/*"
-            ],
-            "services/*": [
-                "src/services/*"
             ]
         }
     }

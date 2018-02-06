@@ -7,6 +7,7 @@ import { RC4, OUTGOING_KEY, INCOMING_KEY } from './../crypto/rc4';
 import { Log, LogLevel } from './../services/logger';
 import { environment } from './../models/environment';
 import { PacketHead } from './packet-head';
+import { PacketType } from './packet-type';
 
 export class PacketIO {
 
@@ -138,7 +139,8 @@ export class PacketIO {
                     this.processHead();
                 } else {
                     // packet buffer is full, emit a packet before continuing.
-                    this.emitPacket();
+                    const packet = this.constructPacket();
+                    this.emitPacket(packet);
                 }
                 if (this.index === 0 && data[i] === 255) {
                     continue;
@@ -153,18 +155,15 @@ export class PacketIO {
                 this.processHead();
             } else {
                 // packet buffer is full, emit a packet before continuing.
-                this.emitPacket();
+                const packet = this.constructPacket();
+                this.emitPacket(packet);
             }
         }
     }
 
-    private emitPacket(): void {
+    private constructPacket(): Packet {
         const packetData = this.packetBuffer.slice(5);
         this.receiveRC4.cipher(packetData);
-
-        if (environment.debug) {
-            Log('PacketIO', 'READ: id: ' + this.currentHead.id + ', size: ' + this.currentHead.length, LogLevel.Info);
-        }
 
         let packet;
         try {
@@ -178,9 +177,18 @@ export class PacketIO {
         if (packet) {
             packet.read();
             packet.data = null;
-            this.emitter.emit('packet', packet);
+        }
+        if (environment.debug) {
+            Log('PacketIO', 'READ: id: ' + this.currentHead.id + ', size: ' + this.currentHead.length, LogLevel.Info);
         }
         this.resetBuffer();
+        return packet;
+    }
+
+    private emitPacket(packet: Packet): void {
+        if (packet) {
+            this.emitter.emit('packet', packet);
+        }
     }
 
     private resetBuffer(): void {

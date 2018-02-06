@@ -167,6 +167,9 @@ export class Client {
     private keyTime: number;
     private gameId: number;
 
+    // packet control
+    private blockedPackets: PacketType[];
+
     /**
      * Creates a new instance of the client and begins the connection process to the specified server.
      * @param server The server to connect to.
@@ -177,6 +180,7 @@ export class Client {
         if (!Client.emitter) {
             Client.emitter = new EventEmitter();
         }
+        this.blockedPackets = [];
         this.key = new Int8Array(0);
         this.keyTime = -1;
         this.gameId = -2;
@@ -243,6 +247,11 @@ export class Client {
         }
     }
 
+    /**
+     * Switches the client connect to a proxied connection. Setting this to
+     * null will remove the current proxy if there is one.
+     * @param proxy The proxy to use.
+     */
     public setProxy(proxy: IProxy): void {
         if (proxy) {
             Log(this.alias, 'Connecting to new proxy.');
@@ -251,6 +260,16 @@ export class Client {
         }
         this.proxy = proxy;
         this.connect();
+    }
+
+    /**
+     * Blocks the next packet of the specified type.
+     * @param packetType The packet type to block.
+     */
+    public blockNext(packetType: PacketType): void {
+        if (this.blockedPackets.indexOf(packetType) < 0) {
+            this.blockedPackets.push(packetType);
+        }
     }
 
     @HookPacket(PacketType.MAPINFO)
@@ -487,7 +506,12 @@ export class Client {
         if (!this.packetio) {
             this.packetio = new PacketIO(this.clientSocket);
             this.packetio.on('packet', (data: Packet) => {
-                PluginManager.callHooks(data.type, data, this);
+                const index = this.blockedPackets.indexOf(data.type);
+                if (index > -1) {
+                    this.blockedPackets = this.blockedPackets.filter((p) => p !== data.type);
+                } else {
+                    PluginManager.callHooks(data.type, data, this);
+                }
             });
             this.packetio.on('error', (err) => {
                 Log(this.alias, 'Received PacketIO error: ' + err, LogLevel.Error);
