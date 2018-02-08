@@ -5,5 +5,5 @@ export interface IProxy {
     port: number;
     userId?: string;
     password?: string;
-    type: SocksProxy['type'];
+    type: 4 | 5;
 }

@@ -38,11 +38,13 @@ import { ServerPlayerShootPacket } from './../networking/packets/incoming/server
 import { PlayerShootPacket } from './../networking/packets/outgoing/player-shoot-packet';
 import { EventEmitter } from 'events';
 import { SocksClient, SocksClientOptions } from 'socks';
+import { IMapInfo } from './../models/mapinfo';
 
 const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
 const MIN_ATTACK_FREQ = 0.0015;
 const MAX_ATTACK_FREQ = 0.008;
+const ACCOUNT_IN_USE_REGEX = /Account in use \((\d+) seconds? until timeout\)/;
 
 export class Client {
 
@@ -112,11 +114,9 @@ export class Client {
     public nextPos: WorldPosData;
     /**
      * Info about the current map including
-     *  + `width: number` the width of the map.
-     *  + `height: number` the height of the name.
-     *  + `name: string` the name of the map.
+     * @see `IMapInfo` for more information.
      */
-    public mapInfo: { width: number, height: number, name: string };
+    public mapInfo: IMapInfo;
     /**
      * Info about the account's characters.
      * @see `ICharacterInfo` for more information.
@@ -166,6 +166,7 @@ export class Client {
     private key: Int8Array;
     private keyTime: number;
     private gameId: number;
+    private reconnectCooldown: number;
 
     // packet control
     private blockedPackets: PacketType[];
@@ -337,6 +338,12 @@ export class Client {
         this.serverIp = this.nexusServerIp;
         this.clientSocket.destroy();
         Log(this.alias, 'Received failure: "' + failurePacket.errorDescription + '"', LogLevel.Error);
+        const accInUse = ACCOUNT_IN_USE_REGEX.exec(failurePacket.errorDescription);
+        if (accInUse) {
+            const time = +accInUse[1] + 1;
+            Log(this.alias, ' Received account in use error. Reconnecting in ' + time + ' seconds.', LogLevel.Warning);
+
+        }
     }
 
     @HookPacket(PacketType.AOE)
@@ -451,10 +458,15 @@ export class Client {
     private onClose(error: boolean): void {
         Client.emitter.emit('disconnect', Object.assign({}, this.playerData), this);
         Log(this.alias, 'The connection to ' + this.server.name + ' was closed.', LogLevel.Warning);
-        Log(this.alias, 'Reconnecting in 5 seconds');
+        let reconnectTime = 5;
+        if (this.reconnectCooldown) {
+            reconnectTime = this.reconnectCooldown;
+            this.reconnectCooldown = null;
+        }
+        Log(this.alias, 'Reconnecting in ' + reconnectTime + ' seconds');
         setTimeout(() => {
             this.connect();
-        }, 5000);
+        }, reconnectTime * 1000);
         // process.exit(0);
     }
 

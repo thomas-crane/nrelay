@@ -1,6 +1,14 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.11.0`
+### Changes:
+ + Reworked documentation. The docs are now structured in the same way the source code is.
+ + Added the `IMapInfo` type to replace inline type of `Client.mapInfo`.
+ + Simplified the `IProxy.type` parameter.
+ + Updated to latest packet ids.
+ + Changed plugin manager code slightly for clarity.
+
 ## `6.10.0`
 ### Changes:
  + Removed path mappings for all modules for now.

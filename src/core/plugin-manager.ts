@@ -45,7 +45,7 @@ export class PluginManager {
         }
     }
 
-    static addHook(packetType: PacketType, action: typeof Function, target: string): void {
+    static addHook(packetType: PacketType, action: (caller: object, packet: Packet) => void, target: string): void {
         if (!this.hooks) {
             this.hooks = {};
         }
@@ -125,7 +125,7 @@ export class PluginManager {
         }
     }
 
-    private static hooks: { [id: number]: Array<{ action: typeof Function, caller: string }> };
+    private static hooks: { [id: number]: Array<{ action: (caller: object, packet: Packet) => void, caller: string }> };
     private static pluginInfo: IPluginInfo[];
     private static pluginInstances: { [name: string]: object };
     private static afterInitFunctions: Array<() => void>;

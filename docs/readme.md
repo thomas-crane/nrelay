@@ -2,6 +2,8 @@
 This folder contains all documentation for nrelay.
 
 ## Contents
+The contents of the `docs` folder mirrors that of the `src` folder. For example, the `Client` class is in `src/core/client`, so the docs will be at `docs/core/client`.
+
 ### `creating-plugins`
 This is a guide which provides a tutorial on how to write a basic plugin, including some of the services which are available to plugins.
 
