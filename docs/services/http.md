@@ -6,7 +6,7 @@ A service class for providing HTTP request functionality.
 ### [Public methods](#public-methods)
  + [`static get(path: string, query?: { [id: string]: string }): Promise<any>`](#static-getpath-string-query--id-string-string--promiseany)
  + [`static proxiedGet(path: string, proxy: IProxy, query?: { [id: string]: string }): Promise<any>`](#static-proxiedgetpath-string-proxy-iproxy-query--id-string-string--promiseany)
- + [`static post(path: string, query?: { [id: string]: string }): Promise<any>`](#static-postpath-string-query--id-string-string--promiseany)
+ + [`static post(path: string, query?: { [id: string]: string }): Promise<any>`](#static-postpath-string-params--id-string-any--promiseany)
 
 ### Public members
 This class has no public members.

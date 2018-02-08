@@ -2,7 +2,7 @@
 This class contains the functionality for downloading the lastest `GroundTypes.json`, `Objects.json` and packet ids.
 
 ### [Public members](#public-members)
- + [`static latestVersion`](#static-latestversion)
+ + [`static latestVersion: string`](#static-latestversion-string)
 ### [Public methods](#public-methods)
  + [`static checkVersion(): Promise<boolean>`](#static-checkversion-promiseboolean)
  + [`static getLatest(): Promise<boolean>`](#static-getlatest-promiseboolean)

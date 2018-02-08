@@ -13,7 +13,7 @@ The `Client` class represents a bot connected to the game server.
  + [`moveMultiplier: number`](#movemultiplier-number)
 
 ### [Public methods](#public-methods)
- + [`static on(event: string | symbol, listener: (...args: any[]) => void)`](#static-onevent-string-symbol-listener-args-any-void)
+ + [`static on(event: string | symbol, listener: (...args: any[]) => void)`](#static-onevent-string--symbol-listener-args-any--void)
  + [`setProxy(proxy: IProxy): void`](#setproxyproxy-iproxy-void)
  + [`shoot(angle: number): boolean`](#shootangle-number-boolean)
  + [`blockNext(packetType: PacketType): void`](#blocknextpackettype-packettype-void)

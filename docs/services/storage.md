@@ -4,9 +4,9 @@ The `Storage` class provides a set of methods to store and retrieve JSON files.
 ### [Public members](#public-members)
  + This class has no public members.
 ### [Public methods](#public-methods)
- + [`static get(...filePath: string[]): Promise<any>`](#static-get...filepath-string-promiseany)
- + [`static makePath(...filePath: string[]): string`](#static-makepath...filepath-string-string)
- + [`static set(data: object, ...filePath: string[]): Promise<any>`](#static-setdata-object-...filepath-string-promiseany)
+ + [`static get(...filePath: string[]): Promise<any>`](#static-getfilepath-string-promiseany)
+ + [`static makePath(...filePath: string[]): string`](#static-makepathfilepath-string-string)
+ + [`static set(data: object, ...filePath: string[]): Promise<any>`](#static-setdata-object-filepath-string-promiseany)
  + [`static getAccountConfig(): IAccountInfo`](#static-getaccountconfig-iaccountinfo)
  + [`static createLog(): void`](#static-createlog-void)
 

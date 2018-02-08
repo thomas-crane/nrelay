@@ -5,11 +5,11 @@ The `PluginManager` class is used for all plugin detection, loading and interop.
  + This class has no public members.
 ### [Public methods](#public-methods)
  + [`static loadPlugins(): void`](#static-loadplugins-void)
- + [`addHook(packetType: PacketType, action: (caller: object, packet: Packet) => void, target: string): void`]()
- + [`static addPlugin(info: IPluginInfo, target: new () => object): void`]()
- + [`static getInstanceOf<T extends object>(instance: new () => T): T | null`]()
- + [`static afterInit(method: () => void): void`]()
- + [`static callHooks(packetType: PacketType, packet: Packet, client: object): void`]()
+ + [`addHook(packetType: PacketType, action: (caller: object, packet: Packet) => void, target: string): void`](#static-addhookpackettype-packettype-action-caller-object-packet-packet--void-target-string-void)
+ + [`static addPlugin(info: IPluginInfo, target: new () => object): void`](#static-addplugininfo-iplugininfo-target-new---object-void)
+ + [`static getInstanceOf<T extends object>(instance: new () => T): T | null`](#static-getinstanceoft-extends-objectinstance-new---t-t--null)
+ + [`static afterInit(method: () => void): void`](#static-afterinitmethod---void-void)
+ + [`static callHooks(packetType: PacketType, packet: Packet, client: object): void`](#static-callhookspackettype-packettype-packet-packet-client-object-void)
 
 ### Public members
 This class has no public members.
