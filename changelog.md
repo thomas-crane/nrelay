@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.11.1`
+### Fixes:
+ + Made `emitPacket` public.
+
 ## `6.11.0`
 ### Changes:
  + Reworked documentation. The docs are now structured in the same way the source code is.

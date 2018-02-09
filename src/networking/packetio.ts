@@ -101,6 +101,16 @@ export class PacketIO {
         packet = null;
     }
 
+    /**
+     * Emits a packet to all other clients.
+     * @param packet The packet to emit.
+     */
+    public emitPacket(packet: Packet): void {
+        if (packet) {
+            this.emitter.emit('packet', packet);
+        }
+    }
+
     private processHead(): void {
         let packetSize: number;
         let packetId: number;
@@ -183,12 +193,6 @@ export class PacketIO {
         }
         this.resetBuffer();
         return packet;
-    }
-
-    private emitPacket(packet: Packet): void {
-        if (packet) {
-            this.emitter.emit('packet', packet);
-        }
     }
 
     private resetBuffer(): void {
