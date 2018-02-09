@@ -19,7 +19,7 @@ To demonstrate how to create plugins and interact with packets/player data this 
 
 To get started, first delete the contents of the file `src/plugins/hello-plugin.ts`.
 
-The first step of creating a plugin is to import some types from nrelay in order to declare the plugin. __All plugins needs these 5 imports__:
+The first step of creating a plugin is to import some types from nrelay in order to declare the plugin. __All plugins need these 5 imports__:
 ```typescript
 import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core/plugin-module';
 ```
