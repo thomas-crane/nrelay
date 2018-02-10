@@ -24,7 +24,7 @@ Events which can be fired are:
 Used to send a packet. The `packet` argument can be any type which is a subclass of `Packet`. This includes all specific packet types such as `PlayerTextPacket` and `UpdateAckPacket`.
 
 #### `emitPacket(packet: Packet): void`
-Used to emit a packet to all clients. This is the same method which is used to send packets received from the game server, so any packet sent using this method will act the same as a packet received from the server.
+This method will emit the `packet` to any clients subscribed to the `PacketIO` instance which emitted the packet. Usually the only client subscribed to a `PacketIO` is the client which owns that `PacketIO` instance. Because of this, calling `emitPacket` on a `PacketIO` owned by a client will emit the packet only to that client. To emit a packet to all clients instead, use `Client.broadcastPacket(packet: Packet): void`.
 
 #### `destroy(): void`
 This should only be used when the client is no longer required. This will remove all listeners and free any memory possible.

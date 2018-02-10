@@ -67,6 +67,14 @@ Call this method and pass the client you want to start tracking players for. Cal
 
 #### `getPlayersFor(client: Client): IPlayerData[] | null`
 Calling this method will return an array of all players which are tracked by the client. If the client does not having tracking enabled, then `null` will be returned. If tracking is enabled, but there are no players to track, then and empty array will be returned.
+
+#### `on(event: string | symbol, listener: (...args: any[]) => void): EventEmitter`
+Used to attach an event listener to the player tracker.
+
+Events which can be fired are:
+ + `'enter'` - Fired when a player enters the current map. The callback will be passed the `IPlayerData` of the player who entered.
+ + `'leave'` - Fired when a player leaves the current map. The callback will be passed the `IPlayerData` of the player who left.
+
 ### Example usage:
 
 ```typescript

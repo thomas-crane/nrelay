@@ -39,6 +39,7 @@ import { PlayerShootPacket } from './../networking/packets/outgoing/player-shoot
 import { EventEmitter } from 'events';
 import { SocksClient, SocksClientOptions } from 'socks';
 import { IMapInfo } from './../models/mapinfo';
+import { CLI } from '../cli';
 
 const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
@@ -270,6 +271,20 @@ export class Client {
     public blockNext(packetType: PacketType): void {
         if (this.blockedPackets.indexOf(packetType) < 0) {
             this.blockedPackets.push(packetType);
+        }
+    }
+
+    /**
+     * Broadcasts a packet to all connected clients except
+     * the client which broadcasted the packet.
+     * @param packet The packet to broadcast.
+     */
+    public broadcastPacket(packet: Packet): void {
+        const clients = CLI.getClients();
+        for (let i = 0; i < clients.length; i++) {
+            if (clients[i].alias !== this.alias) {
+                clients[i].packetio.emitPacket(packet);
+            }
         }
     }
 

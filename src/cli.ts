@@ -135,12 +135,18 @@ export class CLI {
     }
 
     private static proceed(): void {
-        Promise.all([ResourceManager.loadTileInfo(), ResourceManager.loadObjects()]).then(() => {
-            PluginManager.loadPlugins();
-        }).catch((error) => {
-            Log('NRelay', 'An error occurred while loading tiles and objects.', LogLevel.Warning);
+        const loadResources = new Promise((resolve, reject) => {
+            Promise.all([ResourceManager.loadTileInfo(), ResourceManager.loadObjects()]).then(() => {
+                resolve();
+            }).catch((error) => {
+                Log('NRelay', 'An error occurred while loading tiles and objects.', LogLevel.Warning);
+                resolve();
+            });
+        });
+        loadResources.then(() => {
             PluginManager.loadPlugins();
         });
+
         const accInfo = Storage.getAccountConfig();
         if (!accInfo) {
             Log('NRelay', 'Couldn\'t load acc-config.json.', LogLevel.Error);

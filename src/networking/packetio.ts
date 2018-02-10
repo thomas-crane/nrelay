@@ -102,7 +102,8 @@ export class PacketIO {
     }
 
     /**
-     * Emits a packet to all other clients.
+     * Emits a packet from this PacketIO instance. This will only
+     * emit the packet to the clients subscribed to this particular PacketIO.
      * @param packet The packet to emit.
      */
     public emitPacket(packet: Packet): void {

@@ -1,6 +1,13 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.12.0`
+### Changes:
+ + Added the `Using Firebase to store data` plugin recipe.
+ + Added the `broadcastPacket(packet: Packet): void` method to the `Client` class. This method should be used to send a packet to all connected clients except the client which broadcasted the packet.
+### Fixes:
+ + Fixed a bug where the `CLI` would report plugin loading failures as resource loading failures.
+
 ## `6.11.1`
 ### Fixes:
  + Made `emitPacket` public.
