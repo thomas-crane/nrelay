@@ -1,4 +1,5 @@
 import { Packet } from './../packet';
+import { IPoint } from '../../services/pathfinding/point';
 
 export class WorldPosData {
 
@@ -26,5 +27,12 @@ export class WorldPosData {
         clone.x = this.x;
         clone.y = this.y;
         return clone;
+    }
+
+    public toPoint(): IPoint {
+        return {
+            x: Math.floor(this.x),
+            y: Math.floor(this.y)
+        };
     }
 }

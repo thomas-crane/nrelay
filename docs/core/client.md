@@ -18,6 +18,7 @@ The `Client` class represents a bot connected to the game server.
  + [`shoot(angle: number): boolean`](#shootangle-number-boolean)
  + [`blockNext(packetType: PacketType): void`](#blocknextpackettype-packettype-void)
  + [`broadcastPacket(packet: Packet): void`](#broadcastpacketpacket-packet-void)
+ + [`findPath(to: IPoint): void`](#findpathto-ipoint-void)
  + [`destroy(): void`](#destroy-void)
 
 ### Public members
@@ -90,6 +91,9 @@ Blocks the next packet of type `packetType` which is received by the client. Thi
 
 #### `broadcastPacket(packet: Packet): void`
 Broadcasts the `packet` to all connected clients except the client which broadcasted the packet. The clients which receive the broadcasted packet will handle the packet in the same way they would handle a real packet coming from the game server.
+
+#### `findPath(to: IPoint): void`
+Uses AStar pathfinding to find a path to the `to` location. The path will update when new tiles become available in case a better route is found and will keep running until the client reaches its path or no path is available. `to` should be a location in game coordinates on the map.
 
 #### `destroy(): void`
 This should only be used when the client is no longer required. This will remove all listeners and free any memory possible.

@@ -15,7 +15,7 @@ This class has no public members.
 #### `static get(path: string, query?: { [id: string]: string }): Promise<any>`
 This method performs an HTTP `GET` request. The `query` parameter is optional. If `query` is provided, the object will be turned into the query params for the web request. The returned promise will resolve with the response or be rejected if there is an error.
 
-#### `static proxiedGet(path: string, proxy: IProxy, query?: { [id: string]: string }): Promise<any?`
+#### `static proxiedGet(path: string, proxy: IProxy, query?: { [id: string]: string }): Promise<any>`
 The same as `get(...)` but will perform the request through the proxy specified in the `proxy` parameter.
 
 #### `static post(path: string, params?: { [id: string]: any }): Promise<any>`

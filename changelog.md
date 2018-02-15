@@ -1,6 +1,12 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.13.0`
+### Changes:
+ + Added AStar pathfinding. See the `findPath` method in the client docs for more info.
+ + Added `toPoint(): IPoint` method to the `WorldPosData` class to convert a world pos to an `IPoint` object.
+ + Updated packet ids to X22.1.0
+
 ## `6.12.0`
 ### Changes:
  + Added the `Using Firebase to store data` plugin recipe.

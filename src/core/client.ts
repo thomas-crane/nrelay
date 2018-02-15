@@ -40,6 +40,11 @@ import { EventEmitter } from 'events';
 import { SocksClient, SocksClientOptions } from 'socks';
 import { IMapInfo } from './../models/mapinfo';
 import { CLI } from '../cli';
+import { Pathfinder } from '../services/pathfinding/pathfinder';
+import { Node } from '../services/pathfinding/node';
+import { INodeUpdate } from '../services/pathfinding/node-update';
+import { IPoint } from '../services/pathfinding/point';
+import { environment } from '../models/environment';
 
 const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
@@ -162,6 +167,9 @@ export class Client {
     private proxy: IProxy;
     private currentBulletId: number;
     private lastAttackTime: number;
+    private pathfinder: Pathfinder;
+    private currentPath: IPoint[];
+    private pathfinderTarget: IPoint;
 
     // reconnect info
     private key: Int8Array;
@@ -288,6 +296,31 @@ export class Client {
         }
     }
 
+    /**
+     * Finds a path from the client's current position to the `to` point
+     * and moves the client along the path to the `to` position.
+     * @param to The point to navigate towards.
+     */
+    public findPath(to: IPoint): void {
+        to.x = Math.floor(to.x);
+        to.y = Math.floor(to.y);
+        this.pathfinder.findPath(this.worldPos.toPoint(), to).then((path) => {
+            if (path.length === 0) {
+                this.pathfinderTarget = null;
+                this.currentPath = null;
+                return;
+            }
+            this.pathfinderTarget = to;
+            this.currentPath = path;
+            this.nextPos = new WorldPosData();
+            const next = this.currentPath.shift();
+            this.nextPos.x = next.x + 0.5;
+            this.nextPos.y = next.y + 0.5;
+        }).catch((error) => {
+            Log(this.alias, 'Error finding path: ' + error, LogLevel.Error);
+        });
+    }
+
     @HookPacket(PacketType.MAPINFO)
     private onMapInfo(client: Client, mapInfoPacket: MapInfoPacket): void {
         if (this.charInfo.charId > 0) {
@@ -305,6 +338,7 @@ export class Client {
         }
         this.mapTiles = new Array<GroundTileData>(mapInfoPacket.width * mapInfoPacket.height);
         this.mapInfo = { width: mapInfoPacket.width, height: mapInfoPacket.height, name: mapInfoPacket.name };
+        this.pathfinder = new Pathfinder(mapInfoPacket.width);
     }
 
     @HookPacket(PacketType.UPDATE)
@@ -313,6 +347,7 @@ export class Client {
         const updateAck = new UpdateAckPacket();
         this.packetio.sendPacket(updateAck);
 
+        const pathfinderUpdates: INodeUpdate[] = [];
         // playerdata
         for (let i = 0; i < updatePacket.newObjects.length; i++) {
             if (updatePacket.newObjects[i].status.objectId === this.objectId) {
@@ -320,12 +355,37 @@ export class Client {
                 this.playerData = ObjectStatusData.processObject(updatePacket.newObjects[i]);
                 this.playerData.server = this.server.name;
             }
+            if (ResourceManager.objects[updatePacket.newObjects[i].objectType]) {
+                const obj = ResourceManager.objects[updatePacket.newObjects[i].objectType];
+                if (obj.fullOccupy || obj.occupySquare) {
+                    const x = updatePacket.newObjects[i].status.pos.x;
+                    const y = updatePacket.newObjects[i].status.pos.y;
+                    pathfinderUpdates.push({
+                        x: Math.floor(x),
+                        y: Math.floor(y),
+                        walkable: false
+                    });
+                }
+            }
         }
 
         // map tiles
         for (let i = 0; i < updatePacket.tiles.length; i++) {
             const tile = updatePacket.tiles[i];
             this.mapTiles[tile.y * this.mapInfo.width + tile.x] = tile;
+            if (ResourceManager.tiles[tile.type].noWalk) {
+                pathfinderUpdates.push({
+                    x: Math.floor(tile.x),
+                    y: Math.floor(tile.y),
+                    walkable: false
+                });
+            }
+        }
+        if (pathfinderUpdates.length > 0) {
+            this.pathfinder.updateWalkableNodes(pathfinderUpdates);
+            if (this.pathfinderTarget) {
+                this.findPath(this.pathfinderTarget);
+            }
         }
     }
 
@@ -357,7 +417,6 @@ export class Client {
         if (accInUse) {
             const time = +accInUse[1] + 1;
             Log(this.alias, ' Received account in use error. Reconnecting in ' + time + ' seconds.', LogLevel.Warning);
-
         }
     }
 
@@ -377,7 +436,7 @@ export class Client {
         const movePacket = new MovePacket();
         movePacket.tickId = newTickPacket.tickId;
         movePacket.time = this.getTime();
-        if (this.nextPos) {
+        if (this.nextPos || this.pathfinderTarget) {
             this.moveTo(this.nextPos);
         }
         movePacket.newPosition = this.worldPos;
@@ -472,6 +531,9 @@ export class Client {
 
     private onClose(error: boolean): void {
         Client.emitter.emit('disconnect', Object.assign({}, this.playerData), this);
+        this.nextPos = null;
+        this.currentPath = null;
+        this.pathfinderTarget = null;
         Log(this.alias, 'The connection to ' + this.server.name + ' was closed.', LogLevel.Warning);
         let reconnectTime = 5;
         if (this.reconnectCooldown) {
@@ -559,6 +621,20 @@ export class Client {
 
     private moveTo(target: WorldPosData): void {
         const step = this.getSpeed();
+        if (!this.nextPos && this.currentPath && this.currentPath.length > 0) {
+            this.nextPos = new WorldPosData();
+            const next = this.currentPath.shift();
+            this.nextPos.x = next.x + 0.5;
+            this.nextPos.y = next.y + 0.5;
+            target = this.nextPos;
+        }
+        if (this.currentPath && this.currentPath.length === 0) {
+            this.currentPath = null;
+            this.pathfinderTarget = null;
+        }
+        if (!target) {
+            return;
+        }
         if (this.worldPos.squareDistanceTo(target) > step ** 2) {
             const angle: number = Math.atan2(target.y - this.worldPos.y, target.x - this.worldPos.x);
             this.worldPos.x += Math.cos(angle) * step;
