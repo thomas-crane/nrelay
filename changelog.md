@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.13.1`
+### Fixes:
+ + Fixed a bug where the client would ignore the Account in use error and reconnect in 5 seconds instead of after the specified time.
+
 ## `6.13.0`
 ### Changes:
  + Added AStar pathfinding. See the `findPath` method in the client docs for more info.

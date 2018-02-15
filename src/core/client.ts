@@ -416,6 +416,7 @@ export class Client {
         const accInUse = ACCOUNT_IN_USE_REGEX.exec(failurePacket.errorDescription);
         if (accInUse) {
             const time = +accInUse[1] + 1;
+            this.reconnectCooldown = time;
             Log(this.alias, ' Received account in use error. Reconnecting in ' + time + ' seconds.', LogLevel.Warning);
         }
     }
