@@ -1,6 +1,11 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.13.2`
+### Fixes:
+ + Fixed a bug in the `PluginManager` which would cause a new plugin with the same class name as a previously added plugin to override the previously added plugin.
+ + Updated `HelloPlugin` comments to reflect current plugin requirements.
+
 ## `6.13.1`
 ### Fixes:
  + Fixed a bug where the client would ignore the Account in use error and reconnect in 5 seconds instead of after the specified time.

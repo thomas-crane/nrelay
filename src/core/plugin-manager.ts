@@ -83,9 +83,13 @@ export class PluginManager {
             }
             return;
         }
-        this.pluginInstances[target.name] = plugin;
-        this.pluginInfo.push(info);
-        Log('PluginManager', 'Loaded ' + info.name + ' by ' + info.author, LogLevel.Info);
+        if (this.pluginInstances.hasOwnProperty(target.name)) {
+            Log('PluginManager', 'Cannot load ' + target.name + ' because a plugin with the same name already exists.', LogLevel.Error);
+        } else {
+            this.pluginInstances[target.name] = plugin;
+            this.pluginInfo.push(info);
+            Log('PluginManager', 'Loaded ' + info.name + ' by ' + info.author, LogLevel.Info);
+        }
     }
 
     static getInstanceOf<T extends object>(instance: new () => T): T | null {

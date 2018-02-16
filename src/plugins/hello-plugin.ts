@@ -6,8 +6,7 @@ import { TextPacket } from './../networking/packets/incoming/text-packet';
 import { PlayerTextPacket } from './../networking/packets/outgoing/playertext-packet';
 
 // The NrPlugin decorator gives nrelay some information about
-// your plugin. It isn't actually necessary, but if it is not
-// included, nrelay won't notify the user that the plugin has loaded.
+// your plugin. If it is not present, nrelay won't load the plugin.
 @NrPlugin({
     name: 'Hello Plugin',
     author: 'tcrane'
