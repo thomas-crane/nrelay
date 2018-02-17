@@ -17,9 +17,9 @@ This class has no public members.
 
 ### Public methods
 #### `static get(...filePath: string[]): Promise<any>`
-This method will return a JSON object of the contents of the `filePath` arrray. The path should be relative to `src`, e.g.
+This method will return a JSON object of the contents of the `filePath` arrray. The path should be relative to the root directory (`nrelay/`), e.g.
 ```typescript
-Storage.get('..', 'dist', 'plugins', 'config.json').then((config) => {
+Storage.get('dist', 'plugins', 'config.json').then((config) => {
     this.config = config;
 }).catch((error) => {
     Log('Plugin', error, LogLevel.Error);
@@ -27,13 +27,13 @@ Storage.get('..', 'dist', 'plugins', 'config.json').then((config) => {
 ```
 
 #### `static makePath(...filePath: string[]): string`
-Creates a path to a file. The path should be relative to `src`, e.g.
+Creates a path to a file. The path should be relative to the root directory (`nrelay/`), e.g.
 ```typescript
-const configPath = Storage.makePath('..', 'dist', 'plugins', 'config.json');
+const configPath = Storage.makePath('dist', 'plugins', 'config.json');
 ```
 
 #### `static set(data: object, ...filePath: string[]): Promise<any>`
-This method will store a JSON object in the file path specified. The file path should be relative to the `src` folder.
+This method will store a JSON object in the file path specified. The file path should be relative to the root directory (`nrelay/`).
 
 #### `static getAccountConfig(): IAccountInfo`
 Gets the account config file.

@@ -87,9 +87,9 @@ class ExamplePlugin {
 
     constructor() {
         PluginManager.afterInit(() => {
-            this.tracker = PluginManager.getInstanceOf(PlayerTracker);
+            this.playerTracker = PluginManager.getInstanceOf(PlayerTracker);
             Client.on('connect', (pd, client: Client) => {
-                this.tracker.trackPlayersFor(client);
+                this.playerTracker.trackPlayersFor(client);
             });
         });
     }
