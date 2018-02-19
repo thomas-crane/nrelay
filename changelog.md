@@ -1,6 +1,12 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.14.0`
+### Changes:
+ + Made `Client.guid` public.
+ + Added `trackAllPlayers()` and `getAllPlayers()` to the Player Tracker component. See the `plugin-components` doc for more info.
+ + Fixed a bug in the Player Tracker where two clients with similar emails and no explicit alias can't both be tracked.
+
 ## `6.13.2`
 ### Fixes:
  + Fixed a bug in the `PluginManager` which would cause a new plugin with the same class name as a previously added plugin to override the previously added plugin.

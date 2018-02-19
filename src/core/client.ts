@@ -127,16 +127,20 @@ export class Client {
      * Info about the account's characters.
      * @see `ICharacterInfo` for more information.
      */
-    public charInfo: ICharacterInfo;
+    public readonly charInfo: ICharacterInfo;
     /**
      * The server the client is connected to.
      * @see `IServer` for more info.
      */
-    public server: IServer;
+    public readonly server: IServer;
     /**
      * The alias of the client.
      */
     public alias: string;
+    /**
+     * The email address of the client.
+     */
+    public readonly guid: string;
     /**
      * A number between 0 and 1 which can be used to modify the speed
      * of the player. A value of 1 will be 100% move speed for the client,
@@ -160,7 +164,6 @@ export class Client {
     private lastTickTime: number;
     private currentTickTime: number;
     private connectTime: number;
-    private guid: string;
     private password: string;
     private buildVersion: string;
     private clientSocket: Socket;

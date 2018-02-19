@@ -16,6 +16,7 @@ export class PlayerTracker {
     private readonly trackedPlayers: {
         [guid: string]: IPlayerData[]
     };
+    private trackAll = false;
 
     constructor() {
         if (!this.emitter) {
@@ -23,12 +24,17 @@ export class PlayerTracker {
         }
         this.trackedPlayers = {};
         Client.on('disconnect', (pd, client: Client) => {
-            if (this.trackedPlayers.hasOwnProperty(client.alias)) {
-                this.trackedPlayers[client.alias] = [];
+            if (this.trackedPlayers.hasOwnProperty(client.guid)) {
+                this.trackedPlayers[client.guid] = [];
             }
         });
     }
 
+    /**
+     * Attaches an event listener to the specified event.
+     * @param event The event to attach the listener to.
+     * @param listener The function to invoke when the event is fired.
+     */
     public on(event: string | symbol, listener: (...args: any[]) => void): EventEmitter {
         if (!this.emitter) {
             this.emitter = new EventEmitter();
@@ -36,39 +42,72 @@ export class PlayerTracker {
         return this.emitter.on(event, listener);
     }
 
+    /**
+     * Enables tracking for all clients including clients added at runtime.
+     */
+    public trackAllPlayers(): void {
+        Log('Player Tracker', 'Enabled tracking for all clients.', LogLevel.Success);
+        this.trackAll = true;
+    }
+
+    /**
+     * Enables player tracking for the specified client.
+     * @param client The client to enable tracking for.
+     */
     public trackPlayersFor(client: Client): void {
-        if (!this.trackedPlayers.hasOwnProperty(client.alias)) {
-            this.trackedPlayers[client.alias] = [];
+        if (!this.trackedPlayers.hasOwnProperty(client.guid)) {
+            this.trackedPlayers[client.guid] = [];
             Log('Player Tracker', 'Tracking players for ' + client.alias, LogLevel.Success);
         } else {
             Log('Player Tracker', 'Already tracking players for ' + client.alias, LogLevel.Warning);
         }
     }
 
+    /**
+     * Returns all tracked players, or an empty array if there are no clients tracking players.
+     */
+    public getAllPlayers(): IPlayerData[] {
+        let players: IPlayerData[] = [];
+        Object.keys(this.trackedPlayers).map((guid) => {
+            players = players.concat(this.trackedPlayers[guid]);
+        });
+        return players.filter((player, index, self) => {
+            return index === self.findIndex((p) => p.name === player.name);
+        });
+    }
+
+    /**
+     * Returns the list of players visible to the `client` provided.
+     * @param client The client to get players for.
+     */
     public getPlayersFor(client: Client): IPlayerData[] | null {
-        if (!this.trackedPlayers.hasOwnProperty(client.alias)) {
+        if (!this.trackedPlayers.hasOwnProperty(client.guid)) {
             return null;
         }
-        return this.trackedPlayers[client.alias];
+        return this.trackedPlayers[client.guid];
     }
 
     @HookPacket(PacketType.UPDATE)
     private onUpdate(client: Client, update: UpdatePacket): void {
-        if (!this.trackedPlayers.hasOwnProperty(client.alias)) {
-            return;
+        if (!this.trackedPlayers.hasOwnProperty(client.guid)) {
+            if (this.trackAll) {
+                this.trackedPlayers[client.guid] = [];
+            } else {
+                return;
+            }
         }
         for (let i = 0; i < update.newObjects.length; i++) {
             if (Classes[update.newObjects[i].objectType]) {
                 const pd = ObjectStatusData.processObject(update.newObjects[i]);
                 pd.server = client.server.name;
-                this.trackedPlayers[client.alias].push(pd);
-                this.emitter.emit('enter', (pd));
+                this.trackedPlayers[client.guid].push(pd);
+                this.emitter.emit('enter', pd);
             }
         }
         for (let i = 0; i < update.drops.length; i++) {
-            for (let n = 0; n < this.trackedPlayers[client.alias].length; n++) {
-                if (this.trackedPlayers[client.alias][n].objectId === update.drops[i]) {
-                    const pd = this.trackedPlayers[client.alias].splice(n, 1)[0];
+            for (let n = 0; n < this.trackedPlayers[client.guid].length; n++) {
+                if (this.trackedPlayers[client.guid][n].objectId === update.drops[i]) {
+                    const pd = this.trackedPlayers[client.guid].splice(n, 1)[0];
                     this.emitter.emit('leave', pd);
                     break;
                 }
@@ -78,15 +117,19 @@ export class PlayerTracker {
 
     @HookPacket(PacketType.NEWTICK)
     private onNewTick(client: Client, newTick: NewTickPacket): void {
-        if (!this.trackedPlayers.hasOwnProperty(client.alias)) {
-            return;
+        if (!this.trackedPlayers.hasOwnProperty(client.guid)) {
+            if (this.trackAll) {
+                this.trackedPlayers[client.guid] = [];
+            } else {
+                return;
+            }
         }
         for (let i = 0; i < newTick.statuses.length; i++) {
-            for (let n = 0; n < this.trackedPlayers[client.alias].length; n++) {
-                if (newTick.statuses[i].objectId === this.trackedPlayers[client.alias][n].objectId) {
-                    this.trackedPlayers[client.alias][n] =
-                        ObjectStatusData.processStatData(newTick.statuses[i].stats, this.trackedPlayers[client.alias][n]);
-                    this.trackedPlayers[client.alias][n].worldPos = newTick.statuses[i].pos;
+            for (let n = 0; n < this.trackedPlayers[client.guid].length; n++) {
+                if (newTick.statuses[i].objectId === this.trackedPlayers[client.guid][n].objectId) {
+                    this.trackedPlayers[client.guid][n] =
+                        ObjectStatusData.processStatData(newTick.statuses[i].stats, this.trackedPlayers[client.guid][n]);
+                    this.trackedPlayers[client.guid][n].worldPos = newTick.statuses[i].pos;
                     break;
                 }
             }

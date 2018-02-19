@@ -62,8 +62,14 @@ class ExamplePlugin {
 }
 ```
 The methods available in the player tracker component are
+#### `trackAllPlayers(): void`
+Calling this method will enable tracking for all clients including any added at runtime using the `CLI.addClient` method.
+
 #### `trackPlayersFor(client: Client): void`
 Call this method and pass the client you want to start tracking players for. Calling this for a client which already has player tracking enabled will produce a warning but will not cause an error.
+
+### `getAllPlayers(): IPlayerData[]`
+Calling this method will return all players which are tracked. If there are no tracked players, this will return an empty array.
 
 #### `getPlayersFor(client: Client): IPlayerData[] | null`
 Calling this method will return an array of all players which are tracked by the client. If the client does not having tracking enabled, then `null` will be returned. If tracking is enabled, but there are no players to track, then and empty array will be returned.
@@ -88,9 +94,7 @@ class ExamplePlugin {
     constructor() {
         PluginManager.afterInit(() => {
             this.playerTracker = PluginManager.getInstanceOf(PlayerTracker);
-            Client.on('connect', (pd, client: Client) => {
-                this.playerTracker.trackPlayersFor(client);
-            });
+            this.playerTracker.trackAllPlayers();
         });
     }
 

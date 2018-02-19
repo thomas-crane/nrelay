@@ -7,9 +7,10 @@ The `Client` class represents a bot connected to the game server.
  + [`nextPos: WorldPosData`](#nextpos-worldposdata)
  + [`mapInfo: IMapInfo`](#mapinfo-imapinfo)
  + [`mapTiles: GroundTileData[]`](#maptiles-groundtiledata)
- + [`charInfo: ICharacterInfo`](#charinfo-icharacterinfo)
- + [`server: IServer`](#server-iserver)
+ + [`readonly charInfo: ICharacterInfo`](#readonly-charinfo-icharacterinfo)
+ + [`readonly server: IServer`](#readonly-server-iserver)
  + [`alias: string`](#alias-string)
+ + [`readonly guid: string`](#readonly-guid-string)
  + [`moveMultiplier: number`](#movemultiplier-number)
 
 ### [Public methods](#public-methods)
@@ -42,7 +43,7 @@ public getTile(x: number, y: number): GroundTileData {
 }
 ```
 
-#### `charInfo: ICharacterInfo`
+#### `readonly charInfo: ICharacterInfo`
 Holds meta data about the account's character ids.
 
 #### `server: IServer`
@@ -50,6 +51,9 @@ The server the client is connected to.
 
 #### `alias: string`
 The alias of the client.
+
+#### `readonly guid: string`
+The email address of the client.
 
 #### `moveMultiplier: number`
 The percentage of the possible max speed the player will move at. This should be a number between 0 and 1 where 0 represents 0% and 1 represents 100%.
