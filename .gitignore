@@ -21,3 +21,6 @@ resources/*
 
 # Log files
 nrelay-log.log
+
+# Mac files
+.DS_Store
