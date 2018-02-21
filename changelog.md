@@ -1,6 +1,14 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.14.1`
+### Changes:
+ + Added new properties to `IPlayerData`
+    + `nameChosen: boolean` - Whether or not the player has chosen a unique name.
+    + `guildName: string` - The name of the player's guild, or null if they are not in one.
+    + `guildRank: GuildRank` - The guild rank of the player. See `GuildRank` for more info.
+ + Added the `GuildRank` enum to map guild rank number codes to their in game ranks.
+
 ## `6.14.0`
 ### Changes:
  + Made `Client.guid` public.

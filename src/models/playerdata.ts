@@ -1,5 +1,6 @@
 import { WorldPosData } from './../networking/data/world-pos-data';
 import { Classes } from './classes';
+import { GuildRank } from './guildrank';
 
 export interface IPlayerData {
     objectId: number;
@@ -11,6 +12,9 @@ export interface IPlayerData {
     stars: number;
     accountId: string;
     accountFame: number;
+    nameChosen: boolean;
+    guildName: string;
+    guildRank: GuildRank;
     gold: number;
     class: Classes;
     maxHP: number;
@@ -28,8 +32,8 @@ export interface IPlayerData {
     hasBackpack: boolean;
     inventory: number[];
     /**
-     * @deprecated Use `Client.server` instead.
-     * This is not gauranteed to be correct.
+     * @deprecated To get the server of a connect client, use `Client.server` instead.
+     * for any other use (such as the Player Tracker) using this is fine.
      */
     server: string;
 }
@@ -38,15 +42,18 @@ export function getDefaultPlayerData(): IPlayerData {
     return {
         objectId: 0,
         worldPos: null,
-        name: '',
+        name: null,
         level: 0,
         exp: 0,
         currentFame: 0,
         stars: 0,
-        accountId: '',
+        accountId: null,
         accountFame: 0,
         gold: 0,
         class: Classes.Wizard,
+        nameChosen: false,
+        guildName: null,
+        guildRank: GuildRank.NoRank,
         maxHP: 0,
         maxMP: 0,
         hp: 0,
@@ -61,6 +68,6 @@ export function getDefaultPlayerData(): IPlayerData {
         mpPots: 0,
         hasBackpack: false,
         inventory: new Array<number>(20).fill(-1),
-        server: ''
+        server: null
     };
 }

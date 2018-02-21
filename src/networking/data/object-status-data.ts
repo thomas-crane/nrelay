@@ -88,6 +88,15 @@ export class ObjectStatusData {
                 case StatData.HASBACKPACK_STAT:
                     playerData.hasBackpack = data[i].statValue === 1;
                     continue;
+                case StatData.NAME_CHOSEN_STAT:
+                    playerData.nameChosen = data[i].statValue !== 0;
+                    continue;
+                case StatData.GUILD_NAME_STAT:
+                    playerData.guildName = data[i].stringStatValue;
+                    continue;
+                case StatData.GUILD_RANK_STAT:
+                    playerData.guildRank = data[i].statValue;
+                    continue;
                 default:
                     if (data[i].statType >= StatData.INVENTORY_0_STAT && data[i].statType <= StatData.INVENTORY_11_STAT) {
                         playerData.inventory[data[i].statType - 8] = data[i].statValue;

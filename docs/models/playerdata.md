@@ -41,6 +41,15 @@ The account id of the player.
 #### `accountFame: number`
 The account fame of the player.
 
+#### `nameChosen: boolean`
+Whether or not the player has chosen a unique name.
+
+#### `guildName: string`
+The name of the guild which the player is in, or null if they are not in a guild.
+
+#### `guildRank: GuildRank`
+The number code of the player's guild rank. See the `GuildRank` enum for more info.
+
 #### `gold: number`
 The amount of gold the player has.
 
