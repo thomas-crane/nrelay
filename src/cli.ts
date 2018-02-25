@@ -13,10 +13,12 @@ import { environment } from './models/environment';
 import fs = require('fs');
 import net = require('net');
 import dns = require('dns');
+import { LocalServer } from './services/local-server';
 
 const args = process.argv;
 const EMAIL_REPLACE_REGEX = /.+?(.+?)(?:@|\+\d+).+?(.+?)\./;
 const ACCOUNT_IN_USE_REGEX = /Account in use \((\d+) seconds? until timeout\)/;
+const LOCAL_SERVER_DEFAULT_PORT = 5680;
 
 export class CLI {
 
@@ -135,6 +137,18 @@ export class CLI {
     }
 
     private static proceed(): void {
+        const accInfo = Storage.getAccountConfig();
+        if (!accInfo) {
+            Log('NRelay', 'Couldn\'t load acc-config.json.', LogLevel.Error);
+            return;
+        }
+        this.buildVersion = accInfo.buildVersion;
+        if (accInfo.localServer) {
+            if (accInfo.localServer.enabled) {
+                LocalServer.init(accInfo.localServer.port || LOCAL_SERVER_DEFAULT_PORT);
+            }
+        }
+
         const loadResources = new Promise((resolve, reject) => {
             Promise.all([ResourceManager.loadTileInfo(), ResourceManager.loadObjects()]).then(() => {
                 resolve();
@@ -146,14 +160,6 @@ export class CLI {
         loadResources.then(() => {
             PluginManager.loadPlugins();
         });
-
-        const accInfo = Storage.getAccountConfig();
-        if (!accInfo) {
-            Log('NRelay', 'Couldn\'t load acc-config.json.', LogLevel.Error);
-            return;
-        }
-
-        this.buildVersion = accInfo.buildVersion;
 
         for (let i = 0; i < accInfo.accounts.length; i++) {
             const acc = accInfo.accounts[i];

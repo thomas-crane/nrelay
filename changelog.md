@@ -1,6 +1,13 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.15.0`
+### Changes:
+ + Added `readText` and `writeText` methods to `Storage` for reading/writing plaintext.
+ + Added a Local Server to facilitate communication between nrelay and other processes. See the `Using the Local Server` section in the readme for more info.
+ + Added the `ILocalServerSettings` model to the `acc-info` to provide configuration for the Local Server.
+ + Added the `SocketWrapper` class to add convenience methods to `Socket` instances.
+
 ## `6.14.1`
 ### Changes:
  + Added new properties to `IPlayerData`

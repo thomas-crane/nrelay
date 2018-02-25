@@ -7,6 +7,7 @@ A console based modular client for Realm of the Mad God built with Node.js and T
     + [Prerequisites](#prerequisites)
  + [Setup](#setup)
     + [Using proxies](#using-proxies)
+    + [Using the Local Server](#using-the-local-server)
  + [Run](#run)
  + [Command line arguments](#command-line-arguments)
  + [Build](#build)
@@ -116,6 +117,50 @@ nrelay supports the use of SOCKSv4, SOCKSv4a, and SOCKSv5 proxies to route clien
 ```
 If a proxy is specified, nrelay will route all traffic including the initial web request to get the character lists. Because of this, there may be greater delays when using proxies.
 The proxy a client is using can also be changed during runtime by using the `Client.setProxy(proxy: IProxy): void` method.
+
+### Using the Local Server
+nrelay provides the option to enable a local web server which supports TCP connections. The server can be used to both send to and receive data from nrelay. The server is disabled by default, but can be enabled by adding a property to the account config.
+```json
+{
+    "buildVersion": "X22.1.1",
+    "localServer": {
+        "enabled": true
+    },
+    "accounts": [
+        // ...
+    ]
+}
+```
+By default, the server will use the port `5680`, but this can be changed by adding a `port` property to the account config.
+```json
+"localServer": {
+    "enabled": true,
+    "port": 9000
+}
+```
+#### Sending data to the Local Server
+After you have connected to the local server, you can send data to it by simply writing data to the socket. nrelay will convert any received data to a `UTF8` encoded string. Message paging is not supported, so the entire message should be written at once.
+
+__Nodejs example:__
+```javascript
+const net = require('net');
+
+var socket = net.createConnection(5680, 'localhost', () => {
+    console.log('Connected to nrelay server!');
+    socket.write('Hello, nrelay!');
+});
+```
+
+#### Receiving data from the Local Server
+Data is sent from nrelay in the form of a `UTF8` encoded string. All outgoing messages from nrelay include a 4-byte header which indicates the length of the message as an Int32 (excluding the 4 byte header).
+The header is written to the socket in Little-Endian format, so a message length of `4` would produce the header `04 00 00 00` instead of `00 00 00 04`.
+
+For example, the outgoing message `'test'` would be received as follows: (this example shows hex encoded bits. The actual data is not hex encoded.)
+```
+|  Header   |   Data    |
+ 04 00 00 00 74 65 73 74
+|          4| t  e  s  t|
+```
 
 ## Run
 After setting up the `acc-config.json` file, nrelay is ready to go. To run nrelay, simply use the command `nrelay` in the console. If you have setup your `acc-config` properly (and used the correct credentials) you should see an output similar to this

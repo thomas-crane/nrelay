@@ -5,6 +5,7 @@ This file exports several interfaces which are used to represent account and cha
  + [`IAccountInfo`](#iaccountinfo)
  + [`IAccount`](#iaccount)
  + [`ICharacterInfo`](#icharacterinfo)
+ + [`ILocalServerSettings`](#ilocalserversettings)
 
 
 ### Exported interfaces
@@ -53,3 +54,12 @@ The character id of the next character to be created.
 
 #### `maxNumChars: number`
 The maximum number of characters allowed on the account.
+
+### `ILocalServerSettings`
+#### `enabled: boolean`
+Whether or not the Local Server is enabled.
+
+#### `port: number`
+> This parameter is optional. Not including it will default it to `5680`.
+
+The port to listen for connections on.
