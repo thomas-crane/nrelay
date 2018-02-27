@@ -157,6 +157,13 @@ export class Client {
     public get moveMultiplier(): number {
         return this.internalMoveMultiplier;
     }
+    /**
+     * Indicates whether or not the client's TCP socket is connected.
+     */
+    public get connected(): boolean {
+        return this.socketConnected;
+    }
+    private socketConnected: boolean;
     private internalMoveMultiplier: number;
 
     private nexusServerIp: string;
@@ -204,6 +211,7 @@ export class Client {
         this.internalMoveMultiplier = 1;
         this.currentBulletId = 0;
         this.lastAttackTime = 0;
+        this.socketConnected = false;
         this.guid = accInfo.guid;
         this.password = accInfo.password;
         this.buildVersion = buildVersion;
@@ -497,6 +505,7 @@ export class Client {
     }
 
     private onConnect(): void {
+        this.socketConnected = true;
         Client.emitter.emit('connect', Object.assign({}, this.playerData), this);
         Log(this.alias, 'Connected to ' + this.server.name + '!', LogLevel.Success);
         this.connectTime = Date.now();
@@ -534,6 +543,7 @@ export class Client {
     }
 
     private onClose(error: boolean): void {
+        this.socketConnected = false;
         Client.emitter.emit('disconnect', Object.assign({}, this.playerData), this);
         this.nextPos = null;
         this.currentPath = null;

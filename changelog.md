@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.15.1`
+### Changes:
+ + Added `connected: boolean` property to `Client` to indicate whether or not the TCP socket is connected.
+
 ## `6.15.0`
 ### Changes:
  + Added `readText` and `writeText` methods to `Storage` for reading/writing plaintext.

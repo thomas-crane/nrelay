@@ -12,6 +12,7 @@ The `Client` class represents a bot connected to the game server.
  + [`alias: string`](#alias-string)
  + [`readonly guid: string`](#readonly-guid-string)
  + [`moveMultiplier: number`](#movemultiplier-number)
+ + [`connected: boolean`](#connected-boolean)
 
 ### [Public methods](#public-methods)
  + [`static on(event: string | symbol, listener: (...args: any[]) => void)`](#static-onevent-string--symbol-listener-args-any--void)
@@ -57,6 +58,9 @@ The email address of the client.
 
 #### `moveMultiplier: number`
 The percentage of the possible max speed the player will move at. This should be a number between 0 and 1 where 0 represents 0% and 1 represents 100%.
+
+#### `connected: boolean`
+Indicates whether or not the client's TCP socket is currently connected to a server.
 
 ### Public methods
 #### `static on(event: string | symbol, listener: (...args: any[]) => void)`
