@@ -110,7 +110,7 @@ nrelay supports the use of SOCKSv4, SOCKSv4a, and SOCKSv5 proxies to route clien
     "serverPref": "AsiaSouthEast",
     "proxy": {
         "host": "127.0.0.1", // The ip of the proxy
-        "port": "8080",      // The port of the proxy
+        "port": 8080,        // The port of the proxy. Use a number here, e.g. 8080 not "8080".
         "type": 5            // The type of the proxy. Use 5 for SOCKSv5 and 4 for SOCKSv4 or SOCKSv4a
     }
 }
