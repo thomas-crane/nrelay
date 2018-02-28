@@ -308,6 +308,14 @@ export class Client {
     }
 
     /**
+     * Returns how long the client has been connected for in milliseconds.
+     * This is used for several packets including the UseItem packet.
+     */
+    public getTime(): number {
+        return (Date.now() - this.connectTime);
+    }
+
+    /**
      * Finds a path from the client's current position to the `to` point
      * and moves the client along the path to the `to` position.
      * @param to The point to navigate towards.
@@ -498,10 +506,6 @@ export class Client {
         this.charInfo.charId = createSuccessPacket.charId;
         this.charInfo.nextCharId = this.charInfo.charId + 1;
         Log(this.alias, 'Connected!', LogLevel.Success);
-    }
-
-    private getTime(): number {
-        return (Date.now() - this.connectTime);
     }
 
     private onConnect(): void {

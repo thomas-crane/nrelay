@@ -166,8 +166,8 @@ export class CLI {
             setTimeout(() => {
                 this.addClient(acc).then(() => {
                     Log('NRelay', 'Authorized ' + acc.alias, LogLevel.Success);
-                }).catch((error) => {
-                    Log('NRelay', error, LogLevel.Error);
+                }).catch((error: Error) => {
+                    Log('NRelay', error.message, LogLevel.Error);
                 });
             }, (i * 1000));
         }

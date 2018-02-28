@@ -1,6 +1,12 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.15.2`
+### Changes:
+ + Changed the visibility of `Client.getTime()` to public.
+### Fixes:
+ + Added stronger typing to some `CLI` error handlers.
+
 ## `6.15.1`
 ### Changes:
  + Added `connected: boolean` property to `Client` to indicate whether or not the TCP socket is connected.
