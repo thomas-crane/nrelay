@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.15.3`
+### Fixes:
+ + Added error handling for `packet.read()` calls in the `PacketIO`.
+
 ## `6.15.2`
 ### Changes:
  + Changed the visibility of `Client.getTime()` to public.

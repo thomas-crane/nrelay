@@ -186,7 +186,15 @@ export class PacketIO {
             }
         }
         if (packet) {
-            packet.read();
+            try {
+                packet.read();
+            } catch (error) {
+                if (environment.debug) {
+                    Log('PacketIO', error, LogLevel.Error);
+                }
+                this.emitter.emit('error', 'Invalid packet structure.');
+                return;
+            }
             packet.data = null;
         }
         if (environment.debug) {
