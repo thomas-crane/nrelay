@@ -1,6 +1,8 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
-
+## `6.15.4`
+### Changes:
+ + Added `'ready'` emitter for client when it will be able to successfully preform PacketIO actions.
 ## `6.15.3`
 ### Fixes:
  + Added error handling for `packet.read()` calls in the `PacketIO`.
