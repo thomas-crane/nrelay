@@ -505,6 +505,7 @@ export class Client {
         this.objectId = createSuccessPacket.objectId;
         this.charInfo.charId = createSuccessPacket.charId;
         this.charInfo.nextCharId = this.charInfo.charId + 1;
+        Client.emitter.emit('ready', Object.assign({}, this.playerData), this);
         Log(this.alias, 'Connected!', LogLevel.Success);
     }
 
