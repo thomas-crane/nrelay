@@ -62,7 +62,9 @@ export class PluginManager {
         // if the plugin is disabled, don't load it.
         if (info.hasOwnProperty('enabled')) {
             if (!info.enabled) {
-                Log('PluginManager', 'Skipping disabled plugin ' + info.name, LogLevel.Info);
+                if (environment.debug) {
+                    Log('PluginManager', 'Skipping disabled plugin ' + info.name, LogLevel.Info);
+                }
                 // remove hooks
                 const hKeys = Object.keys(this.hooks);
                 for (let i = 0; i < hKeys.length; i++) {

@@ -1,6 +1,13 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.16.0`
+### Changes:
+ + Added an optional parameter `charInfo?: ICharacterInfo` to `CLI.addClient()`. If the parameter is provided, _or_ if the `charInfo` property of the provided `account` is not `null`, then the initial web request to retrieve the character info will be skipped and the provided `charInfo` will be used.
+ + Added the `loadServers()` method to the `CLI` to load the server list. See the `CLI` docs for more info.
+ + Added types to various promises and improved some error messages.
+ + Changed some log messages to debug messages to reduce console clutter.
+
 ## `6.15.4`
 ### Changes:
  + Added `'ready'` emitter for client when it will be able to successfully preform PacketIO actions.

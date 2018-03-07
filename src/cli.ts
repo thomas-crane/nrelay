@@ -3,7 +3,7 @@ import { Http } from './services/http';
 import { parseServers, parseAccountInfo, parseError } from './services/xmltojson';
 import { SERVER_ENDPOINT } from './models/api-endpoints';
 import { IServer } from './models/server';
-import { IAccountInfo, IAccount } from './models/accinfo';
+import { IAccountInfo, IAccount, ICharacterInfo } from './models/accinfo';
 import { Client } from './core/client';
 import { Storage } from './services/storage';
 import { PluginManager } from './core/plugin-manager';
@@ -22,8 +22,8 @@ const LOCAL_SERVER_DEFAULT_PORT = 5680;
 
 export class CLI {
 
-    public static addClient(account: IAccount): Promise<any> {
-        return new Promise((resolve, reject) => {
+    public static addClient(account: IAccount, charInfo?: ICharacterInfo): Promise<any> {
+        return new Promise((resolve: (client: Client) => void, reject: (err: Error) => void) => {
             if (!account.alias) {
                 const match = EMAIL_REPLACE_REGEX.exec(account.guid);
                 if (match) {
@@ -40,9 +40,14 @@ export class CLI {
                 reject(err);
                 return;
             }
-            Log('NRelay', 'Adding ' + account.alias, LogLevel.Info);
-            this.getAccountInfo(account).then((info) => {
-                const keys = Object.keys(this.serverList);
+            const handler = (info: IAccount) => {
+                let keys: string[];
+                try {
+                    keys = Object.keys(this.serverList);
+                } catch (err) {
+                    reject(new Error(account.alias + ' couldn\'t get servers.'));
+                    return;
+                }
                 if (keys.length > 0) {
                     let server = this.serverList[account.serverPref];
                     if (!server) {
@@ -54,12 +59,25 @@ export class CLI {
                     resolve(client);
                 } else {
                     reject(new Error(account.alias + ' couldn\'t get servers.'));
+                    return;
                 }
-            }).catch((error) => {
-                const err = new Error(account.alias + ': ' + error);
-                this.handleConnectionError(error, account);
-                reject(err);
-            });
+            };
+            Log('NRelay', 'Adding ' + account.alias, LogLevel.Info);
+            if (charInfo || account.charInfo) {
+                if (environment.debug) {
+                    Log('NRelay', 'Using provided character info for ' + account.alias + '.', LogLevel.Info);
+                }
+                if (charInfo) {
+                    account.charInfo = charInfo;
+                }
+                handler(account);
+            } else {
+                this.getAccountInfo(account).then(handler).catch((error) => {
+                    const err = new Error(account.alias + ': ' + error);
+                    this.handleConnectionError(error, account);
+                    reject(err);
+                });
+            }
         });
     }
 
@@ -87,6 +105,20 @@ export class CLI {
         return Object.keys(this.clients).map((k) => this.clients[k]);
     }
 
+    public static loadServers(): Promise<any> {
+        Log('NRelay', 'Loading server list', LogLevel.Info);
+        return new Promise((resolve: () => void, reject: (err: Error) => void) => {
+            Http.get(SERVER_ENDPOINT).then((data: any) => {
+                Log('NRelay', 'Server list loaded.', LogLevel.Success);
+                this.serverList = parseServers(data);
+                resolve();
+            }).catch((err) => {
+                Log('NRelay', 'Error loading server list: ' + err.message);
+                reject(err);
+            });
+        });
+    }
+
     private static clients: {
         [guid: string]: Client
     };
@@ -95,7 +127,7 @@ export class CLI {
     private static buildVersion: string;
 
     private static getAccountInfo(account: IAccount): Promise<IAccount> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve: (acc: IAccount) => void, reject: (err: Error) => void) => {
             const handler = (data: any) => {
                 const info = parseAccountInfo(data);
                 this.serverList = parseServers(data);
@@ -149,7 +181,7 @@ export class CLI {
             }
         }
 
-        const loadResources = new Promise((resolve, reject) => {
+        const loadResources = new Promise((resolve: () => void, reject: () => void) => {
             Promise.all([ResourceManager.loadTileInfo(), ResourceManager.loadObjects()]).then(() => {
                 resolve();
             }).catch((error) => {

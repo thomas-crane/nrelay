@@ -335,8 +335,8 @@ export class Client {
             const next = this.currentPath.shift();
             this.nextPos.x = next.x + 0.5;
             this.nextPos.y = next.y + 0.5;
-        }).catch((error) => {
-            Log(this.alias, 'Error finding path: ' + error, LogLevel.Error);
+        }).catch((error: Error) => {
+            Log(this.alias, 'Error finding path: ' + error.message, LogLevel.Error);
         });
     }
 

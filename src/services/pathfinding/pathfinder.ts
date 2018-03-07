@@ -24,7 +24,7 @@ export class Pathfinder {
     }
 
     public findPath(start: IPoint, end: IPoint): Promise<IPoint[]> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve: (path: IPoint[]) => void, reject: (err: Error) => void) => {
             const startNode = this.nodes[this.getIndex(start.x, start.y)];
             const endNode = this.nodes[this.getIndex(end.x, end.y)];
 
@@ -61,7 +61,7 @@ export class Pathfinder {
                     }
                 }
             }
-            reject('No path found.');
+            reject(new Error('No path found.'));
             return;
         });
     }

@@ -16,7 +16,7 @@ export class Updater {
     static latestVersion: string;
 
     static checkVersion(): Promise<boolean> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve: (result: boolean) => void, reject: (err: Error) => void) => {
             https.get(ASSET_ENDPOINT.replace('#', 'current') + 'version.txt', (res) => {
                 let raw = '';
                 res.on('data', (chunk) => {
@@ -49,17 +49,17 @@ export class Updater {
                     resolve(false);
                 });
                 res.on('error', (error) => {
-                    reject(false);
+                    reject(error);
                 });
             });
         });
     }
 
     static getLatest(): Promise<any> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve: () => void, reject: (err: Error) => void) => {
             if (!this.latestVersion) {
                 this.checkVersion().then(() => {
-                    reject();
+                    reject(new Error('No local version found.'));
                 }).catch((error) => {
                     Log('Updater', 'Error getting latest version', LogLevel.Error);
                 });
@@ -160,7 +160,7 @@ export class Updater {
     }
 
     private static unpackSwf(): Promise<any> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve: () => void, reject: (err: Error) => void) => {
             const args = [
                 '-jar',
                 ('"' + path.join(dir, 'lib', 'jpexs', 'ffdec.jar') + '"'),
@@ -180,7 +180,7 @@ export class Updater {
     }
 
     private static updateAssets(): Promise<any> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve: () => void, reject: (err: Error) => void) => {
             let raw = null;
             try {
                 raw = fs.readFileSync(path.join(
@@ -188,8 +188,8 @@ export class Updater {
                     'src', 'services', 'updater-assets', 'decompiled', 'scripts',
                     'kabam', 'rotmg', 'messaging', 'impl', 'GameServerConnection.as'
                 ), { encoding: 'utf8' });
-            } catch {
-                reject();
+            } catch (err) {
+                reject(err);
                 return;
             }
             const packets: {

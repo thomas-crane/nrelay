@@ -8,7 +8,7 @@ import { Log, LogLevel } from './logger';
 
 export class Http {
     static get(path: string, query?: { [id: string]: string }): Promise<any> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve: (data: string) => void, reject: (err: Error) => void) => {
             const qs = this.parseQueryString(query);
             http.get(path + qs, (response) => {
                 response.setEncoding('utf8');
@@ -26,7 +26,7 @@ export class Http {
     }
 
     static proxiedGet(path: string, proxy: IProxy, query?: { [id: string]: string }): Promise<any> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve: (data: string) => void, reject: (err: Error) => void) => {
             const endpoint = url.parse(path);
             const qs = this.parseQueryString(query);
             Log('Http', 'Establishing proxy for GET request.', LogLevel.Info);
@@ -66,7 +66,7 @@ export class Http {
     }
 
     static post(path: string, params?: { [id: string]: any }): Promise<any> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve: (data: string) => void, reject: (err: Error) => void) => {
             const endpoint = url.parse(path);
             const postData = querystring.stringify(params);
             const options = {

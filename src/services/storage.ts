@@ -10,7 +10,7 @@ export class Storage {
      * @param filePath The path of the file to read from.
      */
     public static get(...filePath: string[]): Promise<any> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve: (data: any) => void, reject: (err: Error) => void) => {
             this.readText(...filePath).then((data) => {
                 resolve(JSON.parse(data));
             }).catch((error) => {
@@ -24,7 +24,7 @@ export class Storage {
      * @param filePath The path of the file to read from.
      */
     public static readText(...filePath: string[]): Promise<string> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve: (data: string) => void, reject: (err: Error) => void) => {
             const fileName = this.makePath(...filePath);
             fs.readFile(fileName, 'utf8', (error, data) => {
                 if (error) {
@@ -42,7 +42,7 @@ export class Storage {
      * @param filePath The path of the file to write to.
      */
     public static writeText(data: string, ...filePath: string[]): Promise<any> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve: () => void, reject: (err: Error) => void) => {
             const fileName = this.makePath(...filePath);
             fs.writeFile(fileName, data, (error) => {
                 if (error) {

@@ -17,7 +17,7 @@ export class ResourceManager {
     static pets: { [id: number]: IObject };
 
     static loadTileInfo(): Promise<void> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve: () => void, reject: () => void) => {
             this.tiles = {};
             Storage.get('resources', 'GroundTypes.json').then((data) => {
                 let tileArray: any[] = data['Ground'];
@@ -52,7 +52,7 @@ export class ResourceManager {
     }
 
     static loadObjects(): Promise<any> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve: () => void, reject: () => void) => {
             this.objects = {};
             this.items = {};
             this.enemies = {};
