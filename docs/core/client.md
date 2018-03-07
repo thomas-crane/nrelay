@@ -86,6 +86,17 @@ Client.on('disconnect', (playerData: IPlayerData, client: Client) => {
     delete this.clients[playerData.name];
 });
 ```
+```typescript
+// fired when a client connects to the map and is
+// ready to send and receive traffic over the Packet IO.
+Client.on('ready', (playerData: IPlayerData, client: Client) => {
+    // note that playerData will still be the default values
+    // because no player data has been received yet.
+
+    // the client parameter is a reference to the
+    // client which fired the event.
+});
+```
 
 #### `setProxy(proxy: IProxy): void`
 Used to connect the client to a new proxy. If the `proxy` parameter is `null` then the client will connect without a proxy.

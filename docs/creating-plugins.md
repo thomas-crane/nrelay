@@ -169,7 +169,7 @@ if (textPacket.recipient === client.playerData.name) {
         const replyTextPacket = new PlayerTextPacket();
 
         // Set the text property to '/tell <yourname> Hello!'.
-        replyTextPacket.text = '/tell' + textPacket.name + ' Hello!';
+        replyTextPacket.text = '/tell ' + textPacket.name + ' Hello!';
 
         // Send the packet.
         client.packetio.sendPacket(replyTextPacket);
