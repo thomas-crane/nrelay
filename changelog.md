@@ -1,6 +1,12 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.16.1`
+### Fixes:
+ + Updated RC4 keys to latest keys.
+ + Updated packet ids and docs to X23.0.0
+ + Disabled packet id updater due to RotMG clients now being obfuscated.
+
 ## `6.16.0`
 ### Changes:
  + Added an optional parameter `charInfo?: ICharacterInfo` to `CLI.addClient()`. If the parameter is provided, _or_ if the `charInfo` property of the provided `account` is not `null`, then the initial web request to retrieve the character info will be skipped and the provided `charInfo` will be used.

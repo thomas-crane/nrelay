@@ -131,20 +131,24 @@ export class Updater {
                     });
                 })
             ]).then(() => {
-                Log('Updater', 'Unpacking client.swf', LogLevel.Info);
-                this.unpackSwf().then(() => {
-                    Log('Updater', 'Unpacked client.swf', LogLevel.Success);
-                    Log('Updater', 'Updating assets', LogLevel.Info);
-                    this.updateAssets().then(() => {
-                        Log('Updater', 'Finished! Rebuild the source to apply the update.', LogLevel.Success);
-                        resolve();
-                    }).catch((updateError) => {
-                        reject(updateError);
-                    });
-                }).catch((error) => {
-                    reject(error);
-                    Log('Updater', 'Error while unpacking swf', LogLevel.Error);
-                });
+                Log('Updater', 'The packet updater is currently disabled. Please manually update packet-type.ts', LogLevel.Warning);
+                this.updateVersion();
+                resolve();
+                return;
+                // Log('Updater', 'Unpacking client.swf', LogLevel.Info);
+                // this.unpackSwf().then(() => {
+                //     Log('Updater', 'Unpacked client.swf', LogLevel.Success);
+                //     Log('Updater', 'Updating assets', LogLevel.Info);
+                //     this.updateAssets().then(() => {
+                //         Log('Updater', 'Finished! Rebuild the source to apply the update.', LogLevel.Success);
+                //         resolve();
+                //     }).catch((updateError) => {
+                //         reject(updateError);
+                //     });
+                // }).catch((error) => {
+                //     Log('Updater', 'Error while unpacking swf', LogLevel.Error);
+                //     reject(error);
+                // });
             }).catch((error) => {
                 Log('Updater', 'Error: ' + error.message, LogLevel.Error);
             });
