@@ -97,26 +97,26 @@ export class Pathfinder {
                 y: path[i - 1].y - path[i].y
             };
             if (direction.x !== lastDirection.x || direction.y !== lastDirection.y) {
-                if (direction.x !== lastDirection.x && direction.y !== lastDirection.y) {
-                    if (waypoints.length > 0) {
-                        const last = waypoints[waypoints.length - 1];
-                        if (last.x !== path[i - 1].y || last.x !== path[i - 1].y) {
-                            waypoints.push({
-                                x: path[i - 1].x,
-                                y: path[i - 1].y
-                            });
-                        }
-                    } else {
+                // tslint:disable no-bitwise
+                if ((direction.x & direction.y) !== 0) {
+                // tslint:enable no-bitwise
+                    if (direction.x !== lastDirection.x) {
                         waypoints.push({
                             x: path[i - 1].x,
+                            y: path[i].y
+                        });
+                    } else if (direction.y !== lastDirection.y) {
+                        waypoints.push({
+                            x: path[i].x,
                             y: path[i - 1].y
                         });
                     }
+                } else {
+                    waypoints.push({
+                        x: path[i].x,
+                        y: path[i].y
+                    });
                 }
-                waypoints.push({
-                    x: path[i].x,
-                    y: path[i].y
-                });
             }
             lastDirection = direction;
         }

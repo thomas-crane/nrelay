@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.16.2`
+### Changes:
+ + Improved pathfinder path simplification.
+
 ## `6.16.1`
 ### Fixes:
  + Updated RC4 keys to latest keys.
