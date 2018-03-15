@@ -17,4 +17,12 @@ export class MoveRecord {
         packet.writeFloat(this.x);
         packet.writeFloat(this.y);
     }
+
+    public clone(): MoveRecord {
+        const clone = new MoveRecord();
+        clone.time = this.time;
+        clone.x = this.x;
+        clone.y = this.y;
+        return clone;
+    }
 }

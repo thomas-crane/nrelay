@@ -2,7 +2,7 @@ import { Log, LogLevel } from './../services/logger';
 import fs = require('fs');
 import path = require('path');
 import { ITile } from './../models/tile';
-import { IObject } from './../models/object';
+import { IObject, IProjectile } from './../models/object';
 import { environment } from './../models/environment';
 import { Storage } from './../services/storage';
 
@@ -64,71 +64,123 @@ export class ResourceManager {
                 let objectsArray: any[] = data['Object'];
                 for (let i = 0; i < objectsArray.length; i++) {
                     try {
-                        this.objects[+objectsArray[i].type] = {
-                            type: +objectsArray[i].type,
-                            id: objectsArray[i].id,
-                            enemy: (objectsArray[i].Enemy === '' ? true : false),
-                            item: (objectsArray[i].Item === '' ? true : false),
-                            god: (objectsArray[i].God === '' ? true : false),
-                            pet: (objectsArray[i].Pet === '' ? true : false),
-                            slotType: (+objectsArray[i].SlotType || -1),
-                            bagType: (+objectsArray[i].BagType || -1),
-                            class: objectsArray[i].Class,
-                            maxHitPoints: (+objectsArray[i].MaxHitPoints || -1),
-                            defense: (+objectsArray[i].Defense || -1),
-                            xpMultiplier: (+objectsArray[i].XpMult || -1),
+                        const current = objectsArray[i];
+                        this.objects[+current.type] = {
+                            type: +current.type,
+                            id: current.id,
+                            enemy: (current.Enemy === '' ? true : false),
+                            item: (current.Item === '' ? true : false),
+                            god: (current.God === '' ? true : false),
+                            pet: (current.Pet === '' ? true : false),
+                            slotType: (+current.SlotType || -1),
+                            bagType: (+current.BagType || -1),
+                            class: current.Class,
+                            maxHitPoints: (+current.MaxHitPoints || -1),
+                            defense: (+current.Defense || -1),
+                            xpMultiplier: (+current.XpMult || -1),
                             activateOnEquip: [],
-                            projectile: (objectsArray[i].Projectile ? {
-                                id: +objectsArray[i].Projectile.id,
-                                objectId: objectsArray[i].Projectile.ObjectId,
-                                damage: (+objectsArray[i].Projectile.damage || -1),
-                                minDamage: (+objectsArray[i].Projectile.MinDamage || -1),
-                                maxDamage: (+objectsArray[i].Projectile.maxDamage || -1),
-                                speed: +objectsArray[i].Projectile.Speed,
-                                lifetimeMS: +objectsArray[i].Projectile.LifetimeMS
-                            } : null),
-                            rateOfFire: (+objectsArray[i].RateOfFire || -1),
-                            fameBonus: (+objectsArray[i].FameBonus || -1),
-                            feedPower: (+objectsArray[i].FeedPower || -1),
-                            fullOccupy: (objectsArray[i].FullOccupy === '' ? true : false),
-                            occupySquare: (objectsArray[i].OccupySquare === '' ? true : false),
+                            projectiles: [],
+                            projectile: null,
+                            rateOfFire: (+current.RateOfFire || -1),
+                            numProjectiles: (+current.NumProjectiles || -1),
+                            arcGap: (+current.ArcGap || -1),
+                            fameBonus: (+current.FameBonus || -1),
+                            feedPower: (+current.FeedPower || -1),
+                            fullOccupy: (current.FullOccupy === '' ? true : false),
+                            occupySquare: (current.OccupySquare === '' ? true : false),
                         };
-                        // map items.
-                        if (this.objects[+objectsArray[i].type].item) {
-                            // stat bonuses
-                            if (Array.isArray(objectsArray[i].ActivateOnEquip)) {
-                                for (let j = 0; j < objectsArray[i].ActivateOnEquip.length; j++) {
-                                    if (objectsArray[i].ActivateOnEquip[j]['_'] === 'IncrementStat') {
-                                        this.objects[+objectsArray[i].type].activateOnEquip.push({
-                                            statType: objectsArray[i].ActivateOnEquip[j].stat,
-                                            amount: objectsArray[i].ActivateOnEquip[j].amount
+                        if (Array.isArray(current.Projectile)) {
+                            this.objects[+current.type].projectiles = new Array<IProjectile>(current.Projectile.length);
+                            for (let j = 0; j < current.Projectile.length; j++) {
+                                this.objects[+current.type].projectiles[j] = {
+                                    id: +current.Projectile[j].id,
+                                    objectId: current.Projectile[j].ObjectId,
+                                    damage: (+current.Projectile[j].damage || -1),
+                                    minDamage: (+current.Projectile[j].MinDamage || -1),
+                                    maxDamage: (+current.Projectile[j].MaxDamage || -1),
+                                    speed: +current.Projectile[j].Speed,
+                                    lifetimeMS: +current.Projectile[j].LifetimeMS,
+                                    parametric: (current.Projectile[j].Parametric === '' ? true : false),
+                                    wavy: (current.Projectile[j].Wavy === '' ? true : false),
+                                    boomerang: (current.Projectile[j].Boomerang === '' ? true : false),
+                                    multihit: (current.Projectile[j].MultiHit === '' ? true : false),
+                                    passesCover: (current.Projectile[j].PassesCover === '' ? true : false),
+                                    frequency: (+current.Projectile[j].Frequency || 0),
+                                    amplitude: (+current.Projectile[j].Amplitude || 0),
+                                    magnitude: (+current.Projectile[j].Magnitude || 0),
+                                    conditionEffects: []
+                                };
+                                if (Array.isArray(current.Projectile[j].ConditionEffect)) {
+                                    for (let n = 0; n < current.Projectile[j].ConditionEffect.length; n++) {
+                                        this.objects[+current.type].projectiles[j].conditionEffects.push({
+                                            effectName: current.Projectile[j].ConditionEffect[n]._,
+                                            duration: current.Projectile[j].ConditionEffect[n].duration
                                         });
                                     }
-                                }
-                            } else if (typeof objectsArray[i].ActivateOnEquip === 'object') {
-                                if (objectsArray[i].ActivateOnEquip._ === 'IncrementStat') {
-                                    this.objects[+objectsArray[i].type].activateOnEquip.push({
-                                        statType: objectsArray[i].ActivateOnEquip.stat,
-                                        amount: objectsArray[i].ActivateOnEquip.amount
+                                } else if (typeof current.Projectile[j].ConditionEffect === 'object') {
+                                    this.objects[+current.type].projectiles[j].conditionEffects.push({
+                                        effectName: current.Projectile[j].ConditionEffect._,
+                                        duration: current.Projectile[j].ConditionEffect.duration
                                     });
                                 }
                             }
-                            this.items[+objectsArray[i].type] = this.objects[+objectsArray[i].type];
+                        } else if (typeof current.Projectile === 'object') {
+                            this.objects[+current.type].projectile = {
+                                id: +current.Projectile.id,
+                                objectId: current.Projectile.ObjectId,
+                                damage: (+current.Projectile.damage || -1),
+                                minDamage: (+current.Projectile.MinDamage || -1),
+                                maxDamage: (+current.Projectile.MaxDamage || -1),
+                                speed: +current.Projectile.Speed,
+                                lifetimeMS: +current.Projectile.LifetimeMS,
+                                parametric: (current.Projectile.Parametric === '' ? true : false),
+                                wavy: (current.Projectile.Wavy === '' ? true : false),
+                                boomerang: (current.Projectile.Boomerang === '' ? true : false),
+                                multihit: (current.Projectile.MultiHit === '' ? true : false),
+                                passesCover: (current.Projectile.PassesCover === '' ? true : false),
+                                frequency: (+current.Projectile.Frequency || 0),
+                                amplitude: (+current.Projectile.Amplitude || 0),
+                                magnitude: (+current.Projectile.Magnitude || 0),
+                                conditionEffects: []
+                            };
+                            this.objects[+current.type].projectiles.push(this.objects[+current.type].projectile);
+                        }
+                        // map items.
+                        if (this.objects[+current.type].item) {
+                            // stat bonuses
+                            if (Array.isArray(current.ActivateOnEquip)) {
+                                for (let j = 0; j < current.ActivateOnEquip.length; j++) {
+                                    if (current.ActivateOnEquip[j]['_'] === 'IncrementStat') {
+                                        this.objects[+current.type].activateOnEquip.push({
+                                            statType: current.ActivateOnEquip[j].stat,
+                                            amount: current.ActivateOnEquip[j].amount
+                                        });
+                                    }
+                                }
+                            } else if (typeof current.ActivateOnEquip === 'object') {
+                                if (current.ActivateOnEquip._ === 'IncrementStat') {
+                                    this.objects[+current.type].activateOnEquip.push({
+                                        statType: current.ActivateOnEquip.stat,
+                                        amount: current.ActivateOnEquip.amount
+                                    });
+                                }
+                            }
+                            this.items[+current.type] = this.objects[+current.type];
                             itemCount++;
                         }
                         // map enemies.
-                        if (this.objects[+objectsArray[i].type].enemy) {
-                            this.enemies[+objectsArray[i].type] = this.objects[+objectsArray[i].type];
+                        if (this.objects[+current.type].enemy) {
+                            this.enemies[+current.type] = this.objects[+current.type];
                             enemyCount++;
                         }
                         // map pets.
-                        if (this.objects[+objectsArray[i].type].pet) {
-                            this.pets[+objectsArray[i].type] = this.objects[+objectsArray[i].type];
+                        if (this.objects[+current.type].pet) {
+                            this.pets[+current.type] = this.objects[+current.type];
                             petCount++;
                         }
                     } catch {
                         if (environment.debug) {
-                            Log('ResourceManager', 'Failed to load tile: ' + objectsArray[i].type, LogLevel.Warning);
+                            Log('ResourceManager', 'Failed to load object: ' + objectsArray[i].type, LogLevel.Warning);
                         }
                     }
                 }

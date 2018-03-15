@@ -12,6 +12,7 @@ export interface IAccount {
     serverPref: string;
     charInfo?: ICharacterInfo;
     proxy?: IProxy;
+    pathfinder?: boolean;
 }
 
 export interface ICharacterInfo {

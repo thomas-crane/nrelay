@@ -1,6 +1,21 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.17.0`
+> The changes in this version are part of features which are not fully complete yet and may still contain bugs.
+> If you need a **stable** version of nrelay, do not upgrade to this version.
+### Changes:
+ + Added projectile handling for player and enemy projectiles.
+ + Added move records.
+ + Added new properties to the `IObject` interface.
+ + Added `toPrecisePoint()` to `WorldPosData` to convert the world pos to an `IPoint` without rounding.
+ + Made the pathfinder optional and disabled by default. Unless it is required, leaving the pathfinder disabled will greatly improve memory usage per client.
+ + Added an optional `currentData?: IPlayerData` parameter to the `processObjectStatus` method.
+### Fixes:
+ + Stopped client time getting reset when it shouldn't.
+ + Fixed the `ResourceManager` not properly loading projectiles.
+ + Updated the `Damage` packet structure to reflect the game code.
+
 ## `6.16.2`
 ### Changes:
  + Improved pathfinder path simplification.

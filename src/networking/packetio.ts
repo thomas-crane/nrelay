@@ -193,6 +193,7 @@ export class PacketIO {
                     Log('PacketIO', error, LogLevel.Error);
                 }
                 this.emitter.emit('error', 'Invalid packet structure.');
+                Log('PacketIO', 'Error while reading ' + PacketType[packet.type], LogLevel.Error);
                 return;
             }
             packet.data = null;

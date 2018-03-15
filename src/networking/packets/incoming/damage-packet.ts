@@ -9,6 +9,7 @@ export class DamagePacket extends Packet {
     effects: number[];
     damageAmount: number;
     kill: boolean;
+    armorPierce: boolean;
     bulletId: number;
     objectId: number;
     //#endregion
@@ -22,6 +23,7 @@ export class DamagePacket extends Packet {
         }
         this.damageAmount = this.readUnsignedShort();
         this.kill = this.readBoolean();
+        this.armorPierce = this.readBoolean();
         this.bulletId = this.readUnsignedByte();
         this.objectId = this.readInt32();
     }
@@ -34,6 +36,7 @@ export class DamagePacket extends Packet {
         }
         this.writeUnsignedShort(this.damageAmount);
         this.writeBoolean(this.kill);
+        this.writeBoolean(this.armorPierce);
         this.writeUnsigedByte(this.bulletId);
         this.writeInt32(this.objectId);
     }

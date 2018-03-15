@@ -16,7 +16,7 @@ export class WorldPosData {
         packet.writeFloat(this.y);
     }
 
-    public squareDistanceTo(location: WorldPosData): number {
+    public squareDistanceTo(location: WorldPosData | IPoint): number {
         const a = location.x - this.x;
         const b = location.y - this.y;
         return a ** 2 + b ** 2;
@@ -27,6 +27,13 @@ export class WorldPosData {
         clone.x = this.x;
         clone.y = this.y;
         return clone;
+    }
+
+    public toPrecisePoint(): IPoint {
+        return {
+            x: this.x,
+            y: this.y
+        };
     }
 
     public toPoint(): IPoint {

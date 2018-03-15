@@ -13,8 +13,8 @@ export class ObjectStatusData {
         return playerData;
     }
 
-    public static processObjectStatus(data: ObjectStatusData): IPlayerData {
-        const playerData = this.processStatData(data.stats);
+    public static processObjectStatus(data: ObjectStatusData, currentData?: IPlayerData): IPlayerData {
+        const playerData = this.processStatData(data.stats, currentData);
         playerData.worldPos = data.pos;
         playerData.objectId = data.objectId;
 

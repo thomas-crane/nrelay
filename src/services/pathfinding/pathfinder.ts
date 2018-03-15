@@ -73,6 +73,10 @@ export class Pathfinder {
         updates = null;
     }
 
+    public destroy(): void {
+        this.nodes = null;
+    }
+
     private simplifyPath(path: Node[]): IPoint[] {
         if (path.length < 2) {
             if (path.length === 0) {

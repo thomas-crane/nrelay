@@ -45,11 +45,22 @@ import { Node } from '../services/pathfinding/node';
 import { INodeUpdate } from '../services/pathfinding/node-update';
 import { IPoint } from '../services/pathfinding/point';
 import { environment } from '../models/environment';
+import { Projectile } from '../models/projectile';
+import { IObject } from '../models/object';
+import { Enemy } from '../models/enemy';
+import { PlayerHitPacket } from '../networking/packets/outgoing/player-hit-packet';
+import { EnemyHitPacket } from '../networking/packets/outgoing/enemy-hit-packet';
+import { Random } from '../services/random';
+import { DamagePacket } from '../networking/packets/incoming/damage-packet';
+import { MoveRecord } from '../networking/data/move-record';
+import { MoveRecords } from '../models/move-records';
 
 const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
 const MIN_ATTACK_FREQ = 0.0015;
 const MAX_ATTACK_FREQ = 0.008;
+const MIN_ATTACK_MULT = 0.5;
+const MAX_ATTACK_MULT = 2;
 const ACCOUNT_IN_USE_REGEX = /Account in use \((\d+) seconds? until timeout\)/;
 
 export class Client {
@@ -141,6 +152,7 @@ export class Client {
      * The email address of the client.
      */
     public readonly guid: string;
+    public autoAim: boolean;
     /**
      * A number between 0 and 1 which can be used to modify the speed
      * of the player. A value of 1 will be 100% move speed for the client,
@@ -178,8 +190,11 @@ export class Client {
     private currentBulletId: number;
     private lastAttackTime: number;
     private pathfinder: Pathfinder;
+    private pathfinderEnabled: boolean;
     private currentPath: IPoint[];
     private pathfinderTarget: IPoint;
+    private moveRecords: MoveRecords;
+    private frameUpdateTimer: NodeJS.Timer;
 
     // reconnect info
     private key: Int8Array;
@@ -189,6 +204,14 @@ export class Client {
 
     // packet control
     private blockedPackets: PacketType[];
+
+    // enemies/projeciles
+    private projectiles: Projectile[];
+    private projectileUpdateTimer: NodeJS.Timer;
+    private random: Random;
+    private enemies: {
+        [objectId: number]: Enemy;
+    };
 
     /**
      * Creates a new instance of the client and begins the connection process to the specified server.
@@ -201,6 +224,10 @@ export class Client {
             Client.emitter = new EventEmitter();
         }
         this.blockedPackets = [];
+        this.projectiles = [];
+        this.projectileUpdateTimer = null;
+        this.enemies = {};
+        this.autoAim = true;
         this.key = new Int8Array(0);
         this.keyTime = -1;
         this.gameId = -2;
@@ -209,7 +236,7 @@ export class Client {
         this.playerData.server = server.name;
         this.nextPos = null;
         this.internalMoveMultiplier = 1;
-        this.currentBulletId = 0;
+        this.currentBulletId = 1;
         this.lastAttackTime = 0;
         this.socketConnected = false;
         this.guid = accInfo.guid;
@@ -217,6 +244,7 @@ export class Client {
         this.buildVersion = buildVersion;
         this.alias = accInfo.alias;
         this.proxy = accInfo.proxy;
+        this.pathfinderEnabled = accInfo.pathfinder || false;
         if (accInfo.charInfo) {
             this.charInfo = accInfo.charInfo;
         } else {
@@ -239,15 +267,39 @@ export class Client {
         if (time < this.lastAttackTime + attackPeriod) {
             return false;
         }
-
         this.lastAttackTime = time;
-        const shootPacket = new PlayerShootPacket();
-        shootPacket.bulletId = this.getBulletId();
-        shootPacket.angle = angle;
-        shootPacket.containerType = item.type;
-        shootPacket.time = time;
-        shootPacket.startingPos = this.worldPos.clone();
-        this.packetio.sendPacket(shootPacket);
+        let totalArc = item.arcGap * (item.numProjectiles - 1);
+        if (item.arcGap <= 0) {
+            totalArc = 0;
+        }
+        angle -= totalArc / 2;
+        for (let i = 0; i < item.numProjectiles; i++) {
+            const shootPacket = new PlayerShootPacket();
+            shootPacket.bulletId = this.getBulletId();
+            shootPacket.angle = angle;
+            shootPacket.containerType = item.type;
+            shootPacket.time = time;
+            shootPacket.startingPos = this.worldPos.clone();
+            shootPacket.startingPos.x += (Math.cos(angle) * 0.3);
+            shootPacket.startingPos.y += (Math.sin(angle) * 0.3);
+            this.packetio.sendPacket(shootPacket);
+            this.projectiles.push(new Projectile(item.type, 0, this.objectId, shootPacket.bulletId, angle, time, {
+                x: shootPacket.startingPos.x,
+                y: shootPacket.startingPos.y
+            }));
+            if (item.arcGap > 0) {
+                angle += item.arcGap;
+            }
+
+            const projectile = item.projectile;
+            let damage = this.random.nextIntInRange(projectile.minDamage, projectile.maxDamage);
+            if (time > this.moveRecords.lastClearTime + 600) {
+                damage = 0;
+            }
+            this.projectiles[this.projectiles.length - 1].setDamage(damage * this.getAttackMultiplier());
+        }
+
+        this.checkProjectiles();
         return true;
     }
 
@@ -321,6 +373,9 @@ export class Client {
      * @param to The point to navigate towards.
      */
     public findPath(to: IPoint): void {
+        if (!this.pathfinderEnabled) {
+            Log(this.alias, 'Pathfinding is not enabled. Please enable it in the acc-config.', LogLevel.Warning);
+        }
         to.x = Math.floor(to.x);
         to.y = Math.floor(to.y);
         this.pathfinder.findPath(this.worldPos.toPoint(), to).then((path) => {
@@ -340,6 +395,99 @@ export class Client {
         });
     }
 
+    private damage(damage: number, bulletId: number, objectId: number): void {
+        const min = damage * 3 / 20;
+        const actualDamge = Math.max(min, damage - this.playerData.def);
+        this.playerData.hp -= actualDamge;
+        Log(this.alias, `Took ${actualDamge} damage. At ${this.playerData.hp} health.`);
+        if (this.playerData.hp <= this.playerData.maxHP * 0.3) {
+            Log(this.alias, 'Auto nexused at ' + this.playerData.hp + ' HP', LogLevel.Warning);
+            this.clientSocket.destroy();
+            return;
+        }
+        const playerHit = new PlayerHitPacket();
+        playerHit.bulletId = bulletId;
+        playerHit.objectId = objectId;
+        this.packetio.sendPacket(playerHit);
+    }
+
+    private checkProjectiles(): void {
+        if (this.projectiles.length > 0) {
+            if (!this.projectileUpdateTimer) {
+                this.projectileUpdateTimer = setInterval(() => {
+                    for (let i = 0; i < this.projectiles.length; i++) {
+                        if (!this.projectiles[i].update(this.getTime())) {
+                            this.projectiles.splice(i, 1);
+                            continue;
+                        }
+                        const offset = {
+                            x: this.projectiles[i].currentPosition.x - this.projectiles[i].startPosition.x,
+                            y: this.projectiles[i].currentPosition.y - this.projectiles[i].startPosition.y
+                        };
+                        if (this.projectiles[i].damagePlayers) {
+                            if (this.worldPos.squareDistanceTo(this.projectiles[i].currentPosition) < 0.25) {
+                                // hit.
+                                this.damage(this.projectiles[i].damage, this.projectiles[i].bulletId, this.projectiles[i].ownerObjectId);
+                                this.projectiles.splice(i, 1);
+                            }
+                        } else {
+                            let closestEnemy: Enemy;
+                            let closestDistance = 10000000;
+                            for (const enemyId in this.enemies) {
+                                if (this.enemies.hasOwnProperty(enemyId)) {
+                                    const enemy = this.enemies[+enemyId];
+                                    const dist = enemy.objectData.worldPos.squareDistanceTo(this.projectiles[i].currentPosition);
+                                    if (dist < 0.25) {
+                                        if (dist < closestDistance) {
+                                            closestDistance = dist;
+                                            closestEnemy = enemy;
+                                        }
+                                    }
+                                }
+                            }
+                            if (closestEnemy) {
+                                const lastUpdate = (Date.now() - closestEnemy.lastUpdate);
+                                if (lastUpdate > 200) {
+                                    if (environment.debug) {
+                                        Log(this.alias, 'Preventing EnemyHit. Time since last update: ' + lastUpdate, LogLevel.Warning);
+                                    }
+                                    this.projectiles.splice(i, 1);
+                                    break;
+                                }
+                                const enemyHit = new EnemyHitPacket();
+                                const damage = closestEnemy.damage(this.projectiles[i].damage);
+                                enemyHit.bulletId = this.projectiles[i].bulletId;
+                                enemyHit.targetId = closestEnemy.objectData.objectId;
+                                enemyHit.time = this.getTime();
+                                enemyHit.kill = closestEnemy.objectData.hp <= damage;
+                                this.packetio.sendPacket(enemyHit);
+                                this.projectiles.splice(i, 1);
+                                if (enemyHit.kill) {
+                                    closestEnemy.dead = true;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    if (this.projectiles.length === 0) {
+                        clearInterval(this.projectileUpdateTimer);
+                        this.projectileUpdateTimer = null;
+                    }
+                }, 1000 / 60);
+            }
+        }
+    }
+
+    @HookPacket(PacketType.DAMAGE)
+    private onDamage(client: Client, damage: DamagePacket): void {
+        if (this.enemies[damage.targetId]) {
+            this.enemies[damage.targetId].objectData.hp -= damage.damageAmount;
+            if (this.enemies[damage.targetId].objectData.hp < 0 || damage.kill) {
+                delete this.enemies[damage.targetId];
+            }
+        }
+    }
+
     @HookPacket(PacketType.MAPINFO)
     private onMapInfo(client: Client, mapInfoPacket: MapInfoPacket): void {
         if (this.charInfo.charId > 0) {
@@ -355,9 +503,12 @@ export class Client {
             Log(this.alias, 'Creating new char', LogLevel.Info);
             this.packetio.sendPacket(createPacket);
         }
+        this.random = new Random(mapInfoPacket.fp);
         this.mapTiles = new Array<GroundTileData>(mapInfoPacket.width * mapInfoPacket.height);
         this.mapInfo = { width: mapInfoPacket.width, height: mapInfoPacket.height, name: mapInfoPacket.name };
-        this.pathfinder = new Pathfinder(mapInfoPacket.width);
+        if (this.pathfinderEnabled) {
+            this.pathfinder = new Pathfinder(mapInfoPacket.width);
+        }
     }
 
     @HookPacket(PacketType.UPDATE)
@@ -376,14 +527,20 @@ export class Client {
             }
             if (ResourceManager.objects[updatePacket.newObjects[i].objectType]) {
                 const obj = ResourceManager.objects[updatePacket.newObjects[i].objectType];
-                if (obj.fullOccupy || obj.occupySquare) {
-                    const x = updatePacket.newObjects[i].status.pos.x;
-                    const y = updatePacket.newObjects[i].status.pos.y;
-                    pathfinderUpdates.push({
-                        x: Math.floor(x),
-                        y: Math.floor(y),
-                        walkable: false
-                    });
+                if (this.pathfinderEnabled) {
+                    if (obj.fullOccupy || obj.occupySquare) {
+                        const x = updatePacket.newObjects[i].status.pos.x;
+                        const y = updatePacket.newObjects[i].status.pos.y;
+                        pathfinderUpdates.push({
+                            x: Math.floor(x),
+                            y: Math.floor(y),
+                            walkable: false
+                        });
+                    }
+                }
+                if (obj.enemy) {
+                    this.enemies[updatePacket.newObjects[i].status.objectId] = new Enemy(obj);
+                    this.enemies[updatePacket.newObjects[i].status.objectId].update(updatePacket.newObjects[i].status);
                 }
             }
         }
@@ -392,15 +549,25 @@ export class Client {
         for (let i = 0; i < updatePacket.tiles.length; i++) {
             const tile = updatePacket.tiles[i];
             this.mapTiles[tile.y * this.mapInfo.width + tile.x] = tile;
-            if (ResourceManager.tiles[tile.type].noWalk) {
-                pathfinderUpdates.push({
-                    x: Math.floor(tile.x),
-                    y: Math.floor(tile.y),
-                    walkable: false
-                });
+            if (this.pathfinderEnabled) {
+                if (ResourceManager.tiles[tile.type].noWalk) {
+                    pathfinderUpdates.push({
+                        x: Math.floor(tile.x),
+                        y: Math.floor(tile.y),
+                        walkable: false
+                    });
+                }
             }
         }
-        if (pathfinderUpdates.length > 0) {
+
+        // drops
+        for (let i = 0; i < updatePacket.drops.length; i++) {
+            if (this.enemies[updatePacket.drops[i]]) {
+                delete this.enemies[updatePacket.drops[i]];
+            }
+        }
+
+        if (pathfinderUpdates.length > 0 && this.pathfinderEnabled) {
             this.pathfinder.updateWalkableNodes(pathfinderUpdates);
             if (this.pathfinderTarget) {
                 this.findPath(this.pathfinderTarget);
@@ -445,6 +612,9 @@ export class Client {
         const aoeAck = new AoeAckPacket();
         aoeAck.time = this.getTime();
         aoeAck.position = this.worldPos.clone();
+        if (aoePacket.pos.squareDistanceTo(this.worldPos) < aoePacket.radius ** 2) {
+            this.playerData.hp -= aoePacket.damage;
+        }
         this.packetio.sendPacket(aoeAck);
     }
 
@@ -461,16 +631,55 @@ export class Client {
         }
         movePacket.newPosition = this.worldPos;
         movePacket.records = [];
+        const lastClear = this.moveRecords.lastClearTime;
+        if (lastClear >= 0 && movePacket.time - lastClear > 125) {
+            const len = Math.min(10, this.moveRecords.records.length);
+            for (let i = 0; i < len; i++) {
+                if (this.moveRecords.records[i].time >= movePacket.time - 25) {
+                    break;
+                }
+                movePacket.records.push(this.moveRecords.records[i].clone());
+            }
+        }
+        this.moveRecords.clear(movePacket.time);
         this.packetio.sendPacket(movePacket);
+
+        // hp.
+        const elapsedMS = this.currentTickTime - this.lastTickTime;
+        this.playerData.hp += elapsedMS / 1000 * (1 + 0.12 * this.playerData.vit);
+        if (this.playerData.hp > this.playerData.maxHP) {
+            this.playerData.hp = this.playerData.maxHP;
+        }
 
         for (let i = 0; i < newTickPacket.statuses.length; i++) {
             const status = newTickPacket.statuses[i];
             if (status.objectId === this.objectId) {
+                const beforeHP = this.playerData.hp;
                 this.playerData = ObjectStatusData.processStatData(status.stats, this.playerData);
+                // synchronise the client hp if the difference is more than 30% of the HP.
+                if (Math.abs(beforeHP - this.playerData.hp) < this.playerData.maxHP * 0.3) {
+                    this.playerData.hp = beforeHP;
+                }
                 this.playerData.objectId = this.objectId;
                 this.playerData.worldPos = this.worldPos;
                 this.playerData.server = this.server.name;
                 break;
+            }
+            if (this.enemies[newTickPacket.statuses[i].objectId]) {
+                this.enemies[newTickPacket.statuses[i].objectId].update(newTickPacket.statuses[i]);
+            }
+        }
+
+        if (this.autoAim) {
+            const keys = Object.keys(this.enemies);
+            const projectile = ResourceManager.items[this.playerData.inventory[0]].projectile;
+            const distance = projectile.lifetimeMS * (projectile.speed / 10000);
+            for (const key of keys) {
+                const enemy = this.enemies[+key];
+                if (enemy.objectData.worldPos.squareDistanceTo(this.worldPos) < distance ** 2) {
+                    const angle = Math.atan2(enemy.objectData.worldPos.y - this.worldPos.y, enemy.objectData.worldPos.x - this.worldPos.x);
+                    this.shoot(angle);
+                }
             }
         }
     }
@@ -488,7 +697,29 @@ export class Client {
     private onEnemyShoot(client: Client, enemyShootPacket: EnemyShootPacket): void {
         const shootAck = new ShootAckPacket();
         shootAck.time = this.getTime();
+        const owner = this.enemies[enemyShootPacket.ownerId];
+        if (!owner || owner.dead) {
+            shootAck.time = -1;
+        }
         this.packetio.sendPacket(shootAck);
+        if (!owner || owner.dead) {
+            return;
+        }
+        for (let i = 0; i < enemyShootPacket.numShots; i++) {
+            this.projectiles.push(
+                new Projectile(
+                    owner.properties.type,
+                    enemyShootPacket.bulletType,
+                    enemyShootPacket.ownerId,
+                    (enemyShootPacket.bulletId + i) % 256,
+                    enemyShootPacket.angle + i * enemyShootPacket.angleInc,
+                    this.getTime(),
+                    enemyShootPacket.startingPos.toPrecisePoint()
+                )
+            );
+            this.projectiles[this.projectiles.length - 1].setDamage(enemyShootPacket.damage);
+        }
+        this.checkProjectiles();
     }
 
     @HookPacket(PacketType.SERVERPLAYERSHOOT)
@@ -507,15 +738,25 @@ export class Client {
         this.charInfo.nextCharId = this.charInfo.charId + 1;
         Client.emitter.emit('ready', Object.assign({}, this.playerData), this);
         Log(this.alias, 'Connected!', LogLevel.Success);
+        this.frameUpdateTimer = setInterval(() => {
+            this.moveRecords.addRecord(this.getTime(), this.worldPos.x, this.worldPos.y);
+        }, 1000 / 30);
     }
 
     private onConnect(): void {
         this.socketConnected = true;
         Client.emitter.emit('connect', Object.assign({}, this.playerData), this);
         Log(this.alias, 'Connected to ' + this.server.name + '!', LogLevel.Success);
-        this.connectTime = Date.now();
+        if (!this.connectTime) {
+            this.connectTime = Date.now();
+        }
         this.lastTickTime = 0;
+        this.lastAttackTime = 0;
         this.currentTickTime = 0;
+        this.currentBulletId = 1;
+        this.enemies = {};
+        this.projectiles = [];
+        this.moveRecords = new MoveRecords();
         this.sendHello();
     }
 
@@ -553,6 +794,16 @@ export class Client {
         this.nextPos = null;
         this.currentPath = null;
         this.pathfinderTarget = null;
+        this.serverIp = this.nexusServerIp;
+        if (this.pathfinderEnabled) {
+            this.pathfinder.destroy();
+        }
+        this.projectiles = [];
+        this.enemies = {};
+        if (this.frameUpdateTimer) {
+            clearInterval(this.frameUpdateTimer);
+            this.frameUpdateTimer = null;
+        }
         Log(this.alias, 'The connection to ' + this.server.name + ' was closed.', LogLevel.Warning);
         let reconnectTime = 5;
         if (this.reconnectCooldown) {
@@ -663,6 +914,10 @@ export class Client {
             this.worldPos.y = target.y;
             this.nextPos = null;
         }
+    }
+
+    private getAttackMultiplier(): number {
+        return MIN_ATTACK_MULT + this.playerData.atk / 75 * (MAX_ATTACK_MULT - MIN_ATTACK_MULT);
     }
 
     private getSpeed(): number {
