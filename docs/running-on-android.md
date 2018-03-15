@@ -1,25 +1,21 @@
-### Install on Android
-If you wanna use nrelay on Android, you can setup Linux Deploy and configure system on work with nodejs.
-Your phone need worked root-access!
-You can see images: [Link](https://imgur.com/a/CvMOp)
+# Installing nrelay on Android
+nrelay can be installed and run on an Android device by using Linux Deploy and BusyBox. To run the required software your phone **must have root access**.
+Image examples of the configuration options [can be found here.](https://imgur.com/a/CvMOp)
 
-How to install Linux Deploy:
+## Installing the required software
+Both Linux Deploy and BusyBox can be downloaded from their respective GitHub repositories.
+ + [Linux Deploy](https://github.com/meefik/linuxdeploy/releases)
+ + [BusyBox](https://github.com/meefik/busybox/releases)
 
-You can download last release from GitHub repository: [LinuxDeploy](https://github.com/meefik/linuxdeploy/releases) and [BusyBox](https://github.com/meefik/busybox/releases)
+Since SSH access is required, you also need access to a terminal. ConnectBot is a free console emulator on the Google Play Store, and will work just fine.
 
-To SSH-access you need terminal, here used ConnectBot.
+After installing BusyBox, check your location of BusyBox in the settings, make sure it's `/system/xbin`.
 
-First you need install BusyBox.
+After installing the Linux Deploy apk, open Linux Deploy and go to `Settings`, then
+ 1. Select the correct PATH to your BusyBox. The default PATH is: `/system/xbin`
+ 2. Choose Update ENV
+ 3. Open options from the bottom right corner and set your configuration as follows:
 
-Check your location of BusyBox in settings, make sure it's /system/xbin.
-
-After installing LinuxDeploy apk, open LinuxDeploy and go to "Settings"
-
-Select PATH to your BusyBox, default PATH: /system/xbin
-
-Choose Update ENV
-
-Open options on right-down corner and set this settings:
 ```
 Containerization Method: chroot
 Distribution: Debian
@@ -28,9 +24,9 @@ Distribution suite: stretch
 Source path: default
 Installation type: Directory
 User name: android
-User password: set your password here [You need password to SSH-access]
+User password: Set your password here (Required later for SSH access)
 Privileged Users: root
-Localization: en_US.UTF-8 (ru_RU.UTF-8 to me ;)
+Localization: en_US.UTF-8 (Any language is fine)
 -
 Init: Disable
 -
@@ -47,15 +43,13 @@ Graphics subsystem: VNC
 GUI settings: change your resolution
 Desktop Environment: LXDE
 ```
-Go to the start screen - open menu on right-up corner and choose Install, make sure you have stable connection, give root permissions to application. (This may take 10-30 min, you can watch YT on this time)
+Go to the start screen and open the menu from the top right corner, then choose `Install`. Make sure you have given root permissions to the application and have a stable connection as this process may take anywhere from 10 to 30 minutes.
 
-After downloading, in terminl you can see "<<< deploy"
+After the process is finished, in the terminal you will see `<<< deploy`. Next, choose `START`.
 
-Next choose "START"
+Now you will require an SSH Terminal, for this tutorial, ConnectBot will be used.
 
-Now you need SSH-Terminal, here i use ConnectBot.
-
-After you open app, you can see button in corner, click on it to add new host and set this options:
+After opening ConnectBot, add a new host and use the following configuration:
 ```
 Protocol: SSH
 -
@@ -68,9 +62,9 @@ Nickname: DEBIAN
 Start shell session: true
 Stay connected: true
 ```
-During the connection you will be asked for the password, enter the one that was in the settings.
+During the connection you will be asked for the password, enter the password that you chose earlier when setting up Linux Deploy.
 
-Next tell this in console to download/installing java/nodejs/nrelay: (you can copy-paste all commands in one line, but then don't delete ";" after commands )
+Next, use the following commands in the console to download and install nrelay and its dependencies. If you want to copy and paste all of the commands in a single line, do not delete the `;` at the end of each line.
 ```
 su ;
 apt-get install default-jdk curl git -y ;
@@ -89,5 +83,4 @@ npm link ;
 mv acc-config-sample.json acc-config.json ;
 nano acc-config.json ;
 ```
-Next edit your acc-config.json and save changes on Ctrl+O, close nano on Ctrl+X.
-If you enable Mount in options, you can copy your acc-config in nrelay from sdcard/internal storage.
+Next, edit your `acc-config.json` and save the changes using `Ctrl + O`. Nano can be closed by using `Ctrl + X`. Alternatively, if you enable `Mount` in the options, you can copy an existing `acc-config.json` from your phone's internal storage.
