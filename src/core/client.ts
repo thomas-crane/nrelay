@@ -452,7 +452,7 @@ export class Client {
                                         Log(this.alias, 'Preventing EnemyHit. Time since last update: ' + lastUpdate, LogLevel.Warning);
                                     }
                                     this.projectiles.splice(i, 1);
-                                    break;
+                                    continue;
                                 }
                                 const enemyHit = new EnemyHitPacket();
                                 const damage = closestEnemy.damage(this.projectiles[i].damage);
@@ -465,7 +465,7 @@ export class Client {
                                 if (enemyHit.kill) {
                                     closestEnemy.dead = true;
                                 }
-                                break;
+                                continue;
                             }
                         }
                     }
@@ -539,7 +539,9 @@ export class Client {
                     }
                 }
                 if (obj.enemy) {
-                    this.enemies[updatePacket.newObjects[i].status.objectId] = new Enemy(obj);
+                    if (!this.enemies[updatePacket.newObjects[i].status.objectId]) {
+                        this.enemies[updatePacket.newObjects[i].status.objectId] = new Enemy(obj);
+                    }
                     this.enemies[updatePacket.newObjects[i].status.objectId].update(updatePacket.newObjects[i].status);
                 }
             }
@@ -663,10 +665,10 @@ export class Client {
                 this.playerData.objectId = this.objectId;
                 this.playerData.worldPos = this.worldPos;
                 this.playerData.server = this.server.name;
-                break;
+                continue;
             }
-            if (this.enemies[newTickPacket.statuses[i].objectId]) {
-                this.enemies[newTickPacket.statuses[i].objectId].update(newTickPacket.statuses[i]);
+            if (this.enemies[status.objectId]) {
+                this.enemies[status.objectId].update(status);
             }
         }
 

@@ -1,6 +1,11 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.17.1`
+### Fixes:
+ + Fixed a bug where enemies would not receive new tick updates sometimes.
+ + Fixed a typo in the `Projectile` class.
+
 ## `6.17.0`
 > The changes in this version are part of features which are not fully complete yet and may still contain bugs.
 > If you need a **stable** version of nrelay, do not upgrade to this version.

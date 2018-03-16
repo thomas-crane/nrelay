@@ -72,7 +72,7 @@ export class Projectile {
             const angleX = Math.cos(this.startAngle);
             const angleY = Math.sin(this.startAngle);
             point.x += (offset2 * angleY - offset3 * angleX) * this.projectileProperties.magnitude;
-            point.x += (offset2 * angleX - offset3 * angleY) * this.projectileProperties.magnitude;
+            point.y += (offset2 * angleX - offset3 * angleY) * this.projectileProperties.magnitude;
         } else {
             if (this.projectileProperties.boomerang) {
                 const halfwayPoint = this.projectileProperties.lifetimeMS * (this.projectileProperties.speed / 10000) / 2;
