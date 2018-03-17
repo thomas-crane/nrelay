@@ -310,7 +310,7 @@ class HelloPlugin {
     private setRegex = /^set\s+(\S+.*)$/;
 
     constructor() {
-        this.respnse = 'Default response';
+        this.response = 'Default response';
     }
 
     @HookPacket(PacketType.TEXT)
