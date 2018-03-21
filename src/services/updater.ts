@@ -150,7 +150,7 @@ export class Updater {
                 //     reject(error);
                 // });
             }).catch((error) => {
-                Log('Updater', 'Error: ' + error.message, LogLevel.Error);
+                Log('Updater', `Error: ${error.message}`, LogLevel.Error);
             });
         });
     }
@@ -167,13 +167,13 @@ export class Updater {
         return new Promise((resolve: () => void, reject: (err: Error) => void) => {
             const args = [
                 '-jar',
-                ('"' + path.join(dir, 'lib', 'jpexs', 'ffdec.jar') + '"'),
+                (`"${path.join(dir, 'lib', 'jpexs', 'ffdec.jar')}"`),
                 '-selectclass kabam.rotmg.messaging.impl.GameServerConnection',
                 '-export script',
-                ('"' + path.join(dir, 'src', 'services', 'updater-assets', 'decompiled') + '"'),
-                ('"' + path.join(dir, 'src', 'services', 'updater-assets', 'client.swf') + '"')
+                (`"${path.join(dir, 'src', 'services', 'updater-assets', 'decompiled')}"`),
+                (`"${path.join(dir, 'src', 'services', 'updater-assets', 'client.swf')}"`)
             ];
-            exec('java ' + args.join(' '), (error, stdout, stderr) => {
+            exec(`java ${args.join(' ')}`, (error, stdout, stderr) => {
                 if (error) {
                     reject(error);
                     return;
@@ -216,7 +216,7 @@ export class Updater {
         let raw = 'export enum PacketType {\n';
         const keys = Object.keys(newPackets);
         for (let i = 0; i < keys.length; i++) {
-            raw += ('    ' + keys[i] + ' = ' + newPackets[keys[i]] + (i === keys.length - 1 ? '\n' : ',\n'));
+            raw += (`    ${keys[i]} = ${newPackets[keys[i]] + (i === keys.length - 1 ? '\n' : ',\n')}`);
         }
         raw += '}\n';
         fs.writeFileSync(filePath, raw, { encoding: 'utf8' });

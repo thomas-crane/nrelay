@@ -93,7 +93,7 @@ export class Storage {
      */
     public static createLog(): void {
         const logStream = fs.createWriteStream(Storage.makePath('nrelay-log.log'));
-        logStream.write('Log Start (time: ' + Date.now() + ')\n');
+        logStream.write(`Log Start (time: ${Date.now()})\n`);
         Logger.logStream = logStream;
     }
 }

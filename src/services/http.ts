@@ -47,8 +47,8 @@ export class Http {
                 Log('Http', 'Established proxy!', LogLevel.Success);
                 let data = '';
                 info.socket.setEncoding('utf8');
-                info.socket.write('GET /char/list' + qs + ' HTTP/1.1\r\n');
-                info.socket.write('Host: ' + endpoint.host + '\r\n');
+                info.socket.write(`GET /char/list${qs} HTTP/1.1\r\n`);
+                info.socket.write(`Host: ${endpoint.host}\r\n`);
                 info.socket.write('Connection: close\r\n\r\n');
                 info.socket.on('data', (chunk) => {
                     data += chunk.toString('utf8');

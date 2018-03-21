@@ -25,13 +25,13 @@ export class PluginManager {
                 const relPath = Storage.makePath('dist', 'plugins', files[i]);
                 if (!PLUGIN_REGEX.test(relPath)) {
                     if (environment.debug) {
-                        Log('PluginManager', 'Skipping ' + relPath, LogLevel.Info);
+                        Log('PluginManager', `Skipping ${relPath}`, LogLevel.Info);
                     }
                     continue;
                 }
                 const pluginClass = require(relPath).default;
             } catch (err) {
-                Log('PluginManager', 'Error while loading ' + files[i], LogLevel.Warning);
+                Log('PluginManager', `Error while loading ${files[i]}`, LogLevel.Warning);
                 if (environment.debug) {
                     Log('PluginManager', err);
                 }
@@ -63,7 +63,7 @@ export class PluginManager {
         if (info.hasOwnProperty('enabled')) {
             if (!info.enabled) {
                 if (environment.debug) {
-                    Log('PluginManager', 'Skipping disabled plugin ' + info.name, LogLevel.Info);
+                    Log('PluginManager', `Skipping disabled plugin ${info.name}`, LogLevel.Info);
                 }
                 // remove hooks
                 const hKeys = Object.keys(this.hooks);
@@ -79,18 +79,18 @@ export class PluginManager {
         try {
             plugin = new target();
         } catch (error) {
-            Log('PluginManager', 'Error while instantiating ' + target.name, LogLevel.Warning);
+            Log('PluginManager', `Error while instantiating ${target.name}`, LogLevel.Warning);
             if (environment.debug) {
                 Log('PluginManager', error);
             }
             return;
         }
         if (this.pluginInstances.hasOwnProperty(target.name)) {
-            Log('PluginManager', 'Cannot load ' + target.name + ' because a plugin with the same name already exists.', LogLevel.Error);
+            Log('PluginManager', `Cannot load ${target.name} because a plugin with the same name already exists.`, LogLevel.Error);
         } else {
             this.pluginInstances[target.name] = plugin;
             this.pluginInfo.push(info);
-            Log('PluginManager', 'Loaded ' + info.name + ' by ' + info.author, LogLevel.Info);
+            Log('PluginManager', `Loaded ${info.name} by ${info.author}`, LogLevel.Info);
         }
     }
 
@@ -122,9 +122,9 @@ export class PluginManager {
                     }
                     hook.action.apply(caller, [client, packet]);
                 } catch (error) {
-                    Log('PluginManager', 'Error while calling ' + PacketType[packetType] + ' hook on ' + hook.caller, LogLevel.Warning);
+                    Log('PluginManager', `Error while calling ${PacketType[packetType]} hook on ${hook.caller}`, LogLevel.Warning);
+                    Log('PluginManager', error, LogLevel.Info);
                     if (environment.debug) {
-                        Log('PluginManager', error, LogLevel.Info);
                     }
                 }
             }

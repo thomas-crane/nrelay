@@ -11,7 +11,7 @@ export class Logger {
 }
 
 export function Log(sender: string, message: string, level: LogLevel = LogLevel.Message): void {
-    const senderString = ('[' + getTime() + ' | ' + sender + ']');
+    const senderString = (`[${getTime()} | ${sender}]`);
     let printString: string = pad(senderString, 30) + message;
     if (Logger.logStream && environment.log) {
         Logger.logStream.write(pad(LogLevel[level].toUpperCase(), 8) + printString + '\n');

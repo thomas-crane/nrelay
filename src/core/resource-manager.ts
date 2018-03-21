@@ -32,11 +32,11 @@ export class ResourceManager {
                         };
                     } catch {
                         if (environment.debug) {
-                            Log('ResourceManager', 'Failed to load tile: ' + tileArray[i].type, LogLevel.Warning);
+                            Log('ResourceManager', `Failed to load tile: ${tileArray[i].type}`, LogLevel.Warning);
                         }
                     }
                 }
-                Log('ResourceManager', 'Loaded ' + tileArray.length + ' tiles.', LogLevel.Info);
+                Log('ResourceManager', `Loaded ${tileArray.length} tiles.`, LogLevel.Info);
                 tileArray = null;
                 data = null;
                 resolve();
@@ -180,15 +180,15 @@ export class ResourceManager {
                         }
                     } catch {
                         if (environment.debug) {
-                            Log('ResourceManager', 'Failed to load object: ' + objectsArray[i].type, LogLevel.Warning);
+                            Log('ResourceManager', `Failed to load object: ${objectsArray[i].type}`, LogLevel.Warning);
                         }
                     }
                 }
-                Log('ResourceManager', 'Loaded ' + objectsArray.length + ' objects.', LogLevel.Info);
+                Log('ResourceManager', `Loaded ${objectsArray.length} objects.`, LogLevel.Info);
                 if (environment.debug) {
-                    Log('ResourceManager', 'Loaded ' + itemCount + ' items.', LogLevel.Info);
-                    Log('ResourceManager', 'Loaded ' + enemyCount + ' enemies.', LogLevel.Info);
-                    Log('ResourceManager', 'Loaded ' + petCount + ' pets.', LogLevel.Info);
+                    Log('ResourceManager', `Loaded ${itemCount} items.`, LogLevel.Info);
+                    Log('ResourceManager', `Loaded ${enemyCount} enemies.`, LogLevel.Info);
+                    Log('ResourceManager', `Loaded ${petCount} pets.`, LogLevel.Info);
                 }
                 objectsArray = null;
                 data = null;

@@ -87,7 +87,7 @@ import { UsePortalPacket } from './../networking/packets/outgoing/use-portal-pac
 export class Packets {
     public static create(type: PacketType, data: Buffer): Packet {
         if (!PacketType[type]) {
-            throw new Error('Invalid packet type: ' + type);
+            throw new Error(`Invalid packet type: ${type}`);
         }
         let packet: Packet;
         switch (type) {

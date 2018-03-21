@@ -57,9 +57,9 @@ export class PlayerTracker {
     public trackPlayersFor(client: Client): void {
         if (!this.trackedPlayers.hasOwnProperty(client.guid)) {
             this.trackedPlayers[client.guid] = [];
-            Log('Player Tracker', 'Tracking players for ' + client.alias, LogLevel.Success);
+            Log('Player Tracker', `Tracking players for ${client.alias}`, LogLevel.Success);
         } else {
-            Log('Player Tracker', 'Already tracking players for ' + client.alias, LogLevel.Warning);
+            Log('Player Tracker', `Already tracking players for ${client.alias}`, LogLevel.Warning);
         }
     }
 

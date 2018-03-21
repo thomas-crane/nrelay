@@ -94,7 +94,7 @@ export class PacketIO {
         packet.writeByte(packet.type);
 
         if (environment.debug) {
-            Log('PacketIO', 'WRITE: id: ' + packet.type + ', size: ' + packetSize, LogLevel.Info);
+            Log('PacketIO', `WRITE: id: ${packet.type}, size: ${packetSize}`, LogLevel.Info);
         }
 
         this.socket.write(packet.data);
@@ -126,7 +126,7 @@ export class PacketIO {
             }
         } catch (err) {
             if (environment.debug) {
-                Log('PacketIO', 'READ: id: ' + packetId + ', size: ' + packetSize, LogLevel.Error);
+                Log('PacketIO', `READ: id: ${packetId}, size: ${packetSize}`, LogLevel.Error);
             }
             this.emitter.emit('error', err);
             return;
@@ -192,14 +192,14 @@ export class PacketIO {
                 if (environment.debug) {
                     Log('PacketIO', error, LogLevel.Error);
                 }
-                this.emitter.emit('error', 'Invalid packet structure.');
-                Log('PacketIO', 'Error while reading ' + PacketType[packet.type], LogLevel.Error);
+                this.emitter.emit('error', new Error('Invalid packet structure.'));
+                Log('PacketIO', `Error while reading ${PacketType[packet.type]}`, LogLevel.Error);
                 return;
             }
             packet.data = null;
         }
         if (environment.debug) {
-            Log('PacketIO', 'READ: id: ' + this.currentHead.id + ', size: ' + this.currentHead.length, LogLevel.Info);
+            Log('PacketIO', `READ: id: ${this.currentHead.id}, size: ${this.currentHead.length}`, LogLevel.Info);
         }
         this.resetBuffer();
         return packet;

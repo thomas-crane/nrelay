@@ -89,7 +89,7 @@ export class LocalServer {
         });
         wrapper.socket.on('error', (error) => {
             if (environment.debug) {
-                Log('Local Server', 'Received socket error: ' + error.message, LogLevel.Error);
+                Log('Local Server', `Received socket error: ${error.message}`, LogLevel.Error);
             }
         });
     }
