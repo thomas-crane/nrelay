@@ -27,6 +27,7 @@ export interface IPlayerData {
     dex: number;
     wis: number;
     vit: number;
+    condition: number;
     hpPots: number;
     mpPots: number;
     hasBackpack: boolean;
@@ -64,6 +65,7 @@ export function getDefaultPlayerData(): IPlayerData {
         dex: 0,
         wis: 0,
         vit: 0,
+        condition: 0,
         hpPots: 0,
         mpPots: 0,
         hasBackpack: false,

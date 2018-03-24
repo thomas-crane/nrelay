@@ -41,31 +41,39 @@ export class CLI {
                 return;
             }
             const handler = (info: IAccount) => {
-                let keys: string[];
-                try {
-                    keys = Object.keys(this.serverList);
-                } catch (err) {
-                    reject(new Error(account.alias + ' couldn\'t get servers.'));
-                    return;
+                let server: IServer;
+                if (net.isIP(account.serverPref) !== 0) {
+                    server = {
+                        name: account.serverPref,
+                        address: account.serverPref
+                    };
                 }
-                if (keys.length > 0) {
-                    let server = this.serverList[account.serverPref];
-                    if (!server) {
-                        Log('NRelay', 'Preferred server not found. Choosing first server.', LogLevel.Warning);
-                        server = this.serverList[keys[0]];
+                if (!server) {
+                    let keys: string[];
+                    try {
+                        keys = Object.keys(this.internalServerList);
+                    } catch (err) {
+                        keys = [];
                     }
-                    const client = new Client(server, this.buildVersion, account);
-                    this.clients[account.alias] = client;
-                    resolve(client);
-                } else {
-                    reject(new Error(account.alias + ' couldn\'t get servers.'));
-                    return;
+                    if (keys.length > 0) {
+                        if (!account.serverPref || account.serverPref === '') {
+                            Log('NRelay', 'Preferred server not found. Choosing first server.', LogLevel.Warning);
+                            server = this.internalServerList[keys[0]];
+                        }
+                        server = this.internalServerList[account.serverPref];
+                    } else {
+                        reject(new Error(account.alias + ' couldn\'t get servers.'));
+                        return;
+                    }
                 }
+                const client = new Client(server, this.buildVersion, account);
+                this.clients[account.alias] = client;
+                resolve(client);
             };
-            Log('NRelay', 'Adding ' + account.alias, LogLevel.Info);
+            Log('NRelay', `Adding ${account.alias}`, LogLevel.Info);
             if (charInfo || account.charInfo) {
                 if (environment.debug) {
-                    Log('NRelay', 'Using provided character info for ' + account.alias + '.', LogLevel.Info);
+                    Log('NRelay', `Using provided character info for ${account.alias}.`, LogLevel.Info);
                 }
                 if (charInfo) {
                     account.charInfo = charInfo;
@@ -73,9 +81,8 @@ export class CLI {
                 handler(account);
             } else {
                 this.getAccountInfo(account).then(handler).catch((error) => {
-                    const err = new Error(account.alias + ': ' + error);
                     this.handleConnectionError(error, account);
-                    reject(err);
+                    reject(error);
                 });
             }
         });
@@ -85,7 +92,7 @@ export class CLI {
         if (this.clients[alias]) {
             this.clients[alias].destroy();
             delete this.clients[alias];
-            Log('NRelay', 'Removed ' + alias, LogLevel.Info);
+            Log('NRelay', `Removed ${alias}`, LogLevel.Info);
             return true;
         }
         return false;
@@ -110,27 +117,31 @@ export class CLI {
         return new Promise((resolve: () => void, reject: (err: Error) => void) => {
             Http.get(SERVER_ENDPOINT).then((data: any) => {
                 Log('NRelay', 'Server list loaded.', LogLevel.Success);
-                this.serverList = parseServers(data);
+                this.internalServerList = parseServers(data);
                 resolve();
             }).catch((err) => {
-                Log('NRelay', 'Error loading server list: ' + err.message);
+                Log('NRelay', `Error loading server list: ${err.message}`);
                 reject(err);
             });
         });
+    }
+
+    public static get serverList(): { [id: string]: IServer } {
+        return this.internalServerList;
     }
 
     private static clients: {
         [guid: string]: Client
     };
 
-    private static serverList: { [id: string]: IServer };
+    private static internalServerList: { [id: string]: IServer };
     private static buildVersion: string;
 
     private static getAccountInfo(account: IAccount): Promise<IAccount> {
         return new Promise((resolve: (acc: IAccount) => void, reject: (err: Error) => void) => {
             const handler = (data: any) => {
                 const info = parseAccountInfo(data);
-                this.serverList = parseServers(data);
+                this.internalServerList = parseServers(data);
                 if (info) {
                     account.charInfo = info;
                     resolve(account);
@@ -197,7 +208,7 @@ export class CLI {
             const acc = accInfo.accounts[i];
             setTimeout(() => {
                 this.addClient(acc).then(() => {
-                    Log('NRelay', 'Authorized ' + acc.alias, LogLevel.Success);
+                    Log('NRelay', `Authorized ${acc.alias}`, LogLevel.Success);
                 }).catch((error: Error) => {
                     Log('NRelay', error.message, LogLevel.Error);
                 });
@@ -212,7 +223,7 @@ export class CLI {
         const accInUse = ACCOUNT_IN_USE_REGEX.exec(error);
         if (accInUse) {
             const time = +accInUse[1] + 1;
-            Log('NRelay', acc.alias + ' Received account in use error. Reconnecting in ' + time + ' seconds.', LogLevel.Warning);
+            Log('NRelay', `${acc.alias} Received account in use error. Reconnecting in ${time} seconds.`, LogLevel.Warning);
             setTimeout(() => {
                 this.addClient(acc);
             }, time * 1000);
@@ -242,7 +253,7 @@ export class CLI {
                     Updater.getLatest().then(() => {
                         process.exit(0);
                     }).catch((error) => {
-                        Log('NRelay', 'Error while updating: ' + JSON.stringify(error), LogLevel.Error);
+                        Log('NRelay', `Error while updating: ${JSON.stringify(error)}`, LogLevel.Error);
                     });
                 } else {
                     CLI.proceed();

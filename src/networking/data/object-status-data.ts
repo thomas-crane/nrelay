@@ -76,6 +76,9 @@ export class ObjectStatusData {
                 case StatData.VITALITY_STAT:
                     playerData.vit = data[i].statValue;
                     continue;
+                case StatData.CONDITION_STAT:
+                    playerData.condition = data[i].statValue;
+                    continue;
                 case StatData.WISDOM_STAT:
                     playerData.wis = data[i].statValue;
                     continue;

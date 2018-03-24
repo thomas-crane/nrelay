@@ -10,12 +10,12 @@ export class PlayerHitPacket extends Packet {
     //#endregion
 
     public read(): void {
-        this.bulletId = this.readByte();
+        this.bulletId = this.readUnsignedByte();
         this.objectId = this.readInt32();
     }
 
     public write(): void {
-        this.writeByte(this.bulletId);
+        this.writeUnsigedByte(this.bulletId);
         this.writeInt32(this.objectId);
     }
 }

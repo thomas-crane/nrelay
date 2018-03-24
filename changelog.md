@@ -1,6 +1,19 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.18.0`
+### Changes:
+ + An IP can be used in the `serverPref` to connect directly to that IP.
+ + Added a `serverList` property to the `CLI` which returns all of the loaded servers in the format `{ [id: string]: IServer }`.
+ + Added condition effect handling.
+ + Added `connectToServer(server: IServer)` to the `Client` class to connect the bot to a different server.
+ + Changed string conventions in several classes.
+### Fixes:
+ + Greatly reduced the number of disconnects when shooting at enemies.
+ + Fixed Client time getting reset when it shouldn't.
+ + Added condition effect handling to various client methods.
+ + Fix `PlayerHitPacket` sometimes attempting to write out of bounds values for the `bulletId`.
+
 ## `6.17.1`
 ### Fixes:
  + Fixed a bug where enemies would not receive new tick updates sometimes.
