@@ -170,3 +170,4 @@ bot.channels.get('426565182718738445').send(`${ping} ${dngName} opened by ${dngO
         }, 30000);
     })
 ```
+**Warning: Using the `.then` and getting the message can only work if you change `noImplicitAny` from `true` to `false` in `tsconfig.json`**
