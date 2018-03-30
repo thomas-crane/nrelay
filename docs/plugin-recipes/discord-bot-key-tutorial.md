@@ -31,14 +31,27 @@ class KeyNotifier {
         }
     }
 ```
-Now, we will want the bot to tell the discord bot when a key is being popped. So we can add variables that will hold information on the key, and the discord bot will write to us.
+Now, we will want the bot to tell the discord bot when a key is being popped. To do so, we can create a function that will send the message on discord, which will execute when we have a match. But first, we will need to create the bot itself.
+To create a discord bot, you will need to install the `discord.js` npm module to create and run the bot. In the console, type the command:
+```bash
+npm install discord.js
+```
+We can now define the discord module.
+```typescript
+const Discord = require('discord.js');
+```
+If you are new to discord bots, you can create a discord bot with [this tutorial](https://twentysix26.github.io/Red-Docs/red_guide_bot_accounts/#creating-a-new-bot-account).
+Next up we create our bot and login with it. We will want to put it inside the class constructor so we can use the bot inside the class.
+```typescript
+constructor() {
+    const bot = new Discord.Client();
+    bot.login('your-token');
+}
+```
+After creating our discord bot, we can create a function that will send a message on discord. The function will get the name and location of the dungeon as parameters and write the message.
 ```typescript
 import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager, Log, LogLevel } from './../core/plugin-module';
 import { TextPacket } from '../networking/packets/incoming/text-packet';
-
-let dngName = '';
-let dngOpener = '';
-let dngServer = '';
 
 @NrPlugin({...})
 
@@ -51,94 +64,71 @@ class KeyNotifier {
         // Check if a key is popped
         const match = this.dngRegex.exec(textPacket.text);
         if (match) {
-            dngName = match[1];
-            dngOpener = match[2];
-            dngServer = client.server.name;
+            this.callDungeon(match[1], match[2], client.getServer());
         }
+    }
+    
+    callDungeon(name: String, opener: String, server: IServer): void {
+        this.bot.channels.get('ServerID').send(`${name} opened by ${opener} in ${server.name}`)
+    }
+}
+```
+To prevent any errors regarding the discord bot not being connected, we can create a boolean that will be set to true only when the discord bot is connected
+```typescript
+Class KeyPlugin {
+    private dngRegex = /^{"key":"server.dungeon_opened_by","tokens":{"dungeon":"(\S.*)", "name":"(\w+)"}}$/;
+    private bot;
+    private ready = false;
+    constructor() {
+        this.bot = new Discord.Client();
+        this.bot.login(token);
+        this.bot.on('ready', () => this.ready = true);
+    }
+    ......
+    callDungeon(name: String, opener: String, server: IServer): void {
+        if (!this.ready) {
+            return;
+        }
+        this.bot.channels.get('channel-ID').send(`${name} opened by ${opener} in ${server.name}`)
     }
 }
 ```
 
-
-
-
-After we finished finding the keys being popped, we will build our discord bot. To do this, you will need to install the `discord.js` npm module to create and run the bot. In the console, type the command:
-```bash
-npm install discord.js
-```
-We can now define Discord and create our discord bot:
-```typescript
-const Discord = require('discord.js');
-const bot = new Discord.Client();
-```
-If you are new to discord bots, you can create a discord bot with [this tutorial](https://twentysix26.github.io/Red-Docs/red_guide_bot_accounts/#creating-a-new-bot-account).
-Next, login with the token provided for your discord bot:
-```typescript
-bot.login('your-token');
-```
-Now, you would want your bot to get the variables you defined for the dungeon and send a message with those variables to your server. To do this, you will need to run the bot and every second check if a key was popped.
-You can set an interval that will run every second or so, and let it check the variables if they are empty or not
-```typescript
-bot.on('ready', () => {
-    setInterval(function() {
-        // Check if the variables have a value
-        if (dngServer.length > 0) {
-
-        }
-    }, 500);
-})
-```
-After seeing that the values aren't empty, you will want to use the values and send a message to the server/yourself.
-
-```typescript
-if (dngServer.length > 0) {
-    bot.channels.get('channel-id').send(`${dngName} opened by ${dngOpener} in ${dngServer}`)
-}
-```
-You will want to reset the dungeon variables back to being empty (`''`) so it won't resend the same dungeon.
-Don't forget to add the bot to your server!
-
 The final file should look like this:
 ```typescript
-// These 5 imports are essential for any plugin.
-import { NrPlugin, HookPacket, Packet, PacketType, Client} from './../core/plugin-module';
+// These 5 imports are essential for any plugin. Log and LogLevel to log to the console.
+import { NrPlugin, HookPacket, Packet, PacketType, Client, Log, LogLevel } from './../core/plugin-module';
 
 // Import the TextPacket
 import { TextPacket } from '../networking/packets/incoming/text-packet';
+import { IServer } from './../models/server';
 
-// Define the dungeon variables.
-let dngName = '';
-let dngOpener = '';
-let dngServer = '';
 
-// Create a discord bot
+// Import the discord api
 const Discord = require('discord.js');
-const bot = new Discord.Client();
 
-// Add the token
-bot.login('token');
+/**
+* The bot's token
+*/
+const token = 'NDI2NTY1NDYwNzcxOTk1NjQ4.DZX1jw.xXif6_GaVCqIiSSKHHYU24Yg9Tk';
 
-// Run the bot
-bot.on('ready', () => {
-    setInterval(function() {
-        // Check if there is a dungeon opened
-        if (dngServer.length > 0) {
-            bot.channels.get('channel-id').send(`${dngName} opened by ${dngOpener} in ${dngServer}`)
-            dngName = '';
-            dngOpener = '';
-            dngServer = '';
-        }
-    }, 500);
-})
 // The NrPlugin decorator gives nrelay some information about
 // your plugin. If it is not present, nrelay won't load the plugin.
 @NrPlugin({
     name: 'Key Notifier Plugin',
-    author: 'DavisXola'
+    author: 'Lolization'
 })
 class KeyPlugin {
 
     private dngRegex = /^{"key":"server.dungeon_opened_by","tokens":{"dungeon":"(\S.*)", "name":"(\w+)"}}$/;
+    private bot;
+    private ready = false;
+
+    constructor() {
+        this.bot = new Discord.Client();
+        this.bot.login(token);
+        this.bot.on('ready', () => this.ready = true);
+    }
 
     // The HookPacket decorator will cause the method to be called
     // whenever a packet with the specified packet type is recieved.
@@ -150,17 +140,40 @@ class KeyPlugin {
         // Check if a key is opened
         const match = this.dngRegex.exec(textPacket.text);
         if (match) {
-            dngName = match[1];
-            dngOpener = match[2];
-            dngServer = client.server.name;
+            this.callDungeon(match[1], match[2], client.getServer());
         }
+    }
+    
+    /**
+     * Sends a message to the discord server that a dungeon was opened.
+     * @param name The name of the dungeon
+     * @param opener The name of the opener
+     * @param server The name of the server
+     */
+    callDungeon(name: String, opener: String, server: IServer): void {
+        if (!this.ready) {
+            return;
+        }
+        let time = 30
+        this.bot.channels.get('ChannelID').send(`${ping} ${name} opened by ${opener} in ${server.name} (${time} seconds left)`)
+            .then(function (msg) {
+                let edit = setInterval(() => {
+                    time--;
+                    if (time == 0) {
+                        clearInterval(edit);
+                        msg.delete();
+                        return;
+                    }
+                    msg.edit(`${name} opened by ${opener} in ${server.name} (${time} seconds left)`)
+                }, 1000)
+            })
     }
 }
 ```
 I also made it so the message gets deleted after 30 seconds (when the portal is closed) and 5 seconds before that, it edits the message to have a "(closing)" at the end.
 You can add that by fetching the message upon sending it and using `.then` to edit it and delete it.
 ```typescript
-bot.channels.get('426565182718738445').send(`${ping} ${dngName} opened by ${dngOpener} in ${dngServer}`)
+bot.channels.get('Channel-ID').send(`${dngName} opened by ${dngOpener} in ${dngServer}`)
     .then(function (msg) {
         setTimeout(() => {
             msg.edit(msg.content + ` (closing)`);
