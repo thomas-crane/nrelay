@@ -45,17 +45,30 @@ export class PluginManager {
         }
     }
 
-    static addHook(packetType: PacketType, action: (caller: object, packet: Packet) => void, target: string): void {
-        if (!this.hooks) {
-            this.hooks = {};
+    static addHook(packetType: PacketType, action: (client: Client, packet: Packet) => void, target: object): void {
+        if (target.constructor.name === 'Client') {
+            if (!this.clientHooks) {
+                this.clientHooks = {};
+            }
+            if (!this.clientHooks.hasOwnProperty(packetType)) {
+                this.clientHooks[packetType] = [];
+            }
+            this.clientHooks[packetType].push({
+                action: action,
+                caller: target
+            });
+        } else {
+            if (!this.hooks) {
+                this.hooks = {};
+            }
+            if (!this.hooks.hasOwnProperty(packetType)) {
+                this.hooks[packetType] = [];
+            }
+            this.hooks[packetType].push({
+                action: action,
+                caller: target
+            });
         }
-        if (!this.hooks.hasOwnProperty(packetType)) {
-            this.hooks[packetType] = [];
-        }
-        this.hooks[packetType].push({
-            action: action,
-            caller: target
-        });
     }
 
     static addPlugin(info: IPluginInfo, target: new () => object): void {
@@ -69,7 +82,7 @@ export class PluginManager {
                 const hKeys = Object.keys(this.hooks);
                 for (let i = 0; i < hKeys.length; i++) {
                     this.hooks[+hKeys[i]] = this.hooks[+hKeys[i]].filter((hook) => {
-                        return hook.caller !== target.name;
+                        return hook.caller !== target;
                     });
                 }
                 return;
@@ -108,30 +121,38 @@ export class PluginManager {
         this.afterInitFunctions.push(method);
     }
 
-    static callHooks(packetType: PacketType, packet: Packet, client: object): void {
-        if (!this.hooks) {
-            return;
-        }
-        if (this.hooks[packetType]) {
+    static callHooks(packetType: PacketType, packet: Packet, client: Client): void {
+        if (this.hooks && this.hooks[packetType]) {
             for (let i = 0; i < this.hooks[packetType].length; i++) {
                 const hook = this.hooks[packetType][i];
                 try {
-                    let caller: object = client;
-                    if (this.pluginInstances && this.pluginInstances[hook.caller]) {
-                        caller = this.pluginInstances[hook.caller];
-                    }
+                    const caller = this.pluginInstances[hook.caller.constructor.name];
                     hook.action.apply(caller, [client, packet]);
                 } catch (error) {
-                    Log('PluginManager', `Error while calling ${PacketType[packetType]} hook on ${hook.caller}`, LogLevel.Warning);
+                    Log('PluginManager',
+                        `Error while calling ${PacketType[packetType]} hook on ${hook.caller.constructor.name}`, LogLevel.Warning);
                     Log('PluginManager', error, LogLevel.Info);
-                    if (environment.debug) {
-                    }
+                }
+            }
+        }
+        if (!packet.send) {
+            return;
+        }
+        if (this.clientHooks && this.clientHooks[packetType]) {
+            for (let i = 0; i < this.clientHooks[packetType].length; i++) {
+                const hook = this.clientHooks[packetType][i];
+                try {
+                    hook.action.apply(client, [client, packet]);
+                } catch (error) {
+                    Log('PluginManager', `Error while calling ${PacketType[packetType]} hook on client.`, LogLevel.Warning);
+                    Log('PluginManager', error, LogLevel.Info);
                 }
             }
         }
     }
 
-    private static hooks: { [id: number]: Array<{ action: (caller: object, packet: Packet) => void, caller: string }> };
+    private static hooks: { [id: number]: Array<{ action: (client: Client, packet: Packet) => void, caller: object }> };
+    private static clientHooks: { [id: number]: Array<{ action: (client: Client, packet: Packet) => void, caller: object }> };
     private static pluginInfo: IPluginInfo[];
     private static pluginInstances: { [name: string]: object };
     private static afterInitFunctions: Array<() => void>;

@@ -1,6 +1,17 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.19.0`
+### Changes:
+ + Packets are now sent to plugin packet hooks before they are sent to the client.
+ + Added `send: boolean` to `Packet`. If this is false the packet will not be sent to the client.
+ + Re-enabled the packet id updater.
+### Fixes:
+ + Updated packet ids and docs to X24.0.0
+ + Fixed client NewTick hook throwing an error if the bot didn't have a weapon equipped.
+ + Fixed client CreateSuccess hook occasionally throwing an error.
+ + Improved log messages of the player tracker component.
+
 ## `6.18.0`
 ### Changes:
  + An IP can be used in the `serverPref` to connect directly to that IP.

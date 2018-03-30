@@ -697,7 +697,7 @@ export class Client {
             }
         }
 
-        if (this.autoAim) {
+        if (this.autoAim && this.playerData.inventory[0] !== -1) {
             const keys = Object.keys(this.enemies);
             const projectile = ResourceManager.items[this.playerData.inventory[0]].projectile;
             const distance = projectile.lifetimeMS * (projectile.speed / 10000);
@@ -769,7 +769,9 @@ export class Client {
         this.frameUpdateTimer = setInterval(() => {
             const time = this.getTime();
             const deltaTime = time - this.lastFrameTime;
-            this.moveRecords.addRecord(this.getTime(), this.worldPos.x, this.worldPos.y);
+            if (this.worldPos) {
+                this.moveRecords.addRecord(this.getTime(), this.worldPos.x, this.worldPos.y);
+            }
             const enemies = Object.keys(this.enemies).map((k) => this.enemies[+k]);
             if (enemies.length > 0) {
                 for (const enemy of enemies) {

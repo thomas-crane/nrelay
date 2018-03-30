@@ -46,8 +46,12 @@ export class PlayerTracker {
      * Enables tracking for all clients including clients added at runtime.
      */
     public trackAllPlayers(): void {
-        Log('Player Tracker', 'Enabled tracking for all clients.', LogLevel.Success);
-        this.trackAll = true;
+        if (!this.trackAll) {
+            Log('Player Tracker', 'Enabled tracking for all clients.', LogLevel.Success);
+            this.trackAll = true;
+        } else {
+            Log('Player Tracker', 'Tracking for all players has already been enabled.', LogLevel.Warning);
+        }
     }
 
     /**

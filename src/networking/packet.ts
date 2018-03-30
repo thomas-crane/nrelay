@@ -7,6 +7,7 @@ export abstract class Packet implements IPacket {
 
     bufferIndex: number;
     data: Buffer;
+    send: boolean;
 
     // Network order == Big endian (BE).
     // Host order == Little endian (LE).
@@ -14,6 +15,7 @@ export abstract class Packet implements IPacket {
     constructor(data?: Buffer) {
         this.bufferIndex = 0;
         this.data = data || null;
+        this.send = true;
     }
 
     abstract read(): void;
