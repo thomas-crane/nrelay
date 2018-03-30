@@ -110,7 +110,7 @@ const Discord = require('discord.js');
 /**
 * The bot's token
 */
-const token = 'NDI2NTY1NDYwNzcxOTk1NjQ4.DZX1jw.xXif6_GaVCqIiSSKHHYU24Yg9Tk';
+const token = 'bot-token';
 
 // The NrPlugin decorator gives nrelay some information about
 // your plugin. If it is not present, nrelay won't load the plugin.
