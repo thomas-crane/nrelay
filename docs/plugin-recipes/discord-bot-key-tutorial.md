@@ -64,7 +64,7 @@ class KeyNotifier {
         // Check if a key is popped
         const match = this.dngRegex.exec(textPacket.text);
         if (match) {
-            this.callDungeon(match[1], match[2], client.getServer());
+            this.callDungeon(match[1], match[2], client.server);
         }
     }
     
@@ -140,7 +140,7 @@ class KeyPlugin {
         // Check if a key is opened
         const match = this.dngRegex.exec(textPacket.text);
         if (match) {
-            this.callDungeon(match[1], match[2], client.getServer());
+            this.callDungeon(match[1], match[2], client.server);
         }
     }
     
