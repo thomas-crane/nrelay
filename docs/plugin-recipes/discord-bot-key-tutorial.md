@@ -36,13 +36,15 @@ To create a discord bot, you will need to install the `discord.js` npm module to
 ```bash
 npm install discord.js
 ```
-We can now define the discord module.
+We can now import the discord module.
 ```typescript
-const Discord = require('discord.js');
+import Discord = require('discord.js');
 ```
 If you are new to discord bots, you can create a discord bot with [this tutorial](https://twentysix26.github.io/Red-Docs/red_guide_bot_accounts/#creating-a-new-bot-account).
 Next up we create our bot and login with it. We will want to put it inside the class constructor so we can use the bot inside the class.
 ```typescript
+private dngRegex = /^{"key":"server.dungeon_opened_by","tokens":{"dungeon":"(\S.*)", "name":"(\w+)"}}$/;
+private bot: Discord.Client;
 constructor() {
     const bot = new Discord.Client();
     bot.login('your-token');
@@ -68,8 +70,8 @@ class KeyNotifier {
         }
     }
     
-    callDungeon(name: String, opener: String, server: IServer): void {
-        this.bot.channels.get('ServerID').send(`${name} opened by ${opener} in ${server.name}`)
+    callDungeon(name: string, opener: string, server: IServer): void {
+        this.bot.channels.get('Channel-ID').send(`${name} opened by ${opener} in ${server.name}`)
     }
 }
 ```
@@ -77,7 +79,7 @@ To prevent any errors regarding the discord bot not being connected, we can crea
 ```typescript
 Class KeyPlugin {
     private dngRegex = /^{"key":"server.dungeon_opened_by","tokens":{"dungeon":"(\S.*)", "name":"(\w+)"}}$/;
-    private bot;
+    private bot: Discord.Client;
     private ready = false;
     constructor() {
         this.bot = new Discord.Client();
@@ -85,7 +87,7 @@ Class KeyPlugin {
         this.bot.on('ready', () => this.ready = true);
     }
     ......
-    callDungeon(name: String, opener: String, server: IServer): void {
+    callDungeon(name: string, opener: string, server: IServer): void {
         if (!this.ready) {
             return;
         }
@@ -121,7 +123,7 @@ const token = 'bot-token';
 class KeyPlugin {
 
     private dngRegex = /^{"key":"server.dungeon_opened_by","tokens":{"dungeon":"(\S.*)", "name":"(\w+)"}}$/;
-    private bot;
+    private bot: Discord.Client;
     private ready = false;
 
     constructor() {
@@ -150,23 +152,11 @@ class KeyPlugin {
      * @param opener The name of the opener
      * @param server The name of the server
      */
-    callDungeon(name: String, opener: String, server: IServer): void {
+    callDungeon(name: string, opener: string, server: IServer): void {
         if (!this.ready) {
             return;
         }
-        let time = 30
-        this.bot.channels.get('ChannelID').send(`${ping} ${name} opened by ${opener} in ${server.name} (${time} seconds left)`)
-            .then(function (msg) {
-                let edit = setInterval(() => {
-                    time--;
-                    if (time == 0) {
-                        clearInterval(edit);
-                        msg.delete();
-                        return;
-                    }
-                    msg.edit(`${name} opened by ${opener} in ${server.name} (${time} seconds left)`)
-                }, 1000)
-            })
+        this.bot.channels.get('ChannelID').send(`${name} opened by ${opener} in ${server.name}`)
     }
 }
 ```
@@ -174,7 +164,7 @@ I also made it so the message gets deleted after 30 seconds (when the portal is 
 You can add that by fetching the message upon sending it and using `.then` to edit it and delete it.
 ```typescript
 bot.channels.get('Channel-ID').send(`${dngName} opened by ${dngOpener} in ${dngServer}`)
-    .then(function (msg) {
+    .then((msg: Discord.Message) {
         setTimeout(() => {
             msg.edit(msg.content + ` (closing)`);
         }, 25000);
@@ -183,4 +173,3 @@ bot.channels.get('Channel-ID').send(`${dngName} opened by ${dngOpener} in ${dngS
         }, 30000);
     })
 ```
-**Warning: Using the `.then` and getting the message can only work if you change `noImplicitAny` from `true` to `false` in `tsconfig.json`**
