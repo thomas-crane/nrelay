@@ -55,13 +55,14 @@ export class Updater {
         });
     }
 
-    static getLatest(): Promise<any> {
+    static getLatest(force: boolean = false): Promise<any> {
         return new Promise((resolve: () => void, reject: (err: Error) => void) => {
-            if (!this.latestVersion) {
-                this.checkVersion().then(() => {
+            if (!this.latestVersion && !force) {
+                return this.checkVersion().then(() => {
                     reject(new Error('No local version found.'));
                 }).catch((error) => {
                     Log('Updater', 'Error getting latest version', LogLevel.Error);
+                    reject(error);
                 });
             }
             const url = ASSET_ENDPOINT.replace('#', 'current');
@@ -147,6 +148,7 @@ export class Updater {
                 });
             }).catch((error) => {
                 Log('Updater', `Error: ${error.message}`, LogLevel.Error);
+                reject(error);
             });
         });
     }

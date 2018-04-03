@@ -232,7 +232,7 @@ export class CLI {
     }
 
     constructor() {
-        this.checkFlags();
+        this.updateEnvironment();
         CLI.clients = {};
         if (environment.log) {
             Storage.createLog();
@@ -246,26 +246,35 @@ export class CLI {
             Log('NRelay', 'Not checking for updates.', LogLevel.Info);
             CLI.proceed();
         } else {
-            Log('NRelay', 'Checking for updates...', LogLevel.Info);
-            Updater.checkVersion().then((needsUpdate) => {
-                if (needsUpdate) {
-                    Log('NRelay', 'An update is available. Downloading...');
-                    Updater.getLatest().then(() => {
-                        process.exit(0);
-                    }).catch((error) => {
-                        Log('NRelay', `Error while updating: ${JSON.stringify(error)}`, LogLevel.Error);
-                    });
-                } else {
+            const forceUpdate = this.hasFlag('--force-update');
+            const update = (force: boolean = false) => {
+                Updater.getLatest(force).then(() => {
+                    process.exit(0);
+                }).catch((error: Error) => {
+                    Log('NRelay', `Error while updating: ${error.message}`, LogLevel.Error);
+                });
+            };
+            if (forceUpdate) {
+                Log('NRelay', 'Forcing an update...', LogLevel.Info);
+                update(true);
+            } else {
+                Log('NRelay', 'Checking for updates...', LogLevel.Info);
+                Updater.checkVersion().then((needsUpdate) => {
+                    if (needsUpdate) {
+                        Log('NRelay', 'An update is available. Downloading...');
+                        update();
+                    } else {
+                        CLI.proceed();
+                    }
+                }).catch(() => {
+                    Log('NRelay', 'Error while checking for update, starting anyway.', LogLevel.Info);
                     CLI.proceed();
-                }
-            }).catch(() => {
-                Log('NRelay', 'Error while checking for update, starting anyway.', LogLevel.Info);
-                CLI.proceed();
-            });
+                });
+            }
         }
     }
 
-    private checkFlags(): void {
+    private updateEnvironment(): void {
         if (this.hasFlag('--no-log')) {
             environment.log = false;
         }

@@ -7,6 +7,6 @@ export function HookPacket(type: PacketType):
     (target: object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => void {
     return (target: object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): void => {
         const originalMethod = descriptor.value;
-        PluginManager.addHook(type, originalMethod, target);
+        PluginManager.addHook(type, originalMethod, target.constructor.name);
     };
 }

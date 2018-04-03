@@ -1,6 +1,13 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.19.1`
+### Changes:
+ + Added the `--force-update` flag to force nrelay to download the latest assets.
+### Fixes:
+ + Stopped updater continuing update process when it should have stopped.
+ + Improved updater logging.
+ + Fixed a bug where disabled plugin packet hooks would still be called.
 ## `6.19.0`
 ### Changes:
  + Packets are now sent to plugin packet hooks before they are sent to the client.
