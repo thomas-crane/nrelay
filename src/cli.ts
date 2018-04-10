@@ -81,8 +81,8 @@ export class CLI {
                 handler(account);
             } else {
                 this.getAccountInfo(account).then(handler).catch((error) => {
-                    this.handleConnectionError(error, account);
-                    reject(error);
+                    const accError = this.handleAccountInfoError(error, account);
+                    reject(accError);
                 });
             }
         });
@@ -138,15 +138,15 @@ export class CLI {
     private static buildVersion: string;
 
     private static getAccountInfo(account: IAccount): Promise<IAccount> {
-        return new Promise((resolve: (acc: IAccount) => void, reject: (err: Error) => void) => {
-            const handler = (data: any) => {
+        return new Promise((resolve: (acc: IAccount) => void, reject: (err: Error | string) => void) => {
+            const handler = (data: string) => {
                 const info = parseAccountInfo(data);
                 this.internalServerList = parseServers(data);
                 if (info) {
                     account.charInfo = info;
                     resolve(account);
                 } else {
-                    reject(parseError(data));
+                    reject(data);
                 }
             };
             if (account.proxy) {
@@ -162,19 +162,19 @@ export class CLI {
                         Http.proxiedGet(SERVER_ENDPOINT, account.proxy, {
                             guid: account.guid,
                             password: account.password
-                        }).then(handler).catch((error) => reject(error));
+                        }).then(handler, reject);
                     });
                 } else {
                     Http.proxiedGet(SERVER_ENDPOINT, account.proxy, {
                         guid: account.guid,
                         password: account.password
-                    }).then(handler).catch((err) => reject(err));
+                    }).then(handler, reject);
                 }
             } else {
                 Http.get(SERVER_ENDPOINT, {
                     guid: account.guid,
                     password: account.password
-                }).then(handler).catch((err) => reject(err));
+                }).then(handler, reject);
             }
         });
     }
@@ -210,24 +210,26 @@ export class CLI {
                 this.addClient(acc).then(() => {
                     Log('NRelay', `Authorized ${acc.alias}`, LogLevel.Success);
                 }).catch((error: Error) => {
-                    Log('NRelay', error.message, LogLevel.Error);
+                    Log('NRelay', `${acc.alias}: ${error.message}`, LogLevel.Error);
                 });
             }, (i * 1000));
         }
     }
 
-    private static handleConnectionError(error: string, acc: IAccount): void {
-        if (!error) {
-            return;
+    private static handleAccountInfoError(response: string, acc: IAccount): Error {
+        if (!response) {
+            return new Error('Empty response');
         }
-        const accInUse = ACCOUNT_IN_USE_REGEX.exec(error);
+        const accInUse = ACCOUNT_IN_USE_REGEX.exec(response);
         if (accInUse) {
             const time = +accInUse[1] + 1;
-            Log('NRelay', `${acc.alias} Received account in use error. Reconnecting in ${time} seconds.`, LogLevel.Warning);
             setTimeout(() => {
                 this.addClient(acc);
             }, time * 1000);
-            return;
+            return new Error(`Account in use error. Reconnecting in ${time} seconds.`);
+        } else {
+            const error = parseError(response);
+            return error;
         }
     }
 

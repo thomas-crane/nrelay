@@ -1,6 +1,15 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.19.2`
+### Fixes:
+ + Fixed incorrect default values in `ResourceManager`.
+ + Improved CLI addClient workflow.
+ + Stopped PacketIO spamming the console when a packet error occurs.
+ + Stopped `proxiedGet` terminating nrelay if an error was thrown.
+ + Fixed Client emitting a disconnect event when it shouldn't.
+ + Stopped Client reconnecting even after being destroyed.
+
 ## `6.19.1`
 ### Changes:
  + Added the `--force-update` flag to force nrelay to download the latest assets.

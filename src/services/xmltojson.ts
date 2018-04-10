@@ -49,7 +49,7 @@ export function parseAccountInfo(xml: string): ICharacterInfo | null {
 
 export function parseError(xml: string): Error {
     const match = ERROR_REGEX.exec(xml);
-    if (match != null) {
+    if (match) {
         return new Error(match[1]);
     }
     return new Error('Unhandled error');

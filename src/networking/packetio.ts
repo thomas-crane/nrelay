@@ -129,6 +129,7 @@ export class PacketIO {
                 Log('PacketIO', `READ: id: ${packetId}, size: ${packetSize}`, LogLevel.Error);
             }
             this.emitter.emit('error', err);
+            this.resetBuffer();
             return;
         }
         this.currentHead = new PacketHead(packetId, packetSize);
@@ -194,6 +195,7 @@ export class PacketIO {
                 }
                 this.emitter.emit('error', new Error('Invalid packet structure.'));
                 Log('PacketIO', `Error while reading ${PacketType[packet.type]}`, LogLevel.Error);
+                this.resetBuffer();
                 return;
             }
             packet.data = null;

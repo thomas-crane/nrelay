@@ -200,6 +200,7 @@ export class Client {
     private pathfinderTarget: IPoint;
     private moveRecords: MoveRecords;
     private frameUpdateTimer: NodeJS.Timer;
+    private reconnectTimer: NodeJS.Timer;
 
     // reconnect info
     private key: Int8Array;
@@ -316,11 +317,35 @@ export class Client {
      * This should only be used when the client is no longer needed.
      */
     public destroy(): void {
+        // packet io.
         if (this.packetio) {
             this.packetio.destroy();
         }
-        if (this.clientSocket) {
+
+        // timers.
+        if (this.reconnectTimer) {
+            clearTimeout(this.reconnectTimer);
+        }
+        if (this.projectileUpdateTimer) {
+            clearInterval(this.projectileUpdateTimer);
+            this.projectileUpdateTimer = null;
+        }
+        if (this.frameUpdateTimer) {
+            clearInterval(this.frameUpdateTimer);
+            this.frameUpdateTimer = null;
+        }
+
+        // resources.
+        this.mapTiles = null;
+        this.projectiles = null;
+        this.enemies = null;
+
+        if (this.socketConnected) {
             Client.emitter.emit('disconnect', Object.assign({}, this.playerData), this);
+        }
+
+        // client socket.
+        if (this.clientSocket) {
             this.clientSocket.removeAllListeners('connect');
             this.clientSocket.removeAllListeners('close');
             this.clientSocket.removeAllListeners('error');
@@ -770,7 +795,7 @@ export class Client {
             const time = this.getTime();
             const deltaTime = time - this.lastFrameTime;
             if (this.worldPos) {
-                this.moveRecords.addRecord(this.getTime(), this.worldPos.x, this.worldPos.y);
+                this.moveRecords.addRecord(time, this.worldPos.x, this.worldPos.y);
             }
             const enemies = Object.keys(this.enemies).map((k) => this.enemies[+k]);
             if (enemies.length > 0) {
@@ -848,7 +873,7 @@ export class Client {
             this.reconnectCooldown = null;
         }
         Log(this.alias, `Reconnecting in ${reconnectTime} seconds`);
-        setTimeout(() => {
+        this.reconnectTimer = setTimeout(() => {
             this.connect();
         }, reconnectTime * 1000);
         // process.exit(0);
@@ -864,6 +889,17 @@ export class Client {
             this.clientSocket.removeAllListeners('close');
             this.clientSocket.removeAllListeners('error');
             this.clientSocket.destroy();
+        }
+        if (this.frameUpdateTimer) {
+            clearInterval(this.frameUpdateTimer);
+            this.frameUpdateTimer = null;
+        }
+        if (this.projectiles.length > 0) {
+            this.projectiles = [];
+        }
+        if (this.projectileUpdateTimer) {
+            clearInterval(this.projectileUpdateTimer);
+            this.projectileUpdateTimer = null;
         }
 
         if (this.proxy) {

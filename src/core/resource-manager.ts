@@ -138,9 +138,9 @@ export class ResourceManager {
                                 boomerang: (current.Projectile.Boomerang === '' ? true : false),
                                 multihit: (current.Projectile.MultiHit === '' ? true : false),
                                 passesCover: (current.Projectile.PassesCover === '' ? true : false),
-                                frequency: (+current.Projectile.Frequency || 0),
+                                frequency: (+current.Projectile.Frequency || 1),
                                 amplitude: (+current.Projectile.Amplitude || 0),
-                                magnitude: (+current.Projectile.Magnitude || 0),
+                                magnitude: (+current.Projectile.Magnitude || 3),
                                 conditionEffects: []
                             };
                             this.objects[+current.type].projectiles.push(this.objects[+current.type].projectile);

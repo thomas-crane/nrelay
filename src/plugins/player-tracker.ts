@@ -86,6 +86,7 @@ export class PlayerTracker {
      */
     public getPlayersFor(client: Client): IPlayerData[] | null {
         if (!this.trackedPlayers.hasOwnProperty(client.guid)) {
+            Log('Player Tracker', `Players are not being tracked for ${client.alias}. Did you forget to call trackPlayersFor(client)?`);
             return null;
         }
         return this.trackedPlayers[client.guid];

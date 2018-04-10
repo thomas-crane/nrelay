@@ -48,7 +48,7 @@ gulp
 
 __Note__
 
-Step 6 and 7 are optional, but not performing them will restrict how you can run nrelay. See the [Run](#Run) section for more info.
+Step 6 and 7 are optional, but not performing them will restrict how you can run nrelay. See the [Run](#run) section for more info.
 
 6. Install nrelay as an npm module. This will let you use nrelay from any directory in the console.
 ```bash

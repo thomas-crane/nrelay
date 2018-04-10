@@ -53,15 +53,18 @@ export class Http {
                 info.socket.on('data', (chunk) => {
                     data += chunk.toString('utf8');
                 });
-                info.socket.on('close', (err) => {
+                info.socket.once('close', (err) => {
                     info.socket.destroy();
                     info.socket.removeAllListeners('data');
-                    info.socket.removeAllListeners('close');
+                    info.socket.removeAllListeners('error');
                     resolve(data);
                 });
-            }).catch((err) => {
-                reject(err);
-            });
+                info.socket.once('error', (err) => {
+                    info.socket.removeAllListeners('data');
+                    info.socket.removeAllListeners('close');
+                    reject(err);
+                });
+            }, reject);
         });
     }
 
