@@ -54,14 +54,15 @@ export class Http {
                     data += chunk.toString('utf8');
                 });
                 info.socket.once('close', (err) => {
-                    info.socket.destroy();
                     info.socket.removeAllListeners('data');
                     info.socket.removeAllListeners('error');
+                    info.socket.destroy();
                     resolve(data);
                 });
                 info.socket.once('error', (err) => {
                     info.socket.removeAllListeners('data');
                     info.socket.removeAllListeners('close');
+                    info.socket.destroy();
                     reject(err);
                 });
             }, reject);

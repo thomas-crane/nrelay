@@ -82,7 +82,11 @@ export class CLI {
             } else {
                 this.getAccountInfo(account).then(handler).catch((error) => {
                     const accError = this.handleAccountInfoError(error, account);
-                    reject(accError);
+                    if (accError) {
+                        reject(accError);
+                    } else {
+                        reject(error);
+                    }
                 });
             }
         });
@@ -181,8 +185,9 @@ export class CLI {
 
     private static proceed(): void {
         const accInfo = Storage.getAccountConfig();
-        if (!accInfo) {
+        if (accInfo instanceof Error) {
             Log('NRelay', 'Couldn\'t load acc-config.json.', LogLevel.Error);
+            Log('NRelay', accInfo.message, LogLevel.Warning);
             return;
         }
         this.buildVersion = accInfo.buildVersion;

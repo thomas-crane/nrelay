@@ -1,6 +1,11 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.19.3`
+### Fixes:
+ + Fixed error propagation issue in `CLI.addClient`.
+ + Improved acc-config error logging.
+
 ## `6.19.2`
 ### Fixes:
  + Fixed incorrect default values in `ResourceManager`.

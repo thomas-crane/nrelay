@@ -80,11 +80,11 @@ export class Storage {
      * Gets the contents of the `acc-config.json` file and returns
      * it as an `IAccountInfo` object.
      */
-    public static getAccountConfig(): IAccountInfo {
+    public static getAccountConfig(): IAccountInfo | Error {
         try {
             return require('./../../acc-config.json');
         } catch (err) {
-            return null;
+            return err;
         }
     }
 

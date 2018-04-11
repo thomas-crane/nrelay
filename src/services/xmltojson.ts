@@ -52,5 +52,5 @@ export function parseError(xml: string): Error {
     if (match) {
         return new Error(match[1]);
     }
-    return new Error('Unhandled error');
+    return null;
 }
