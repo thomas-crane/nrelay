@@ -22,7 +22,7 @@ class KeyNotifier {
 ```
 
 Before we can send any messages to discord, we first need to detect when a key is used in the Nexus. To do this, we can listen for any `TextPacket`s which contain the portal open mesage.
-These messages are displayed nicely on the client, but are actually sent as a JSON payload over the network. To detect when one of these payloads is received, we will use a simple regular expression. Since the RegExp will never change, we can declare it as a `const` at the top level.
+These messages are displayed nicely on the client, but are actually sent as a JSON payload over the network. To detect when one of these payloads are received, we will use a simple regular expression. Since the RegExp will never change, we can declare it as a `const` at the top level.
 
 We will also be using the `TextPacket` class in a moment, so we can import that too.
 ```typescript
