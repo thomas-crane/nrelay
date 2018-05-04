@@ -68,7 +68,7 @@ Now that nrelay is installed, you will need to set up your `acc-config.json` fil
 ```
 // acc-config-sample.json
 {
-    "buildVersion": "X24.0.0",              // The current RotMG build version
+    "buildVersion": "X25.1.1",              // The current RotMG build version
     "accounts": [
         {
             "alias": "Main Client",         // The name which appears in logs. This is optional.
@@ -83,7 +83,7 @@ If you have multiple accounts which you want to run at the same time, you can ad
 ```
 // acc-config-sample.json
 {
-    "buildVersion": "X24.0.0",
+    "buildVersion": "X25.1.1",
     "accounts": [
         {
             "alias": "Main Client",
@@ -122,7 +122,7 @@ The proxy a client is using can also be changed during runtime by using the `Cli
 nrelay provides the option to enable a local web server which supports TCP connections. The server can be used to both send to and receive data from nrelay. The server is disabled by default, but can be enabled by adding a property to the account config.
 ```json
 {
-    "buildVersion": "X24.0.0",
+    "buildVersion": "X25.1.1",
     "localServer": {
         "enabled": true
     },
@@ -200,6 +200,9 @@ This will stop nrelay from checking for updates when it starts.
 
 #### `--no-log`
 This will stop nrelay from writing to the log file.
+
+#### `--force-update`
+This will force nrelay to download the latest client and assets.
 
 #### Example
 To start nrelay without checking for updates or log file writing, use
