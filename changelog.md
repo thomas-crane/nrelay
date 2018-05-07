@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.19.4`
+### Changes
+ + Added `ClaimDailyRewardMessage` and `ClaimDailyRewardResponse` packets.
+
 ## `6.19.3`
 ### Fixes:
  + Fixed error propagation issue in `CLI.addClient`.
