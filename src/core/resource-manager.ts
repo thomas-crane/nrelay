@@ -1,10 +1,7 @@
-import { Log, LogLevel } from './../services/logger';
+import { Log, LogLevel, Storage } from './../services';
 import fs = require('fs');
 import path = require('path');
-import { ITile } from './../models/tile';
-import { IObject, IProjectile } from './../models/object';
-import { environment } from './../models/environment';
-import { Storage } from './../services/storage';
+import { IObject, IProjectile, ITile, environment } from './../models';
 
 const dir = path.dirname(require.main.filename);
 

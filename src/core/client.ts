@@ -1,60 +1,61 @@
 import { Socket } from 'net';
-import { Log, LogLevel } from '../services/logger';
-import { Packet, PacketType } from './../networking/packet';
-import { IAccountInfo, IAccount, ICharacterInfo } from './../models/accinfo';
-import { IProxy } from './../models/proxy';
-import { IServer } from './../models/server';
-import { Packets } from './../networking/packets';
-import { HelloPacket } from './../networking/packets/outgoing/hello-packet';
-import { LoadPacket } from './../networking/packets/outgoing/load-packet';
-import { UpdatePacket } from './../networking/packets/incoming/update-packet';
-import { PingPacket } from './../networking/packets/incoming/ping-packet';
-import { PongPacket } from './../networking/packets/outgoing/pong-packet';
-import { NewTickPacket } from './../networking/packets/incoming/newtick-packet';
-import { FailurePacket } from './../networking/packets/incoming/failure-packet';
-import { MovePacket } from './../networking/packets/outgoing/move-packet';
-import { CreateSuccessPacket } from './../networking/packets/incoming/createsuccess-packet';
-import { CreatePacket } from './../networking/packets/outgoing/create-packet';
-import { WorldPosData } from './../networking/data/world-pos-data';
-import { GroundTileData } from './../networking/data/ground-tile-data';
-import { StatData } from './../networking/data/stat-data';
-import { ObjectStatusData } from './../networking/data/object-status-data';
-import { IPlayerData, getDefaultPlayerData } from './../models/playerdata';
-import { MapInfoPacket } from './../networking/packets/incoming/mapinfo-packet';
-import { PacketIO } from './../networking/packetio';
-import { PluginManager } from './../core/plugin-manager';
-import { ResourceManager } from './../core/resource-manager';
-import { HookPacket } from './../decorators/hook-packet';
-import { Classes } from './../models/classes';
-import { GotoPacket } from './../networking/packets/incoming/goto-packet';
-import { GotoAckPacket } from './../networking/packets/outgoing/gotoack-packet';
-import { ReconnectPacket } from './../networking/packets/incoming/reconnect-packet';
-import { AoePacket } from './../networking/packets/incoming/aoe-packet';
-import { AoeAckPacket } from './../networking/packets/outgoing/aoeack-packet';
-import { EnemyShootPacket } from './../networking/packets/incoming/enemy-shoot-packet';
-import { ShootAckPacket } from './../networking/packets/outgoing/shootack-packet';
-import { UpdateAckPacket } from './../networking/packets/outgoing/updateack-packet';
-import { ServerPlayerShootPacket } from './../networking/packets/incoming/server-player-shoot-packet';
-import { PlayerShootPacket } from './../networking/packets/outgoing/player-shoot-packet';
+import { Log, LogLevel, Random } from '../services';
+import { Packet, PacketType, Packets, PacketIO } from './../networking';
+import {
+    HelloPacket,
+    LoadPacket,
+    PongPacket,
+    MovePacket,
+    CreatePacket,
+    GotoAckPacket,
+    AoeAckPacket,
+    ShootAckPacket,
+    UpdateAckPacket,
+    PlayerShootPacket,
+    PlayerHitPacket,
+    EnemyHitPacket
+} from './../networking/packets/outgoing';
+import {
+    UpdatePacket,
+    PingPacket,
+    NewTickPacket,
+    FailurePacket,
+    CreateSuccessPacket,
+    MapInfoPacket,
+    GotoPacket,
+    ReconnectPacket,
+    AoePacket,
+    EnemyShootPacket,
+    ServerPlayerShootPacket,
+    DamagePacket
+} from './../networking/packets/incoming';
+import {
+    IAccountInfo, IAccount, ICharacterInfo,
+    IPlayerData, getDefaultPlayerData,
+    Classes,
+    IMapInfo,
+    environment,
+    Projectile,
+    IObject,
+    Enemy,
+    MoveRecords,
+    ConditionEffects, ConditionEffect,
+    IProxy,
+    IServer
+} from './../models';
+import {
+    WorldPosData,
+    GroundTileData,
+    StatData,
+    ObjectStatusData,
+    MoveRecord
+} from './../networking/data';
+import { PluginManager, ResourceManager } from './../core';
+import { HookPacket } from './../decorators';
 import { EventEmitter } from 'events';
 import { SocksClient, SocksClientOptions } from 'socks';
-import { IMapInfo } from './../models/mapinfo';
-import { CLI } from '../cli';
-import { Pathfinder } from '../services/pathfinding/pathfinder';
-import { Node } from '../services/pathfinding/node';
-import { INodeUpdate } from '../services/pathfinding/node-update';
-import { IPoint } from '../services/pathfinding/point';
-import { environment } from '../models/environment';
-import { Projectile } from '../models/projectile';
-import { IObject } from '../models/object';
-import { Enemy } from '../models/enemy';
-import { PlayerHitPacket } from '../networking/packets/outgoing/player-hit-packet';
-import { EnemyHitPacket } from '../networking/packets/outgoing/enemy-hit-packet';
-import { Random } from '../services/random';
-import { DamagePacket } from '../networking/packets/incoming/damage-packet';
-import { MoveRecord } from '../networking/data/move-record';
-import { MoveRecords } from '../models/move-records';
-import { ConditionEffects, ConditionEffect } from '../models/condition-effect';
+import { CLI } from '..';
+import { Pathfinder, Node, INodeUpdate, IPoint } from '../services/pathfinding';
 
 const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
@@ -155,6 +156,13 @@ export class Client {
      * The email address of the client.
      */
     public readonly guid: string;
+    /**
+     * The password of the client.
+     */
+    public readonly password: string;
+    /**
+     * Whether or not the client should automatically shoot at enemies.
+     */
     public autoAim: boolean;
     /**
      * A number between 0 and 1 which can be used to modify the speed
@@ -188,7 +196,6 @@ export class Client {
     private currentTickTime: number;
     private lastFrameTime: number;
     private connectTime: number;
-    private password: string;
     private buildVersion: string;
     private clientSocket: Socket;
     private proxy: IProxy;

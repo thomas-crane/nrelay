@@ -1,7 +1,7 @@
 import * as chalk from 'chalk';
 import { Storage } from './storage';
 import fs = require('fs');
-import { environment } from './../models/environment';
+import { environment } from './../models';
 import { WriteStream } from 'fs';
 
 const c = chalk.constructor();

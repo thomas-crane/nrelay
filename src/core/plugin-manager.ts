@@ -1,10 +1,8 @@
 import { Packet, PacketType } from './../networking/packet';
-import { Log, LogLevel } from './../services/logger';
+import { Log, LogLevel, Storage } from './../services';
 import { Client } from './client';
-import { environment } from './../models/environment';
+import { environment, IPluginInfo } from './../models';
 import fs = require('fs');
-import { Storage } from '../services/storage';
-import { IPluginInfo } from './../models/plugin-info';
 
 const PLUGIN_REGEX = /^.+\.js$/;
 
