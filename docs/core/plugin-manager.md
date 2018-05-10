@@ -36,7 +36,7 @@ const component = PluginManager.getInstanceOf(MyPluginComponent);
 Registers a method to be invoked after all plugins have had their constructor called. This is where the `getInstanceOf` method should be used to ensure the plugin you are trying to get has been constructed.
 Example:
 ```typescript
-import { PluginManager } from './../core/plugin-module';
+import { PluginManager } from './../core';
 import { MyPluginComponent } from './mycomponent';
 ...
 PluginManager.afterInit(() => {

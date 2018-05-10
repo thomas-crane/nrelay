@@ -1,8 +1,7 @@
 import { createServer, Server, Socket } from 'net';
 import { Log, LogLevel } from './logger';
-import { SocketWrapper } from '../models/socket-wrapper';
+import { SocketWrapper, environment } from '../models';
 import { EventEmitter } from 'events';
-import { environment } from '../models/environment';
 
 export class LocalServer {
 

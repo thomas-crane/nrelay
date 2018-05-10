@@ -1,4 +1,4 @@
 #!/usr/bin/env node
 
-const cli = require('./dist/cli.js').CLI;
-new cli();
+const { CLI } = require('./dist');
+new CLI();

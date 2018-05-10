@@ -1,4 +1,4 @@
-import { IAccountInfo } from './../models/accinfo';
+import { IAccountInfo } from './../models';
 import { Logger } from './logger';
 import fs = require('fs');
 import path = require('path');

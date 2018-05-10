@@ -1,7 +1,7 @@
 import http = require('http');
 import querystring = require('querystring');
 import url = require('url');
-import { IProxy } from './../models/proxy';
+import { IProxy } from './../models';
 import { Socket } from 'net';
 import { SocksClient, SocksClientOptions } from 'socks';
 import { Log, LogLevel } from './logger';

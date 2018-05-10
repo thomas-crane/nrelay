@@ -21,12 +21,12 @@ To get started, first delete the contents of the file `src/plugins/hello-plugin.
 
 The first step of creating a plugin is to import some types from nrelay in order to declare the plugin. __All plugins need these 5 imports__:
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core/plugin-module';
+import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core';
 ```
 
 Now that we have the essentials imported, we can declare the plugin class.
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core/plugin-module';
+import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core';
 
 class HelloPlugin {
 
@@ -122,9 +122,9 @@ Now that the HookPacket decorator is present, nrelay will be able to detect this
 
 In order to access the text packet properties, we need to cast the `packet` parameter to the correct type. To do this we first need to import the type of packet we want to cast to. In this case we want to use the `TextPacket` so we need to add another import to the top of the file
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core/plugin-module';
+import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core';
 
-import { TextPacket } from './../networking/packets/incoming/text-packet'; // Add this line.
+import { TextPacket } from './../networking/packets/incoming'; // Add this line.
 ```
 Because the `TextPacket` type is a subclass of the `Packet` type, we can simply specify the parameter's type as the subclass `TextPacket`. This will implicitly cast the packet to a `TextPacket` object.
 ```typescript
@@ -155,10 +155,10 @@ if (textPacket.recipient === client.playerData.name) {
 ```
 To send a message we need to use the `PlayerTextPacket` which needs to be imported. Once again, add another import to the top of the file
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core/plugin-module';
+import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core';
 
-import { TextPacket } from './../networking/packets/incoming/text-packet';
-import { PlayerTextPacket } from './../networking/packets/outgoing/playertext-packet'; // Add this line.
+import { TextPacket } from './../networking/packets/incoming';
+import { PlayerTextPacket } from './../networking/packets/outgoing'; // Add this line.
 ```
 Now all that is left to do is create a new `PlayerTextPacket`, set the text and then send it.
 ```typescript
@@ -178,10 +178,10 @@ if (textPacket.recipient === client.playerData.name) {
 ```
 The entire plugin file should now look similar to the following
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core/plugin-module';
+import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core';
 
-import { TextPacket } from './../networking/packets/incoming/text-packet';
-import { PlayerTextPacket } from './../networking/packets/outgoing/playertext-packet';
+import { TextPacket } from './../networking/packets/incoming';
+import { PlayerTextPacket } from './../networking/packets/outgoing';
 
 @NrPlugin({
     name: 'Hello Plugin',
@@ -349,7 +349,7 @@ console.log('Player name: ' + client.playerData.name);
 The `Logger` class allows you to log messages with senders and log levels.
 Firstly, you need to import the `Logger` class exports
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client, Log, LogLevel } from './../core/plugin-module';
+import { NrPlugin, HookPacket, Packet, PacketType, Client, Log, LogLevel } from './../core';
 //                                                         ^^^^^^^^^^^^^
 ```
 `LogLevel` is an enum which describes the type of message you are trying to log. It consists of
@@ -426,7 +426,7 @@ export class ComponentA {
 ```
 The managed instance of `ComponentA` can be accessed from another class using the `getInstanceOf` method.
 ```typescript
-import { PluginManager } from './../core/plugin-module';
+import { PluginManager } from './../core';
 import { ComponentA } from './component-a'; // the class needs to be imported to be used.
 
 @NrPlugin({ name: 'Component A', author: 'tcrane' })
@@ -447,9 +447,9 @@ class PluginCore {
 
 ## Plugin template
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core/plugin-module';
+import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core';
 
-import { UpdatePacket } from './../networking/packets/incoming/update-packet';
+import { UpdatePacket } from './../networking/packets/incoming';
 
 @NrPlugin({
     name: 'Your Plugin Name',

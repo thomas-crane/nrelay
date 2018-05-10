@@ -5,7 +5,7 @@ This recipe will demonstrate how to use Firebase to store and retrieve data. To 
 ## Setup
 Start by creating the file `server-monitor.plugin.ts` in the `src/plugins` folder. We can start with the plugin template provided in the `creating-plugins` doc. We can remove the `Update` packet hook since we don't need it.
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager, Log, LogLevel } from './../core/plugin-module';
+import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager, Log, LogLevel } from './../core';
 
 @NrPlugin({
     name: 'Server Monitor',
@@ -26,7 +26,7 @@ In order to use Firebase to store data in a plugin, you need to have a Firebase 
 
 Once you have the project set up, Go to the Project Overview, and click on `Add Firebase to your web app`. In the dialogue box, copy the `var config = { ... }` segment and put it in a `const` variable in the plugin.
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager, Log, LogLevel } from './../core/plugin-module';
+import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager, Log, LogLevel } from './../core';
 
 const firebaseConfig = {
     apiKey: 'your-apiKey',
@@ -47,7 +47,7 @@ npm install firebase
 
 Firebase can now be imported into the plugin.
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager, Log, LogLevel } from './../core/plugin-module';
+import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager, Log, LogLevel } from './../core';
 import * as firebase from 'firebase';
 ```
 
@@ -64,7 +64,7 @@ class ServerMonitor {
 
 Since we are monitoring players, we also need an instance of the `PlayerTracker` component.
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager, Log, LogLevel } from './../core/plugin-module';
+import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager, Log, LogLevel } from './../core';
 import * as firebase from 'firebase';
 import { PlayerTracker } from './player-tracker';
 
@@ -299,7 +299,7 @@ Now that the rules allow reading and writing to the database, you can start the 
 
 Now that the plugin is finished, it should look like the following code. This plugin can be extended to log extra information, or log it in a different way such as on a per-server basis.
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager, LogLevel, Log } from './../core/plugin-module';
+import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager, LogLevel, Log } from './../core';
 import * as firebase from 'firebase';
 import { PlayerTracker } from './player-tracker';
 import { CLI } from '../cli';

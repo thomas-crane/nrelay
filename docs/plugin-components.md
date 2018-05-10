@@ -9,7 +9,7 @@ Plugin components are plugins which are not designed to be run on their own but 
 ## Using plugin components
 To utilize a plugin component, the `PluginManager` class can be used. The `PluginManager` class provides some helpful functions to get managed instances of the plugin components which can then be used in other plugins. The `PluginManager` class is imported from the `plugin-module`.
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager } from './../core/plugin-module';
+import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager } from './../core';
 //                                                         ^^^^^^^^^^^^^
 @NrPlugin({ name: 'Hello plugin', author: 'tcrane' })
 class HelloPlugin {
@@ -18,13 +18,13 @@ class HelloPlugin {
 ```
 To use a plugin component from another plugin, that component has to be imported as well
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager } from './../core/plugin-module';
+import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager } from './../core';
 import { PlayerTracker } from './player-tracker';
 ```
 The best way to get a reference to the plugin component is to use the `PluginManager` helper methods inside of the plugin's `constructor`
 
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager } from './../core/plugin-module';
+import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager } from './../core';
 import { PlayerTracker } from './player-tracker';
 
 @NrPlugin({ name: 'Hello plugin', author: 'tcrane' })

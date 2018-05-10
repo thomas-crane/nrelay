@@ -5,7 +5,7 @@ import { exec } from 'child_process';
 import https = require('https');
 import stream = require('stream');
 import { createWriteStream, PathLike } from 'fs';
-import { Log, LogLevel } from './../core/plugin-module';
+import { Log, LogLevel } from './../services';
 
 const ASSET_ENDPOINT = 'https://static.drips.pw/rotmg/production/#/';
 const PACKET_REGEX = /public static const ([A-Z_]+):int = (\d+);/g;

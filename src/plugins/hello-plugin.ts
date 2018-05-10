@@ -1,9 +1,9 @@
 // These 5 imports are essential for any plugin.
-import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core/plugin-module';
+import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core';
 
 // These 2 imports are only required because this plugin deals with text packets.
-import { TextPacket } from './../networking/packets/incoming/text-packet';
-import { PlayerTextPacket } from './../networking/packets/outgoing/playertext-packet';
+import { TextPacket } from './../networking/packets/incoming';
+import { PlayerTextPacket } from './../networking/packets/outgoing';
 
 // The NrPlugin decorator gives nrelay some information about
 // your plugin. If it is not present, nrelay won't load the plugin.

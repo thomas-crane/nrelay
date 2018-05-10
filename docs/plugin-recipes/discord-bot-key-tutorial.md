@@ -4,7 +4,7 @@ This recipe will demonstrate how to create a key notifier that messages you thro
 ## Setup
 Start by creating the file `key-notifier.ts` in the `src/plugins` folder. We can start with the plugin template provided in the `creating-plugins` doc. We can remove the `Update` packet hook since we don't need it.
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager} from './../core/plugin-module';
+import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager} from './../core';
 
 @NrPlugin({
     name: 'Key Notifier',
@@ -26,7 +26,7 @@ These messages are displayed nicely on the client, but are actually sent as a JS
 
 We will also be using the `TextPacket` class in a moment, so we can import that too.
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager} from './../core/plugin-module';
+import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager} from './../core';
 import { TextPacket } from './../networking/packets/incoming/text-packet';
 
 const PORTAL_REGEX = /^{"key":"server.dungeon_opened_by","tokens":{"dungeon":"(\S.*)", "name":"(\w+)"}}$/;
@@ -61,7 +61,7 @@ npm install bufferutil discord.js
 
 We can now import the discord module.
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager } from './../core/plugin-module';
+import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager } from './../core';
 import { TextPacket } from './../networking/packets/incoming/text-packet';
 
 import Discord = require('discord.js');
@@ -103,7 +103,7 @@ callDungeon(name: string, opener: string, server: IServer): void {
 
 At this point we have 2 errors: `Property 'send' does not exist on type 'Channel'.`, and `Cannot find name 'IServer'.`. To fix the `IServer` error, we simply need to import `IServer`.
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager } from './../core/plugin-module';
+import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager } from './../core';
 import { TextPacket } from './../networking/packets/incoming/text-packet';
 import Discord = require('discord.js');
 
@@ -145,7 +145,7 @@ class KeyPlugin {
 
 The final file should look like this:
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager } from './../core/plugin-module';
+import { NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager } from './../core';
 import { TextPacket } from './../networking/packets/incoming/text-packet';
 import { IServer } from './../models/server';
 import Discord = require('discord.js');
@@ -223,7 +223,7 @@ In our `.then` function, we can add two `setTimeout` calls, which will call the 
 
 In the `.catch` part, we will just log the error that occurred. To do this we first need to add `Log` and `LogLevel` to our imports.
 ```typescript
-import { Log, LogLevel, NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager } from './../core/plugin-module';
+import { Log, LogLevel, NrPlugin, HookPacket, Packet, PacketType, Client, PluginManager } from './../core';
 //       ^^^^^^^^^^^^^ New imports.
 ```
 

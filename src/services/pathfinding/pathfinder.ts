@@ -2,9 +2,9 @@ import { Node } from './node';
 import { IPoint } from './point';
 import { Heap } from './heap';
 import { HashSet } from './hash-set';
-import { ITile } from '../../models/tile';
-import { GroundTileData } from '../../networking/data/ground-tile-data';
-import { ResourceManager } from '../../core/resource-manager';
+import { ITile } from '../../models';
+import { GroundTileData } from '../../networking/data';
+import { ResourceManager } from '../../core';
 import { INodeUpdate } from './node-update';
 
 export class Pathfinder {

@@ -1,6 +1,12 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `6.20.0`
+### Changes:
+ + Added `tsai` dev dependency and npm task for indexing nrelay.
+ + Added generated index files for each directory. This means that files can now be imported from their root directory instead of directly from the file.
+ + Fixed errors in docs
+
 ## `6.19.4`
 ### Changes
  + Added `ClaimDailyRewardMessage` and `ClaimDailyRewardResponse` packets.

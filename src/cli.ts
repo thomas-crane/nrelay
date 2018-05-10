@@ -1,19 +1,9 @@
-import { Log, LogLevel } from './services/logger';
-import { Http } from './services/http';
-import { parseServers, parseAccountInfo, parseError } from './services/xmltojson';
-import { SERVER_ENDPOINT } from './models/api-endpoints';
-import { IServer } from './models/server';
-import { IAccountInfo, IAccount, ICharacterInfo } from './models/accinfo';
-import { Client } from './core/client';
-import { Storage } from './services/storage';
-import { PluginManager } from './core/plugin-manager';
-import { ResourceManager } from './core/resource-manager';
-import { Updater } from './services/updater';
-import { environment } from './models/environment';
+import { parseServers, parseAccountInfo, parseError, Updater, LocalServer, Http, Log, LogLevel, Storage } from './services';
+import { IAccountInfo, IAccount, ICharacterInfo, SERVER_ENDPOINT, IServer, environment } from './models';
+import { PluginManager, ResourceManager, Client } from './core';
 import fs = require('fs');
 import net = require('net');
 import dns = require('dns');
-import { LocalServer } from './services/local-server';
 
 const args = process.argv;
 const EMAIL_REPLACE_REGEX = /.+?(.+?)(?:@|\+\d+).+?(.+?)\./;

@@ -1,9 +1,7 @@
-import { NrPlugin, HookPacket, Client, Log, LogLevel, PacketType } from './../core/plugin-module';
-import { IPlayerData } from './../models/playerdata';
-import { Classes } from './../models/classes';
-import { UpdatePacket } from './../networking/packets/incoming/update-packet';
-import { ObjectStatusData } from './../networking/data/object-status-data';
-import { NewTickPacket } from './../networking/packets/incoming/newtick-packet';
+import { NrPlugin, HookPacket, Client, Log, LogLevel, PacketType } from './../core';
+import { IPlayerData, Classes } from './../models';
+import { UpdatePacket, NewTickPacket } from './../networking/packets/incoming';
+import { ObjectStatusData } from './../networking/data';
 import { EventEmitter } from 'events';
 
 @NrPlugin({
