@@ -1,6 +1,6 @@
 import { Socket } from 'net';
 import { Log, LogLevel, Random } from '../services';
-import { Packet, PacketType, Packets, PacketIO } from './../networking';
+import { Packet, PacketType, PacketIO } from './../networking';
 import {
     HelloPacket,
     LoadPacket,
@@ -30,13 +30,12 @@ import {
     DamagePacket
 } from './../networking/packets/incoming';
 import {
-    IAccountInfo, IAccount, ICharacterInfo,
+    IAccount, ICharacterInfo,
     IPlayerData, getDefaultPlayerData,
     Classes,
     IMapInfo,
     environment,
     Projectile,
-    IObject,
     Enemy,
     MoveRecords,
     ConditionEffects, ConditionEffect,
@@ -46,9 +45,7 @@ import {
 import {
     WorldPosData,
     GroundTileData,
-    StatData,
     ObjectStatusData,
-    MoveRecord
 } from './../networking/data';
 import { PluginManager, ResourceManager } from './../core';
 import { HookPacket } from './../decorators';
@@ -65,6 +62,8 @@ const MIN_ATTACK_MULT = 0.5;
 const MAX_ATTACK_MULT = 2;
 const ACCOUNT_IN_USE_REGEX = /Account in use \((\d+) seconds? until timeout\)/;
 
+declare type ClientEvent = 'connect' | 'disconnect' | 'ready';
+
 export class Client {
 
     /**
@@ -78,7 +77,7 @@ export class Client {
      * @param event The name of the event to listen for. Available events are 'connect'|'disconnect'
      * @param listener The callback to invoke when the event is fired.
      */
-    public static on(event: string | symbol, listener: (...args: any[]) => void): EventEmitter {
+    public static on(event: ClientEvent, listener: (client: Client) => void): EventEmitter {
         if (!this.emitter) {
             this.emitter = new EventEmitter();
         }
@@ -130,7 +129,7 @@ export class Client {
      * client.nextPos = pos;
      * ```
      */
-    public nextPos: WorldPosData;
+    public readonly nextPos: WorldPosData[];
     /**
      * Info about the current map including
      * @see `IMapInfo` for more information.
@@ -203,7 +202,6 @@ export class Client {
     private lastAttackTime: number;
     private pathfinder: Pathfinder;
     private pathfinderEnabled: boolean;
-    private currentPath: IPoint[];
     private pathfinderTarget: IPoint;
     private moveRecords: MoveRecords;
     private frameUpdateTimer: NodeJS.Timer;
@@ -246,7 +244,7 @@ export class Client {
         this.gameId = -2;
         this.playerData = getDefaultPlayerData();
         this.playerData.server = server.name;
-        this.nextPos = null;
+        this.nextPos = [];
         this.internalMoveMultiplier = 1;
         this.currentBulletId = 1;
         this.lastAttackTime = 0;
@@ -284,8 +282,9 @@ export class Client {
             return false;
         }
         this.lastAttackTime = time;
-        let totalArc = item.arcGap * (item.numProjectiles - 1);
-        if (item.arcGap <= 0) {
+        const arcRads = item.arcGap / 180 * Math.PI;
+        let totalArc = arcRads * (item.numProjectiles - 1);
+        if (arcRads <= 0) {
             totalArc = 0;
         }
         angle -= totalArc / 2;
@@ -303,8 +302,8 @@ export class Client {
                 x: shootPacket.startingPos.x,
                 y: shootPacket.startingPos.y
             }));
-            if (item.arcGap > 0) {
-                angle += item.arcGap;
+            if (arcRads > 0) {
+                angle += arcRads;
             }
 
             const projectile = item.projectile;
@@ -348,7 +347,8 @@ export class Client {
         this.enemies = null;
 
         if (this.socketConnected) {
-            Client.emitter.emit('disconnect', Object.assign({}, this.playerData), this);
+            Client.emitter.emit('disconnect', this);
+            this.socketConnected = false;
         }
 
         // client socket.
@@ -432,15 +432,12 @@ export class Client {
         this.pathfinder.findPath(this.worldPos.toPoint(), to).then((path) => {
             if (path.length === 0) {
                 this.pathfinderTarget = null;
-                this.currentPath = null;
+                this.nextPos.length = 0;
                 return;
             }
             this.pathfinderTarget = to;
-            this.currentPath = path;
-            this.nextPos = new WorldPosData();
-            const next = this.currentPath.shift();
-            this.nextPos.x = next.x + 0.5;
-            this.nextPos.y = next.y + 0.5;
+            this.nextPos.length = 0;
+            this.nextPos.push(...path.map((p) => new WorldPosData(p.x + 0.5, p.y + 0.5)));
         }).catch((error: Error) => {
             Log(this.alias, `Error finding path: ${error.message}`, LogLevel.Error);
         });
@@ -644,6 +641,9 @@ export class Client {
         const ack = new GotoAckPacket();
         ack.time = this.getTime();
         this.packetio.sendPacket(ack);
+        if (gotoPacket.objectId === this.objectId) {
+            this.worldPos = gotoPacket.position.clone();
+        }
         if (this.enemies[gotoPacket.objectId]) {
             this.enemies[gotoPacket.objectId].onGoto(gotoPacket.position.x, gotoPacket.position.y, this.lastFrameTime);
         }
@@ -651,17 +651,23 @@ export class Client {
 
     @HookPacket(PacketType.FAILURE)
     private onFailurePacket(client: Client, failurePacket: FailurePacket): void {
-        this.gameId = -2;
-        this.keyTime = -1;
-        this.key = new Int8Array(0);
-        this.internalServer = Object.assign({}, this.nexusServer);
-        this.clientSocket.destroy();
-        Log(this.alias, `Received failure ${failurePacket.errorId}: "${failurePacket.errorDescription}"`, LogLevel.Error);
-        const accInUse = ACCOUNT_IN_USE_REGEX.exec(failurePacket.errorDescription);
-        if (accInUse) {
-            const time = +accInUse[1] + 1;
-            this.reconnectCooldown = time;
-            Log(this.alias, `Received account in use error. Reconnecting in ${time} seconds.`, LogLevel.Warning);
+        switch (failurePacket.errorId) {
+            case FailurePacket.INCORRECT_VERSION:
+                Log('NRelay', `acc-config.json is out of date. Change "buildVersion" to "${failurePacket.errorDescription}"`);
+                process.exit(0);
+                break;
+            case FailurePacket.INVALID_TELEPORT_TARGET:
+                Log(this.alias, 'Invalid teleport target.', LogLevel.Warning);
+                break;
+            case FailurePacket.EMAIL_VERIFICATION_NEEDED:
+                Log(this.alias, 'Email verification is required for this account.', LogLevel.Error);
+                break;
+            case FailurePacket.BAD_KEY:
+                Log(this.alias, 'Invalid key used.', LogLevel.Error);
+                break;
+            default:
+                Log(this.alias, `Received failure ${failurePacket.errorId}: "${failurePacket.errorDescription}"`, LogLevel.Error);
+                break;
         }
     }
 
@@ -685,8 +691,8 @@ export class Client {
         const movePacket = new MovePacket();
         movePacket.tickId = newTickPacket.tickId;
         movePacket.time = this.getTime();
-        if (this.nextPos || this.pathfinderTarget) {
-            this.moveTo(this.nextPos);
+        if (this.nextPos.length > 0) {
+            this.moveTo(this.nextPos[0]);
         }
         movePacket.newPosition = this.worldPos;
         movePacket.records = [];
@@ -792,12 +798,12 @@ export class Client {
 
     @HookPacket(PacketType.CREATESUCCESS)
     private onCreateSuccess(client: Client, createSuccessPacket: CreateSuccessPacket): void {
+        Log(this.alias, 'Connected!', LogLevel.Success);
         this.objectId = createSuccessPacket.objectId;
         this.charInfo.charId = createSuccessPacket.charId;
         this.charInfo.nextCharId = this.charInfo.charId + 1;
         this.lastFrameTime = this.getTime();
-        Client.emitter.emit('ready', Object.assign({}, this.playerData), this);
-        Log(this.alias, 'Connected!', LogLevel.Success);
+        Client.emitter.emit('ready', this);
         this.frameUpdateTimer = setInterval(() => {
             const time = this.getTime();
             const deltaTime = time - this.lastFrameTime;
@@ -815,9 +821,9 @@ export class Client {
     }
 
     private onConnect(): void {
-        this.socketConnected = true;
-        Client.emitter.emit('connect', Object.assign({}, this.playerData), this);
         Log(this.alias, `Connected to ${this.internalServer.name}!`, LogLevel.Success);
+        this.socketConnected = true;
+        Client.emitter.emit('connect', this);
         this.lastTickTime = 0;
         this.lastAttackTime = 0;
         this.currentTickTime = 0;
@@ -858,12 +864,11 @@ export class Client {
     }
 
     private onClose(error: boolean): void {
-        this.socketConnected = false;
-        Client.emitter.emit('disconnect', Object.assign({}, this.playerData), this);
-        this.nextPos = null;
-        this.currentPath = null;
-        this.pathfinderTarget = null;
         Log(this.alias, `The connection to ${this.internalServer.name} was closed.`, LogLevel.Warning);
+        this.socketConnected = false;
+        Client.emitter.emit('disconnect', this);
+        this.nextPos.length = 0;
+        this.pathfinderTarget = null;
         this.internalServer = Object.assign({}, this.nexusServer);
         if (this.pathfinderEnabled) {
             this.pathfinder.destroy();
@@ -970,21 +975,10 @@ export class Client {
     }
 
     private moveTo(target: WorldPosData): void {
-        const step = this.getSpeed();
-        if (!this.nextPos && this.currentPath && this.currentPath.length > 0) {
-            this.nextPos = new WorldPosData();
-            const next = this.currentPath.shift();
-            this.nextPos.x = next.x + 0.5;
-            this.nextPos.y = next.y + 0.5;
-            target = this.nextPos;
-        }
-        if (this.currentPath && this.currentPath.length === 0) {
-            this.currentPath = null;
-            this.pathfinderTarget = null;
-        }
         if (!target) {
             return;
         }
+        const step = this.getSpeed();
         if (this.worldPos.squareDistanceTo(target) > step ** 2) {
             const angle: number = Math.atan2(target.y - this.worldPos.y, target.x - this.worldPos.x);
             this.worldPos.x += Math.cos(angle) * step;
@@ -992,7 +986,10 @@ export class Client {
         } else {
             this.worldPos.x = target.x;
             this.worldPos.y = target.y;
-            this.nextPos = null;
+            this.nextPos.shift();
+            if (this.nextPos.length === 0 && this.pathfinderTarget) {
+                this.pathfinderTarget = null;
+            }
         }
     }
 
