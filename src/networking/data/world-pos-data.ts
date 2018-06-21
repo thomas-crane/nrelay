@@ -6,6 +6,11 @@ export class WorldPosData {
     x: number;
     y: number;
 
+    constructor(x?: number, y?: number) {
+        this.x = x || null;
+        this.y = y || null;
+    }
+
     public read(packet: Packet): void {
         this.x = packet.readFloat();
         this.y = packet.readFloat();

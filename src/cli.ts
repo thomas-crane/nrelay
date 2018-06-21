@@ -8,7 +8,6 @@ import dns = require('dns');
 const args = process.argv;
 const EMAIL_REPLACE_REGEX = /.+?(.+?)(?:@|\+\d+).+?(.+?)\./;
 const ACCOUNT_IN_USE_REGEX = /Account in use \((\d+) seconds? until timeout\)/;
-const LOCAL_SERVER_DEFAULT_PORT = 5680;
 
 export class CLI {
 
@@ -183,7 +182,7 @@ export class CLI {
         this.buildVersion = accInfo.buildVersion;
         if (accInfo.localServer) {
             if (accInfo.localServer.enabled) {
-                LocalServer.init(accInfo.localServer.port || LOCAL_SERVER_DEFAULT_PORT);
+                LocalServer.init(accInfo.localServer.port);
             }
         }
 

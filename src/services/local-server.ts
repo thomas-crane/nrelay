@@ -3,13 +3,17 @@ import { Log, LogLevel } from './logger';
 import { SocketWrapper, environment } from '../models';
 import { EventEmitter } from 'events';
 
+const DEFAULT_PORT = 5680;
 export class LocalServer {
 
     /**
      * Initializes the Local Server and begins listening on the specified port.
      * @param port The port to listen for connections on.
      */
-    public static init(port: number): void {
+    public static init(port?: number): void {
+        if (!port) {
+            port = DEFAULT_PORT;
+        }
         if (this.initialized) {
             Log('Local Server', 'Local Server has already been initialized.', LogLevel.Warning);
             return;
