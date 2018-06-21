@@ -1,12 +1,12 @@
-import { parseServers, parseAccountInfo, parseError, Updater, LocalServer, Http, Log, LogLevel, Storage } from './services';
+import { XMLtoJSON, Updater, LocalServer, Http, Log, LogLevel, Storage } from './services';
 import { IAccountInfo, IAccount, ICharacterInfo, SERVER_ENDPOINT, IServer, environment } from './models';
 import { PluginManager, ResourceManager, Client } from './core';
 import fs = require('fs');
 import net = require('net');
 import dns = require('dns');
+import { StringUtils } from './services/string-utils';
 
 const args = process.argv;
-const EMAIL_REPLACE_REGEX = /.+?(.+?)(?:@|\+\d+).+?(.+?)\./;
 const ACCOUNT_IN_USE_REGEX = /Account in use \((\d+) seconds? until timeout\)/;
 
 export class CLI {
@@ -14,17 +14,9 @@ export class CLI {
     public static addClient(account: IAccount, charInfo?: ICharacterInfo): Promise<any> {
         return new Promise((resolve: (client: Client) => void, reject: (err: Error) => void) => {
             if (!account.alias) {
-                const match = EMAIL_REPLACE_REGEX.exec(account.guid);
-                if (match) {
-                    if (match[1]) {
-                        account.alias = account.guid.replace(match[1], '***');
-                    }
-                    if (match[2]) {
-                        account.alias = account.alias.replace(match[2], '***');
-                    }
-                }
+                account.alias = StringUtils.censorGuid(account.guid);
             }
-            if (this.clients[account.alias]) {
+            if (this.clients[account.guid]) {
                 const err = new Error(account.alias + ' has already been added.');
                 reject(err);
                 return;
@@ -56,7 +48,7 @@ export class CLI {
                     }
                 }
                 const client = new Client(server, this.buildVersion, account);
-                this.clients[account.alias] = client;
+                this.clients[account.guid] = client;
                 resolve(client);
             };
             Log('NRelay', `Adding ${account.alias}`, LogLevel.Info);
@@ -81,21 +73,21 @@ export class CLI {
         });
     }
 
-    public static removeClient(alias: string): boolean {
-        if (this.clients[alias]) {
-            this.clients[alias].destroy();
-            delete this.clients[alias];
-            Log('NRelay', `Removed ${alias}`, LogLevel.Info);
+    public static removeClient(guid: string): boolean {
+        if (this.clients[guid]) {
+            this.clients[guid].destroy();
+            delete this.clients[guid];
+            Log('NRelay', `Removed ${StringUtils.censorGuid(guid)}`, LogLevel.Info);
             return true;
         }
         return false;
     }
 
-    public static getClient(alias: string): Client | null {
-        if (!this.clients.hasOwnProperty(alias)) {
+    public static getClient(guid: string): Client {
+        if (!this.clients.hasOwnProperty(guid)) {
             return null;
         }
-        return this.clients[alias];
+        return this.clients[guid];
     }
 
     public static getClients(): Client[] {
@@ -110,7 +102,7 @@ export class CLI {
         return new Promise((resolve: () => void, reject: (err: Error) => void) => {
             Http.get(SERVER_ENDPOINT).then((data: any) => {
                 Log('NRelay', 'Server list loaded.', LogLevel.Success);
-                this.internalServerList = parseServers(data);
+                this.internalServerList = XMLtoJSON.parseServers(data);
                 resolve();
             }).catch((err) => {
                 Log('NRelay', `Error loading server list: ${err.message}`);
@@ -133,8 +125,8 @@ export class CLI {
     private static getAccountInfo(account: IAccount): Promise<IAccount> {
         return new Promise((resolve: (acc: IAccount) => void, reject: (err: Error | string) => void) => {
             const handler = (data: string) => {
-                const info = parseAccountInfo(data);
-                this.internalServerList = parseServers(data);
+                const info = XMLtoJSON.parseAccountInfo(data);
+                this.internalServerList = XMLtoJSON.parseServers(data);
                 if (info) {
                     account.charInfo = info;
                     resolve(account);
@@ -222,7 +214,7 @@ export class CLI {
             }, time * 1000);
             return new Error(`Account in use error. Reconnecting in ${time} seconds.`);
         } else {
-            const error = parseError(response);
+            const error = XMLtoJSON.parseError(response);
             return error;
         }
     }

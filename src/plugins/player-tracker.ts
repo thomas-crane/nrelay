@@ -21,7 +21,7 @@ export class PlayerTracker {
             this.emitter = new EventEmitter();
         }
         this.trackedPlayers = {};
-        Client.on('disconnect', (client) => {
+        Client.on('connect', (client) => {
             if (this.trackedPlayers.hasOwnProperty(client.guid)) {
                 this.trackedPlayers[client.guid] = [];
             }
