@@ -34,14 +34,14 @@ export class EnemyShootPacket extends Packet {
     }
 
     public write(): void {
-        this.writeUnsigedByte(this.bulletId);
+        this.writeUnsignedByte(this.bulletId);
         this.writeInt32(this.ownerId);
-        this.writeUnsigedByte(this.bulletType);
+        this.writeUnsignedByte(this.bulletType);
         this.startingPos.write(this);
         this.writeFloat(this.angle);
         this.writeShort(this.damage);
         if (this.numShots !== 1) {
-            this.writeUnsigedByte(this.numShots);
+            this.writeUnsignedByte(this.numShots);
         }
         if (this.angleInc !== 0) {
             this.writeFloat(this.angleInc);

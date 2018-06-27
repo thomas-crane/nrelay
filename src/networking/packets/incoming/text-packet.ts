@@ -28,7 +28,7 @@ export class TextPacket extends Packet {
         this.writeString(this.name);
         this.writeInt32(this.objectId);
         this.writeInt32(this.numStars);
-        this.writeUnsigedByte(this.bubbleTime);
+        this.writeUnsignedByte(this.bubbleTime);
         this.writeString(this.recipient);
         this.writeString(this.text);
         this.writeString(this.cleanText);

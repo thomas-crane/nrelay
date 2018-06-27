@@ -71,7 +71,7 @@ export abstract class Packet implements IPacket {
         this.bufferIndex++;
         return result;
     }
-    writeUnsigedByte(value: number): void {
+    writeUnsignedByte(value: number): void {
         this.bufferIndex = this.data.writeUInt8(value, this.bufferIndex);
     }
 
@@ -96,7 +96,7 @@ export abstract class Packet implements IPacket {
     readByteArray(): Int8Array {
         const arraylen = this.readShort();
         const result = new Int8Array(arraylen);
-        for (let i = 0; i < arraylen; i++, this.bufferIndex++) {
+        for (let i = 0; i < arraylen; i++ , this.bufferIndex++) {
             result[i] = this.data[this.bufferIndex];
         }
         return result;
@@ -107,7 +107,7 @@ export abstract class Packet implements IPacket {
             return;
         }
         this.writeShort(value.length);
-        for (let i = 0; i < value.length; i++, this.bufferIndex++) {
+        for (let i = 0; i < value.length; i++ , this.bufferIndex++) {
             this.data[this.bufferIndex] = value[i];
         }
     }

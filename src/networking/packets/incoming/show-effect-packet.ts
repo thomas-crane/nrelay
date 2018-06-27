@@ -26,7 +26,7 @@ export class ShowEffectPacket extends Packet {
     }
 
     public write(): void {
-        this.writeUnsigedByte(this.effectType);
+        this.writeUnsignedByte(this.effectType);
         this.writeInt32(this.targetObjectId);
         this.pos1.write(this);
         this.pos2.write(this);

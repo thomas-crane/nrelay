@@ -15,7 +15,7 @@ export class PlayerHitPacket extends Packet {
     }
 
     public write(): void {
-        this.writeUnsigedByte(this.bulletId);
+        this.writeUnsignedByte(this.bulletId);
         this.writeInt32(this.objectId);
     }
 }

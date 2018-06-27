@@ -14,7 +14,7 @@ export class SlotObjectData {
 
     public write(packet: Packet): void {
         packet.writeInt32(this.objectId);
-        packet.writeUnsigedByte(this.slotId);
+        packet.writeUnsignedByte(this.slotId);
         packet.writeInt32(this.objectType);
     }
 }

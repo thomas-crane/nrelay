@@ -30,14 +30,14 @@ export class DamagePacket extends Packet {
 
     public write(): void {
         this.writeInt32(this.targetId);
-        this.writeUnsigedByte(this.effects.length);
+        this.writeUnsignedByte(this.effects.length);
         for (let i = 0; i < this.effects.length; i++) {
-            this.writeUnsigedByte(this.effects[i]);
+            this.writeUnsignedByte(this.effects[i]);
         }
         this.writeUnsignedShort(this.damageAmount);
         this.writeBoolean(this.kill);
         this.writeBoolean(this.armorPierce);
-        this.writeUnsigedByte(this.bulletId);
+        this.writeUnsignedByte(this.bulletId);
         this.writeInt32(this.objectId);
     }
 }

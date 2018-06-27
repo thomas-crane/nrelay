@@ -25,7 +25,7 @@ export class ServerPlayerShootPacket extends Packet {
     }
 
     public write(): void {
-        this.writeUnsigedByte(this.bulletId);
+        this.writeUnsignedByte(this.bulletId);
         this.writeInt32(this.ownerId);
         this.writeInt32(this.containerType);
         this.startingPos.write(this);

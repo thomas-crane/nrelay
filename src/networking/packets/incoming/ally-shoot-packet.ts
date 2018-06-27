@@ -19,7 +19,7 @@ export class AllyShootPacket extends Packet {
     }
 
     public write(): void {
-        this.writeUnsigedByte(this.bulletId);
+        this.writeUnsignedByte(this.bulletId);
         this.writeInt32(this.ownerId);
         this.writeShort(this.containerType);
         this.writeFloat(this.angle);

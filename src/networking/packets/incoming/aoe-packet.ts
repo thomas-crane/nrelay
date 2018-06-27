@@ -30,7 +30,7 @@ export class AoePacket extends Packet {
         this.pos.write(this);
         this.writeFloat(this.radius);
         this.writeUnsignedShort(this.damage);
-        this.writeUnsigedByte(this.effect);
+        this.writeUnsignedByte(this.effect);
         this.writeFloat(this.duration);
         this.writeUnsignedShort(this.origType);
         this.writeInt32(this.color);
