@@ -1,16 +1,20 @@
-import fs = require('fs');
-import path = require('path');
+import * as fs from 'fs';
+import * as path from 'path';
 import { exec, spawn } from 'child_process';
 import * as os from 'os';
 
-import https = require('https');
+import * as https from 'https';
 import { createWriteStream, PathLike } from 'fs';
 import { Log, LogLevel } from './../services';
-import { HttpClient } from './http';
 import { ASSET_ENDPOINT } from '../models';
 
 const PACKET_REGEX = /static const ([A-Z_]+):int = (\d+);/g;
 const dir = path.dirname(require.main.filename);
+const GSC_PATH = path.join(
+    'scripts', 'kabam', 'rotmg', 'messaging',
+    'impl', 'GameServerConnection.as'
+);
+const DEFAULT_SWF_PATH = path.join(dir, 'src', 'services', 'updater-assets');
 
 export class Updater {
 
@@ -142,12 +146,14 @@ export class Updater {
      */
     static getVersionNumber(): Promise<string> {
         return new Promise((resolve: (result: string) => void, reject: (err: Error) => void) => {
+            Log('Updater', 'Downloading version.txt', LogLevel.Info);
             https.get(ASSET_ENDPOINT + '/current/version.txt', (res) => {
                 let raw = '';
                 res.on('data', (chunk) => {
                     raw += chunk;
                 });
                 res.once('end', () => {
+                    Log('Updater', 'Downloaded version.txt', LogLevel.Success);
                     resolve(raw);
                 });
                 res.once('error', (error) => {
@@ -169,64 +175,58 @@ export class Updater {
             this.getGroundTypes(),
             this.getObjects()
         ]).then(() => {
-            Log('Updater', 'Unpacking client.swf', LogLevel.Info);
-            return this.unpackSwf();
+            return this.updateFrom(DEFAULT_SWF_PATH);
         }).then(() => {
-            Log('Updater', 'Unpacked client.swf', LogLevel.Success);
-            Log('Updater', 'Updating assets', LogLevel.Info);
-            const FILEPATH = path.join(
-                dir,
-                'src', 'services', 'updater-assets', 'decompiled', 'scripts',
-                'kabam', 'rotmg', 'messaging', 'impl', 'GameServerConnection.as'
-            );
-            const packets = this.extractPacketInfo(FILEPATH);
-            this.updatePackets(packets);
-            Log('Updater', 'Updated assets. Updating local version number.');
+            Log('Updater', 'Updating local version number.', LogLevel.Info);
             return this.getVersionNumber();
         }).then((version) => {
             this.updateVersion(version);
-            Log('Updater', 'Finished! Rebuilding source...', LogLevel.Success);
             return this.rebuildSource();
         }).then(() => {
-            Log('Updater', 'Finished rebuilding source!', LogLevel.Success);
+            Log('Updater', 'Finished!', LogLevel.Success);
         }).catch((error) => {
             Log('Updater', `Error: ${error.message}`, LogLevel.Error);
         });
     }
 
     /**
+     * Updates the packet ids using the client.swf inside the `parentDir`.
+     * @param parentDir The directory containing the client.swf
+     */
+    static updateFrom(parentDir: string): Promise<any> {
+        const realPath = parentDir.split(/\/|\\/g).join(path.sep);
+        let swfDir = realPath;
+        let swfName = 'client.swf';
+        const stat = fs.statSync(realPath);
+        if (stat.isFile()) {
+            const parts = realPath.split(path.sep);
+            swfName = parts.pop();
+            swfDir = parts.join(path.sep);
+        }
+        return this.unpackSwf(swfDir, swfName).then(() => {
+            Log('Updater', 'Updating assets.', LogLevel.Info);
+            const packets = this.extractPacketInfo(path.join(swfDir, 'decompiled', GSC_PATH));
+            this.updatePackets(packets);
+        });
+    }
+
+    /**
      * Invokes the gulp process to rebuild the source.
      */
-    private static rebuildSource(): Promise<any> {
+    static rebuildSource(): Promise<any> {
         return new Promise((resolve, reject) => {
+            Log('Updater', 'Rebuilding source.', LogLevel.Info);
             const gulpCmd = os.platform() === 'win32' ? 'gulp.cmd' : 'gulp';
-            const child = spawn(path.join(dir, 'node_modules', '.bin', gulpCmd), []);
-            child.stdout.on('data', (data) => {
-                for (const line of this.cleanGulpOutput(data)) {
-                    Log('gulp', line, LogLevel.Info);
-                }
-            });
-            child.stderr.on('data', (data) => {
-                for (const line of this.cleanGulpOutput(data)) {
-                    Log('gulp', line, LogLevel.Error);
-                }
-            });
+            const cmd = path.join(dir, 'node_modules', '.bin', gulpCmd);
+            const child = spawn(cmd, [], { stdio: 'inherit' });
             child.once('exit', () => {
+                Log('Updater', 'Finished rebuilding source.', LogLevel.Success);
                 resolve();
             });
             child.once('error', (error) => {
                 reject(error);
             });
         });
-    }
-
-    /**
-     * Cleans the gulp process output.
-     * @param data The output to clean.
-     */
-    private static cleanGulpOutput(data: string | Buffer): string[] {
-        const lines = data.toString().split('\n');
-        return lines.filter((line) => line && !/^\s*\[\d{2}:\d{2}:\d{2}\]\s*$/.test(line));
     }
 
     /**
@@ -248,21 +248,23 @@ export class Updater {
     /**
      * Unpacks the client in the updater assets.
      */
-    private static unpackSwf(): Promise<any> {
+    private static unpackSwf(parentDir: string, swfName: string): Promise<any> {
         return new Promise((resolve: () => void, reject: (err: Error) => void) => {
+            Log('Updater', `Unpacking ${swfName}`, LogLevel.Info);
             const args = [
                 '-jar',
                 (`"${path.join(dir, 'lib', 'jpexs', 'ffdec.jar')}"`),
                 '-selectclass kabam.rotmg.messaging.impl.GameServerConnection',
                 '-export script',
-                (`"${path.join(dir, 'src', 'services', 'updater-assets', 'decompiled')}"`),
-                (`"${path.join(dir, 'src', 'services', 'updater-assets', 'client.swf')}"`)
+                (`"${path.join(parentDir, 'decompiled')}"`),
+                (`"${path.join(parentDir, swfName)}"`)
             ];
             exec(`java ${args.join(' ')}`, (error, stdout, stderr) => {
                 if (error) {
                     reject(error);
                     return;
                 }
+                Log('Updater', `Unpacked ${swfName}`, LogLevel.Success);
                 resolve();
             });
         });
@@ -283,6 +285,7 @@ export class Updater {
             packets[match[1].replace('_', '')] = +match[2];
             match = PACKET_REGEX.exec(raw);
         }
+        Log('Updater', 'Extracted packet info.', LogLevel.Success);
         return packets;
     }
 
@@ -301,7 +304,7 @@ export class Updater {
         }
         raw += '}\n';
         fs.writeFileSync(filePath, raw, { encoding: 'utf8' });
-        Log('Updater', 'Updated PacketType enum', LogLevel.Info);
+        Log('Updater', 'Updated PacketType enum.', LogLevel.Success);
     }
 
     /**
@@ -312,5 +315,6 @@ export class Updater {
         const filePath = path.join(dir, 'src', 'services', 'updater-assets', 'version.txt');
         fs.truncateSync(filePath, 0);
         fs.writeFileSync(filePath, newVersion, { encoding: 'utf8' });
+        Log('Updater', 'Updated local version number.', LogLevel.Success);
     }
 }
