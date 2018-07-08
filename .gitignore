@@ -11,6 +11,7 @@ src/plugins/*
 
 # Config
 acc-config.json
+last-known-servers.json
 
 # Updater assets
 src/services/updater-assets/*

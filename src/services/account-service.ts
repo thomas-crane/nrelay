@@ -85,6 +85,10 @@ export class AccountService {
             this.checkErrors(response);
             const info = XMLtoJSON.parseAccountInfo(response);
             this.internalServerList = XMLtoJSON.parseServers(response);
+            Storage.set(this.internalServerList, 'last-known-servers.json').catch((error) => {
+                Log('AccountService', 'Error while caching servers.', LogLevel.Warning);
+                Log('AccountService', error.message, LogLevel.Warning);
+            });
             return info;
         });
     }
