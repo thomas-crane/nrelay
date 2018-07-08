@@ -1,166 +1,253 @@
 import fs = require('fs');
 import path = require('path');
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
+import * as os from 'os';
 
 import https = require('https');
-import stream = require('stream');
 import { createWriteStream, PathLike } from 'fs';
 import { Log, LogLevel } from './../services';
+import { HttpClient } from './http';
+import { ASSET_ENDPOINT } from '../models';
 
-const ASSET_ENDPOINT = 'https://static.drips.pw/rotmg/production/#/';
-const PACKET_REGEX = /public static const ([A-Z_]+):int = (\d+);/g;
+const PACKET_REGEX = /static const ([A-Z_]+):int = (\d+);/g;
 const dir = path.dirname(require.main.filename);
 
 export class Updater {
 
-    static latestVersion: string;
+    /**
+     * Checks if `currentVersion` matches the remote version number.
+     * @param currentVersion The version number to check.
+     */
+    static isOutdated(currentVersion: string): Promise<boolean> {
+        return this.getVersionNumber().then((version) => {
+            return currentVersion !== version;
+        });
+    }
 
-    static checkVersion(): Promise<boolean> {
-        return new Promise((resolve: (result: boolean) => void, reject: (err: Error) => void) => {
-            https.get(ASSET_ENDPOINT.replace('#', 'current') + 'version.txt', (res) => {
-                let raw = '';
+    /**
+     * Reads the local version number from the updater assets.
+     */
+    static getCurrentVersion(): string {
+        const filename = path.join(dir, 'src', 'services', 'updater-assets', 'version.txt');
+        try {
+            return fs.readFileSync(filename, { encoding: 'utf8' });
+        } catch {
+            try {
+                fs.mkdirSync(path.join(dir, 'src', 'services', 'updater-assets'));
+            } catch (error) {
+                if (error.code !== 'EEXIST') {
+                    throw error;
+                }
+            }
+            fs.writeFileSync(filename, '', { encoding: 'utf8' });
+            return '';
+        }
+    }
+
+    /**
+     * Downloads the latest client.swf to the updater assets folder.
+     */
+    static getClient(): Promise<any> {
+        const clientPath = path.join(dir, 'src', 'services', 'updater-assets', 'client.swf');
+        this.emptyFile(clientPath);
+        const clientStream = createWriteStream(clientPath);
+        return new Promise((resolve, reject) => {
+            Log('Updater', 'Downloading latest client.swf', LogLevel.Info);
+            https.get(ASSET_ENDPOINT + '/current/client.swf', (res) => {
                 res.on('data', (chunk) => {
-                    raw += chunk;
+                    clientStream.write(chunk);
                 });
-                res.on('end', () => {
-                    if (!raw) {
-                        resolve(false);
-                        return;
-                    }
-                    this.latestVersion = raw;
-                    const filename = path.join(dir, 'src', 'services', 'updater-assets', 'version.txt');
-                    let currentVersion = null;
-                    try {
-                        currentVersion = fs.readFileSync(filename, { encoding: 'utf8' });
-                    } catch {
-                        try {
-                            fs.mkdirSync(path.join(dir, 'src', 'services', 'updater-assets'));
-                        } catch (error) {
-                            if (error.code !== 'EEXIST') {
-                                reject(error);
-                            }
-                        }
-                        fs.writeFileSync(filename, '', { encoding: 'utf8' });
-                    }
-                    if (currentVersion !== raw) {
-                        resolve(true);
-                        return;
-                    }
-                    resolve(false);
+                res.once('end', () => {
+                    Log('Updater', 'Downloaded client.swf', LogLevel.Success);
+                    clientStream.end();
+                    res.removeAllListeners('data');
+                    res.removeAllListeners('error');
+                    resolve();
                 });
-                res.on('error', (error) => {
+                res.once('error', (error) => {
+                    clientStream.end();
+                    res.removeAllListeners('data');
+                    res.removeAllListeners('end');
                     reject(error);
                 });
             });
         });
     }
 
-    static getLatest(force: boolean = false): Promise<any> {
-        return new Promise((resolve: () => void, reject: (err: Error) => void) => {
-            if (!this.latestVersion && !force) {
-                return this.checkVersion().then(() => {
-                    reject(new Error('No local version found.'));
-                }).catch((error) => {
-                    Log('Updater', 'Error getting latest version', LogLevel.Error);
+    /**
+     * Downdloads the latest GroundTypes.json to the updater assets folder.
+     */
+    static getGroundTypes(): Promise<any> {
+        if (!fs.existsSync(path.join(dir, 'resources'))) {
+            fs.mkdirSync(path.join(dir, 'resources'));
+        }
+        const groundTypesPath = path.join(dir, 'resources', 'GroundTypes.json');
+        this.emptyFile(groundTypesPath);
+        const groundTypesStream = createWriteStream(groundTypesPath);
+        return new Promise((resolve, reject) => {
+            Log('Updater', 'Downloading latest GroundTypes.json', LogLevel.Info);
+            https.get(ASSET_ENDPOINT + '/current/json/GroundTypes.json', (res) => {
+                res.on('data', (chunk) => {
+                    groundTypesStream.write(chunk);
+                });
+                res.once('end', () => {
+                    Log('Updater', 'Downloaded GroundTypes.json', LogLevel.Success);
+                    groundTypesStream.end();
+                    res.removeAllListeners('data');
+                    res.removeAllListeners('error');
+                    resolve();
+                });
+                res.once('error', (error) => {
+                    groundTypesStream.end();
+                    res.removeAllListeners('data');
+                    res.removeAllListeners('end');
                     reject(error);
                 });
-            }
-            const url = ASSET_ENDPOINT.replace('#', 'current');
+            });
+        });
+    }
 
-            const clientPath = path.join(dir, 'src', 'services', 'updater-assets', 'client.swf');
-            if (!fs.existsSync(path.join(dir, 'resources'))) {
-                fs.mkdirSync(path.join(dir, 'resources'));
-            }
-            const groundTypesPath = path.join(dir, 'resources', 'GroundTypes.json');
-            const objectsPath = path.join(dir, 'resources', 'Objects.json');
-
-            this.emptyFile(clientPath);
-            this.emptyFile(groundTypesPath);
-            this.emptyFile(objectsPath);
-
-            const clientStream = createWriteStream(clientPath);
-            const groundTypesStream = createWriteStream(groundTypesPath);
-            const objectsStream = createWriteStream(objectsPath);
-
-            Promise.all([
-                new Promise((resolve1, reject1) => {
-                    Log('Updater', 'Downloading latest client.swf', LogLevel.Info);
-                    https.get(url + 'client.swf', (res) => {
-                        res.on('data', (chunk) => {
-                            clientStream.write(chunk);
-                        });
-                        res.on('end', () => {
-                            Log('Updater', 'Downloaded client.swf', LogLevel.Success);
-                            clientStream.end();
-                            resolve1();
-                        });
-                        res.on('error', (error) => {
-                            reject1(error);
-                        });
-                    });
-                }),
-                new Promise((resolve2, reject2) => {
-                    Log('Updater', 'Downloading latest GroundTypes.json', LogLevel.Info);
-                    https.get(url + 'json/GroundTypes.json', (res) => {
-                        res.on('data', (chunk) => {
-                            groundTypesStream.write(chunk);
-                        });
-                        res.on('end', () => {
-                            Log('Updater', 'Downloaded GroundTypes.json', LogLevel.Success);
-                            groundTypesStream.end();
-                            resolve2();
-                        });
-                        res.on('error', (error) => {
-                            reject2(error);
-                        });
-                    });
-                }),
-                new Promise((resolve3, reject3) => {
-                    Log('Updater', 'Downloading latest Objects.json', LogLevel.Info);
-                    https.get(url + 'json/Objects.json', (res) => {
-                        res.on('data', (chunk) => {
-                            objectsStream.write(chunk);
-                        });
-                        res.on('end', () => {
-                            Log('Updater', 'Downloaded Objects.json', LogLevel.Success);
-                            objectsStream.end();
-                            resolve3();
-                        });
-                        res.on('error', (error) => {
-                            reject3(error);
-                        });
-                    });
-                })
-            ]).then(() => {
-                Log('Updater', 'Unpacking client.swf', LogLevel.Info);
-                this.unpackSwf().then(() => {
-                    Log('Updater', 'Unpacked client.swf', LogLevel.Success);
-                    Log('Updater', 'Updating assets', LogLevel.Info);
-                    this.updateAssets().then(() => {
-                        Log('Updater', 'Finished! Rebuild the source to apply the update.', LogLevel.Success);
-                        resolve();
-                    }).catch((updateError) => {
-                        reject(updateError);
-                    });
-                }).catch((error) => {
-                    Log('Updater', 'Error while unpacking swf', LogLevel.Error);
+    /**
+     * Downloads the latest Objects.json to the updater asssets folder.
+     */
+    static getObjects(): Promise<any> {
+        const objectsPath = path.join(dir, 'resources', 'Objects.json');
+        this.emptyFile(objectsPath);
+        const objectsStream = createWriteStream(objectsPath);
+        return new Promise((resolve, reject) => {
+            Log('Updater', 'Downloading latest Objects.json', LogLevel.Info);
+            https.get(ASSET_ENDPOINT + '/current/json/Objects.json', (res) => {
+                res.on('data', (chunk) => {
+                    objectsStream.write(chunk);
+                });
+                res.once('end', () => {
+                    Log('Updater', 'Downloaded Objects.json', LogLevel.Success);
+                    objectsStream.end();
+                    res.removeAllListeners('data');
+                    res.removeAllListeners('error');
+                    resolve();
+                });
+                res.once('error', (error) => {
+                    objectsStream.end();
+                    res.removeAllListeners('data');
+                    res.removeAllListeners('end');
                     reject(error);
                 });
-            }).catch((error) => {
-                Log('Updater', `Error: ${error.message}`, LogLevel.Error);
+            });
+        });
+    }
+
+    /**
+     * Gets the latest version number.
+     */
+    static getVersionNumber(): Promise<string> {
+        return new Promise((resolve: (result: string) => void, reject: (err: Error) => void) => {
+            https.get(ASSET_ENDPOINT + '/current/version.txt', (res) => {
+                let raw = '';
+                res.on('data', (chunk) => {
+                    raw += chunk;
+                });
+                res.once('end', () => {
+                    resolve(raw);
+                });
+                res.once('error', (error) => {
+                    res.removeAllListeners('data');
+                    res.removeAllListeners('end');
+                    reject(error);
+                });
+            });
+        });
+    }
+
+    /**
+     * Downloads all of the latest assets, extracts and applies the
+     * new packet ids, and updates the local version number.
+     */
+    static getLatest(): Promise<any> {
+        return Promise.all([
+            this.getClient(),
+            this.getGroundTypes(),
+            this.getObjects()
+        ]).then(() => {
+            Log('Updater', 'Unpacking client.swf', LogLevel.Info);
+            return this.unpackSwf();
+        }).then(() => {
+            Log('Updater', 'Unpacked client.swf', LogLevel.Success);
+            Log('Updater', 'Updating assets', LogLevel.Info);
+            const FILEPATH = path.join(
+                dir,
+                'src', 'services', 'updater-assets', 'decompiled', 'scripts',
+                'kabam', 'rotmg', 'messaging', 'impl', 'GameServerConnection.as'
+            );
+            const packets = this.extractPacketInfo(FILEPATH);
+            this.updatePackets(packets);
+            Log('Updater', 'Updated assets. Updating local version number.');
+            return this.getVersionNumber();
+        }).then((version) => {
+            this.updateVersion(version);
+            Log('Updater', 'Finished! Rebuilding source...', LogLevel.Success);
+            return this.rebuildSource();
+        }).then(() => {
+            Log('Updater', 'Finished rebuilding source!', LogLevel.Success);
+        }).catch((error) => {
+            Log('Updater', `Error: ${error.message}`, LogLevel.Error);
+        });
+    }
+
+    /**
+     * Invokes the gulp process to rebuild the source.
+     */
+    private static rebuildSource(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            const gulpCmd = os.platform() === 'win32' ? 'gulp.cmd' : 'gulp';
+            const child = spawn(path.join(dir, 'node_modules', '.bin', gulpCmd), []);
+            child.stdout.on('data', (data) => {
+                for (const line of this.cleanGulpOutput(data)) {
+                    Log('gulp', line, LogLevel.Info);
+                }
+            });
+            child.stderr.on('data', (data) => {
+                for (const line of this.cleanGulpOutput(data)) {
+                    Log('gulp', line, LogLevel.Error);
+                }
+            });
+            child.once('exit', () => {
+                resolve();
+            });
+            child.once('error', (error) => {
                 reject(error);
             });
         });
     }
 
+    /**
+     * Cleans the gulp process output.
+     * @param data The output to clean.
+     */
+    private static cleanGulpOutput(data: string | Buffer): string[] {
+        const lines = data.toString().split('\n');
+        return lines.filter((line) => line && !/^\s*\[\d{2}:\d{2}:\d{2}\]\s*$/.test(line));
+    }
+
+    /**
+     * Ensures that the given file is empty.
+     * @param filePath The file to empty.
+     */
     private static emptyFile(filePath: PathLike): void {
         try {
             fs.truncateSync(filePath, 0);
-        } catch {
-            fs.writeFileSync(filePath, '', { encoding: 'utf8' });
+        } catch (error) {
+            if (error.code === 'ENOENT') {
+                fs.writeFileSync(filePath, '', { encoding: 'utf8' });
+            } else {
+                throw error;
+            }
         }
     }
 
+    /**
+     * Unpacks the client in the updater assets.
+     */
     private static unpackSwf(): Promise<any> {
         return new Promise((resolve: () => void, reject: (err: Error) => void) => {
             const args = [
@@ -181,33 +268,29 @@ export class Updater {
         });
     }
 
-    private static updateAssets(): Promise<any> {
-        return new Promise((resolve: () => void, reject: (err: Error) => void) => {
-            let raw = null;
-            try {
-                raw = fs.readFileSync(path.join(
-                    dir,
-                    'src', 'services', 'updater-assets', 'decompiled', 'scripts',
-                    'kabam', 'rotmg', 'messaging', 'impl', 'GameServerConnection.as'
-                ), { encoding: 'utf8' });
-            } catch (err) {
-                reject(err);
-                return;
-            }
-            const packets: {
-                [id: string]: number
-            } = {};
-            let match = PACKET_REGEX.exec(raw);
-            while (match != null) {
-                packets[match[1].replace('_', '')] = +match[2];
-                match = PACKET_REGEX.exec(raw);
-            }
-            this.updatePackets(packets);
-            this.updateVersion();
-            resolve();
-        });
+    /**
+     * Extracts the packet information from the given file.
+     * @param assetPath The path to the file containing the extracted packet ids.
+     */
+    private static extractPacketInfo(assetPath: string): { [id: string]: number } {
+        let raw = null;
+        raw = fs.readFileSync(assetPath, { encoding: 'utf8' });
+        const packets: {
+            [id: string]: number
+        } = {};
+        let match = PACKET_REGEX.exec(raw);
+        while (match != null) {
+            packets[match[1].replace('_', '')] = +match[2];
+            match = PACKET_REGEX.exec(raw);
+        }
+        return packets;
     }
 
+    /**
+     * Converts the `newPackets` to an enum and writes the result
+     * to the `packet-type.ts` file.
+     * @param newPackets The packet name/id map to use.
+     */
     private static updatePackets(newPackets: { [id: string]: number }): void {
         const filePath = path.join(dir, 'src', 'networking', 'packet-type.ts');
         fs.truncateSync(filePath, 0);
@@ -221,12 +304,13 @@ export class Updater {
         Log('Updater', 'Updated PacketType enum', LogLevel.Info);
     }
 
-    private static updateVersion(): void {
+    /**
+     * Writes the `newVersion` to the local version number storage.
+     * @param newVersion The version number to write.
+     */
+    private static updateVersion(newVersion: string): void {
         const filePath = path.join(dir, 'src', 'services', 'updater-assets', 'version.txt');
-        try {
-            fs.truncateSync(filePath, 0);
-        } catch {
-        }
-        fs.writeFileSync(filePath, this.latestVersion, { encoding: 'utf8' });
+        fs.truncateSync(filePath, 0);
+        fs.writeFileSync(filePath, newVersion, { encoding: 'utf8' });
     }
 }
