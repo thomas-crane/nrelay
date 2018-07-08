@@ -347,8 +347,8 @@ export class Client {
         this.enemies = null;
 
         if (this.socketConnected) {
-            Client.emitter.emit('disconnect', this);
             this.socketConnected = false;
+            Client.emitter.emit('disconnect', this);
         }
 
         // client socket.

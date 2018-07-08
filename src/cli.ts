@@ -88,6 +88,7 @@ export class CLI {
 
     /**
      * Returns all clients.
+     * @deprecated Use `CLI.getAny((client) => true);` instead.
      */
     static getClients(): Client[] {
         if (!this.clients) {
