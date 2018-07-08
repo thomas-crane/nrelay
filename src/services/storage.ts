@@ -1,7 +1,7 @@
 import { IAccountInfo } from './../models';
 import { Logger, Log, LogLevel } from './logger';
-import fs = require('fs');
-import path = require('path');
+import * as fs from 'fs';
+import * as path from 'path';
 const dir = path.dirname(require.main.filename);
 const BUILD_VERSION_REGEX = /"buildVersion":\s*"([X.0-9]+)"/;
 

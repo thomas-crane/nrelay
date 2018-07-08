@@ -2,7 +2,6 @@ import { EventEmitter } from 'events';
 import { Socket } from 'net';
 import { Packet } from './packet';
 import { Packets } from './packets';
-import stream = require('stream');
 import { RC4, OUTGOING_KEY, INCOMING_KEY } from './../crypto/rc4';
 import { Log, LogLevel } from './../services/logger';
 import { environment } from './../models/environment';

@@ -1,10 +1,6 @@
-import * as chalk from 'chalk';
-import { Storage } from './storage';
-import fs = require('fs');
+import chalk from 'chalk';
 import { environment } from './../models';
 import { WriteStream } from 'fs';
-
-const c = chalk.constructor();
 
 export class Logger {
     static logStream: WriteStream;
@@ -18,19 +14,19 @@ export function Log(sender: string, message: string, level: LogLevel = LogLevel.
     }
     switch (level) {
         case LogLevel.Info:
-            printString = c.gray(printString);
+            printString = chalk.gray(printString);
             break;
         case LogLevel.Message:
             printString = (printString);
             break;
         case LogLevel.Warning:
-            printString = c.yellow(printString);
+            printString = chalk.yellow(printString);
             break;
         case LogLevel.Error:
-            printString = c.red(printString);
+            printString = chalk.red(printString);
             break;
         case LogLevel.Success:
-            printString = c.green(printString);
+            printString = chalk.green(printString);
             break;
         default:
             printString = message;

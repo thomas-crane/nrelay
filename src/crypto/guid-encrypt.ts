@@ -1,4 +1,4 @@
-import NodeRSA = require('node-rsa');
+import * as NodeRSA from 'node-rsa';
 
 const PUBLIC_KEY =
 '-----BEGIN PUBLIC KEY-----\n' +
