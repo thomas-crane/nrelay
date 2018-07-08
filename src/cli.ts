@@ -1,9 +1,8 @@
 import { XMLtoJSON, Updater, LocalServer, Log, LogLevel, Storage, AccountService, StringUtils } from './services';
 import { IAccountInfo, IAccount, ICharacterInfo, IServer, environment } from './models';
 import { PluginManager, ResourceManager, Client } from './core';
-import net = require('net');
-
-const args = process.argv;
+import * as net from 'net';
+import * as argParser from './services/arg-parser';
 
 export class CLI {
     /**
@@ -158,7 +157,8 @@ export class CLI {
     }
 
     constructor() {
-        this.updateEnvironment();
+        const args = argParser.parse(process.argv.slice(2));
+        this.updateEnvironment(args);
         CLI.clients = {};
         if (environment.log) {
             Storage.createLog();
@@ -168,54 +168,51 @@ export class CLI {
         } else {
             Log('NRelay', 'Starting...');
         }
-        if (this.hasFlag('--no-update')) {
+        if (args.update === false) {
             Log('NRelay', 'Not checking for updates.', LogLevel.Info);
             CLI.proceed();
+        } else if (args.hasOwnProperty('update-from')) {
+            const path = args['update-from'];
+            Log('NRelay', 'Updating from custom path.', LogLevel.Info);
+            Updater.updateFrom(path).then(() => {
+                return Updater.rebuildSource();
+            }).then(() => {
+                process.exit(0);
+            });
+        } else if (args['force-update'] === true) {
+            Log('NRelay', 'Forcing an update...', LogLevel.Info);
+            Updater.getLatest().then(() => {
+                process.exit(0);
+            }).catch((error) => {
+                Log('NRelay', `Error while updating: ${error.message}`, LogLevel.Error);
+            });
         } else {
-            if (this.hasFlag('--force-update')) {
-                Log('NRelay', 'Forcing an update...', LogLevel.Info);
-                Updater.getLatest().then(() => {
-                    process.exit(0);
-                }).catch((error) => {
-                    Log('NRelay', `Error while updating: ${error.message}`, LogLevel.Error);
-                });
-            } else {
-                Log('NRelay', 'Checking for updates...', LogLevel.Info);
-                Updater.isOutdated(Updater.getCurrentVersion()).then((needsUpdate) => {
-                    if (needsUpdate) {
-                        Log('NRelay', 'An update is available. Downloading...');
-                        return Updater.getLatest().then(() => {
-                            process.exit();
-                        });
-                    } else {
-                        CLI.proceed();
-                    }
-                }).catch(() => {
-                    Log('NRelay', 'Error while checking for update, starting anyway.', LogLevel.Info);
+            Log('NRelay', 'Checking for updates...', LogLevel.Info);
+            Updater.isOutdated(Updater.getCurrentVersion()).then((needsUpdate) => {
+                if (needsUpdate) {
+                    Log('NRelay', 'An update is available. Downloading...');
+                    return Updater.getLatest().then(() => {
+                        process.exit();
+                    });
+                } else {
                     CLI.proceed();
-                });
-            }
+                }
+            }).catch(() => {
+                Log('NRelay', 'Error while checking for update, starting anyway.', LogLevel.Info);
+                CLI.proceed();
+            });
         }
     }
 
-    private updateEnvironment(): void {
-        if (this.hasFlag('--no-log')) {
+    private updateEnvironment(args: argParser.IArgsResult): void {
+        if (args.log === false) {
             environment.log = false;
         }
-        if (this.hasFlag('--debug')) {
+        if (args.debug === true) {
             environment.debug = true;
         }
-        if (this.hasFlag('--no-plugins')) {
+        if (args.plugins === false) {
             environment.loadPlugins = false;
         }
-    }
-
-    private hasFlag(flag: string): boolean {
-        for (let i = 0; i < args.length; i++) {
-            if (args[i] === flag) {
-                return true;
-            }
-        }
-        return false;
     }
 }
