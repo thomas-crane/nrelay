@@ -1,9 +1,5 @@
 import { Log, LogLevel, Storage } from './../services';
-import fs = require('fs');
-import path = require('path');
 import { IObject, IProjectile, ITile, environment } from './../models';
-
-const dir = path.dirname(require.main.filename);
 
 export class ResourceManager {
 
@@ -13,8 +9,15 @@ export class ResourceManager {
     static enemies: { [id: number]: IObject };
     static pets: { [id: number]: IObject };
 
+    static loadAllResources(): Promise<void> {
+        return Promise.all([
+            this.loadTileInfo(),
+            this.loadObjects()
+        ]).then(() => null);
+    }
+
     static loadTileInfo(): Promise<void> {
-        return new Promise((resolve: () => void, reject: () => void) => {
+        return new Promise((resolve: () => void, reject: (error: Error) => void) => {
             this.tiles = {};
             Storage.get('resources', 'GroundTypes.json').then((data) => {
                 let tileArray: any[] = data['Ground'];
@@ -39,17 +42,13 @@ export class ResourceManager {
                 resolve();
             }).catch((error) => {
                 Log('ResourceManager', 'Error reading GroundTypes.json', LogLevel.Warning);
-                if (environment.debug) {
-                    Log('ResourceManager', error, LogLevel.Info);
-                }
-                resolve();
-                return;
+                reject(error);
             });
         });
     }
 
     static loadObjects(): Promise<any> {
-        return new Promise((resolve: () => void, reject: () => void) => {
+        return new Promise((resolve: () => void, reject: (error: Error) => void) => {
             this.objects = {};
             this.items = {};
             this.enemies = {};
@@ -192,11 +191,7 @@ export class ResourceManager {
                 resolve();
             }).catch((error) => {
                 Log('ResourceManager', 'Error reading Objects.json', LogLevel.Warning);
-                if (environment.debug) {
-                    Log('ResourceManager', error, LogLevel.Info);
-                }
-                resolve();
-                return;
+                reject(error);
             });
         });
     }
