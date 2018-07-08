@@ -1,4 +1,5 @@
 export const environment = {
     debug: false,
-    log: true
+    log: true,
+    loadPlugins: true,
 };

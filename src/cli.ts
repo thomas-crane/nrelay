@@ -1,174 +1,115 @@
-import { XMLtoJSON, Updater, LocalServer, Http, Log, LogLevel, Storage } from './services';
-import { IAccountInfo, IAccount, ICharacterInfo, SERVER_ENDPOINT, IServer, environment } from './models';
+import { XMLtoJSON, Updater, LocalServer, Log, LogLevel, Storage, AccountService, StringUtils } from './services';
+import { IAccountInfo, IAccount, ICharacterInfo, IServer, environment } from './models';
 import { PluginManager, ResourceManager, Client } from './core';
-import fs = require('fs');
 import net = require('net');
-import dns = require('dns');
-import { StringUtils } from './services/string-utils';
 
 const args = process.argv;
-const ACCOUNT_IN_USE_REGEX = /Account in use \((\d+) seconds? until timeout\)/;
 
 export class CLI {
-
-    public static addClient(account: IAccount, charInfo?: ICharacterInfo): Promise<any> {
-        return new Promise((resolve: (client: Client) => void, reject: (err: Error) => void) => {
-            if (!account.alias) {
-                account.alias = StringUtils.censorGuid(account.guid);
+    /**
+     * Creates a new client with the `account` details provided.
+     *
+     * The `charInfo` can optionally be provided to avoid the initial web
+     * request to fetch the character info.
+     * @param account The account info to use.
+     * @param charInfo The character info to use.
+     */
+    static addClient(account: IAccount, charInfo?: ICharacterInfo): Promise<Client> {
+        if (!account.alias) {
+            account.alias = StringUtils.censorGuid(account.guid);
+        }
+        if (this.clients[account.guid]) {
+            const err = new Error(`${account.alias} has already been added.`);
+            return Promise.reject(err);
+        }
+        Log('NRelay', `Loading ${account.alias}`);
+        return AccountService.resolveProxyHostname(account.proxy).then(() => {
+            if (charInfo) {
+                return charInfo;
             }
-            if (this.clients[account.guid]) {
-                const err = new Error(account.alias + ' has already been added.');
-                reject(err);
-                return;
+            if (account.charInfo) {
+                return account.charInfo;
             }
-            const handler = (info: IAccount) => {
-                let server: IServer;
-                if (net.isIP(account.serverPref) !== 0) {
-                    server = {
-                        name: account.serverPref,
-                        address: account.serverPref
-                    };
-                }
-                if (!server) {
-                    let keys: string[];
-                    try {
-                        keys = Object.keys(this.internalServerList);
-                    } catch (err) {
-                        keys = [];
-                    }
-                    if (keys.length > 0) {
-                        if (!account.serverPref || account.serverPref === '') {
-                            Log('NRelay', 'Preferred server not found. Choosing first server.', LogLevel.Warning);
-                            server = this.internalServerList[keys[0]];
-                        }
-                        server = this.internalServerList[account.serverPref];
-                    } else {
-                        reject(new Error(account.alias + ' couldn\'t get servers.'));
-                        return;
-                    }
-                }
-                const client = new Client(server, this.buildVersion, account);
-                this.clients[account.guid] = client;
-                resolve(client);
-            };
-            Log('NRelay', `Adding ${account.alias}`, LogLevel.Info);
-            if (charInfo || account.charInfo) {
-                if (environment.debug) {
-                    Log('NRelay', `Using provided character info for ${account.alias}.`, LogLevel.Info);
-                }
-                if (charInfo) {
-                    account.charInfo = charInfo;
-                }
-                handler(account);
-            } else {
-                this.getAccountInfo(account).then(handler).catch((error) => {
-                    const accError = this.handleAccountInfoError(error, account);
-                    if (accError) {
-                        reject(accError);
-                    } else {
-                        reject(error);
-                    }
-                });
+            return AccountService.getCharacterInfo(account.guid, account.password, account.proxy);
+        }).then((retrievedCharInfo) => {
+            account.charInfo = retrievedCharInfo;
+            return AccountService.getServerList();
+        }).then((servers: { [name: string]: IServer }) => {
+            let server: IServer;
+            if (net.isIP(account.serverPref) !== 0) {
+                server = {
+                    name: account.serverPref,
+                    address: account.serverPref
+                };
             }
+            if (!server) {
+                if (!servers[account.serverPref]) {
+                    const keys = Object.keys(servers);
+                    if (keys.length === 0) {
+                        throw new Error(`Server list is empty.`);
+                    }
+                    server = servers[keys[Math.floor(Math.random() * keys.length)]];
+                    Log('NRelay', `Preferred server not found. Using ${server.name} instead.`, LogLevel.Warning);
+                } else {
+                    server = servers[account.serverPref];
+                }
+            }
+            Log('NRelay', `Loaded ${account.alias}!`, LogLevel.Success);
+            const client = new Client(server, this.buildVersion, account);
+            this.clients[account.guid] = client;
+            return client;
         });
     }
 
-    public static removeClient(guid: string): boolean {
-        if (this.clients[guid]) {
-            this.clients[guid].destroy();
-            delete this.clients[guid];
-            Log('NRelay', `Removed ${StringUtils.censorGuid(guid)}`, LogLevel.Info);
-            return true;
+    /**
+     * Removes all clients which return true for the `predicate`.
+     * @param predicate The predicate used to test clients.
+     */
+    static removeAny(predicate: (client: Client) => boolean): number {
+        const keysToRemove = Object.keys(this.clients)
+            .filter((k) => predicate(this.clients[k]));
+        for (const key of keysToRemove) {
+            const guid = this.clients[key].guid;
+            this.clients[key].destroy();
+            delete this.clients[key];
+            Log('NRelay', `Removed ${guid}`, LogLevel.Info);
         }
-        return false;
+        return keysToRemove.length;
     }
 
-    public static getClient(guid: string): Client {
-        if (!this.clients.hasOwnProperty(guid)) {
-            return null;
-        }
-        return this.clients[guid];
+    /**
+     * Returns all clients which return true for the `predicate`.
+     * @param predicate The predicate used to test clients.
+     */
+    static getAny(predicate: (client: Client) => boolean): Client[] {
+        return Object.keys(this.clients)
+            .map((k) => this.clients[k])
+            .filter((client) => predicate(client));
     }
 
-    public static getClients(): Client[] {
+    /**
+     * Returns all clients.
+     */
+    static getClients(): Client[] {
         if (!this.clients) {
             return new Array<Client>(0);
         }
         return Object.keys(this.clients).map((k) => this.clients[k]);
     }
 
-    public static loadServers(): Promise<any> {
-        Log('NRelay', 'Loading server list', LogLevel.Info);
-        return new Promise((resolve: () => void, reject: (err: Error) => void) => {
-            Http.get(SERVER_ENDPOINT).then((data: any) => {
-                Log('NRelay', 'Server list loaded.', LogLevel.Success);
-                this.internalServerList = XMLtoJSON.parseServers(data);
-                resolve();
-            }).catch((err) => {
-                Log('NRelay', `Error loading server list: ${err.message}`);
-                reject(err);
-            });
-        });
-    }
-
-    public static get serverList(): { [id: string]: IServer } {
-        return this.internalServerList;
-    }
-
     private static clients: {
         [guid: string]: Client
     };
 
-    private static internalServerList: { [id: string]: IServer };
     private static buildVersion: string;
 
-    private static getAccountInfo(account: IAccount): Promise<IAccount> {
-        return new Promise((resolve: (acc: IAccount) => void, reject: (err: Error | string) => void) => {
-            const handler = (data: string) => {
-                const info = XMLtoJSON.parseAccountInfo(data);
-                this.internalServerList = XMLtoJSON.parseServers(data);
-                if (info) {
-                    account.charInfo = info;
-                    resolve(account);
-                } else {
-                    reject(data);
-                }
-            };
-            if (account.proxy) {
-                if (net.isIP(account.proxy.host) === 0) {
-                    Log('NRelay', 'Resolving proxy hostname.', LogLevel.Info);
-                    dns.lookup(account.proxy.host, (err, address, family) => {
-                        if (err) {
-                            reject(err);
-                            return;
-                        }
-                        Log('NRelay', 'Proxy hostname resolved!', LogLevel.Success);
-                        account.proxy.host = address;
-                        Http.proxiedGet(SERVER_ENDPOINT, account.proxy, {
-                            guid: account.guid,
-                            password: account.password
-                        }).then(handler, reject);
-                    });
-                } else {
-                    Http.proxiedGet(SERVER_ENDPOINT, account.proxy, {
-                        guid: account.guid,
-                        password: account.password
-                    }).then(handler, reject);
-                }
-            } else {
-                Http.get(SERVER_ENDPOINT, {
-                    guid: account.guid,
-                    password: account.password
-                }).then(handler, reject);
-            }
-        });
-    }
-
     private static proceed(): void {
-        const accInfo = Storage.getAccountConfig();
-        if (accInfo instanceof Error) {
+        let accInfo: IAccountInfo;
+        try {
+            accInfo = Storage.getAccountConfig();
+        } catch (error) {
             Log('NRelay', 'Couldn\'t load acc-config.json.', LogLevel.Error);
-            Log('NRelay', accInfo.message, LogLevel.Warning);
+            Log('NRelay', error.message, LogLevel.Warning);
             return;
         }
         this.buildVersion = accInfo.buildVersion;
@@ -178,44 +119,41 @@ export class CLI {
             }
         }
 
-        const loadResources = new Promise((resolve: () => void, reject: () => void) => {
-            Promise.all([ResourceManager.loadTileInfo(), ResourceManager.loadObjects()]).then(() => {
-                resolve();
-            }).catch((error) => {
-                Log('NRelay', 'An error occurred while loading tiles and objects.', LogLevel.Warning);
-                resolve();
-            });
+        ResourceManager.loadAllResources().then(() => {
+            if (environment.loadPlugins) {
+                PluginManager.loadPlugins();
+            } else {
+                Log('NRelay', 'Load plugins disabled. No plugins will be loaded.', LogLevel.Warning);
+            }
+            for (let i = 0; i < accInfo.accounts.length; i++) {
+                const acc = accInfo.accounts[i];
+                setTimeout(() => {
+                    this.addClient(acc).catch((err) => this.handleAddAccountError(acc, err));
+                }, (i * 1000));
+            }
+        }).catch((error) => {
+            Log('NRelay', 'An error occurred while loading the resources required to run nrelay.', LogLevel.Error);
+            Log('NRelay', error.message, LogLevel.Error);
+            Log('NRelay', 'If this error persists, trying redownloading the resources by running "nrelay --force-update"');
         });
-        loadResources.then(() => {
-            PluginManager.loadPlugins();
-        });
-
-        for (let i = 0; i < accInfo.accounts.length; i++) {
-            const acc = accInfo.accounts[i];
-            setTimeout(() => {
-                this.addClient(acc).then(() => {
-                    Log('NRelay', `Authorized ${acc.alias}`, LogLevel.Success);
-                }).catch((error: Error) => {
-                    Log('NRelay', `${acc.alias}: ${error.message}`, LogLevel.Error);
-                });
-            }, (i * 1000));
-        }
     }
 
-    private static handleAccountInfoError(response: string, acc: IAccount): Error {
-        if (!response) {
-            return new Error('Empty response');
-        }
-        const accInUse = ACCOUNT_IN_USE_REGEX.exec(response);
-        if (accInUse) {
-            const time = +accInUse[1] + 1;
-            setTimeout(() => {
-                this.addClient(acc);
-            }, time * 1000);
-            return new Error(`Account in use error. Reconnecting in ${time} seconds.`);
-        } else {
-            const error = XMLtoJSON.parseError(response);
-            return error;
+    private static handleAddAccountError(acc: IAccount, error: Error): void {
+        if (error.name) {
+            switch (error.name) {
+                case 'ACCOUNT_IN_USE':
+                    const timeout: number = (error as any).timeout__;
+                    Log(acc.alias, `Account in use. (${timeout} second${timeout !== 1 ? 's' : ''})`, LogLevel.Warning);
+                    const shortTimeout = Math.floor(timeout / 4) + 1;
+                    Log(acc.alias, `Reconnecting in ${shortTimeout} second${shortTimeout !== 1 ? 's' : ''}`);
+                    setTimeout(() => {
+                        this.addClient(acc).catch((err) => this.handleAddAccountError(acc, err));
+                    }, shortTimeout * 1000);
+                    break;
+                default:
+                    Log(acc.alias, error.message, LogLevel.Error);
+                    break;
+            }
         }
     }
 
@@ -234,23 +172,21 @@ export class CLI {
             Log('NRelay', 'Not checking for updates.', LogLevel.Info);
             CLI.proceed();
         } else {
-            const forceUpdate = this.hasFlag('--force-update');
-            const update = (force: boolean = false) => {
-                Updater.getLatest(force).then(() => {
+            if (this.hasFlag('--force-update')) {
+                Log('NRelay', 'Forcing an update...', LogLevel.Info);
+                Updater.getLatest().then(() => {
                     process.exit(0);
-                }).catch((error: Error) => {
+                }).catch((error) => {
                     Log('NRelay', `Error while updating: ${error.message}`, LogLevel.Error);
                 });
-            };
-            if (forceUpdate) {
-                Log('NRelay', 'Forcing an update...', LogLevel.Info);
-                update(true);
             } else {
                 Log('NRelay', 'Checking for updates...', LogLevel.Info);
-                Updater.checkVersion().then((needsUpdate) => {
+                Updater.isOutdated(Updater.getCurrentVersion()).then((needsUpdate) => {
                     if (needsUpdate) {
                         Log('NRelay', 'An update is available. Downloading...');
-                        update();
+                        return Updater.getLatest().then(() => {
+                            process.exit();
+                        });
                     } else {
                         CLI.proceed();
                     }
@@ -268,6 +204,9 @@ export class CLI {
         }
         if (this.hasFlag('--debug')) {
             environment.debug = true;
+        }
+        if (this.hasFlag('--no-plugins')) {
+            environment.loadPlugins = false;
         }
     }
 
