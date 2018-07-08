@@ -22,32 +22,24 @@ export class XMLtoJSON {
         return servers;
     }
 
-    static parseAccountInfo(xml: string): ICharacterInfo | null {
+    static parseAccountInfo(xml: string): ICharacterInfo {
         const acc = {
             nextCharId: 2,
             charId: 1,
             maxNumChars: 1
         };
         const match = ACCOUNT_INFO_REGEX.exec(xml);
-        if (match != null) {
+        if (match) {
             acc.nextCharId = +match[1];
             acc.maxNumChars = +match[2];
-            try {
+            if (match[3]) {
                 acc.charId = +match[3];
-            } catch {
+            } else {
                 acc.charId = -1;
             }
         } else {
             return null;
         }
         return acc;
-    }
-
-    static parseError(xml: string): Error {
-        const match = ERROR_REGEX.exec(xml);
-        if (match) {
-            return new Error(match[1]);
-        }
-        return null;
     }
 }
