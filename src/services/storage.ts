@@ -1,8 +1,9 @@
 import { IAccountInfo } from './../models';
-import { Logger } from './logger';
+import { Logger, Log, LogLevel } from './logger';
 import fs = require('fs');
 import path = require('path');
 const dir = path.dirname(require.main.filename);
+const BUILD_VERSION_REGEX = /"buildVersion":\s*"([X.0-9]+)"/;
 
 export class Storage {
     /**
@@ -41,7 +42,7 @@ export class Storage {
      * @param data The text to write.
      * @param filePath The path of the file to write to.
      */
-    public static writeText(data: string, ...filePath: string[]): Promise<any> {
+    public static writeText(data: string, ...filePath: string[]): Promise<void> {
         return new Promise((resolve: () => void, reject: (err: Error) => void) => {
             const fileName = this.makePath(...filePath);
             fs.writeFile(fileName, data, (error) => {
@@ -72,7 +73,7 @@ export class Storage {
      * @param data The data to write.
      * @param filePath The path of the file to write to.
      */
-    public static set(data: object, ...filePath: string[]): Promise<any> {
+    public static set(data: object, ...filePath: string[]): Promise<void> {
         return this.writeText(JSON.stringify(data), ...filePath);
     }
 
@@ -80,12 +81,32 @@ export class Storage {
      * Gets the contents of the `acc-config.json` file and returns
      * it as an `IAccountInfo` object.
      */
-    public static getAccountConfig(): IAccountInfo | Error {
-        try {
-            return require('./../../acc-config.json');
-        } catch (err) {
-            return err;
-        }
+    public static getAccountConfig(): IAccountInfo {
+        return require('./../../acc-config.json');
+    }
+
+    /**
+     * Replaces the "buildVersion" value in the acc-config with `newVersion`.
+     * @param newVersion The new value to use.
+     */
+    public static updateBuildVersion(newVersion: string): void {
+        this.readText('acc-config.json').then((text) => {
+            const match = BUILD_VERSION_REGEX.exec(text);
+            if (!match) {
+                throw new Error('Cannot find buildVersion in acc-config.json');
+            }
+            if (match[1] === newVersion) {
+                return;
+            }
+            Log('Storage', 'Updating acc-config buildVersion', LogLevel.Info);
+            const newText = text.replace(match[0], match[0].replace(match[1], newVersion));
+            return this.writeText(newText, 'acc-config.json');
+        }).then(() => {
+            Log('Storage', `Updated acc-config buildVersion to ${newVersion}!`, LogLevel.Success);
+        }).catch((error) => {
+            Log('Storage', 'Error while updating acc-config buildVersion.', LogLevel.Warning);
+            Log('Storage', error.message, LogLevel.Warning);
+        });
     }
 
     /**

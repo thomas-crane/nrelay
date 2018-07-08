@@ -1,5 +1,5 @@
 import { Socket } from 'net';
-import { Log, LogLevel, Random } from '../services';
+import { Log, LogLevel, Random, Storage } from '../services';
 import { Packet, PacketType, PacketIO } from './../networking';
 import {
     HelloPacket,
@@ -208,7 +208,7 @@ export class Client {
     private reconnectTimer: NodeJS.Timer;
 
     // reconnect info
-    private key: Int8Array;
+    private key: number[];
     private keyTime: number;
     private gameId: number;
     private reconnectCooldown: number;
@@ -239,7 +239,7 @@ export class Client {
         this.projectileUpdateTimer = null;
         this.enemies = {};
         this.autoAim = true;
-        this.key = new Int8Array(0);
+        this.key = [];
         this.keyTime = -1;
         this.gameId = -2;
         this.playerData = getDefaultPlayerData();
@@ -653,8 +653,9 @@ export class Client {
     private onFailurePacket(client: Client, failurePacket: FailurePacket): void {
         switch (failurePacket.errorId) {
             case FailurePacket.INCORRECT_VERSION:
-                Log('NRelay', `acc-config.json is out of date. Change "buildVersion" to "${failurePacket.errorDescription}"`);
-                process.exit(0);
+                Log(this.alias, 'buildVersion out of date. Updating and reconnecting...');
+                this.buildVersion = failurePacket.errorDescription;
+                Storage.updateBuildVersion(failurePacket.errorDescription);
                 break;
             case FailurePacket.INVALID_TELEPORT_TARGET:
                 Log(this.alias, 'Invalid teleport target.', LogLevel.Warning);
@@ -664,6 +665,9 @@ export class Client {
                 break;
             case FailurePacket.BAD_KEY:
                 Log(this.alias, 'Invalid key used.', LogLevel.Error);
+                this.key = [];
+                this.gameId = -2;
+                this.keyTime = -1;
                 break;
             default:
                 Log(this.alias, `Received failure ${failurePacket.errorId}: "${failurePacket.errorDescription}"`, LogLevel.Error);
@@ -806,7 +810,6 @@ export class Client {
         Client.emitter.emit('ready', this);
         this.frameUpdateTimer = setInterval(() => {
             const time = this.getTime();
-            const deltaTime = time - this.lastFrameTime;
             if (this.worldPos) {
                 this.moveRecords.addRecord(time, this.worldPos.x, this.worldPos.y);
             }
@@ -841,8 +844,6 @@ export class Client {
         hp.gameId = this.gameId;
         hp.guid = this.guid;
         hp.password = this.password;
-        hp.random1 = Math.floor(Math.random() * 1000000000);
-        hp.random2 = Math.floor(Math.random() * 1000000000);
         hp.secret = '';
         hp.keyTime = this.keyTime;
         hp.key = this.key;
@@ -888,7 +889,6 @@ export class Client {
         this.reconnectTimer = setTimeout(() => {
             this.connect();
         }, reconnectTime * 1000);
-        // process.exit(0);
     }
 
     private onError(error: Error): void {
