@@ -9,12 +9,10 @@ export class HelloPacket extends Packet {
     buildVersion: string;
     gameId: number;
     guid: string;
-    random1: number;
     password: string;
-    random2: number;
     secret: string;
     keyTime: number;
-    key: Int8Array;
+    key: number[];
     mapJSON: string;
     entryTag: string;
     gameNet: string;
@@ -30,9 +28,9 @@ export class HelloPacket extends Packet {
         this.buildVersion = this.readString();
         this.gameId = this.readInt32();
         this.guid = this.readString();
-        this.random1 = this.readInt32();
+        this.readInt32(); // skip random1
         this.password = this.readString();
-        this.random2 = this.readInt32();
+        this.readInt32(); // skip random2
         this.secret = this.readString();
         this.keyTime = this.readInt32();
         this.key = this.readByteArray();
@@ -49,9 +47,9 @@ export class HelloPacket extends Packet {
         this.writeString(this.buildVersion);
         this.writeInt32(this.gameId);
         this.writeString(encryptGUID(this.guid));
-        this.writeInt32(this.random1);
+        this.writeInt32(Math.floor(Math.random() * 1000000000));
         this.writeString(encryptGUID(this.password));
-        this.writeInt32(this.random2);
+        this.writeInt32(Math.floor(Math.random() * 1000000000));
         this.writeString(encryptGUID(this.secret));
         this.writeInt32(this.keyTime);
         this.writeByteArray(this.key);

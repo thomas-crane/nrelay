@@ -11,7 +11,7 @@ export class ReconnectPacket extends Packet {
     port: number;
     gameId: number;
     keyTime: number;
-    key: Int8Array;
+    key: number[];
     isFromArena: boolean;
     //#endregion
 
@@ -23,11 +23,7 @@ export class ReconnectPacket extends Packet {
         this.gameId = this.readInt32();
         this.keyTime = this.readInt32();
         this.isFromArena = this.readBoolean();
-        const keyLen = this.readShort();
-        this.key = new Int8Array(keyLen);
-        for (let i = 0; i < keyLen; i++) {
-            this.key[i] = this.readByte();
-        }
+        this.key = this.readByteArray();
     }
 
     public write(): void {
@@ -38,9 +34,6 @@ export class ReconnectPacket extends Packet {
         this.writeInt32(this.gameId);
         this.writeInt32(this.keyTime);
         this.writeBoolean(this.isFromArena);
-        this.writeShort(this.key.length);
-        for (let i = 0; i < this.key.length; i++) {
-            this.writeByte(this.key[i]);
-        }
+        this.writeByteArray(this.key);
     }
 }

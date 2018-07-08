@@ -93,15 +93,15 @@ export abstract class Packet implements IPacket {
         this.bufferIndex = this.data.writeFloatBE(value, this.bufferIndex);
     }
 
-    readByteArray(): Int8Array {
+    readByteArray(): number[] {
         const arraylen = this.readShort();
-        const result = new Int8Array(arraylen);
+        const result = new Array<number>(arraylen);
         for (let i = 0; i < arraylen; i++ , this.bufferIndex++) {
             result[i] = this.data[this.bufferIndex];
         }
         return result;
     }
-    writeByteArray(value: Int8Array): void {
+    writeByteArray(value: number[]): void {
         if (!value) {
             this.writeShort(0);
             return;
