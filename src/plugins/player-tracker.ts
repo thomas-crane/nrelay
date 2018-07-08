@@ -33,7 +33,7 @@ export class PlayerTracker {
      * @param event The event to attach the listener to.
      * @param listener The function to invoke when the event is fired.
      */
-    public on(event: string | symbol, listener: (...args: any[]) => void): EventEmitter {
+    on(event: string | symbol, listener: (...args: any[]) => void): EventEmitter {
         if (!this.emitter) {
             this.emitter = new EventEmitter();
         }
@@ -43,7 +43,7 @@ export class PlayerTracker {
     /**
      * Enables tracking for all clients including clients added at runtime.
      */
-    public trackAllPlayers(): void {
+    trackAllPlayers(): void {
         if (!this.trackAll) {
             Log('Player Tracker', 'Enabled tracking for all clients.', LogLevel.Success);
             this.trackAll = true;
@@ -56,7 +56,7 @@ export class PlayerTracker {
      * Enables player tracking for the specified client.
      * @param client The client to enable tracking for.
      */
-    public trackPlayersFor(client: Client): void {
+    trackPlayersFor(client: Client): void {
         if (!this.trackedPlayers.hasOwnProperty(client.guid)) {
             this.trackedPlayers[client.guid] = [];
             Log('Player Tracker', `Tracking players for ${client.alias}`, LogLevel.Success);
@@ -68,7 +68,7 @@ export class PlayerTracker {
     /**
      * Returns all tracked players, or an empty array if there are no clients tracking players.
      */
-    public getAllPlayers(): IPlayerData[] {
+    getAllPlayers(): IPlayerData[] {
         let players: IPlayerData[] = [];
         Object.keys(this.trackedPlayers).map((guid) => {
             players = players.concat(this.trackedPlayers[guid]);
@@ -82,7 +82,7 @@ export class PlayerTracker {
      * Returns the list of players visible to the `client` provided.
      * @param client The client to get players for.
      */
-    public getPlayersFor(client: Client): IPlayerData[] | null {
+    getPlayersFor(client: Client): IPlayerData[] | null {
         if (!this.trackedPlayers.hasOwnProperty(client.guid)) {
             Log('Player Tracker', `Players are not being tracked for ${client.alias}. Did you forget to call trackPlayersFor(client)?`);
             return null;

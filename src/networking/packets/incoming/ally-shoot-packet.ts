@@ -2,7 +2,7 @@ import { Packet, PacketType } from '../../packet';
 
 export class AllyShootPacket extends Packet {
 
-    public type = PacketType.ALLYSHOOT;
+    type = PacketType.ALLYSHOOT;
 
     //#region packet-specific members
     bulletId: number;
@@ -11,14 +11,14 @@ export class AllyShootPacket extends Packet {
     angle: number;
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.bulletId = this.readUnsignedByte();
         this.ownerId = this.readInt32();
         this.containerType = this.readShort();
         this.angle = this.readFloat();
     }
 
-    public write(): void {
+    write(): void {
         this.writeUnsignedByte(this.bulletId);
         this.writeInt32(this.ownerId);
         this.writeShort(this.containerType);

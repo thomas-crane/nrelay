@@ -3,14 +3,14 @@ import { SlotObjectData } from '../../../data/slot-object-data';
 
 export class QuestRedeemPacket extends Packet {
 
-    public type = PacketType.QUESTREDEEM;
+    type = PacketType.QUESTREDEEM;
 
     //#region packet-specific members
     questId: string;
     slots: SlotObjectData[];
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.questId = this.readString();
         const slotsLen = this.readShort();
         this.slots = new Array<SlotObjectData>(slotsLen);
@@ -20,7 +20,7 @@ export class QuestRedeemPacket extends Packet {
         }
     }
 
-    public write(): void {
+    write(): void {
         this.writeString(this.questId);
         this.writeShort(this.slots.length);
         for (let i = 0; i < this.slots.length; i++) {

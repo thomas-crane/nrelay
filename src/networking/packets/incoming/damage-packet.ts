@@ -2,7 +2,7 @@ import { Packet, PacketType } from '../../packet';
 
 export class DamagePacket extends Packet {
 
-    public type = PacketType.DAMAGE;
+    type = PacketType.DAMAGE;
 
     //#region packet-specific members
     targetId: number;
@@ -14,7 +14,7 @@ export class DamagePacket extends Packet {
     objectId: number;
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.targetId = this.readInt32();
         const effectsLen = this.readUnsignedByte();
         this.effects = new Array<number>(effectsLen);
@@ -28,7 +28,7 @@ export class DamagePacket extends Packet {
         this.objectId = this.readInt32();
     }
 
-    public write(): void {
+    write(): void {
         this.writeInt32(this.targetId);
         this.writeUnsignedByte(this.effects.length);
         for (let i = 0; i < this.effects.length; i++) {

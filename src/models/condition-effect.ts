@@ -1,5 +1,5 @@
 export class ConditionEffects {
-    public static has(condition: number, effect: ConditionEffect): boolean {
+    static has(condition: number, effect: ConditionEffect): boolean {
         // tslint:disable no-bitwise
         const effectBit = 1 << effect - 1;
         return (condition & effectBit) === 1;

@@ -5,7 +5,7 @@ export class Random {
         this.seed = seed;
     }
 
-    public nextIntInRange(min: number, max: number): number {
+    nextIntInRange(min: number, max: number): number {
         if (min === max) {
             return min;
         }

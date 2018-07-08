@@ -2,7 +2,7 @@ import { Packet, PacketType } from '../../packet';
 
 export class ReconnectPacket extends Packet {
 
-    public type = PacketType.RECONNECT;
+    type = PacketType.RECONNECT;
 
     //#region packet-specific members
     name: string;
@@ -15,7 +15,7 @@ export class ReconnectPacket extends Packet {
     isFromArena: boolean;
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.name = this.readString();
         this.host = this.readString();
         this.stats = this.readString();
@@ -26,7 +26,7 @@ export class ReconnectPacket extends Packet {
         this.key = this.readByteArray();
     }
 
-    public write(): void {
+    write(): void {
         this.writeString(this.name);
         this.writeString(this.host);
         this.writeString(this.stats);

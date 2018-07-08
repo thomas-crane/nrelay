@@ -6,13 +6,13 @@ export class SlotObjectData {
     slotId: number;
     objectType: number;
 
-    public read(packet: Packet): void {
+    read(packet: Packet): void {
         this.objectId = packet.readInt32();
         this.slotId = packet.readUnsignedByte();
         this.objectType = packet.readUInt32();
     }
 
-    public write(packet: Packet): void {
+    write(packet: Packet): void {
         packet.writeInt32(this.objectId);
         packet.writeUnsignedByte(this.slotId);
         packet.writeInt32(this.objectType);

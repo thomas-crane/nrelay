@@ -3,7 +3,7 @@ import { encryptGUID } from '../../../crypto/guid-encrypt';
 
 export class HelloPacket extends Packet {
 
-    public type = PacketType.HELLO;
+    type = PacketType.HELLO;
 
     //#region packet-specific members
     buildVersion: string;
@@ -24,7 +24,7 @@ export class HelloPacket extends Packet {
 
     data: Buffer;
 
-    public read(): void {
+    read(): void {
         this.buildVersion = this.readString();
         this.gameId = this.readInt32();
         this.guid = this.readString();
@@ -43,7 +43,7 @@ export class HelloPacket extends Packet {
         this.userToken = this.readString();
     }
 
-    public write(): void {
+    write(): void {
         this.writeString(this.buildVersion);
         this.writeInt32(this.gameId);
         this.writeString(encryptGUID(this.guid));

@@ -4,7 +4,7 @@ import { MoveRecord } from './../../data/move-record';
 
 export class MovePacket extends Packet {
 
-    public type = PacketType.MOVE;
+    type = PacketType.MOVE;
 
     //#region packet-specific members
     tickId: number;
@@ -13,7 +13,7 @@ export class MovePacket extends Packet {
     records: MoveRecord[];
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.tickId = this.readInt32();
         this.time = this.readInt32();
         this.newPosition = new WorldPosData();
@@ -26,7 +26,7 @@ export class MovePacket extends Packet {
         }
     }
 
-    public write(): void {
+    write(): void {
         this.writeInt32(this.tickId);
         this.writeInt32(this.time);
         this.newPosition.write(this);

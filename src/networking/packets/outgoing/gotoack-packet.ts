@@ -2,17 +2,17 @@ import { Packet, PacketType } from '../../packet';
 
 export class GotoAckPacket extends Packet {
 
-    public type = PacketType.GOTOACK;
+    type = PacketType.GOTOACK;
 
     //#region packet-specific members
     time: number;
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.time = this.readInt32();
     }
 
-    public write(): void {
+    write(): void {
         this.writeInt32(this.time);
     }
 }

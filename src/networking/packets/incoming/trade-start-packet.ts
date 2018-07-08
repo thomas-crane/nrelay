@@ -3,7 +3,7 @@ import { TradeItem } from './../../data/trade-item';
 
 export class TradeStartPacket extends Packet {
 
-    public type = PacketType.TRADESTART;
+    type = PacketType.TRADESTART;
 
     //#region packet-specific members
     clientItems: TradeItem[];
@@ -11,7 +11,7 @@ export class TradeStartPacket extends Packet {
     partnerItems: TradeItem[];
     //#endregion
 
-    public read(): void {
+    read(): void {
         const clientItemsLen = this.readShort();
         this.clientItems = new Array(clientItemsLen);
         for (let i = 0; i < clientItemsLen; i++) {
@@ -29,7 +29,7 @@ export class TradeStartPacket extends Packet {
         }
     }
 
-    public write(): void {
+    write(): void {
         this.writeShort(this.clientItems.length);
         for (let i = 0; i < this.clientItems.length; i++) {
             const item = new TradeItem();

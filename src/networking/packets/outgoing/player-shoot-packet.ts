@@ -3,7 +3,7 @@ import { WorldPosData } from '../../data/world-pos-data';
 
 export class PlayerShootPacket extends Packet {
 
-    public type = PacketType.PLAYERSHOOT;
+    type = PacketType.PLAYERSHOOT;
 
     //#region packet-specific members
     time: number;
@@ -13,7 +13,7 @@ export class PlayerShootPacket extends Packet {
     angle: number;
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.time = this.readInt32();
         this.bulletId = this.readByte();
         this.containerType = this.readShort();
@@ -22,7 +22,7 @@ export class PlayerShootPacket extends Packet {
         this.angle = this.readFloat();
     }
 
-    public write(): void {
+    write(): void {
         this.writeInt32(this.time);
         this.writeByte(this.bulletId);
         this.writeShort(this.containerType);

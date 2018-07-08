@@ -2,17 +2,17 @@ import { Packet, PacketType } from '../../packet';
 
 export class VerifyEmailPacket extends Packet {
 
-    public type = PacketType.VERIFYEMAIL;
+    type = PacketType.VERIFYEMAIL;
 
     //#region packet-specific members
 
     //#endregion
 
-    public read(): void {
+    read(): void {
 
     }
 
-    public write(): void {
+    write(): void {
 
     }
 }

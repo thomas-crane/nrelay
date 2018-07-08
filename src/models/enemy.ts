@@ -37,7 +37,7 @@ export class Enemy {
         };
     }
 
-    public onNewTick(objectStatus: ObjectStatusData, tickTime: number, tickId: number, clientTime: number): void {
+    onNewTick(objectStatus: ObjectStatusData, tickTime: number, tickId: number, clientTime: number): void {
         this.objectData = ObjectStatusData.processObjectStatus(objectStatus, this.objectData);
         if (this.lastTickId < tickId) {
             this.moveTo(this.tickPos.x, this.tickPos.y);
@@ -55,19 +55,19 @@ export class Enemy {
         this.lastUpdate = clientTime;
     }
 
-    public squareDistanceTo(point: IPoint | WorldPosData): number {
+    squareDistanceTo(point: IPoint | WorldPosData): number {
         const a = point.x - this.currentPos.x;
         const b = point.y - this.currentPos.y;
         return a ** 2 + b ** 2;
     }
 
-    public damage(damage: number): number {
+    damage(damage: number): number {
         const min = damage * 3 / 20;
         const actualDamge = Math.max(min, damage - this.objectData.def);
         return actualDamge;
     }
 
-    public frameTick(lastTick: number, clientTime: number): void {
+    frameTick(lastTick: number, clientTime: number): void {
         if (!(this.moveVector.x === 0 && this.moveVector.y === 0)) {
             if (this.lastTickId < lastTick) {
                 this.moveVector.x = 0;
@@ -82,7 +82,7 @@ export class Enemy {
         }
     }
 
-    public onGoto(x: number, y: number, time: number): void {
+    onGoto(x: number, y: number, time: number): void {
         this.moveTo(x, y);
         this.tickPos.x = x;
         this.tickPos.y = y;

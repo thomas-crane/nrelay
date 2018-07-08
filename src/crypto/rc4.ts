@@ -20,7 +20,7 @@ export class RC4 {
      * the next bit of the Keystream.
      * @param data A stream of data to cipher using the Keystream.
      */
-    public cipher(data: Buffer): void {
+    cipher(data: Buffer): void {
         for (let n = 0; n < data.length; n++) {
             this.i = (this.i + 1) % 256;
             this.j = (this.j + this.state[this.i]) % 256;

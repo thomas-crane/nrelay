@@ -2,7 +2,7 @@ import { Packet, PacketType } from '../../packet';
 
 export class CancelTradePacket extends Packet {
 
-    public type = PacketType.CANCELTRADE;
+    type = PacketType.CANCELTRADE;
 
     //#region packet-specific members
     /**
@@ -11,11 +11,11 @@ export class CancelTradePacket extends Packet {
     objectId: number;
     //#endregion
 
-    public read(): void {
+    read(): void {
 
     }
 
-    public write(): void {
+    write(): void {
 
     }
 }

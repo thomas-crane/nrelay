@@ -2,17 +2,17 @@ import { Packet, PacketType } from '../../packet';
 
 export class CheckCreditsPacket extends Packet {
 
-    public type = PacketType.CHECKCREDITS;
+    type = PacketType.CHECKCREDITS;
 
     //#region packet-specific members
 
     //#endregion
 
-    public read(): void {
+    read(): void {
 
     }
 
-    public write(): void {
+    write(): void {
 
     }
 }

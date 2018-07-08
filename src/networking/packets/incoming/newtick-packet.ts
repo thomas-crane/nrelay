@@ -3,7 +3,7 @@ import { ObjectStatusData } from './../../data/object-status-data';
 
 export class NewTickPacket extends Packet {
 
-    public type = PacketType.NEWTICK;
+    type = PacketType.NEWTICK;
 
     //#region packet-specific members
     tickId: number;
@@ -11,7 +11,7 @@ export class NewTickPacket extends Packet {
     statuses: ObjectStatusData[];
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.tickId = this.readInt32();
         this.tickTime = this.readInt32();
         const statusesLen = this.readShort();
@@ -23,7 +23,7 @@ export class NewTickPacket extends Packet {
         }
     }
 
-    public write(): void {
+    write(): void {
         this.writeInt32(this.tickId);
         this.writeInt32(this.tickTime);
         this.writeShort(this.statuses.length);

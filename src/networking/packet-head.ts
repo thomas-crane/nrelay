@@ -1,7 +1,7 @@
 export class PacketHead {
 
-    public id: number;
-    public length: number;
+    id: number;
+    length: number;
 
     constructor(id: number, length: number) {
         this.id = id;

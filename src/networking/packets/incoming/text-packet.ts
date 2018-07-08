@@ -2,7 +2,7 @@ import { Packet, PacketType } from '../../packet';
 
 export class TextPacket extends Packet {
 
-    public type = PacketType.TEXT;
+    type = PacketType.TEXT;
 
     //#region packet-specific members
     name: string;
@@ -14,7 +14,7 @@ export class TextPacket extends Packet {
     cleanText: string;
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.name = this.readString();
         this.objectId = this.readInt32();
         this.numStars = this.readInt32();
@@ -24,7 +24,7 @@ export class TextPacket extends Packet {
         this.cleanText = this.readString();
     }
 
-    public write(): void {
+    write(): void {
         this.writeString(this.name);
         this.writeInt32(this.objectId);
         this.writeInt32(this.numStars);

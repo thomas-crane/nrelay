@@ -34,7 +34,7 @@ export class PacketIO {
      * Resets the RC4 state and attaches to the new socket.
      * @param socket The socket to attach the PacketIO to.
      */
-    public reset(socket: Socket): void {
+    reset(socket: Socket): void {
         this.socket.removeAllListeners('data');
         this.socket = socket;
         this.resetBuffer();
@@ -50,7 +50,7 @@ export class PacketIO {
      * @param listener The function to call when the event is fired.
      * The current method signature is `(playerData: IPlayerData, client: Client)`
      */
-    public on(event: string | symbol, listener: (...args: any[]) => void): EventEmitter {
+    on(event: string | symbol, listener: (...args: any[]) => void): EventEmitter {
         return this.emitter.on(event, listener);
     }
 
@@ -58,7 +58,7 @@ export class PacketIO {
      * Removes all event listeners and destroys any resources held by the PacketIO.
      * This should only be used when the PacketIO is no longer needed.
      */
-    public destroy(): void {
+    destroy(): void {
         if (this.socket) {
             this.socket.removeAllListeners('data');
         }
@@ -74,7 +74,7 @@ export class PacketIO {
      * Sends a packet.
      * @param packet The packet to send.
      */
-    public sendPacket(packet: Packet): void {
+    sendPacket(packet: Packet): void {
         if (this.socket.destroyed) {
             return;
         }
@@ -106,7 +106,7 @@ export class PacketIO {
      * emit the packet to the clients subscribed to this particular PacketIO.
      * @param packet The packet to emit.
      */
-    public emitPacket(packet: Packet): void {
+    emitPacket(packet: Packet): void {
         if (packet) {
             this.emitter.emit('packet', packet);
         }

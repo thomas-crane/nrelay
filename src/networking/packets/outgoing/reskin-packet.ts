@@ -2,17 +2,17 @@ import { Packet, PacketType } from '../../packet';
 
 export class ReskinPacket extends Packet {
 
-    public type = PacketType.RESKIN;
+    type = PacketType.RESKIN;
 
     //#region packet-specific members
     skinId: number;
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.skinId = this.readInt32();
     }
 
-    public write(): void {
+    write(): void {
         this.writeInt32(this.skinId);
     }
 }

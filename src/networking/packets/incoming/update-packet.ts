@@ -4,7 +4,7 @@ import { ObjectData } from '../../data/object-data';
 
 export class UpdatePacket extends Packet {
 
-    public type = PacketType.UPDATE;
+    type = PacketType.UPDATE;
 
     //#region packet-specific members
     tiles: GroundTileData[];
@@ -14,7 +14,7 @@ export class UpdatePacket extends Packet {
 
     data: Buffer;
 
-    public read(): void {
+    read(): void {
         const tilesLen = this.readShort();
         this.tiles = new Array<GroundTileData>(tilesLen);
         for (let i = 0; i < tilesLen; i++) {
@@ -38,7 +38,7 @@ export class UpdatePacket extends Packet {
         }
     }
 
-    public write(): void {
+    write(): void {
         this.writeShort(this.tiles.length);
         for (let i = 0; i < this.tiles.length; i++) {
             this.tiles[i].write(this);

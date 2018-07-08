@@ -3,7 +3,7 @@ import { WorldPosData } from './../../data/world-pos-data';
 
 export class ShowEffectPacket extends Packet {
 
-    public type = PacketType.SHOWEFFECT;
+    type = PacketType.SHOWEFFECT;
 
     //#region packet-specific members
     effectType: number;
@@ -14,7 +14,7 @@ export class ShowEffectPacket extends Packet {
     duration: number;
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.effectType = this.readUnsignedByte();
         this.targetObjectId = this.readInt32();
         this.pos1 = new WorldPosData();
@@ -25,7 +25,7 @@ export class ShowEffectPacket extends Packet {
         this.duration = this.readFloat();
     }
 
-    public write(): void {
+    write(): void {
         this.writeUnsignedByte(this.effectType);
         this.writeInt32(this.targetObjectId);
         this.pos1.write(this);

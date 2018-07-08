@@ -2,7 +2,7 @@ import { Packet, PacketType } from '../../../packet';
 
 export class EvolvedPetMessage extends Packet {
 
-    public type = PacketType.EVOLVEPET;
+    type = PacketType.EVOLVEPET;
 
     //#region packet-specific members
     petId: number;
@@ -10,13 +10,13 @@ export class EvolvedPetMessage extends Packet {
     finalSkin: number;
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.petId = this.readInt32();
         this.initialSkin = this.readInt32();
         this.finalSkin = this.readInt32();
     }
 
-    public write(): void {
+    write(): void {
         this.writeInt32(this.petId);
         this.writeInt32(this.initialSkin);
         this.writeInt32(this.finalSkin);

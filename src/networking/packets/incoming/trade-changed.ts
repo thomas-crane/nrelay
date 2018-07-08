@@ -2,13 +2,13 @@ import { Packet, PacketType } from '../../packet';
 
 export class TradeChangedPacket extends Packet {
 
-    public type = PacketType.TRADECHANGED;
+    type = PacketType.TRADECHANGED;
 
     //#region packet-specific members
     offer: boolean[];
     //#endregion
 
-    public read(): void {
+    read(): void {
         const offerLen = this.readShort();
         this.offer = new Array<boolean>(offerLen);
         for (let i = 0; i < offerLen; i++) {
@@ -16,7 +16,7 @@ export class TradeChangedPacket extends Packet {
         }
     }
 
-    public write(): void {
+    write(): void {
         this.writeShort(this.offer.length);
         for (let i = 0; i < this.offer.length; i++) {
             this.writeBoolean(this.offer[i]);

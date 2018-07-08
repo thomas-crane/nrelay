@@ -10,7 +10,7 @@ export class FailurePacket extends Packet {
     static TELEPORT_REALM_BLOCK = 9;
     //#endregion
 
-    public type = PacketType.FAILURE;
+    type = PacketType.FAILURE;
 
     //#region packet-specific members
     errorId: number;
@@ -19,12 +19,12 @@ export class FailurePacket extends Packet {
 
     data: Buffer;
 
-    public read(): void {
+    read(): void {
         this.errorId = this.readInt32();
         this.errorDescription = this.readString();
     }
 
-    public write(): void {
+    write(): void {
         this.writeInt32(this.errorId);
         this.writeString(this.errorDescription);
     }

@@ -3,7 +3,7 @@ import { WorldPosData } from '../../data/world-pos-data';
 
 export class AoePacket extends Packet {
 
-    public type = PacketType.AOE;
+    type = PacketType.AOE;
 
     //#region packet-specific members
     pos: WorldPosData;
@@ -15,7 +15,7 @@ export class AoePacket extends Packet {
     color: number;
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.pos = new WorldPosData();
         this.pos.read(this);
         this.radius = this.readFloat();
@@ -26,7 +26,7 @@ export class AoePacket extends Packet {
         this.color = this.readInt32();
     }
 
-    public write(): void {
+    write(): void {
         this.pos.write(this);
         this.writeFloat(this.radius);
         this.writeUnsignedShort(this.damage);

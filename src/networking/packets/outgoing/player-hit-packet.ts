@@ -2,19 +2,19 @@ import { Packet, PacketType } from '../../packet';
 
 export class PlayerHitPacket extends Packet {
 
-    public type = PacketType.PLAYERHIT;
+    type = PacketType.PLAYERHIT;
 
     //#region packet-specific members
     bulletId: number;
     objectId: number;
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.bulletId = this.readUnsignedByte();
         this.objectId = this.readInt32();
     }
 
-    public write(): void {
+    write(): void {
         this.writeUnsignedByte(this.bulletId);
         this.writeInt32(this.objectId);
     }

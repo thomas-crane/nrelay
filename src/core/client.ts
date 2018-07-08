@@ -77,7 +77,7 @@ export class Client {
      * @param event The name of the event to listen for. Available events are 'connect'|'disconnect'
      * @param listener The callback to invoke when the event is fired.
      */
-    public static on(event: ClientEvent, listener: (client: Client) => void): EventEmitter {
+    static on(event: ClientEvent, listener: (client: Client) => void): EventEmitter {
         if (!this.emitter) {
             this.emitter = new EventEmitter();
         }
@@ -89,20 +89,20 @@ export class Client {
      * The player data of the client.
      * @see `IPlayerData` for more info.
      */
-    public playerData: IPlayerData;
+    playerData: IPlayerData;
     /**
      * The objectId of the client.
      */
-    public objectId: number;
+    objectId: number;
     /**
      * The current position of the client.
      */
-    public worldPos: WorldPosData;
+    worldPos: WorldPosData;
     /**
      * The PacketIO instance associated with the client.
      * @see `PacketIO` for more info.
      */
-    public packetio: PacketIO;
+    packetio: PacketIO;
     /**
      * The tiles of the current map. These are stored in a
      * 1d array, so to access the tile at x, y the index
@@ -110,14 +110,14 @@ export class Client {
      * of the map.
      * @example
      * ```
-     * public getTile(client: Client, x: number, y: number): GroundTileData {
+     * getTile(client: Client, x: number, y: number): GroundTileData {
      *   const tileX = Math.floor(x);
      *   const tileY = Math.floor(y);
      *   return client.mapTiles.mapTiles[tileY * client.mapInfo.height + tileX];
      * }
      * ```
      */
-    public mapTiles: GroundTileData[];
+    mapTiles: GroundTileData[];
     /**
      * The position the client will try to move towards.
      * If this is `null` then the client will not move.
@@ -129,40 +129,40 @@ export class Client {
      * client.nextPos = pos;
      * ```
      */
-    public readonly nextPos: WorldPosData[];
+    readonly nextPos: WorldPosData[];
     /**
      * Info about the current map including
      * @see `IMapInfo` for more information.
      */
-    public mapInfo: IMapInfo;
+    mapInfo: IMapInfo;
     /**
      * Info about the account's characters.
      * @see `ICharacterInfo` for more information.
      */
-    public readonly charInfo: ICharacterInfo;
+    readonly charInfo: ICharacterInfo;
     /**
      * The server the client is connected to.
      * @see `IServer` for more info.
      */
-    public get server(): IServer {
+    get server(): IServer {
         return this.internalServer;
     }
     /**
      * The alias of the client.
      */
-    public alias: string;
+    alias: string;
     /**
      * The email address of the client.
      */
-    public readonly guid: string;
+    readonly guid: string;
     /**
      * The password of the client.
      */
-    public readonly password: string;
+    readonly password: string;
     /**
      * Whether or not the client should automatically shoot at enemies.
      */
-    public autoAim: boolean;
+    autoAim: boolean;
     /**
      * A number between 0 and 1 which can be used to modify the speed
      * of the player. A value of 1 will be 100% move speed for the client,
@@ -173,16 +173,16 @@ export class Client {
      * client.moveMultiplier = 0.8;
      * ```
      */
-    public set moveMultiplier(value: number) {
+    set moveMultiplier(value: number) {
         this.internalMoveMultiplier = Math.max(0, Math.min(value, 1));
     }
-    public get moveMultiplier(): number {
+    get moveMultiplier(): number {
         return this.internalMoveMultiplier;
     }
     /**
      * Indicates whether or not the client's TCP socket is connected.
      */
-    public get connected(): boolean {
+    get connected(): boolean {
         return this.socketConnected;
     }
     private socketConnected: boolean;
@@ -271,7 +271,7 @@ export class Client {
      * Shoots a projectile at the specified angle.
      * @param angle The angle in radians to shoot towards.
      */
-    public shoot(angle: number): boolean {
+    shoot(angle: number): boolean {
         if (ConditionEffects.has(this.playerData.condition, ConditionEffect.STUNNED)) {
             return;
         }
@@ -322,7 +322,7 @@ export class Client {
      * Removes all event listeners and destroys any resources held by the client.
      * This should only be used when the client is no longer needed.
      */
-    public destroy(): void {
+    destroy(): void {
         // packet io.
         if (this.packetio) {
             this.packetio.destroy();
@@ -365,7 +365,7 @@ export class Client {
      * null will remove the current proxy if there is one.
      * @param proxy The proxy to use.
      */
-    public setProxy(proxy: IProxy): void {
+    setProxy(proxy: IProxy): void {
         if (proxy) {
             Log(this.alias, 'Connecting to new proxy.');
         } else {
@@ -379,7 +379,7 @@ export class Client {
      * Connects the bot to the provided `server`.
      * @param server The server to connect to.
      */
-    public connectToServer(server: IServer): void {
+    connectToServer(server: IServer): void {
         Log(this.alias, `Switching to ${server.name}.`, LogLevel.Info);
         this.internalServer = server;
         this.nexusServer = server;
@@ -390,7 +390,7 @@ export class Client {
      * Blocks the next packet of the specified type.
      * @param packetType The packet type to block.
      */
-    public blockNext(packetType: PacketType): void {
+    blockNext(packetType: PacketType): void {
         if (this.blockedPackets.indexOf(packetType) < 0) {
             this.blockedPackets.push(packetType);
         }
@@ -401,7 +401,7 @@ export class Client {
      * the client which broadcasted the packet.
      * @param packet The packet to broadcast.
      */
-    public broadcastPacket(packet: Packet): void {
+    broadcastPacket(packet: Packet): void {
         const clients = CLI.getClients();
         for (let i = 0; i < clients.length; i++) {
             if (clients[i].alias !== this.alias) {
@@ -414,7 +414,7 @@ export class Client {
      * Returns how long the client has been connected for in milliseconds.
      * This is used for several packets including the UseItem packet.
      */
-    public getTime(): number {
+    getTime(): number {
         return (Date.now() - this.connectTime);
     }
 
@@ -423,7 +423,7 @@ export class Client {
      * and moves the client along the path to the `to` position.
      * @param to The point to navigate towards.
      */
-    public findPath(to: IPoint): void {
+    findPath(to: IPoint): void {
         if (!this.pathfinderEnabled) {
             Log(this.alias, 'Pathfinding is not enabled. Please enable it in the acc-config.', LogLevel.Warning);
         }

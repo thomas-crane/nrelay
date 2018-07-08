@@ -4,7 +4,7 @@ import { WorldPosData } from '../../data/world-pos-data';
 
 export class UseItemPacket extends Packet {
 
-    public type = PacketType.USEITEM;
+    type = PacketType.USEITEM;
 
     //#region packet-specific members
     time: number;
@@ -13,7 +13,7 @@ export class UseItemPacket extends Packet {
     useType: number;
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.time = this.readInt32();
         this.slotObject = new SlotObjectData();
         this.slotObject.read(this);
@@ -22,7 +22,7 @@ export class UseItemPacket extends Packet {
         this.useType = this.readByte();
     }
 
-    public write(): void {
+    write(): void {
         this.writeInt32(this.time);
         this.slotObject.write(this);
         this.itemUsePos.write(this);

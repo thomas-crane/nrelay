@@ -2,14 +2,14 @@ import { Packet, PacketType } from '../../packet';
 
 export class AcceptTradePacket extends Packet {
 
-    public type = PacketType.ACCEPTTRADE;
+    type = PacketType.ACCEPTTRADE;
 
     //#region packet-specific members
     clientOffer: boolean[];
     partnerOffer: boolean[];
     //#endregion
 
-    public read(): void {
+    read(): void {
         const clientOfferLen = this.readShort();
         this.clientOffer = new Array<boolean>(clientOfferLen);
         for (let i = 0; i < clientOfferLen; i++) {
@@ -22,7 +22,7 @@ export class AcceptTradePacket extends Packet {
         }
     }
 
-    public write(): void {
+    write(): void {
         this.writeShort(this.clientOffer.length);
         for (let i = 0; i < this.clientOffer.length; i++) {
             this.writeBoolean(this.clientOffer[i]);

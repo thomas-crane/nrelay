@@ -2,7 +2,7 @@ import { Packet, PacketType } from '../../packet';
 
 export class EnemyHitPacket extends Packet {
 
-    public type = PacketType.ENEMYHIT;
+    type = PacketType.ENEMYHIT;
 
     //#region packet-specific members
     time: number;
@@ -11,14 +11,14 @@ export class EnemyHitPacket extends Packet {
     kill: boolean;
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.time = this.readInt32();
         this.bulletId = this.readByte();
         this.targetId = this.readInt32();
         this.kill = this.readBoolean();
     }
 
-    public write(): void {
+    write(): void {
         this.writeInt32(this.time);
         this.writeByte(this.bulletId);
         this.writeInt32(this.targetId);

@@ -2,7 +2,7 @@ import { Packet, PacketType } from '../../packet';
 
 export class EditAccountListPacket extends Packet {
 
-    public type = PacketType.EDITACCOUNTLIST;
+    type = PacketType.EDITACCOUNTLIST;
 
     //#region packet-specific members
     accountListId: number;
@@ -10,13 +10,13 @@ export class EditAccountListPacket extends Packet {
     objectId: number;
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.accountListId = this.readInt32();
         this.add = this.readBoolean();
         this.objectId = this.readInt32();
     }
 
-    public write(): void {
+    write(): void {
         this.writeInt32(this.accountListId);
         this.writeBoolean(this.add);
         this.writeInt32(this.objectId);

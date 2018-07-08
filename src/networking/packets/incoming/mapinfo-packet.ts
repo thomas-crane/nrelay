@@ -2,7 +2,7 @@ import { Packet, PacketType } from '../../packet';
 
 export class MapInfoPacket extends Packet {
 
-    public type = PacketType.MAPINFO;
+    type = PacketType.MAPINFO;
 
     //#region packet-specific members
     width: number;
@@ -18,7 +18,7 @@ export class MapInfoPacket extends Packet {
     extraXML: string[];
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.width = this.readInt32();
         this.height = this.readInt32();
         this.name = this.readString();
@@ -38,7 +38,7 @@ export class MapInfoPacket extends Packet {
         }
     }
 
-    public write(): void {
+    write(): void {
         this.writeInt32(this.width);
         this.writeInt32(this.height);
         this.writeString(this.name);

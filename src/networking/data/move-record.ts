@@ -6,19 +6,19 @@ export class MoveRecord {
     x: number;
     y: number;
 
-    public read(packet: Packet): void {
+    read(packet: Packet): void {
         this.time = packet.readInt32();
         this.x = packet.readFloat();
         this.y = packet.readFloat();
     }
 
-    public write(packet: Packet): void {
+    write(packet: Packet): void {
         packet.writeInt32(this.time);
         packet.writeFloat(this.x);
         packet.writeFloat(this.y);
     }
 
-    public clone(): MoveRecord {
+    clone(): MoveRecord {
         const clone = new MoveRecord();
         clone.time = this.time;
         clone.x = this.x;

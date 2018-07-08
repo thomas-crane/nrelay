@@ -4,7 +4,7 @@ import { SlotObjectData } from '../../data/slot-object-data';
 
 export class InvSwapPacket extends Packet {
 
-    public type = PacketType.INVSWAP;
+    type = PacketType.INVSWAP;
 
     //#region packet-specific members
     time: number;
@@ -13,7 +13,7 @@ export class InvSwapPacket extends Packet {
     slotObject2: SlotObjectData;
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.time = this.readInt32();
         this.position = new WorldPosData();
         this.position.read(this);
@@ -23,7 +23,7 @@ export class InvSwapPacket extends Packet {
         this.slotObject2.read(this);
     }
 
-    public write(): void {
+    write(): void {
         this.writeInt32(this.time);
         this.slotObject1.write(this);
         this.slotObject2.write(this);

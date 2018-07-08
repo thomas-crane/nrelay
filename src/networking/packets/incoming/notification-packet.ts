@@ -2,7 +2,7 @@ import { Packet, PacketType } from '../../packet';
 
 export class NotificationPacket extends Packet {
 
-    public type = PacketType.NOTIFICATION;
+    type = PacketType.NOTIFICATION;
 
     //#region packet-specific members
     objectId: number;
@@ -10,13 +10,13 @@ export class NotificationPacket extends Packet {
     color: number;
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.objectId = this.readInt32();
         this.message = this.readString();
         this.color = this.readInt32();
     }
 
-    public write(): void {
+    write(): void {
         this.writeInt32(this.objectId);
         this.writeString(this.message);
         this.writeInt32(this.color);

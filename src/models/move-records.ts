@@ -9,7 +9,7 @@ export class MoveRecords {
         this.records = [];
     }
 
-    public addRecord(time: number, x: number, y: number): void {
+    addRecord(time: number, x: number, y: number): void {
         if (this.lastClearTime < 0) {
             return;
         }
@@ -43,7 +43,7 @@ export class MoveRecords {
         }
     }
 
-    public clear(time: number): void {
+    clear(time: number): void {
         this.records = [];
         this.lastClearTime = time;
     }

@@ -2,7 +2,7 @@ import { Packet, PacketType } from '../../packet';
 
 export class AccountListPacket extends Packet {
 
-    public type = PacketType.ACCOUNTLIST;
+    type = PacketType.ACCOUNTLIST;
 
     //#region packet-specific members
     accountListId: number;
@@ -10,7 +10,7 @@ export class AccountListPacket extends Packet {
     lockAction: number;
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.accountListId = this.readInt32();
         const accountIdsLen = this.readShort();
         this.accountIds = new Array<string>(accountIdsLen);
@@ -20,7 +20,7 @@ export class AccountListPacket extends Packet {
         this.lockAction = this.readInt32();
     }
 
-    public write(): void {
+    write(): void {
         this.writeInt32(this.accountListId);
         this.writeShort(this.accountIds.length);
         for (let i = 0; i < this.accountIds.length; i++) {

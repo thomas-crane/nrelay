@@ -12,18 +12,18 @@ export class Heap<T extends IHeapItem<T>> {
         this.items = new Array<T>(this.maxHeapSize);
     }
 
-    public get count(): number {
+    get count(): number {
         return this.heapSize;
     }
 
-    public add(item: T): void {
+    add(item: T): void {
         item.heapIndex = this.heapSize;
         this.items[this.heapSize] = item;
         this.sortUp(item);
         this.heapSize++;
     }
 
-    public removeFirst(): T {
+    removeFirst(): T {
         const first = this.items[0];
         this.heapSize--;
         this.items[0] = this.items[this.heapSize];
@@ -32,11 +32,11 @@ export class Heap<T extends IHeapItem<T>> {
         return first;
     }
 
-    public update(item: T): void {
+    update(item: T): void {
         this.sortUp(item);
     }
 
-    public contains(item: T): boolean {
+    contains(item: T): boolean {
         if (!this.items[item.heapIndex]) {
             return false;
         }

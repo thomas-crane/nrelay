@@ -2,7 +2,7 @@ import { Packet, PacketType } from '../../packet';
 
 export class DeathPacket extends Packet {
 
-    public type = PacketType.DEATH;
+    type = PacketType.DEATH;
 
     //#region packet-specific members
     accountId: string;
@@ -13,7 +13,7 @@ export class DeathPacket extends Packet {
     isZombie: boolean;
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.accountId = this.readString();
         this.charId = this.readInt32();
         this.killedBy = this.readString();
@@ -22,7 +22,7 @@ export class DeathPacket extends Packet {
         this.isZombie = this.zombieId !== -1;
     }
 
-    public write(): void {
+    write(): void {
         this.writeString(this.accountId);
         this.writeInt32(this.charId);
         this.writeString(this.killedBy);

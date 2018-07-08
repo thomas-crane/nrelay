@@ -3,7 +3,7 @@ import { WorldPosData } from './../../data/world-pos-data';
 
 export class EnemyShootPacket extends Packet {
 
-    public type = PacketType.ENEMYSHOOT;
+    type = PacketType.ENEMYSHOOT;
 
     //#region packet-specific members
     bulletId: number;
@@ -16,7 +16,7 @@ export class EnemyShootPacket extends Packet {
     angleInc: number;
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.bulletId = this.readUnsignedByte();
         this.ownerId = this.readInt32();
         this.bulletType = this.readUnsignedByte();
@@ -33,7 +33,7 @@ export class EnemyShootPacket extends Packet {
         }
     }
 
-    public write(): void {
+    write(): void {
         this.writeUnsignedByte(this.bulletId);
         this.writeInt32(this.ownerId);
         this.writeUnsignedByte(this.bulletType);

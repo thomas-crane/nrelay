@@ -85,7 +85,7 @@ import { UseItemPacket } from './../networking/packets/outgoing/use-item-packet'
 import { UsePortalPacket } from './../networking/packets/outgoing/use-portal-packet';
 
 export class Packets {
-    public static create(type: PacketType, data: Buffer): Packet {
+    static create(type: PacketType, data: Buffer): Packet {
         if (!PacketType[type]) {
             throw new Error(`Invalid packet type: ${type}`);
         }

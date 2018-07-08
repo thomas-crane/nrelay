@@ -2,19 +2,19 @@ import { Packet, PacketType } from '../../packet';
 
 export class TradeDonePacket extends Packet {
 
-    public type = PacketType.TRADEDONE;
+    type = PacketType.TRADEDONE;
 
     //#region packet-specific members
     code: TradeResult;
     description: string;
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.code = this.readInt32();
         this.description = this.readString();
     }
 
-    public write(): void {
+    write(): void {
         this.writeInt32(this.code);
         this.writeString(this.description);
     }

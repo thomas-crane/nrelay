@@ -3,7 +3,7 @@ import { WorldPosData } from './../../../networking/data/world-pos-data';
 
 export class ServerPlayerShootPacket extends Packet {
 
-    public type = PacketType.SERVERPLAYERSHOOT;
+    type = PacketType.SERVERPLAYERSHOOT;
 
     //#region packet-specific members
     bulletId: number;
@@ -14,7 +14,7 @@ export class ServerPlayerShootPacket extends Packet {
     damage: number;
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.bulletId = this.readUnsignedByte();
         this.ownerId = this.readInt32();
         this.containerType = this.readInt32();
@@ -24,7 +24,7 @@ export class ServerPlayerShootPacket extends Packet {
         this.damage = this.readShort();
     }
 
-    public write(): void {
+    write(): void {
         this.writeUnsignedByte(this.bulletId);
         this.writeInt32(this.ownerId);
         this.writeInt32(this.containerType);

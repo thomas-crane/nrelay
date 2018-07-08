@@ -2,17 +2,17 @@ import { Packet, PacketType } from '../../../packet';
 
 export class DeletePetMessage extends Packet {
 
-    public type = PacketType.DELETEPET;
+    type = PacketType.DELETEPET;
 
     //#region packet-specific members
     petId: number;
     //#endregion
 
-    public read(): void {
+    read(): void {
         this.petId = this.readInt32();
     }
 
-    public write(): void {
+    write(): void {
         this.writeInt32(this.petId);
     }
 }

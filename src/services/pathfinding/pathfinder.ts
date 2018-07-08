@@ -23,7 +23,7 @@ export class Pathfinder {
         }
     }
 
-    public findPath(start: IPoint, end: IPoint): Promise<IPoint[]> {
+    findPath(start: IPoint, end: IPoint): Promise<IPoint[]> {
         return new Promise((resolve: (path: IPoint[]) => void, reject: (err: Error) => void) => {
             const startNode = this.nodes[this.getIndex(start.x, start.y)];
             const endNode = this.nodes[this.getIndex(end.x, end.y)];
@@ -66,14 +66,14 @@ export class Pathfinder {
         });
     }
 
-    public updateWalkableNodes(updates: INodeUpdate[]): void {
+    updateWalkableNodes(updates: INodeUpdate[]): void {
         for (let i = 0; i < updates.length; i++) {
             this.nodes[this.getIndex(updates[i].x, updates[i].y)].walkable = updates[i].walkable;
         }
         updates = null;
     }
 
-    public destroy(): void {
+    destroy(): void {
         this.nodes = null;
     }
 

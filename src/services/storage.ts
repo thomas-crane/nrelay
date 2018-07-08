@@ -10,7 +10,7 @@ export class Storage {
      * Gets the contents of the file at the specified filepath and returns the result as a JSON object.
      * @param filePath The path of the file to read from.
      */
-    public static get(...filePath: string[]): Promise<any> {
+    static get(...filePath: string[]): Promise<any> {
         return new Promise((resolve: (data: any) => void, reject: (err: Error) => void) => {
             this.readText(...filePath).then((data) => {
                 resolve(JSON.parse(data));
@@ -24,7 +24,7 @@ export class Storage {
      * Reads the contents of the file at the specified filepath and returns the result as plaintext.
      * @param filePath The path of the file to read from.
      */
-    public static readText(...filePath: string[]): Promise<string> {
+    static readText(...filePath: string[]): Promise<string> {
         return new Promise((resolve: (data: string) => void, reject: (err: Error) => void) => {
             const fileName = this.makePath(...filePath);
             fs.readFile(fileName, 'utf8', (error, data) => {
@@ -42,7 +42,7 @@ export class Storage {
      * @param data The text to write.
      * @param filePath The path of the file to write to.
      */
-    public static writeText(data: string, ...filePath: string[]): Promise<void> {
+    static writeText(data: string, ...filePath: string[]): Promise<void> {
         return new Promise((resolve: () => void, reject: (err: Error) => void) => {
             const fileName = this.makePath(...filePath);
             fs.writeFile(fileName, data, (error) => {
@@ -64,7 +64,7 @@ export class Storage {
      * ```
      * @param filePath The path to create.
      */
-    public static makePath(...filePath: string[]): string {
+    static makePath(...filePath: string[]): string {
         return path.resolve(__dirname, path.join(dir, ...filePath));
     }
 
@@ -73,7 +73,7 @@ export class Storage {
      * @param data The data to write.
      * @param filePath The path of the file to write to.
      */
-    public static set(data: object, ...filePath: string[]): Promise<void> {
+    static set(data: object, ...filePath: string[]): Promise<void> {
         return this.writeText(JSON.stringify(data), ...filePath);
     }
 
@@ -81,7 +81,7 @@ export class Storage {
      * Gets the contents of the `acc-config.json` file and returns
      * it as an `IAccountInfo` object.
      */
-    public static getAccountConfig(): IAccountInfo {
+    static getAccountConfig(): IAccountInfo {
         return require('./../../acc-config.json');
     }
 
@@ -89,7 +89,7 @@ export class Storage {
      * Replaces the "buildVersion" value in the acc-config with `newVersion`.
      * @param newVersion The new value to use.
      */
-    public static updateBuildVersion(newVersion: string): void {
+    static updateBuildVersion(newVersion: string): void {
         this.readText('acc-config.json').then((text) => {
             const match = BUILD_VERSION_REGEX.exec(text);
             if (!match) {
@@ -112,7 +112,7 @@ export class Storage {
     /**
      * Creates a log file and sets the `Logger.logStream` property to the newly created write stream.
      */
-    public static createLog(): void {
+    static createLog(): void {
         const logStream = fs.createWriteStream(Storage.makePath('nrelay-log.log'));
         logStream.write(`Log Start (time: ${Date.now()})\n`);
         Logger.logStream = logStream;

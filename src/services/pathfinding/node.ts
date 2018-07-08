@@ -18,11 +18,11 @@ export class Node implements IHeapItem<Node>, IHashable {
         this.y = y;
     }
 
-    public hash(): string {
+    hash(): string {
         return this.x + '' + this.y;
     }
 
-    public compareTo(item: Node): number {
+    compareTo(item: Node): number {
         if (this.fCost > item.fCost) {
             return -1;
         }

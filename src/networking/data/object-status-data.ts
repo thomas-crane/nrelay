@@ -7,13 +7,13 @@ import { Classes } from './../../models/classes';
 
 export class ObjectStatusData {
 
-    public static processObject(data: ObjectData): IPlayerData {
+    static processObject(data: ObjectData): IPlayerData {
         const playerData = this.processObjectStatus(data.status);
         playerData.class = data.objectType;
         return playerData;
     }
 
-    public static processObjectStatus(data: ObjectStatusData, currentData?: IPlayerData): IPlayerData {
+    static processObjectStatus(data: ObjectStatusData, currentData?: IPlayerData): IPlayerData {
         const playerData = this.processStatData(data.stats, currentData);
         playerData.worldPos = data.pos;
         playerData.objectId = data.objectId;
@@ -21,7 +21,7 @@ export class ObjectStatusData {
         return playerData;
     }
 
-    public static processStatData(data: StatData[], currentData?: IPlayerData): IPlayerData {
+    static processStatData(data: StatData[], currentData?: IPlayerData): IPlayerData {
         const playerData = currentData || getDefaultPlayerData();
         for (let i = 0; i < data.length; i++) {
             switch (data[i].statType) {
@@ -115,7 +115,7 @@ export class ObjectStatusData {
     pos: WorldPosData;
     stats: StatData[];
 
-    public read(packet: Packet): void {
+    read(packet: Packet): void {
         this.objectId = packet.readInt32();
         this.pos = new WorldPosData();
         this.pos.read(packet);
@@ -128,7 +128,7 @@ export class ObjectStatusData {
         }
     }
 
-    public write(packet: Packet): void {
+    write(packet: Packet): void {
         packet.writeInt32(this.objectId);
         this.pos.write(packet);
         packet.writeShort(this.stats.length);

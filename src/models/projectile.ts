@@ -41,11 +41,11 @@ export class Projectile {
         this.damage = 0;
     }
 
-    public setDamage(damage: number): void {
+    setDamage(damage: number): void {
         this.damage = damage;
     }
 
-    public update(currentTime: number): boolean {
+    update(currentTime: number): boolean {
         const elapsed = currentTime - this.startTime;
         if (elapsed > this.projectileProperties.lifetimeMS) {
             return false;
