@@ -871,7 +871,7 @@ export class Client {
         this.nextPos.length = 0;
         this.pathfinderTarget = null;
         this.internalServer = Object.assign({}, this.nexusServer);
-        if (this.pathfinderEnabled) {
+        if (this.pathfinder) {
             this.pathfinder.destroy();
         }
         this.projectiles = [];
