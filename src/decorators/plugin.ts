@@ -1,5 +1,3 @@
-import { PacketType } from './../networking/packet';
-import { Log, LogLevel } from './../services/logger';
 import { PluginManager } from './../core/plugin-manager';
 import { IPluginInfo } from './../models/plugin-info';
 

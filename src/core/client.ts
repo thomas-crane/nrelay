@@ -50,9 +50,9 @@ import {
 import { PluginManager, ResourceManager } from './../core';
 import { HookPacket } from './../decorators';
 import { EventEmitter } from 'events';
-import { SocksClient, SocksClientOptions } from 'socks';
+import { SocksClient } from 'socks';
 import { CLI } from '..';
-import { Pathfinder, Node, INodeUpdate, IPoint } from '../services/pathfinding';
+import { Pathfinder, INodeUpdate, IPoint } from '../services/pathfinding';
 
 const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
@@ -60,7 +60,6 @@ const MIN_ATTACK_FREQ = 0.0015;
 const MAX_ATTACK_FREQ = 0.008;
 const MIN_ATTACK_MULT = 0.5;
 const MAX_ATTACK_MULT = 2;
-const ACCOUNT_IN_USE_REGEX = /Account in use \((\d+) seconds? until timeout\)/;
 
 declare type ClientEvent = 'connect' | 'disconnect' | 'ready';
 

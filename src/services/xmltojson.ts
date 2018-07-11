@@ -4,8 +4,6 @@ const SERVER_REGEX = /<Server><Name>(\w+)<\/Name><DNS>(\d+\.\d+\.\d+\.\d+)<\/DNS
 
 const ACCOUNT_INFO_REGEX = /<Chars nextCharId="(\d+)" maxNumChars="(\d+)">(?:<Char id="(\d+)">)*/;
 
-const ERROR_REGEX = /<Error\/?>(.+)<\/?Error>/;
-
 export class XMLtoJSON {
     static parseServers(xml: string): { [id: string]: IServer } {
         let match = SERVER_REGEX.exec(xml);

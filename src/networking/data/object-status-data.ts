@@ -3,7 +3,6 @@ import { WorldPosData } from './world-pos-data';
 import { StatData } from './stat-data';
 import { IPlayerData, getDefaultPlayerData } from './../../models/playerdata';
 import { ObjectData } from './object-data';
-import { Classes } from './../../models/classes';
 
 export class ObjectStatusData {
 

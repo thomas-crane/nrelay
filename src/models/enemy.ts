@@ -1,6 +1,5 @@
 import { IObject } from './object';
 import { ObjectStatusData } from '../networking/data/object-status-data';
-import { StatData } from '../networking/data/stat-data';
 import { IPlayerData } from './playerdata';
 import { IPoint } from '../services/pathfinding/point';
 import { WorldPosData } from '../networking/data/world-pos-data';
