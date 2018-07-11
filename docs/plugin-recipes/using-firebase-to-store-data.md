@@ -92,7 +92,7 @@ class ServerMonitor {
     }
 }
 ```
-Now that we have a reference to the player tracker component, we need to tell it to start tracking players for any client which enters the game. We can do this by subscribing to the `connect` event provided by the client.
+Now that we have a reference to the player tracker component, we need to tell it to start tracking players for any client which enters the game. We can do this by calling the player tracker's `trackAllPlayers()` method. This method will enable tracking for all clients.
 
 ```typescript
 class ServerMonitor {
@@ -100,9 +100,7 @@ class ServerMonitor {
     constructor() {
         PluginManager.afterInit(() => {
             const playerTracker = PluginManager.getInstanceOf(PlayerTracker);
-            Client.on('connect', (playerdata, client: Client) => {
-                playerTracker.trackPlayersFor(client);
-            });
+            playerTracker.trackAllPlayers();
             firebase.initializeApp(firebaseConfig);
         });
     }
@@ -117,9 +115,7 @@ class ServerMonitor {
     constructor() {
         PluginManager.afterInit(() => {
             const playerTracker = PluginManager.getInstanceOf(PlayerTracker);
-            Client.on('connect', (playerdata, client: Client) => {
-                playerTracker.trackPlayersFor(client);
-            });
+            playerTracker.trackAllPlayers();
             firebase.initializeApp(firebaseConfig);
             playerTracker.on('enter', (player) => {
                 console.log(player.name + ' Entered the server.');
@@ -329,9 +325,7 @@ class ServerMonitor {
     constructor() {
         PluginManager.afterInit(() => {
             const playerTracker = PluginManager.getInstanceOf(PlayerTracker);
-            Client.on('connect', (playerdata, client: Client) => {
-                playerTracker.trackPlayersFor(client);
-            });
+            playerTracker.trackAllPlayers();
             firebase.initializeApp(config);
             this.playerlistReference = firebase.database().ref('players');
             this.playerRefs = {};

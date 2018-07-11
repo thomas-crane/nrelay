@@ -1,6 +1,15 @@
 # nrelay
 A console based modular client for Realm of the Mad God built with Node.js and TypeScript.
 
+## Important note.
+This is a preview of version `7.0.0`. 
+Because of this, breaking changes may be commited to this branch **without a major version increment.**
+This includes changes that may break existing features, or features introduced in `7.0.0`.
+
+If you need a stable version of nrelay, please use the `master` or the `dev` branch for now.
+
+Upgrading to `7.0.0`? [Check out the migration guide.](docs/migration/6-to-7.md)
+
 ## Contents
  + [Docs](#docs)
  + [Install](#install)
@@ -127,7 +136,7 @@ nrelay provides the option to enable a local web server which supports TCP conne
         "enabled": true
     },
     "accounts": [
-        // ...
+
     ]
 }
 ```
@@ -201,8 +210,19 @@ This will stop nrelay from checking for updates when it starts.
 #### `--no-log`
 This will stop nrelay from writing to the log file.
 
+#### `--no-plugins`
+This will stop nrelay from loading any plugins.
+
 #### `--force-update`
 This will force nrelay to download the latest client and assets.
+
+#### `--update-from="filepath"`
+This will update the packet ids using the client at the given filepath.
+
+If `filepath` is a path to a file (e.g. `C:\clients\myclient.swf`), then the directory containing the swf will used to store the decompiled scripts.
+If `filepath` is a path to a directory, (e.g. `C:\clients`), then nrelay will assume a file called `client.swf` exists in the directory, and will use the directory to store the decompiled scripts.
+
+Please note that `filepath` should always be an absolute path to either a client or a directory containing a `client.swf`.
 
 #### Example
 To start nrelay without checking for updates or log file writing, use

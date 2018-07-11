@@ -1,6 +1,31 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `7.0.0`
+> Not backwards compatible.
+>
+> For a guide on how to migrate from v6 to v7, see [the migration guide.](docs/migration/6-to-7.md)
+### Changes:
+ + `client.nextPos` is now a queue instead of a single value.
+ + The signature of `Client.on` has been changed to `(client: Client)`.
+ + Improved `FailurePacket` handler.
+ + Removed `CLI.getClient` and `CLI.removeClient` in favor of `CLI.getAny` and `CLI.removeAny`.
+ + `WorldPosData` now takes `(x?: number, y?: number)` in the constructor.
+ + Renamed `packet.writeUnsigedByte` to `packet.writeUnsignedByte`
+ + The build version no longer needs to be manually updated.
+ + The source will automatically be rebuilt after updates are downloaded.
+ + Added `HttpClient` to replace the `Http` class.
+ + Removed `XMLtoJSON.parseError` method.
+ + The `--no-plugins` flag has been added which can be used to prevent nrelay from loading any plugins.
+ + The `--update-from="C:\path\to\client.swf"` flag has been added. This can be used to update from a custom swf.
+
+### Fixes:
+ + Teleporting no longer instantly disconnects the client.
+ + Fixed radian/degree conversion issue in the shoot method.
+ + Fixed player tracker occasionally not clearing players on map changes.
+ + `XMLtoJSON.parseAccountInfo` now correctly parses a missing `charId`.
+ + Fix pathfinder being destroyed before it was created.
+
 ## `6.20.0`
 ### Changes:
  + Added `tsai` dev dependency and npm task for indexing nrelay.
@@ -453,7 +478,7 @@ Client.on('disconnect', (client: Client) => {
 
 ## `3.3.0`
 ### Changes:
- + Added `Objects.xml` and `GrounTypes.xml` to updater.
+ + Added `Objects.xml` and `GroundTypes.xml` to updater.
  + Added `resources/` to `.gitignore`. Manually change your version to force an update which will download the latest xml resources.
 
 ## `3.2.2`
