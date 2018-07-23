@@ -12,10 +12,14 @@ src/plugins/*
 # Config
 acc-config.json
 last-known-servers.json
+packets.json
+versions.json
 
 # Updater assets
 src/services/updater-assets/*
+!src/services/updater-assets/.gitkeep
 resources/*
+!resources/.gitkeep
 
 # User prefs
 .vscode/
