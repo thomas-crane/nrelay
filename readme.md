@@ -1,7 +1,17 @@
 # nrelay
 A console based modular client for Realm of the Mad God built with Node.js and TypeScript.
 
-## Important note.
+## Important notes.
+### Version `7.2.0`
+Version `7.2.0` has seen most of the codebase receive massive changes or reworks. Because of this, the documentation has now become outdated to the point where it is no longer useful.
+
+The decision was made to release the code changes *before* the documentation has been fully updated, as the task of updating the documentation is a large one and will take some time.
+Don't let the lack of updated documentation discourage you from trying out version `7.2.0`, as it will help you become familiar with the changes, and will help uncover any bugs.
+
+All `7.x.x` versions will remain on the `7.0.0-preview` branch until the documentation is updated to a satisfactory standard. 
+
+---
+
 This is a preview of version `7.0.0`. 
 Because of this, breaking changes may be commited to this branch **without a major version increment.**
 This includes changes that may break existing features, or features introduced in `7.0.0`.
@@ -9,6 +19,8 @@ This includes changes that may break existing features, or features introduced i
 If you need a stable version of nrelay, please use the `master` or the `dev` branch for now.
 
 Upgrading to `7.0.0`? [Check out the migration guide.](docs/migration/6-to-7.md)
+
+---
 
 ## Contents
  + [Docs](#docs)
