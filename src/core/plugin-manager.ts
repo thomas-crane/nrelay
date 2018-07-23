@@ -1,16 +1,19 @@
-import { Packet, PacketType } from './../networking/packet';
+import { Packet } from './../networking/packet';
 import { Log, LogLevel, Storage } from './../services';
 import { Client } from './client';
-import { environment, IPluginInfo } from './../models';
+import { environment } from './../models';
 import * as fs from 'fs';
+import { ILoadedLib, IManagedLib, IHookInfo } from './lib-info';
 
 const PLUGIN_REGEX = /^.+\.js$/;
 
 export class PluginManager {
 
+    static readonly libStore: Map<string, IManagedLib<any>> = new Map();
+    static readonly hookStore: Map<string, Array<IHookInfo<any>>> = new Map();
+    static readonly clientHookStore: Map<string, IHookInfo<Client>> = new Map();
+
     static loadPlugins(): void {
-        this.pluginInfo = [];
-        this.pluginInstances = {};
         const folderPath = Storage.makePath('dist', 'plugins');
         let files: string[] = [];
         try {
@@ -18,97 +21,89 @@ export class PluginManager {
         } catch {
             Log('PluginManager', 'Couldn\'t find plugins directory', LogLevel.Warning);
         }
-        for (let i = 0; i < files.length; i++) {
+        for (const file of files) {
             try {
-                const relPath = Storage.makePath('dist', 'plugins', files[i]);
+                const relPath = Storage.makePath('dist', 'plugins', file);
                 if (!PLUGIN_REGEX.test(relPath)) {
                     if (environment.debug) {
                         Log('PluginManager', `Skipping ${relPath}`, LogLevel.Info);
                     }
                     continue;
                 }
-                const pluginClass = require(relPath).default;
+                require(relPath);
             } catch (err) {
-                Log('PluginManager', `Error while loading ${files[i]}`, LogLevel.Warning);
-                if (environment.debug) {
-                    Log('PluginManager', err);
-                }
+                Log('PluginManager', `Error while loading ${file}`, LogLevel.Warning);
+                console.error(err);
             }
         }
         if (this.afterInitFunctions && this.afterInitFunctions.length > 0) {
-            for (let i = 0; i < this.afterInitFunctions.length; i++) {
-                this.afterInitFunctions[i]();
+            for (const func of this.afterInitFunctions) {
+                func();
             }
             this.afterInitFunctions = null;
         }
     }
 
-    static addHook(packetType: PacketType, action: (client: Client, packet: Packet) => void, target: string): void {
-        if (target === 'Client') {
-            if (!this.clientHooks) {
-                this.clientHooks = {};
-            }
-            if (!this.clientHooks.hasOwnProperty(packetType)) {
-                this.clientHooks[packetType] = [];
-            }
-            this.clientHooks[packetType].push({
-                action: action
-            });
+    static loadHook<T>(info: IHookInfo<T>): void {
+        if (info.target === 'Client') {
+            this.clientHookStore.set(info.packet, info as any);
         } else {
-            if (!this.hooks) {
-                this.hooks = {};
+            if (!this.hookStore.has(info.packet)) {
+                this.hookStore.set(info.packet, []);
             }
-            if (!this.hooks.hasOwnProperty(packetType)) {
-                this.hooks[packetType] = [];
-            }
-            this.hooks[packetType].push({
-                action: action,
-                caller: target
-            });
+            this.hookStore.get(info.packet).push(info);
         }
     }
 
-    static addPlugin(info: IPluginInfo, target: new () => object): void {
-        // if the plugin is disabled, don't load it.
-        if (info.hasOwnProperty('enabled')) {
-            if (!info.enabled) {
-                if (environment.debug) {
-                    Log('PluginManager', `Skipping disabled plugin ${info.name}`, LogLevel.Info);
-                }
-                // remove hooks
-                const hKeys = Object.keys(this.hooks);
-                for (let i = 0; i < hKeys.length; i++) {
-                    this.hooks[+hKeys[i]] = this.hooks[+hKeys[i]].filter((hook) => {
-                        return hook.caller !== target.name;
-                    });
-                }
-                return;
-            }
-        }
-        let plugin: object;
-        try {
-            plugin = new target();
-        } catch (error) {
-            Log('PluginManager', `Error while instantiating ${target.name}`, LogLevel.Warning);
-            if (environment.debug) {
-                Log('PluginManager', error);
+    static loadLibrary<T>(lib: ILoadedLib<T>): void {
+        if (this.libStore.has(lib.target.name)) {
+            const existing = this.libStore.get(lib.target.name);
+            if (existing.info.dependencies.some((v, i) => v !== lib.dependencies[i])) {
+                Log('PluginManager', `A library with the name ${lib.target.name} already exists.`, LogLevel.Error);
+            } else {
+                Log('PluginManager', `The library ${lib.target.name} has already been loaded.`, LogLevel.Warning);
             }
             return;
         }
-        if (this.pluginInstances.hasOwnProperty(target.name)) {
-            Log('PluginManager', `Cannot load ${target.name} because a plugin with the same name already exists.`, LogLevel.Error);
-        } else {
-            this.pluginInstances[target.name] = plugin;
-            this.pluginInfo.push(info);
-            Log('PluginManager', `Loaded ${info.name} by ${info.author}`, LogLevel.Info);
+        if (lib.info.enabled === false) {
+            // unload hooks
+            for (const store of this.hookStore) {
+                this.hookStore.set(store[0], store[1].filter((info) => info.target === lib.info.name));
+            }
+            return;
+        }
+        for (const dep of lib.dependencies) {
+            if (!this.libStore.has(dep)) {
+                const error = new Error(`${lib.target.name} depends on the unloaded library ${dep}.`);
+                error.name = '__DEP';
+                throw error;
+            }
+        }
+        try {
+            const deps = lib.dependencies.map((dep) => this.libStore.get(dep).instance);
+            const instance = new lib.target(...deps);
+            this.libStore.set(lib.target.name, {
+                info: lib,
+                instance
+            });
+            Log('PluginManager', `Loaded ${lib.info.name} by ${lib.info.author}`, LogLevel.Info);
+        } catch (error) {
+            Log('PluginManager', `Error while instantiating ${lib.target.name}`, LogLevel.Error);
+            Log('PluginManager', error.message, LogLevel.Error);
         }
     }
 
-    static getInstanceOf<T extends object>(instance: new () => T): T | null {
-        if (!this.pluginInstances.hasOwnProperty(instance.name)) {
+    /**
+     * @deprecated Use dependency injection instead.
+     */
+    static getInstanceOf<T extends object>(instance: new () => T): T {
+        Log('Deprecation', 'getInstanceOf is deprecated. Use dependency injection instead.', LogLevel.Warning);
+        const lib = this.libStore.get(instance.name);
+        if (lib && lib.instance) {
+            return lib.instance;
+        } else {
             return null;
         }
-        return this.pluginInstances[instance.name] as T;
     }
 
     static afterInit(method: () => void): void {
@@ -118,39 +113,30 @@ export class PluginManager {
         this.afterInitFunctions.push(method);
     }
 
-    static callHooks(packetType: PacketType, packet: Packet, client: Client): void {
-        if (this.hooks && this.hooks[packetType]) {
-            for (let i = 0; i < this.hooks[packetType].length; i++) {
-                const hook = this.hooks[packetType][i];
+    static callHooks(packet: Packet, client: Client): void {
+        const name = packet.constructor.name;
+        if (this.hookStore.has(name)) {
+            const hooks = this.hookStore.get(name);
+            for (const hook of hooks) {
                 try {
-                    const caller = this.pluginInstances[hook.caller];
-                    hook.action.apply(caller, [client, packet]);
+                    const caller = this.libStore.get(hook.target);
+                    if (caller && caller.instance) {
+                        caller.instance[hook.method].call(caller.instance, client, packet);
+                    }
                 } catch (error) {
-                    Log('PluginManager',
-                        `Error while calling ${PacketType[packetType]} hook on ${hook.caller}`, LogLevel.Warning);
-                    Log('PluginManager', error, LogLevel.Info);
+                    Log('PluginManager', `Error while calling ${hook.target}.${hook.method}()`, LogLevel.Warning);
+                    Log('PluginManager', error.message, LogLevel.Warning);
                 }
             }
         }
         if (!packet.send) {
             return;
         }
-        if (this.clientHooks && this.clientHooks[packetType]) {
-            for (let i = 0; i < this.clientHooks[packetType].length; i++) {
-                const hook = this.clientHooks[packetType][i];
-                try {
-                    hook.action.apply(client, [client, packet]);
-                } catch (error) {
-                    Log('PluginManager', `Error while calling ${PacketType[packetType]} hook on client.`, LogLevel.Warning);
-                    Log('PluginManager', error, LogLevel.Info);
-                }
-            }
+        if (this.clientHookStore.has(name)) {
+            const hook = this.clientHookStore.get(name);
+            (client as any)[hook.method].call(client, client, packet);
         }
     }
 
-    private static hooks: { [id: number]: Array<{ action: (client: Client, packet: Packet) => void, caller: string }> };
-    private static clientHooks: { [id: number]: Array<{ action: (client: Client, packet: Packet) => void }> };
-    private static pluginInfo: IPluginInfo[];
-    private static pluginInstances: { [name: string]: object };
     private static afterInitFunctions: Array<() => void>;
 }

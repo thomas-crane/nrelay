@@ -1,6 +1,14 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `7.1.0`
+> Not backwards compatible.
+### Changes:
++ The `NrPlugin` decorator has been renamed to `Library`.
++ The `HookPacket` decorator has been replaced by `PacketHook` which does not require any parameters.
++ `PluginManager.getInstanceOf` has been deprecated in favor of dependency injection.
++ Warning are now raised if a packet hook method has problems (e.g. incorrect signature or too many params).
+
 ## `7.0.0`
 > Not backwards compatible.
 >

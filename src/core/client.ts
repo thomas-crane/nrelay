@@ -48,7 +48,7 @@ import {
     ObjectStatusData,
 } from './../networking/data';
 import { PluginManager, ResourceManager } from './../core';
-import { HookPacket } from './../decorators';
+import { PacketHook } from './../decorators';
 import { EventEmitter } from 'events';
 import { SocksClient } from 'socks';
 import { CLI } from '..';
@@ -402,9 +402,9 @@ export class Client {
      */
     broadcastPacket(packet: Packet): void {
         const clients = CLI.getClients();
-        for (let i = 0; i < clients.length; i++) {
-            if (clients[i].alias !== this.alias) {
-                clients[i].packetio.emitPacket(packet);
+        for (const client of clients) {
+            if (client.alias !== this.alias) {
+                client.packetio.emitPacket(packet);
             }
         }
     }
@@ -520,7 +520,7 @@ export class Client {
         }
     }
 
-    @HookPacket(PacketType.DAMAGE)
+    @PacketHook()
     private onDamage(client: Client, damage: DamagePacket): void {
         if (this.enemies[damage.targetId]) {
             this.enemies[damage.targetId].objectData.hp -= damage.damageAmount;
@@ -536,7 +536,7 @@ export class Client {
         }
     }
 
-    @HookPacket(PacketType.MAPINFO)
+    @PacketHook()
     private onMapInfo(client: Client, mapInfoPacket: MapInfoPacket): void {
         if (this.charInfo.charId > 0) {
             const loadPacket = new LoadPacket();
@@ -559,7 +559,7 @@ export class Client {
         }
     }
 
-    @HookPacket(PacketType.UPDATE)
+    @PacketHook()
     private onUpdate(client: Client, updatePacket: UpdatePacket): void {
         // reply
         const updateAck = new UpdateAckPacket();
@@ -567,18 +567,18 @@ export class Client {
 
         const pathfinderUpdates: INodeUpdate[] = [];
         // playerdata
-        for (let i = 0; i < updatePacket.newObjects.length; i++) {
-            if (updatePacket.newObjects[i].status.objectId === this.objectId) {
-                this.worldPos = updatePacket.newObjects[i].status.pos;
-                this.playerData = ObjectStatusData.processObject(updatePacket.newObjects[i]);
+        for (const obj of updatePacket.newObjects) {
+            if (obj.status.objectId === this.objectId) {
+                this.worldPos = obj.status.pos;
+                this.playerData = ObjectStatusData.processObject(obj);
                 this.playerData.server = this.internalServer.name;
             }
-            if (ResourceManager.objects[updatePacket.newObjects[i].objectType]) {
-                const obj = ResourceManager.objects[updatePacket.newObjects[i].objectType];
+            if (ResourceManager.objects[obj.objectType]) {
+                const gameObject = ResourceManager.objects[obj.objectType];
                 if (this.pathfinderEnabled) {
-                    if (obj.fullOccupy || obj.occupySquare) {
-                        const x = updatePacket.newObjects[i].status.pos.x;
-                        const y = updatePacket.newObjects[i].status.pos.y;
+                    if (gameObject.fullOccupy || gameObject.occupySquare) {
+                        const x = obj.status.pos.x;
+                        const y = obj.status.pos.y;
                         pathfinderUpdates.push({
                             x: Math.floor(x),
                             y: Math.floor(y),
@@ -586,18 +586,17 @@ export class Client {
                         });
                     }
                 }
-                if (obj.enemy) {
-                    if (!this.enemies[updatePacket.newObjects[i].status.objectId]) {
-                        this.enemies[updatePacket.newObjects[i].status.objectId]
-                            = new Enemy(obj, updatePacket.newObjects[i].status);
+                if (gameObject.enemy) {
+                    if (!this.enemies[obj.status.objectId]) {
+                        this.enemies[obj.status.objectId]
+                            = new Enemy(gameObject, obj.status);
                     }
                 }
             }
         }
 
         // map tiles
-        for (let i = 0; i < updatePacket.tiles.length; i++) {
-            const tile = updatePacket.tiles[i];
+        for (const tile of updatePacket.tiles) {
             this.mapTiles[tile.y * this.mapInfo.width + tile.x] = tile;
             if (this.pathfinderEnabled) {
                 if (ResourceManager.tiles[tile.type].noWalk) {
@@ -611,9 +610,9 @@ export class Client {
         }
 
         // drops
-        for (let i = 0; i < updatePacket.drops.length; i++) {
-            if (this.enemies[updatePacket.drops[i]]) {
-                delete this.enemies[updatePacket.drops[i]];
+        for (const drop of updatePacket.drops) {
+            if (this.enemies[drop]) {
+                delete this.enemies[drop];
             }
         }
 
@@ -625,7 +624,7 @@ export class Client {
         }
     }
 
-    @HookPacket(PacketType.RECONNECT)
+    @PacketHook()
     private onReconnectPacket(client: Client, reconnectPacket: ReconnectPacket): void {
         this.internalServer.address = (reconnectPacket.host === '' ? this.nexusServer.address : reconnectPacket.host);
         this.internalServer.name = (reconnectPacket.host === '' ? this.nexusServer.name : reconnectPacket.name);
@@ -635,7 +634,7 @@ export class Client {
         this.connect();
     }
 
-    @HookPacket(PacketType.GOTO)
+    @PacketHook()
     private onGotoPacket(client: Client, gotoPacket: GotoPacket): void {
         const ack = new GotoAckPacket();
         ack.time = this.getTime();
@@ -648,7 +647,7 @@ export class Client {
         }
     }
 
-    @HookPacket(PacketType.FAILURE)
+    @PacketHook()
     private onFailurePacket(client: Client, failurePacket: FailurePacket): void {
         switch (failurePacket.errorId) {
             case FailurePacket.INCORRECT_VERSION:
@@ -674,7 +673,7 @@ export class Client {
         }
     }
 
-    @HookPacket(PacketType.AOE)
+    @PacketHook()
     private onAoe(client: Client, aoePacket: AoePacket): void {
         const aoeAck = new AoeAckPacket();
         aoeAck.time = this.getTime();
@@ -685,7 +684,7 @@ export class Client {
         this.packetio.sendPacket(aoeAck);
     }
 
-    @HookPacket(PacketType.NEWTICK)
+    @PacketHook()
     private onNewTick(client: Client, newTickPacket: NewTickPacket): void {
         this.lastTickTime = this.currentTickTime;
         this.lastTickId = newTickPacket.tickId;
@@ -719,8 +718,7 @@ export class Client {
             this.playerData.hp = this.playerData.maxHP;
         }
 
-        for (let i = 0; i < newTickPacket.statuses.length; i++) {
-            const status = newTickPacket.statuses[i];
+        for (const status of newTickPacket.statuses) {
             if (status.objectId === this.objectId) {
                 const beforeHP = this.playerData.hp;
                 this.playerData = ObjectStatusData.processStatData(status.stats, this.playerData);
@@ -752,7 +750,7 @@ export class Client {
         }
     }
 
-    @HookPacket(PacketType.PING)
+    @PacketHook()
     private onPing(client: Client, pingPacket: PingPacket): void {
         // reply
         const pongPacket = new PongPacket();
@@ -761,7 +759,7 @@ export class Client {
         this.packetio.sendPacket(pongPacket);
     }
 
-    @HookPacket(PacketType.ENEMYSHOOT)
+    @PacketHook()
     private onEnemyShoot(client: Client, enemyShootPacket: EnemyShootPacket): void {
         const shootAck = new ShootAckPacket();
         shootAck.time = this.getTime();
@@ -790,7 +788,7 @@ export class Client {
         this.checkProjectiles();
     }
 
-    @HookPacket(PacketType.SERVERPLAYERSHOOT)
+    @PacketHook()
     private onServerPlayerShoot(client: Client, serverPlayerShoot: ServerPlayerShootPacket): void {
         if (serverPlayerShoot.ownerId === this.objectId) {
             const ack = new ShootAckPacket();
@@ -799,7 +797,7 @@ export class Client {
         }
     }
 
-    @HookPacket(PacketType.CREATESUCCESS)
+    @PacketHook()
     private onCreateSuccess(client: Client, createSuccessPacket: CreateSuccessPacket): void {
         Log(this.alias, 'Connected!', LogLevel.Success);
         this.objectId = createSuccessPacket.objectId;
@@ -953,7 +951,7 @@ export class Client {
                 if (index > -1) {
                     this.blockedPackets = this.blockedPackets.filter((p) => p !== data.type);
                 } else {
-                    PluginManager.callHooks(data.type, data, this);
+                    PluginManager.callHooks(data, this);
                 }
             });
             this.packetio.on('error', (err: Error) => {

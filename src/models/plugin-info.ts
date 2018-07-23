@@ -1,4 +1,4 @@
-export interface IPluginInfo {
+export interface ILibraryInfo {
     name: string;
     author: string;
     description?: string;

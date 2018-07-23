@@ -1,6 +1,7 @@
 // auto generated with tsai
 // https://github.com/thomas-crane/tsai
 export * from './account-service';
+export * from './arg-parser';
 export * from './local-server';
 export * from './logger';
 export * from './random';

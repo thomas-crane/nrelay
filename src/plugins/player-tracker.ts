@@ -1,10 +1,10 @@
-import { NrPlugin, HookPacket, Client, Log, LogLevel, PacketType } from './../core';
+import { Library, PacketHook, Client, Log, LogLevel, PacketType } from './../core';
 import { IPlayerData, Classes } from './../models';
 import { UpdatePacket, NewTickPacket } from './../networking/packets/incoming';
 import { ObjectStatusData } from './../networking/data';
 import { EventEmitter } from 'events';
 
-@NrPlugin({
+@Library({
     name: 'Player Tracker',
     author: 'tcrane'
 })
@@ -90,7 +90,7 @@ export class PlayerTracker {
         return this.trackedPlayers[client.guid];
     }
 
-    @HookPacket(PacketType.UPDATE)
+    @PacketHook()
     private onUpdate(client: Client, update: UpdatePacket): void {
         if (!this.trackedPlayers.hasOwnProperty(client.guid)) {
             if (this.trackAll) {
@@ -99,17 +99,17 @@ export class PlayerTracker {
                 return;
             }
         }
-        for (let i = 0; i < update.newObjects.length; i++) {
-            if (Classes[update.newObjects[i].objectType]) {
-                const pd = ObjectStatusData.processObject(update.newObjects[i]);
+        for (const obj of update.newObjects) {
+            if (Classes[obj.objectType]) {
+                const pd = ObjectStatusData.processObject(obj);
                 pd.server = client.server.name;
                 this.trackedPlayers[client.guid].push(pd);
                 this.emitter.emit('enter', pd);
             }
         }
-        for (let i = 0; i < update.drops.length; i++) {
+        for (const drop of update.drops) {
             for (let n = 0; n < this.trackedPlayers[client.guid].length; n++) {
-                if (this.trackedPlayers[client.guid][n].objectId === update.drops[i]) {
+                if (this.trackedPlayers[client.guid][n].objectId === drop) {
                     const pd = this.trackedPlayers[client.guid].splice(n, 1)[0];
                     this.emitter.emit('leave', pd);
                     break;
@@ -118,7 +118,7 @@ export class PlayerTracker {
         }
     }
 
-    @HookPacket(PacketType.NEWTICK)
+    @PacketHook()
     private onNewTick(client: Client, newTick: NewTickPacket): void {
         if (!this.trackedPlayers.hasOwnProperty(client.guid)) {
             if (this.trackAll) {
@@ -127,12 +127,12 @@ export class PlayerTracker {
                 return;
             }
         }
-        for (let i = 0; i < newTick.statuses.length; i++) {
+        for (const status of newTick.statuses) {
             for (let n = 0; n < this.trackedPlayers[client.guid].length; n++) {
-                if (newTick.statuses[i].objectId === this.trackedPlayers[client.guid][n].objectId) {
+                if (status.objectId === this.trackedPlayers[client.guid][n].objectId) {
                     this.trackedPlayers[client.guid][n] =
-                        ObjectStatusData.processStatData(newTick.statuses[i].stats, this.trackedPlayers[client.guid][n]);
-                    this.trackedPlayers[client.guid][n].worldPos = newTick.statuses[i].pos;
+                        ObjectStatusData.processStatData(status.stats, this.trackedPlayers[client.guid][n]);
+                    this.trackedPlayers[client.guid][n].worldPos = status.pos;
                     break;
                 }
             }
