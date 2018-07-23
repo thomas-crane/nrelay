@@ -1,6 +1,6 @@
-export interface ILibraryInfo {
-    name: string;
-    author: string;
-    description?: string;
-    enabled?: boolean;
+export interface LibraryInfo {
+  name: string;
+  author: string;
+  description?: string;
+  enabled?: boolean;
 }

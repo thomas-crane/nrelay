@@ -1,6 +1,18 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `7.2.0`
+> Not backwards compatible.
+### Changes:
++ Rework networking code.
++ Packet classes now read/write from a `PacketBuffer` instead of having a buffer as a class member.
++ Packet ids are now stored in a .json file instead of in the source.
++ Replaced `guidEncrypt()` with `RSA.encrypt()`
++ Updater now maintains two versions, one for the client and one for the assets.
++ Rework logging mechanism. `Log()` has been replaced by `Logger.log()`, custom loggers can now be used.
++ Interfaces are no longer prefixed with `I`. (e.g. `IPlayerData` has become `PlayerData`).
++ Indendation of all files has changed from 4 spaces to 2.
+
 ## `7.1.0`
 > Not backwards compatible.
 ### Changes:

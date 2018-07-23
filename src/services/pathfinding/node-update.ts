@@ -1,5 +1,5 @@
-export interface INodeUpdate {
-    x: number;
-    y: number;
-    walkable: boolean;
+export interface NodeUpdate {
+  x: number;
+  y: number;
+  walkable: boolean;
 }

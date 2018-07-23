@@ -1,27 +1,27 @@
-import { IProxy } from './proxy';
+import { Proxy } from './proxy';
 
-export interface IAccountInfo {
-    buildVersion: string;
-    localServer?: ILocalServerSettings;
-    accounts: IAccount[];
+export interface AccountInfo {
+  buildVersion: string;
+  localServer?: LocalServerSettings;
+  accounts: Account[];
 }
-export interface IAccount {
-    alias: string;
-    guid: string;
-    password: string;
-    serverPref: string;
-    charInfo?: ICharacterInfo;
-    proxy?: IProxy;
-    pathfinder?: boolean;
-}
-
-export interface ICharacterInfo {
-    charId: number;
-    nextCharId: number;
-    maxNumChars: number;
+export interface Account {
+  alias: string;
+  guid: string;
+  password: string;
+  serverPref: string;
+  charInfo?: CharacterInfo;
+  proxy?: Proxy;
+  pathfinder?: boolean;
 }
 
-export interface ILocalServerSettings {
-    enabled: boolean;
-    port?: number;
+export interface CharacterInfo {
+  charId: number;
+  nextCharId: number;
+  maxNumChars: number;
+}
+
+export interface LocalServerSettings {
+  enabled: boolean;
+  port?: number;
 }

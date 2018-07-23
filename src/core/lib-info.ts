@@ -1,22 +1,22 @@
-import { ILibraryInfo } from './../models/plugin-info';
+import { LibraryInfo } from './../models/plugin-info';
 
-export interface IType<T> {
-    new(...args: any[]): T;
+export interface Type<T> {
+  new(...args: any[]): T;
 }
 
-export interface ILoadedLib<T> {
-    info: ILibraryInfo;
-    target: IType<T>;
-    dependencies: string[];
+export interface LoadedLib<T> {
+  info: LibraryInfo;
+  target: Type<T>;
+  dependencies: string[];
 }
 
-export interface IManagedLib<T> {
-    instance: T;
-    info: ILoadedLib<T>;
+export interface ManagedLib<T> {
+  instance: T;
+  info: LoadedLib<T>;
 }
 
-export interface IHookInfo<T> {
-    target: string;
-    method: string;
-    packet: string;
+export interface HookInfo<T> {
+  target: string;
+  method: string;
+  packet: string;
 }

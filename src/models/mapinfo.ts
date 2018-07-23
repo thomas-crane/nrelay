@@ -1,5 +1,5 @@
-export interface IMapInfo {
-    width: number;
-    height: number;
-    name: string;
+export interface MapInfo {
+  width: number;
+  height: number;
+  name: string;
 }

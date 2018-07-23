@@ -1,4 +1,4 @@
-export interface IServer {
-    name: string;
-    address: string;
+export interface Server {
+  name: string;
+  address: string;
 }

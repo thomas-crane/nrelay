@@ -1,4 +1,4 @@
-export interface IHeapItem<T> {
-    heapIndex: number;
-    compareTo(item: T): number;
+export interface HeapItem<T> {
+  heapIndex: number;
+  compareTo(item: T): number;
 }

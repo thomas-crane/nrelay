@@ -16,4 +16,6 @@ export * from './projectile';
 export * from './proxy';
 export * from './server';
 export * from './socket-wrapper';
+export * from './stat-type';
 export * from './tile';
+export * from './trade-result';

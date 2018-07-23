@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import { WriteStream } from 'fs';
 
 export interface LogProvider {
   log(sender: string, message: string, level: LogLevel): void;
