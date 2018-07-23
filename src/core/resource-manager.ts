@@ -21,18 +21,18 @@ export class ResourceManager {
             this.tiles = {};
             Storage.get('resources', 'GroundTypes.json').then((data) => {
                 let tileArray: any[] = data['Ground'];
-                for (let i = 0; i < tileArray.length; i++) {
+                for (const tile of tileArray) {
                     try {
-                        this.tiles[+tileArray[i].type] = {
-                            type: +tileArray[i].type,
-                            id: tileArray[i].id,
-                            sink: (tileArray[i].Sink ? true : false),
-                            speed: (+tileArray[i].Speed || 1),
-                            noWalk: (tileArray[i].NoWalk ? true : false)
+                        this.tiles[+tile.type] = {
+                            type: +tile.type,
+                            id: tile.id,
+                            sink: (tile.Sink ? true : false),
+                            speed: (+tile.Speed || 1),
+                            noWalk: (tile.NoWalk ? true : false)
                         };
                     } catch {
                         if (environment.debug) {
-                            Log('ResourceManager', `Failed to load tile: ${tileArray[i].type}`, LogLevel.Warning);
+                            Log('ResourceManager', `Failed to load tile: ${tile.type}`, LogLevel.Warning);
                         }
                     }
                 }
@@ -58,9 +58,8 @@ export class ResourceManager {
                 let enemyCount = 0;
                 let petCount = 0;
                 let objectsArray: any[] = data['Object'];
-                for (let i = 0; i < objectsArray.length; i++) {
+                for (const current of objectsArray) {
                     try {
-                        const current = objectsArray[i];
                         this.objects[+current.type] = {
                             type: +current.type,
                             id: current.id,
@@ -107,10 +106,10 @@ export class ResourceManager {
                                     conditionEffects: []
                                 };
                                 if (Array.isArray(current.Projectile[j].ConditionEffect)) {
-                                    for (let n = 0; n < current.Projectile[j].ConditionEffect.length; n++) {
+                                    for (const effect of current.Projectile[j].ConditionEffect) {
                                         this.objects[+current.type].projectiles[j].conditionEffects.push({
-                                            effectName: current.Projectile[j].ConditionEffect[n]._,
-                                            duration: current.Projectile[j].ConditionEffect[n].duration
+                                            effectName: effect._,
+                                            duration: effect.duration
                                         });
                                     }
                                 } else if (typeof current.Projectile[j].ConditionEffect === 'object') {
@@ -145,11 +144,11 @@ export class ResourceManager {
                         if (this.objects[+current.type].item) {
                             // stat bonuses
                             if (Array.isArray(current.ActivateOnEquip)) {
-                                for (let j = 0; j < current.ActivateOnEquip.length; j++) {
-                                    if (current.ActivateOnEquip[j]['_'] === 'IncrementStat') {
+                                for (const bonus of current.ActivateOnEquip) {
+                                    if (bonus['_'] === 'IncrementStat') {
                                         this.objects[+current.type].activateOnEquip.push({
-                                            statType: current.ActivateOnEquip[j].stat,
-                                            amount: current.ActivateOnEquip[j].amount
+                                            statType: bonus.stat,
+                                            amount: bonus.amount
                                         });
                                     }
                                 }
@@ -176,7 +175,7 @@ export class ResourceManager {
                         }
                     } catch {
                         if (environment.debug) {
-                            Log('ResourceManager', `Failed to load object: ${objectsArray[i].type}`, LogLevel.Warning);
+                            Log('ResourceManager', `Failed to load object: ${current.type}`, LogLevel.Warning);
                         }
                     }
                 }

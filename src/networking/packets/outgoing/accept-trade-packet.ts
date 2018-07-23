@@ -24,12 +24,12 @@ export class AcceptTradePacket extends Packet {
 
     write(): void {
         this.writeShort(this.clientOffer.length);
-        for (let i = 0; i < this.clientOffer.length; i++) {
-            this.writeBoolean(this.clientOffer[i]);
+        for (const slot of this.clientOffer) {
+            this.writeBoolean(slot);
         }
         this.writeShort(this.partnerOffer.length);
-        for (let i = 0; i < this.partnerOffer.length; i++) {
-            this.writeBoolean(this.partnerOffer[i]);
+        for (const slot of this.partnerOffer) {
+            this.writeBoolean(slot);
         }
     }
 }

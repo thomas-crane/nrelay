@@ -64,8 +64,8 @@ export class Pathfinder {
     }
 
     updateWalkableNodes(updates: INodeUpdate[]): void {
-        for (let i = 0; i < updates.length; i++) {
-            this.nodes[this.getIndex(updates[i].x, updates[i].y)].walkable = updates[i].walkable;
+        for (const update of updates) {
+            this.nodes[this.getIndex(update.x, update.y)].walkable = update.walkable;
         }
         updates = null;
     }

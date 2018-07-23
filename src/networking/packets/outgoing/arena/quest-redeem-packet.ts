@@ -23,8 +23,8 @@ export class QuestRedeemPacket extends Packet {
     write(): void {
         this.writeString(this.questId);
         this.writeShort(this.slots.length);
-        for (let i = 0; i < this.slots.length; i++) {
-            this.slots[i].write(this);
+        for (const slot of this.slots) {
+            slot.write(this);
         }
     }
 }

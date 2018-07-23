@@ -18,8 +18,8 @@ export class TradeChangedPacket extends Packet {
 
     write(): void {
         this.writeShort(this.offer.length);
-        for (let i = 0; i < this.offer.length; i++) {
-            this.writeBoolean(this.offer[i]);
+        for (const slot of this.offer) {
+            this.writeBoolean(slot);
         }
     }
 }

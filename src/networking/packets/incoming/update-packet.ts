@@ -40,18 +40,18 @@ export class UpdatePacket extends Packet {
 
     write(): void {
         this.writeShort(this.tiles.length);
-        for (let i = 0; i < this.tiles.length; i++) {
-            this.tiles[i].write(this);
+        for (const tile of this.tiles) {
+            tile.write(this);
         }
 
         this.writeShort(this.newObjects.length);
-        for (let i = 0; i < this.newObjects.length; i++) {
-            this.newObjects[i].write(this);
+        for (const obj of this.newObjects) {
+            obj.write(this);
         }
 
         this.writeShort(this.drops.length);
-        for (let i = 0; i < this.drops.length; i++) {
-            this.writeInt32(this.drops[i]);
+        for (const drop of this.drops) {
+            this.writeInt32(drop);
         }
     }
 }

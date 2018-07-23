@@ -6,6 +6,14 @@ export class Logger {
     static logStream: WriteStream;
 }
 
+export enum LogLevel {
+    Info,
+    Message,
+    Warning,
+    Error,
+    Success,
+}
+
 export function Log(sender: string, message: string, level: LogLevel = LogLevel.Message): void {
     const senderString = (`[${getTime()} | ${sender}]`);
     let printString: string = pad(senderString, 30) + message;
@@ -45,12 +53,4 @@ function pad(str: string, paddingLength: number): string {
         return str;
     }
     return (str + ' '.repeat(paddingLength - str.length));
-}
-
-export enum LogLevel {
-    Info,
-    Message,
-    Warning,
-    Error,
-    Success,
 }

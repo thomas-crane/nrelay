@@ -31,8 +31,8 @@ export class DamagePacket extends Packet {
     write(): void {
         this.writeInt32(this.targetId);
         this.writeUnsignedByte(this.effects.length);
-        for (let i = 0; i < this.effects.length; i++) {
-            this.writeUnsignedByte(this.effects[i]);
+        for (const effect of this.effects) {
+            this.writeUnsignedByte(effect);
         }
         this.writeUnsignedShort(this.damageAmount);
         this.writeBoolean(this.kill);

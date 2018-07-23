@@ -137,14 +137,14 @@ export class PacketIO {
 
     private processData(data: Buffer): void {
         // process all data which has arrived.
-        for (let i = 0; i < data.length; i++) {
+        for (const byte of data) {
             // reconnecting to the nexus causes a 'buffer' byte to be sent
             // which should be skipped.
-            if (this.index === 0 && data[i] === 255) {
+            if (this.index === 0 && byte === 255) {
                 continue;
             }
             if (this.index < this.packetBuffer.length) {
-                this.packetBuffer[this.index++] = data[i];
+                this.packetBuffer[this.index++] = byte;
             } else {
                 if (!this.currentHead) {
                     this.processHead();
@@ -153,10 +153,10 @@ export class PacketIO {
                     const packet = this.constructPacket();
                     this.emitPacket(packet);
                 }
-                if (this.index === 0 && data[i] === 255) {
+                if (this.index === 0 && byte === 255) {
                     continue;
                 }
-                this.packetBuffer[this.index++] = data[i];
+                this.packetBuffer[this.index++] = byte;
             }
         }
 

@@ -23,8 +23,8 @@ export class AccountListPacket extends Packet {
     write(): void {
         this.writeInt32(this.accountListId);
         this.writeShort(this.accountIds.length);
-        for (let i = 0; i < this.accountIds.length; i++) {
-            this.writeString(this.accountIds[i]);
+        for (const accId of this.accountIds) {
+            this.writeString(accId);
         }
         this.writeInt32(this.lockAction);
     }

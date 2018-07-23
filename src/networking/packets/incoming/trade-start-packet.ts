@@ -31,14 +31,12 @@ export class TradeStartPacket extends Packet {
 
     write(): void {
         this.writeShort(this.clientItems.length);
-        for (let i = 0; i < this.clientItems.length; i++) {
-            const item = new TradeItem();
+        for (const item of this.clientItems) {
             item.write(this);
         }
         this.writeString(this.partnerName);
         this.writeShort(this.partnerItems.length);
-        for (let i = 0; i < this.partnerItems.length; i++) {
-            const item = new TradeItem();
+        for (const item of this.partnerItems) {
             item.write(this);
         }
     }

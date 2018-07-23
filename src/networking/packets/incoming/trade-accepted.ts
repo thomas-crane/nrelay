@@ -23,11 +23,11 @@ export class TradeAcceptedPacket extends Packet {
     }
 
     write(): void {
-        for (let i = 0; i < this.clientOffer.length; i++) {
-            this.writeBoolean(this.clientOffer[i]);
+        for (const slot of this.clientOffer) {
+            this.writeBoolean(slot);
         }
-        for (let i = 0; i < this.partnerOffer.length; i++) {
-            this.writeBoolean(this.partnerOffer[i]);
+        for (const slot of this.partnerOffer) {
+            this.writeBoolean(slot);
         }
     }
 }

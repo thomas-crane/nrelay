@@ -32,8 +32,8 @@ export class MovePacket extends Packet {
         this.newPosition.write(this);
         this.records = [];
         this.writeShort(this.records.length);
-        for (let i = 0; i < this.records.length; i++) {
-            this.records[i].write(this);
+        for (const record of this.records) {
+            record.write(this);
         }
     }
 }

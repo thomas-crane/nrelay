@@ -49,12 +49,12 @@ export class MapInfoPacket extends Packet {
         this.writeBoolean(this.allowPlayerTeleport);
         this.writeBoolean(this.showDisplays);
         this.writeShort(this.clientXML.length);
-        for (let i = 0; i < this.clientXML.length; i++) {
-            this.writeStringUTF32(this.clientXML[i]);
+        for (const xml of this.clientXML) {
+            this.writeStringUTF32(xml);
         }
         this.writeShort(this.extraXML.length);
-        for (let i = 0; i < this.extraXML.length; i++) {
-            this.writeStringUTF32(this.extraXML[i]);
+        for (const xml of this.extraXML) {
+            this.writeStringUTF32(xml);
         }
     }
 }

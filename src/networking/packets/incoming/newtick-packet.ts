@@ -27,8 +27,8 @@ export class NewTickPacket extends Packet {
         this.writeInt32(this.tickId);
         this.writeInt32(this.tickTime);
         this.writeShort(this.statuses.length);
-        for (let i = 0; i < this.statuses.length; i++) {
-            this.statuses[i].write(this);
+        for (const status of this.statuses) {
+            status.write(this);
         }
     }
 }

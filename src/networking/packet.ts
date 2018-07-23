@@ -1,7 +1,7 @@
 import { PacketType } from './packet-type';
 export * from './packet-type';
 
-export abstract class Packet implements IPacket {
+export abstract class Packet {
 
     abstract type: PacketType;
 
@@ -148,13 +148,4 @@ export abstract class Packet implements IPacket {
         this.bufferIndex = 0;
         this.data = Buffer.alloc(1024);
     }
-}
-
-export interface IPacket {
-    type: PacketType;
-
-    data: Buffer;
-
-    read(): void;
-    write(): void;
 }
