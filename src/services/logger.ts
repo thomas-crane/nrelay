@@ -1,56 +1,37 @@
 import chalk from 'chalk';
-import { environment } from './../models';
 import { WriteStream } from 'fs';
 
+export interface LogProvider {
+  log(sender: string, message: string, level: LogLevel): void;
+}
+
 export class Logger {
-    static logStream: WriteStream;
+  static loggers: LogProvider[] = [];
+
+  static addLogger(logger: LogProvider): void {
+    this.loggers.push(logger);
+  }
+  static resetLoggers(): void {
+    this.loggers = [];
+  }
+  static log(sender: string, message: string, level: LogLevel = LogLevel.Message): void {
+    for (const logger of this.loggers) {
+      try {
+        logger.log(sender, message, level);
+      } catch (error) {
+        // console.log is the only reliable logger at this point.
+        console.log(`${chalk.bgRedBright('ERROR')} while calling log() on the logger class: ${logger.constructor.name}.`);
+        console.error(error);
+      }
+    }
+  }
 }
 
 export enum LogLevel {
-    Info,
-    Message,
-    Warning,
-    Error,
-    Success,
-}
-
-export function Log(sender: string, message: string, level: LogLevel = LogLevel.Message): void {
-    const senderString = (`[${getTime()} | ${sender}]`);
-    let printString: string = pad(senderString, 30) + message;
-    if (Logger.logStream && environment.log) {
-        Logger.logStream.write(pad(LogLevel[level].toUpperCase(), 8) + printString + '\n');
-    }
-    switch (level) {
-        case LogLevel.Info:
-            printString = chalk.gray(printString);
-            break;
-        case LogLevel.Message:
-            printString = (printString);
-            break;
-        case LogLevel.Warning:
-            printString = chalk.yellow(printString);
-            break;
-        case LogLevel.Error:
-            printString = chalk.red(printString);
-            break;
-        case LogLevel.Success:
-            printString = chalk.green(printString);
-            break;
-        default:
-            printString = message;
-            break;
-    }
-    console.log(printString);
-}
-
-function getTime(): string {
-    const now = new Date();
-    return now.toTimeString().split(' ')[0];
-}
-
-function pad(str: string, paddingLength: number): string {
-    if (str.length > paddingLength) {
-        return str;
-    }
-    return (str + ' '.repeat(paddingLength - str.length));
+  Debug,
+  Info,
+  Message,
+  Warning,
+  Error,
+  Success,
 }
