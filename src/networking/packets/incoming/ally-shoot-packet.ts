@@ -1,27 +1,22 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class AllyShootPacket extends Packet {
+export class AllyShootPacket implements IncomingPacket {
 
-    type = PacketType.ALLYSHOOT;
+  type = PacketType.ALLYSHOOT;
 
-    //#region packet-specific members
-    bulletId: number;
-    ownerId: number;
-    containerType: number;
-    angle: number;
-    //#endregion
+  //#region packet-specific members
+  bulletId: number;
+  ownerId: number;
+  containerType: number;
+  angle: number;
+  //#endregion
 
-    read(): void {
-        this.bulletId = this.readUnsignedByte();
-        this.ownerId = this.readInt32();
-        this.containerType = this.readShort();
-        this.angle = this.readFloat();
-    }
-
-    write(): void {
-        this.writeUnsignedByte(this.bulletId);
-        this.writeInt32(this.ownerId);
-        this.writeShort(this.containerType);
-        this.writeFloat(this.angle);
-    }
+  read(buffer: PacketBuffer): void {
+    this.bulletId = buffer.readUnsignedByte();
+    this.ownerId = buffer.readInt32();
+    this.containerType = buffer.readShort();
+    this.angle = buffer.readFloat();
+  }
 }

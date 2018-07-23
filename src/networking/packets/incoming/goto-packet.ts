@@ -1,23 +1,20 @@
-import { Packet, PacketType } from '../../packet';
-import { WorldPosData } from './../../../networking/data/world-pos-data';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
+import { WorldPosData } from '../../data/world-pos-data';
 
-export class GotoPacket extends Packet {
+export class GotoPacket implements IncomingPacket {
 
-    type = PacketType.GOTO;
+  type = PacketType.GOTO;
 
-    //#region packet-specific members
-    objectId: number;
-    position: WorldPosData;
-    //#endregion
+  //#region packet-specific members
+  objectId: number;
+  position: WorldPosData;
+  //#endregion
 
-    read(): void {
-        this.objectId = this.readInt32();
-        this.position = new WorldPosData();
-        this.position.read(this);
-    }
-
-    write(): void {
-        this.writeInt32(this.objectId);
-        this.position.write(this);
-    }
+  read(buffer: PacketBuffer): void {
+    this.objectId = buffer.readInt32();
+    this.position = new WorldPosData();
+    this.position.read(buffer);
+  }
 }

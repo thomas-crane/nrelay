@@ -1,31 +1,24 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class AccountListPacket extends Packet {
+export class AccountListPacket implements IncomingPacket {
 
-    type = PacketType.ACCOUNTLIST;
+  type = PacketType.ACCOUNTLIST;
 
-    //#region packet-specific members
-    accountListId: number;
-    accountIds: string[];
-    lockAction: number;
-    //#endregion
+  //#region packet-specific members
+  accountListId: number;
+  accountIds: string[];
+  lockAction: number;
+  //#endregion
 
-    read(): void {
-        this.accountListId = this.readInt32();
-        const accountIdsLen = this.readShort();
-        this.accountIds = new Array<string>(accountIdsLen);
-        for (let i = 0; i < accountIdsLen; i++) {
-            this.accountIds[i] = this.readString();
-        }
-        this.lockAction = this.readInt32();
+  read(buffer: PacketBuffer): void {
+    this.accountListId = buffer.readInt32();
+    const accountIdsLen = buffer.readShort();
+    this.accountIds = new Array<string>(accountIdsLen);
+    for (let i = 0; i < accountIdsLen; i++) {
+      this.accountIds[i] = buffer.readString();
     }
-
-    write(): void {
-        this.writeInt32(this.accountListId);
-        this.writeShort(this.accountIds.length);
-        for (const accId of this.accountIds) {
-            this.writeString(accId);
-        }
-        this.writeInt32(this.lockAction);
-    }
+    this.lockAction = buffer.readInt32();
+  }
 }

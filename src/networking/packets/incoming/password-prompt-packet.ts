@@ -1,18 +1,16 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class PasswordPromptPacket extends Packet {
+export class PasswordPromptPacket implements IncomingPacket {
 
-    type = PacketType.PASSWORDPROMPT;
+  type = PacketType.PASSWORDPROMPT;
 
-    //#region packet-specific members
-    cleanPasswordStatus: number;
-    //#endregion
+  //#region packet-specific members
+  cleanPasswordStatus: number;
+  //#endregion
 
-    read(): void {
-        this.cleanPasswordStatus = this.readInt32();
-    }
-
-    write(): void {
-        this.writeInt32(this.cleanPasswordStatus);
-    }
+  read(buffer: PacketBuffer): void {
+    this.cleanPasswordStatus = buffer.readInt32();
+  }
 }

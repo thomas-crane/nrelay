@@ -1,31 +1,24 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 import { SlotObjectData } from '../../data/slot-object-data';
 import { WorldPosData } from '../../data/world-pos-data';
 
-export class UseItemPacket extends Packet {
+export class UseItemPacket implements OutgoingPacket {
 
-    type = PacketType.USEITEM;
+  type = PacketType.USEITEM;
 
-    //#region packet-specific members
-    time: number;
-    slotObject: SlotObjectData;
-    itemUsePos: WorldPosData;
-    useType: number;
-    //#endregion
+  //#region packet-specific members
+  time: number;
+  slotObject: SlotObjectData;
+  itemUsePos: WorldPosData;
+  useType: number;
+  //#endregion
 
-    read(): void {
-        this.time = this.readInt32();
-        this.slotObject = new SlotObjectData();
-        this.slotObject.read(this);
-        this.itemUsePos = new WorldPosData();
-        this.itemUsePos.read(this);
-        this.useType = this.readByte();
-    }
-
-    write(): void {
-        this.writeInt32(this.time);
-        this.slotObject.write(this);
-        this.itemUsePos.write(this);
-        this.writeByte(this.useType);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.time);
+    this.slotObject.write(buffer);
+    this.itemUsePos.write(buffer);
+    buffer.writeByte(this.useType);
+  }
 }

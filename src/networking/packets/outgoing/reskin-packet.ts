@@ -1,18 +1,16 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class ReskinPacket extends Packet {
+export class ReskinPacket implements OutgoingPacket {
 
-    type = PacketType.RESKIN;
+  type = PacketType.RESKIN;
 
-    //#region packet-specific members
-    skinId: number;
-    //#endregion
+  //#region packet-specific members
+  skinId: number;
+  //#endregion
 
-    read(): void {
-        this.skinId = this.readInt32();
-    }
-
-    write(): void {
-        this.writeInt32(this.skinId);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.skinId);
+  }
 }

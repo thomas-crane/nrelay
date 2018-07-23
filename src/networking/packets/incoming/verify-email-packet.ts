@@ -1,18 +1,16 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class VerifyEmailPacket extends Packet {
+export class VerifyEmailPacket implements IncomingPacket {
 
-    type = PacketType.VERIFYEMAIL;
+  type = PacketType.VERIFYEMAIL;
 
-    //#region packet-specific members
+  //#region packet-specific members
 
-    //#endregion
+  //#endregion
 
-    read(): void {
-
-    }
-
-    write(): void {
-
-    }
+  read(buffer: PacketBuffer): void {
+    //
+  }
 }

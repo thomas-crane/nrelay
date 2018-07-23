@@ -1,18 +1,16 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class KeyInfoRequestPacket extends Packet {
+export class KeyInfoRequestPacket implements OutgoingPacket {
 
-    type = PacketType.KEYINFO_REQUEST;
+  type = PacketType.KEYINFO_REQUEST;
 
-    //#region packet-specific members
-    itemType: number;
-    //#endregion
+  //#region packet-specific members
+  itemType: number;
+  //#endregion
 
-    read(): void {
-        this.itemType = this.readInt32();
-    }
-
-    write(): void {
-        this.writeInt32(this.itemType);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.itemType);
+  }
 }

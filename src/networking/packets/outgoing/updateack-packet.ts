@@ -1,18 +1,16 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class UpdateAckPacket extends Packet {
+export class UpdateAckPacket implements OutgoingPacket {
 
-    type = PacketType.UPDATEACK;
+  type = PacketType.UPDATEACK;
 
-    //#region packet-specific members
+  //#region packet-specific members
 
-    //#endregion
+  //#endregion
 
-    read(): void {
+  write(buffer: PacketBuffer): void {
 
-    }
-
-    write(): void {
-
-    }
+  }
 }

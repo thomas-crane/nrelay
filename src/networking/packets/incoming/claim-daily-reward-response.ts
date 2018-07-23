@@ -1,24 +1,20 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class ClaimDailyRewardResponse extends Packet {
+export class ClaimDailyRewardResponse implements IncomingPacket {
 
-    type = PacketType.LOGINREWARD_MSG;
+  type = PacketType.LOGINREWARD_MSG;
 
-    //#region packet-specific members
-    itemId: number;
-    quantity: number;
-    gold: number;
-    //#endregion
+  //#region packet-specific members
+  itemId: number;
+  quantity: number;
+  gold: number;
+  //#endregion
 
-    read(): void {
-        this.itemId = this.readInt32();
-        this.quantity = this.readInt32();
-        this.gold = this.readInt32();
-    }
-
-    write(): void {
-        this.writeInt32(this.itemId);
-        this.writeInt32(this.quantity);
-        this.writeInt32(this.gold);
-    }
+  read(buffer: PacketBuffer): void {
+    this.itemId = buffer.readInt32();
+    this.quantity = buffer.readInt32();
+    this.gold = buffer.readInt32();
+  }
 }

@@ -1,18 +1,16 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class TradeRequestedPacket extends Packet {
+export class TradeRequestedPacket implements IncomingPacket {
 
-    type = PacketType.TRADEREQUESTED;
+  type = PacketType.TRADEREQUESTED;
 
-    //#region packet-specific members
-    name: string;
-    //#endregion
+  //#region packet-specific members
+  name: string;
+  //#endregion
 
-    read(): void {
-        this.name = this.readString();
-    }
-
-    write(): void {
-        this.writeString(this.name);
-    }
+  read(buffer: PacketBuffer): void {
+    this.name = buffer.readString();
+  }
 }

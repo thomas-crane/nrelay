@@ -1,18 +1,16 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class InvResultPacket extends Packet {
+export class InvResultPacket implements IncomingPacket {
 
-    type = PacketType.INVRESULT;
+  type = PacketType.INVRESULT;
 
-    //#region packet-specific members
-    result: number;
-    //#endregion
+  //#region packet-specific members
+  result: number;
+  //#endregion
 
-    read(): void {
-        this.result = this.readInt32();
-    }
-
-    write(): void {
-        this.writeInt32(this.result);
-    }
+  read(buffer: PacketBuffer): void {
+    this.result = buffer.readInt32();
+  }
 }

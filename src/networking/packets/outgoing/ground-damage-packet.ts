@@ -1,23 +1,19 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 import { WorldPosData } from '../../data/world-pos-data';
 
-export class GroundDamagePacket extends Packet {
+export class GroundDamagePacket implements OutgoingPacket {
 
-    type = PacketType.GROUNDDAMAGE;
+  type = PacketType.GROUNDDAMAGE;
 
-    //#region packet-specific members
-    time: number;
-    position: WorldPosData;
-    //#endregion
+  //#region packet-specific members
+  time: number;
+  position: WorldPosData;
+  //#endregion
 
-    read(): void {
-        this.time = this.readInt32();
-        this.position = new WorldPosData();
-        this.position.read(this);
-    }
-
-    write(): void {
-        this.writeInt32(this.time);
-        this.position.write(this);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.time);
+    this.position.write(buffer);
+  }
 }

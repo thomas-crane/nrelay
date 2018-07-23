@@ -1,28 +1,29 @@
-import { Packet } from './../packet';
+import { PacketBuffer } from '../packet-buffer';
+import { DataPacket } from '../packet';
 
-export class MoveRecord {
+export class MoveRecord implements DataPacket {
 
-    time: number;
-    x: number;
-    y: number;
+  time: number;
+  x: number;
+  y: number;
 
-    read(packet: Packet): void {
-        this.time = packet.readInt32();
-        this.x = packet.readFloat();
-        this.y = packet.readFloat();
-    }
+  read(packet: PacketBuffer): void {
+    this.time = packet.readInt32();
+    this.x = packet.readFloat();
+    this.y = packet.readFloat();
+  }
 
-    write(packet: Packet): void {
-        packet.writeInt32(this.time);
-        packet.writeFloat(this.x);
-        packet.writeFloat(this.y);
-    }
+  write(packet: PacketBuffer): void {
+    packet.writeInt32(this.time);
+    packet.writeFloat(this.x);
+    packet.writeFloat(this.y);
+  }
 
-    clone(): MoveRecord {
-        const clone = new MoveRecord();
-        clone.time = this.time;
-        clone.x = this.x;
-        clone.y = this.y;
-        return clone;
-    }
+  clone(): MoveRecord {
+    const clone = new MoveRecord();
+    clone.time = this.time;
+    clone.x = this.x;
+    clone.y = this.y;
+    return clone;
+  }
 }

@@ -1,18 +1,16 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class QuestObjectIdPacket extends Packet {
+export class QuestObjectIdPacket implements IncomingPacket {
 
-    type = PacketType.QUESTOBJID;
+  type = PacketType.QUESTOBJID;
 
-    //#region packet-specific members
-    objectId: number;
-    //#endregion
+  //#region packet-specific members
+  objectId: number;
+  //#endregion
 
-    read(): void {
-        this.objectId = this.readInt32();
-    }
-
-    write(): void {
-        this.writeInt32(this.objectId);
-    }
+  read(buffer: PacketBuffer): void {
+    this.objectId = buffer.readInt32();
+  }
 }

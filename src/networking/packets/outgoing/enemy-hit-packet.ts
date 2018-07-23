@@ -1,27 +1,22 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class EnemyHitPacket extends Packet {
+export class EnemyHitPacket implements OutgoingPacket {
 
-    type = PacketType.ENEMYHIT;
+  type = PacketType.ENEMYHIT;
 
-    //#region packet-specific members
-    time: number;
-    bulletId: number;
-    targetId: number;
-    kill: boolean;
-    //#endregion
+  //#region packet-specific members
+  time: number;
+  bulletId: number;
+  targetId: number;
+  kill: boolean;
+  //#endregion
 
-    read(): void {
-        this.time = this.readInt32();
-        this.bulletId = this.readByte();
-        this.targetId = this.readInt32();
-        this.kill = this.readBoolean();
-    }
-
-    write(): void {
-        this.writeInt32(this.time);
-        this.writeByte(this.bulletId);
-        this.writeInt32(this.targetId);
-        this.writeBoolean(this.kill);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.time);
+    buffer.writeByte(this.bulletId);
+    buffer.writeInt32(this.targetId);
+    buffer.writeBoolean(this.kill);
+  }
 }

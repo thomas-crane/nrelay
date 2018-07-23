@@ -1,24 +1,20 @@
-import { Packet, PacketType } from '../../../packet';
+import { PacketBuffer } from '../../../packet-buffer';
+import { PacketType } from '../../../packet-type';
+import { IncomingPacket } from '../../../packet';
 
-export class EvolvedPetMessage extends Packet {
+export class EvolvedPetMessage implements IncomingPacket {
 
-    type = PacketType.EVOLVEPET;
+  type = PacketType.EVOLVEPET;
 
-    //#region packet-specific members
-    petId: number;
-    initialSkin: number;
-    finalSkin: number;
-    //#endregion
+  //#region packet-specific members
+  petId: number;
+  initialSkin: number;
+  finalSkin: number;
+  //#endregion
 
-    read(): void {
-        this.petId = this.readInt32();
-        this.initialSkin = this.readInt32();
-        this.finalSkin = this.readInt32();
-    }
-
-    write(): void {
-        this.writeInt32(this.petId);
-        this.writeInt32(this.initialSkin);
-        this.writeInt32(this.finalSkin);
-    }
+  read(buffer: PacketBuffer): void {
+    this.petId = buffer.readInt32();
+    this.initialSkin = buffer.readInt32();
+    this.finalSkin = buffer.readInt32();
+  }
 }

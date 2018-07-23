@@ -1,18 +1,16 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class UsePortalPacket extends Packet {
+export class UsePortalPacket implements OutgoingPacket {
 
-    type = PacketType.USEPORTAL;
+  type = PacketType.USEPORTAL;
 
-    //#region packet-specific members
-    objectId: number;
-    //#endregion
+  //#region packet-specific members
+  objectId: number;
+  //#endregion
 
-    read(): void {
-        this.objectId = this.readInt32();
-    }
-
-    write(): void {
-        this.writeInt32(this.objectId);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.objectId);
+  }
 }

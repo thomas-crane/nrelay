@@ -1,18 +1,16 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class GotoAckPacket extends Packet {
+export class GotoAckPacket implements OutgoingPacket {
 
-    type = PacketType.GOTOACK;
+  type = PacketType.GOTOACK;
 
-    //#region packet-specific members
-    time: number;
-    //#endregion
+  //#region packet-specific members
+  time: number;
+  //#endregion
 
-    read(): void {
-        this.time = this.readInt32();
-    }
-
-    write(): void {
-        this.writeInt32(this.time);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.time);
+  }
 }

@@ -1,24 +1,20 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class NotificationPacket extends Packet {
+export class NotificationPacket implements IncomingPacket {
 
-    type = PacketType.NOTIFICATION;
+  type = PacketType.NOTIFICATION;
 
-    //#region packet-specific members
-    objectId: number;
-    message: string;
-    color: number;
-    //#endregion
+  //#region packet-specific members
+  objectId: number;
+  message: string;
+  color: number;
+  //#endregion
 
-    read(): void {
-        this.objectId = this.readInt32();
-        this.message = this.readString();
-        this.color = this.readInt32();
-    }
-
-    write(): void {
-        this.writeInt32(this.objectId);
-        this.writeString(this.message);
-        this.writeInt32(this.color);
-    }
+  read(buffer: PacketBuffer): void {
+    this.objectId = buffer.readInt32();
+    this.message = buffer.readString();
+    this.color = buffer.readInt32();
+  }
 }

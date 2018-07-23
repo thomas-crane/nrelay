@@ -1,21 +1,18 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class QuestRedeemResponsePacket extends Packet {
+export class QuestRedeemResponsePacket implements IncomingPacket {
 
-    type = PacketType.QUESTREDEEM_RESPONSE;
+  type = PacketType.QUESTREDEEM_RESPONSE;
 
-    //#region packet-specific members
-    ok: boolean;
-    message: string;
-    //#endregion
+  //#region packet-specific members
+  ok: boolean;
+  message: string;
+  //#endregion
 
-    read(): void {
-        this.ok = this.readBoolean();
-        this.message = this.readString();
-    }
-
-    write(): void {
-        this.writeBoolean(this.ok);
-        this.writeString(this.message);
-    }
+  read(buffer: PacketBuffer): void {
+    this.ok = buffer.readBoolean();
+    this.message = buffer.readString();
+  }
 }

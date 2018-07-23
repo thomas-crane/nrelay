@@ -1,57 +1,42 @@
-import { Packet, PacketType } from '../../packet';
-import { GroundTileData } from './../../data/ground-tile-data';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
+import { GroundTileData } from '../../data/ground-tile-data';
 import { ObjectData } from '../../data/object-data';
 
-export class UpdatePacket extends Packet {
+export class UpdatePacket implements IncomingPacket {
 
-    type = PacketType.UPDATE;
+  type = PacketType.UPDATE;
 
-    //#region packet-specific members
-    tiles: GroundTileData[];
-    newObjects: ObjectData[];
-    drops: number[];
-    //#endregion
+  //#region packet-specific members
+  tiles: GroundTileData[];
+  newObjects: ObjectData[];
+  drops: number[];
+  //#endregion
 
-    data: Buffer;
+  data: PacketBuffer;
 
-    read(): void {
-        const tilesLen = this.readShort();
-        this.tiles = new Array<GroundTileData>(tilesLen);
-        for (let i = 0; i < tilesLen; i++) {
-            const gd = new GroundTileData();
-            gd.read(this);
-            this.tiles[i] = gd;
-        }
-
-        const newObjectsLen = this.readShort();
-        this.newObjects = new Array<ObjectData>(newObjectsLen);
-        for (let i = 0; i < newObjectsLen; i++) {
-            const od = new ObjectData();
-            od.read(this);
-            this.newObjects[i] = od;
-        }
-
-        const dropsLen = this.readShort();
-        this.drops = new Array<number>(dropsLen);
-        for (let i = 0; i < dropsLen; i++) {
-            this.drops[i] = this.readInt32();
-        }
+  read(buffer: PacketBuffer): void {
+    const tilesLen = buffer.readShort();
+    this.tiles = new Array<GroundTileData>(tilesLen);
+    for (let i = 0; i < tilesLen; i++) {
+      const gd = new GroundTileData();
+      gd.read(buffer);
+      this.tiles[i] = gd;
     }
 
-    write(): void {
-        this.writeShort(this.tiles.length);
-        for (const tile of this.tiles) {
-            tile.write(this);
-        }
-
-        this.writeShort(this.newObjects.length);
-        for (const obj of this.newObjects) {
-            obj.write(this);
-        }
-
-        this.writeShort(this.drops.length);
-        for (const drop of this.drops) {
-            this.writeInt32(drop);
-        }
+    const newObjectsLen = buffer.readShort();
+    this.newObjects = new Array<ObjectData>(newObjectsLen);
+    for (let i = 0; i < newObjectsLen; i++) {
+      const od = new ObjectData();
+      od.read(buffer);
+      this.newObjects[i] = od;
     }
+
+    const dropsLen = buffer.readShort();
+    this.drops = new Array<number>(dropsLen);
+    for (let i = 0; i < dropsLen; i++) {
+      this.drops[i] = buffer.readInt32();
+    }
+  }
 }

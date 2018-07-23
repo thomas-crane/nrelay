@@ -1,18 +1,16 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class EscapePacket extends Packet {
+export class EscapePacket implements OutgoingPacket {
 
-    type = PacketType.ESCAPE;
+  type = PacketType.ESCAPE;
 
-    //#region packet-specific members
+  //#region packet-specific members
 
-    //#endregion
+  //#endregion
 
-    read(): void {
-
-    }
-
-    write(): void {
-
-    }
+  write(buffer: PacketBuffer): void {
+    //
+  }
 }

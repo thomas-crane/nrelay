@@ -1,23 +1,19 @@
-import { Packet, PacketType } from '../../packet';
-import { WorldPosData } from './../../../networking/data/world-pos-data';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
+import { WorldPosData } from '../../data/world-pos-data';
 
-export class AoeAckPacket extends Packet {
+export class AoeAckPacket implements OutgoingPacket {
 
-    type = PacketType.AOEACK;
+  type = PacketType.AOEACK;
 
-    //#region packet-specific members
-    time: number;
-    position: WorldPosData;
-    //#endregion
+  //#region packet-specific members
+  time: number;
+  position: WorldPosData;
+  //#endregion
 
-    read(): void {
-        this.time = this.readInt32();
-        this.position = new WorldPosData();
-        this.position.read(this);
-    }
-
-    write(): void {
-        this.writeInt32(this.time);
-        this.position.write(this);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.time);
+    this.position.write(buffer);
+  }
 }

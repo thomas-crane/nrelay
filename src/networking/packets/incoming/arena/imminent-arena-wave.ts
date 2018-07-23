@@ -1,18 +1,16 @@
-import { Packet, PacketType } from '../../../packet';
+import { PacketBuffer } from '../../../packet-buffer';
+import { PacketType } from '../../../packet-type';
+import { IncomingPacket } from '../../../packet';
 
-export class ImminentArenaWavePacket extends Packet {
+export class ImminentArenaWavePacket implements IncomingPacket {
 
-    type = PacketType.IMMINENTARENA_WAVE;
+  type = PacketType.IMMINENTARENA_WAVE;
 
-    //#region packet-specific members
-    currentRuntime: number;
-    //#endregion
+  //#region packet-specific members
+  currentRuntime: number;
+  //#endregion
 
-    read(): void {
-        this.currentRuntime = this.readInt32();
-    }
-
-    write(): void {
-        this.writeInt32(this.currentRuntime);
-    }
+  read(buffer: PacketBuffer): void {
+    this.currentRuntime = buffer.readInt32();
+  }
 }

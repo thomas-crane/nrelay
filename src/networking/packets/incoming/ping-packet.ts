@@ -1,18 +1,16 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class PingPacket extends Packet {
+export class PingPacket implements IncomingPacket {
 
-    type = PacketType.PING;
+  type = PacketType.PING;
 
-    //#region packet-specific members
-    serial: number;
-    //#endregion
+  //#region packet-specific members
+  serial: number;
+  //#endregion
 
-    read(): void {
-        this.serial = this.readInt32();
-    }
-
-    write(): void {
-        this.writeInt32(this.serial);
-    }
+  read(buffer: PacketBuffer): void {
+    this.serial = buffer.readInt32();
+  }
 }

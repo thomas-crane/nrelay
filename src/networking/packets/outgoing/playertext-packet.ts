@@ -1,18 +1,16 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class PlayerTextPacket extends Packet {
+export class PlayerTextPacket implements OutgoingPacket {
 
-    type = PacketType.PLAYERTEXT;
+  type = PacketType.PLAYERTEXT;
 
-    //#region packet-specific members
-    text: string;
-    //#endregion
+  //#region packet-specific members
+  text: string;
+  //#endregion
 
-    read(): void {
-        this.text = this.readString();
-    }
-
-    write(): void {
-        this.writeString(this.text);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeString(this.text);
+  }
 }

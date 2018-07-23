@@ -1,18 +1,16 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class GuildInvitePacket extends Packet {
+export class GuildInvitePacket implements OutgoingPacket {
 
-    type = PacketType.GUILDINVITE;
+  type = PacketType.GUILDINVITE;
 
-    //#region packet-specific members
-    name: string;
-    //#endregion
+  //#region packet-specific members
+  name: string;
+  //#endregion
 
-    read(): void {
-        this.name = this.readString();
-    }
-
-    write(): void {
-        this.writeString(this.name);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeString(this.name);
+  }
 }

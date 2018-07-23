@@ -1,24 +1,20 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class EditAccountListPacket extends Packet {
+export class EditAccountListPacket implements OutgoingPacket {
 
-    type = PacketType.EDITACCOUNTLIST;
+  type = PacketType.EDITACCOUNTLIST;
 
-    //#region packet-specific members
-    accountListId: number;
-    add: boolean;
-    objectId: number;
-    //#endregion
+  //#region packet-specific members
+  accountListId: number;
+  add: boolean;
+  objectId: number;
+  //#endregion
 
-    read(): void {
-        this.accountListId = this.readInt32();
-        this.add = this.readBoolean();
-        this.objectId = this.readInt32();
-    }
-
-    write(): void {
-        this.writeInt32(this.accountListId);
-        this.writeBoolean(this.add);
-        this.writeInt32(this.objectId);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.accountListId);
+    buffer.writeBoolean(this.add);
+    buffer.writeInt32(this.objectId);
+  }
 }

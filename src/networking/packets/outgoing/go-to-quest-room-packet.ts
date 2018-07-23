@@ -1,18 +1,16 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class GoToQuestRoomPacket extends Packet {
+export class GoToQuestRoomPacket implements OutgoingPacket {
 
-    type = PacketType.QUESTROOM_MSG;
+  type = PacketType.QUESTROOM_MSG;
 
-    //#region packet-specific members
+  //#region packet-specific members
 
-    //#endregion
+  //#endregion
 
-    read(): void {
-
-    }
-
-    write(): void {
-
-    }
+  write(buffer: PacketBuffer): void {
+    //
+  }
 }

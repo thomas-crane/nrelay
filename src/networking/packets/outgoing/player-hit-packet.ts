@@ -1,21 +1,18 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class PlayerHitPacket extends Packet {
+export class PlayerHitPacket implements OutgoingPacket {
 
-    type = PacketType.PLAYERHIT;
+  type = PacketType.PLAYERHIT;
 
-    //#region packet-specific members
-    bulletId: number;
-    objectId: number;
-    //#endregion
+  //#region packet-specific members
+  bulletId: number;
+  objectId: number;
+  //#endregion
 
-    read(): void {
-        this.bulletId = this.readUnsignedByte();
-        this.objectId = this.readInt32();
-    }
-
-    write(): void {
-        this.writeUnsignedByte(this.bulletId);
-        this.writeInt32(this.objectId);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeUnsignedByte(this.bulletId);
+    buffer.writeInt32(this.objectId);
+  }
 }

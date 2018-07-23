@@ -1,18 +1,16 @@
-import { Packet, PacketType } from '../../../packet';
+import { PacketBuffer } from '../../../packet-buffer';
+import { PacketType } from '../../../packet-type';
+import { OutgoingPacket } from '../../../packet';
 
-export class EnterArenaPacket extends Packet {
+export class EnterArenaPacket implements OutgoingPacket {
 
-    type = PacketType.ENTERARENA;
+  type = PacketType.ENTERARENA;
 
-    //#region packet-specific members
-    currency: number;
-    //#endregion
+  //#region packet-specific members
+  currency: number;
+  //#endregion
 
-    read(): void {
-        this.currency = this.readInt32();
-    }
-
-    write(): void {
-        this.writeInt32(this.currency);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.currency);
+  }
 }

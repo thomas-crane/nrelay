@@ -1,43 +1,32 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class DamagePacket extends Packet {
+export class DamagePacket implements IncomingPacket {
 
-    type = PacketType.DAMAGE;
+  type = PacketType.DAMAGE;
 
-    //#region packet-specific members
-    targetId: number;
-    effects: number[];
-    damageAmount: number;
-    kill: boolean;
-    armorPierce: boolean;
-    bulletId: number;
-    objectId: number;
-    //#endregion
+  //#region packet-specific members
+  targetId: number;
+  effects: number[];
+  damageAmount: number;
+  kill: boolean;
+  armorPierce: boolean;
+  bulletId: number;
+  objectId: number;
+  //#endregion
 
-    read(): void {
-        this.targetId = this.readInt32();
-        const effectsLen = this.readUnsignedByte();
-        this.effects = new Array<number>(effectsLen);
-        for (let i = 0; i < effectsLen; i++) {
-            this.effects[i] = this.readUnsignedByte();
-        }
-        this.damageAmount = this.readUnsignedShort();
-        this.kill = this.readBoolean();
-        this.armorPierce = this.readBoolean();
-        this.bulletId = this.readUnsignedByte();
-        this.objectId = this.readInt32();
+  read(buffer: PacketBuffer): void {
+    this.targetId = buffer.readInt32();
+    const effectsLen = buffer.readUnsignedByte();
+    this.effects = new Array<number>(effectsLen);
+    for (let i = 0; i < effectsLen; i++) {
+      this.effects[i] = buffer.readUnsignedByte();
     }
-
-    write(): void {
-        this.writeInt32(this.targetId);
-        this.writeUnsignedByte(this.effects.length);
-        for (const effect of this.effects) {
-            this.writeUnsignedByte(effect);
-        }
-        this.writeUnsignedShort(this.damageAmount);
-        this.writeBoolean(this.kill);
-        this.writeBoolean(this.armorPierce);
-        this.writeUnsignedByte(this.bulletId);
-        this.writeInt32(this.objectId);
-    }
+    this.damageAmount = buffer.readUnsignedShort();
+    this.kill = buffer.readBoolean();
+    this.armorPierce = buffer.readBoolean();
+    this.bulletId = buffer.readUnsignedByte();
+    this.objectId = buffer.readInt32();
+  }
 }

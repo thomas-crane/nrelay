@@ -1,18 +1,16 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class TeleportPacket extends Packet {
+export class TeleportPacket implements OutgoingPacket {
 
-    type = PacketType.TELEPORT;
+  type = PacketType.TELEPORT;
 
-    //#region packet-specific members
-    objectId: number;
-    //#endregion
+  //#region packet-specific members
+  objectId: number;
+  //#endregion
 
-    read(): void {
-        this.objectId = this.readInt32();
-    }
-
-    write(): void {
-        this.writeInt32(this.objectId);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.objectId);
+  }
 }

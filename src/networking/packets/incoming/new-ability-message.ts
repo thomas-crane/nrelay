@@ -1,18 +1,16 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class NewAbilityMessage extends Packet {
+export class NewAbilityMessage implements IncomingPacket {
 
-    type = PacketType.NEWABILITY;
+  type = PacketType.NEWABILITY;
 
-    //#region packet-specific members
-    abilityType: number;
-    //#endregion
+  //#region packet-specific members
+  abilityType: number;
+  //#endregion
 
-    read(): void {
-        this.abilityType = this.readInt32();
-    }
-
-    write(): void {
-        this.writeInt32(this.abilityType);
-    }
+  read(buffer: PacketBuffer): void {
+    this.abilityType = buffer.readInt32();
+  }
 }

@@ -1,20 +1,21 @@
-import { Packet } from './../packet';
+import { PacketBuffer } from '../packet-buffer';
+import { DataPacket } from '../packet';
 
-export class GroundTileData {
+export class GroundTileData implements DataPacket {
 
-    x: number;
-    y: number;
-    type: number;
+  x: number;
+  y: number;
+  type: number;
 
-    read(packet: Packet): void {
-        this.x = packet.readShort();
-        this.y = packet.readShort();
-        this.type = packet.readUnsignedShort();
-    }
+  read(packet: PacketBuffer): void {
+    this.x = packet.readShort();
+    this.y = packet.readShort();
+    this.type = packet.readUnsignedShort();
+  }
 
-    write(packet: Packet): void {
-        packet.writeShort(this.x);
-        packet.writeShort(this.y);
-        packet.writeUnsignedShort(this.type);
-    }
+  write(packet: PacketBuffer): void {
+    packet.writeShort(this.x);
+    packet.writeShort(this.y);
+    packet.writeUnsignedShort(this.type);
+  }
 }

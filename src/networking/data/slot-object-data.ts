@@ -1,20 +1,21 @@
-import { Packet } from './../packet';
+import { PacketBuffer } from '../packet-buffer';
+import { DataPacket } from '../packet';
 
-export class SlotObjectData {
+export class SlotObjectData implements DataPacket {
 
-    objectId: number;
-    slotId: number;
-    objectType: number;
+  objectId: number;
+  slotId: number;
+  objectType: number;
 
-    read(packet: Packet): void {
-        this.objectId = packet.readInt32();
-        this.slotId = packet.readUnsignedByte();
-        this.objectType = packet.readUInt32();
-    }
+  read(packet: PacketBuffer): void {
+    this.objectId = packet.readInt32();
+    this.slotId = packet.readUnsignedByte();
+    this.objectType = packet.readUInt32();
+  }
 
-    write(packet: Packet): void {
-        packet.writeInt32(this.objectId);
-        packet.writeUnsignedByte(this.slotId);
-        packet.writeInt32(this.objectType);
-    }
+  write(packet: PacketBuffer): void {
+    packet.writeInt32(this.objectId);
+    packet.writeUnsignedByte(this.slotId);
+    packet.writeInt32(this.objectType);
+  }
 }

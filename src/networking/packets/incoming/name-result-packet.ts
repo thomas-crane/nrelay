@@ -1,21 +1,18 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class NameResultPacket extends Packet {
+export class NameResultPacket implements IncomingPacket {
 
-    type = PacketType.NAMERESULT;
+  type = PacketType.NAMERESULT;
 
-    //#region packet-specific members
-    success: boolean;
-    errorText: string;
-    //#endregion
+  //#region packet-specific members
+  success: boolean;
+  errorText: string;
+  //#endregion
 
-    read(): void {
-        this.success = this.readBoolean();
-        this.errorText = this.readString();
-    }
-
-    write(): void {
-        this.writeBoolean(this.success);
-        this.writeString(this.errorText);
-    }
+  read(buffer: PacketBuffer): void {
+    this.success = buffer.readBoolean();
+    this.errorText = buffer.readString();
+  }
 }

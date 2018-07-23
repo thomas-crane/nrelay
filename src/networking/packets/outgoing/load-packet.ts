@@ -1,21 +1,18 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class LoadPacket extends Packet {
+export class LoadPacket implements OutgoingPacket {
 
-    type = PacketType.LOAD;
+  type = PacketType.LOAD;
 
-    //#region packet-specific members
-    charId: number;
-    isFromArena: boolean;
-    //#endregion
+  //#region packet-specific members
+  charId: number;
+  isFromArena: boolean;
+  //#endregion
 
-    read(): void {
-        this.charId = this.readInt32();
-        this.isFromArena = this.readBoolean();
-    }
-
-    write(): void {
-        this.writeInt32(this.charId);
-        this.writeBoolean(this.isFromArena);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.charId);
+    buffer.writeBoolean(this.isFromArena);
+  }
 }

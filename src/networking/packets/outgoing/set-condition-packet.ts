@@ -1,21 +1,18 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class SetConditionPacket extends Packet {
+export class SetConditionPacket implements OutgoingPacket {
 
-    type = PacketType.SETCONDITION;
+  type = PacketType.SETCONDITION;
 
-    //#region packet-specific members
-    conditionEffect: number;
-    conditionDuration: number;
-    //#endregion
+  //#region packet-specific members
+  conditionEffect: number;
+  conditionDuration: number;
+  //#endregion
 
-    read(): void {
-        this.conditionEffect = this.readByte();
-        this.conditionDuration = this.readFloat();
-    }
-
-    write(): void {
-        this.writeByte(this.conditionEffect);
-        this.writeFloat(this.conditionDuration);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeByte(this.conditionEffect);
+    buffer.writeFloat(this.conditionDuration);
+  }
 }

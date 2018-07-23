@@ -1,21 +1,18 @@
-import { Packet, PacketType } from '../../packet';
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class GuildResultPacket extends Packet {
+export class GuildResultPacket implements IncomingPacket {
 
-    type = PacketType.GUILDRESULT;
+  type = PacketType.GUILDRESULT;
 
-    //#region packet-specific members
-    success: boolean;
-    lineBuilderJSON: string;
-    //#endregion
+  //#region packet-specific members
+  success: boolean;
+  lineBuilderJSON: string;
+  //#endregion
 
-    read(): void {
-        this.success = this.readBoolean();
-        this.lineBuilderJSON = this.readString();
-    }
-
-    write(): void {
-        this.writeBoolean(this.success);
-        this.writeString(this.lineBuilderJSON);
-    }
+  read(buffer: PacketBuffer): void {
+    this.success = buffer.readBoolean();
+    this.lineBuilderJSON = buffer.readString();
+  }
 }

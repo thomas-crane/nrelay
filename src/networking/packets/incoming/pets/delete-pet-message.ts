@@ -1,18 +1,16 @@
-import { Packet, PacketType } from '../../../packet';
+import { PacketBuffer } from '../../../packet-buffer';
+import { PacketType } from '../../../packet-type';
+import { IncomingPacket } from '../../../packet';
 
-export class DeletePetMessage extends Packet {
+export class DeletePetMessage implements IncomingPacket {
 
-    type = PacketType.DELETEPET;
+  type = PacketType.DELETEPET;
 
-    //#region packet-specific members
-    petId: number;
-    //#endregion
+  //#region packet-specific members
+  petId: number;
+  //#endregion
 
-    read(): void {
-        this.petId = this.readInt32();
-    }
-
-    write(): void {
-        this.writeInt32(this.petId);
-    }
+  read(buffer: PacketBuffer): void {
+    this.petId = buffer.readInt32();
+  }
 }
