@@ -53,6 +53,7 @@ import { EventEmitter } from 'events';
 import { SocksClient } from 'socks';
 import { CLI } from '..';
 import { Pathfinder, NodeUpdate, Point } from '../services/pathfinding';
+import { FailureCode } from '../models/failure-code';
 
 const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
@@ -69,11 +70,11 @@ export class Client {
    * Attaches an event listener to the client.
    * @example
    * ```
-   * Client.on('disconnect', (data: IPlayerData) => {
-   *   delete this.clients[data.name];
+   * Client.on('disconnect', (client) => {
+   *   delete this.clients[client.alias];
    * });
    * ```
-   * @param event The name of the event to listen for. Available events are 'connect'|'disconnect'
+   * @param event The name of the event to listen for.
    * @param listener The callback to invoke when the event is fired.
    */
   static on(event: ClientEvent, listener: (client: Client) => void): EventEmitter {
@@ -86,7 +87,7 @@ export class Client {
 
   /**
    * The player data of the client.
-   * @see `IPlayerData` for more info.
+   * @see `PlayerData` for more info.
    */
   playerData: PlayerData;
   /**
@@ -118,30 +119,31 @@ export class Client {
    */
   mapTiles: GroundTileData[];
   /**
-   * The position the client will try to move towards.
-   * If this is `null` then the client will not move.
+   * A queue of positions for the client to move towards. If
+   * the queue is not empty, the client will move towards the first
+   * item in it. The first item will be removed when the client has reached it.
    * @example
    * ```
    * const pos: WorldPosData = client.worldPos.clone();
    * pos.x += 1;
    * pos.y += 1;
-   * client.nextPos = pos;
+   * client.nextPos.push(pos);
    * ```
    */
   readonly nextPos: WorldPosData[];
   /**
-   * Info about the current map including
-   * @see `IMapInfo` for more information.
+   * Info about the current map.
+   * @see `MapInfo` for more information.
    */
   mapInfo: MapInfo;
   /**
    * Info about the account's characters.
-   * @see `ICharacterInfo` for more information.
+   * @see `CharacterInfo` for more information.
    */
   readonly charInfo: CharacterInfo;
   /**
    * The server the client is connected to.
-   * @see `IServer` for more info.
+   * @see `Server` for more info.
    */
   get server(): Server {
     return this.internalServer;
@@ -164,13 +166,11 @@ export class Client {
   autoAim: boolean;
   /**
    * A number between 0 and 1 which can be used to modify the speed
-   * of the player. A value of 1 will be 100% move speed for the client,
+   * of the client. A value of 1 will be 100% move speed for the client,
    * a value of 0.5 will be 50% of the max speed. etc.
    *
    * @example
-   * ```
    * client.moveMultiplier = 0.8;
-   * ```
    */
   set moveMultiplier(value: number) {
     this.internalMoveMultiplier = Math.max(0, Math.min(value, 1));
@@ -318,7 +318,7 @@ export class Client {
   }
 
   /**
-   * Removes all event listeners and destroys any resources held by the client.
+   * Removes all event listeners and releases any resources held by the client.
    * This should only be used when the client is no longer needed.
    */
   destroy(): void {
@@ -361,7 +361,7 @@ export class Client {
 
   /**
    * Switches the client connect to a proxied connection. Setting this to
-   * null will remove the current proxy if there is one.
+   * `null` will remove the current proxy if there is one.
    * @param proxy The proxy to use.
    */
   setProxy(proxy: Proxy): void {
@@ -375,7 +375,7 @@ export class Client {
   }
 
   /**
-   * Connects the bot to the provided `server`.
+   * Connects the bot to the `server`.
    * @param server The server to connect to.
    */
   connectToServer(server: Server): void {
@@ -388,6 +388,8 @@ export class Client {
   /**
    * Blocks the next packet of the specified type.
    * @param packetType The packet type to block.
+   * @deprecated Prefer using a library to hook the desired packet
+   * and set its `send` property to `false`.
    */
   blockNext(packetType: PacketType): void {
     if (this.blockedPackets.indexOf(packetType) < 0) {
@@ -403,15 +405,14 @@ export class Client {
   broadcastPacket(packet: IncomingPacket): void {
     const clients = CLI.getClients();
     for (const client of clients) {
-      if (client.alias !== this.alias) {
+      if (client.guid !== this.guid) {
         client.packetio.emitPacket(packet);
       }
     }
   }
 
   /**
-   * Returns how long the client has been connected for in milliseconds.
-   * This is used for several packets including the UseItem packet.
+   * Returns how long the client has been connected for, in milliseconds.
    */
   getTime(): number {
     return (Date.now() - this.connectTime);
@@ -419,12 +420,13 @@ export class Client {
 
   /**
    * Finds a path from the client's current position to the `to` point
-   * and moves the client along the path to the `to` position.
+   * and moves the client along the path.
    * @param to The point to navigate towards.
    */
   findPath(to: Point): void {
     if (!this.pathfinderEnabled) {
       Logger.log(this.alias, 'Pathfinding is not enabled. Please enable it in the acc-config.', LogLevel.Warning);
+      return;
     }
     to.x = Math.floor(to.x);
     to.y = Math.floor(to.y);
@@ -648,18 +650,18 @@ export class Client {
   @PacketHook()
   private onFailurePacket(client: Client, failurePacket: FailurePacket): void {
     switch (failurePacket.errorId) {
-      case FailurePacket.INCORRECT_VERSION:
+      case FailureCode.IncorrectVersion:
         Logger.log(this.alias, 'buildVersion out of date. Updating and reconnecting...');
         this.buildVersion = failurePacket.errorDescription;
         Storage.updateBuildVersion(failurePacket.errorDescription);
         break;
-      case FailurePacket.INVALID_TELEPORT_TARGET:
+      case FailureCode.InvalidTeleportTarget:
         Logger.log(this.alias, 'Invalid teleport target.', LogLevel.Warning);
         break;
-      case FailurePacket.EMAIL_VERIFICATION_NEEDED:
+      case FailureCode.EmailVerificationNeeded:
         Logger.log(this.alias, 'Email verification is required for this account.', LogLevel.Error);
         break;
-      case FailurePacket.BAD_KEY:
+      case FailureCode.BadKey:
         Logger.log(this.alias, 'Invalid key used.', LogLevel.Error);
         this.key = [];
         this.gameId = -2;

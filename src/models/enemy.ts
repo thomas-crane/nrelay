@@ -4,15 +4,45 @@ import { PlayerData } from './playerdata';
 import { Point } from '../services/pathfinding/point';
 import { WorldPosData } from '../networking/data/world-pos-data';
 
+/**
+ * An enemy game object.
+ */
 export class Enemy {
+  /**
+   * Stat information of the enemy, such as HP and defense.
+   */
   objectData: PlayerData;
+  /**
+   * The properties of this enemy as described by the Objects resource.
+   */
   properties: GameObject;
+  /**
+   * Whether or not this enemy is dead.
+   */
   dead: boolean;
+  /**
+   * The client time of the last update that this enemy received.
+   */
   lastUpdate: number;
+  /**
+   * The position of the enemy as received in a `NewTick` packet.
+   */
   tickPos: Point;
+  /**
+   * The position of the enemy at a particular game tick.
+   */
   posAtTick: Point;
+  /**
+   * The velocity of the enemy.
+   */
   moveVector: Point;
+  /**
+   * The tick id of the last game tick received by this enemy.
+   */
   lastTickId: number;
+  /**
+   * The current position of the enemy.
+   */
   currentPos: Point;
 
   constructor(properties: GameObject, status: ObjectStatusData) {

@@ -2,13 +2,26 @@ import { PacketBuffer } from '../../packet-buffer';
 import { PacketType } from '../../packet-type';
 import { IncomingPacket } from '../../packet';
 
+/**
+ * Received to provide lists of accounts ids which are
+ * those of players who have been locked, ignored, etc.
+ */
 export class AccountListPacket implements IncomingPacket {
 
   type = PacketType.ACCOUNTLIST;
 
   //#region packet-specific members
+  /**
+   * The id of the account id list.
+   */
   accountListId: number;
+  /**
+   * The account ids included in the list.
+   */
   accountIds: string[];
+  /**
+   * > Unknown.
+   */
   lockAction: number;
   //#endregion
 

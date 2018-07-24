@@ -1,3 +1,6 @@
+/**
+ * A list of the stat type values as they are received on the network.
+ */
 export enum StatType {
   MAX_HP_STAT = 0,
   HP_STAT = 1,

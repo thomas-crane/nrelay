@@ -1,6 +1,9 @@
 import { Logger, LogLevel, Storage } from './../services';
 import { GameObject, ProjectileInfo, Tile, environment } from './../models';
 
+/**
+ * A static singleton class to faciliate the loading of game resources.
+ */
 export class ResourceManager {
 
   static tiles: { [id: number]: Tile };
@@ -9,6 +12,9 @@ export class ResourceManager {
   static enemies: { [id: number]: GameObject };
   static pets: { [id: number]: GameObject };
 
+  /**
+   * Loads all available resources.
+   */
   static loadAllResources(): Promise<void> {
     return Promise.all([
       this.loadTileInfo(),
@@ -16,6 +22,9 @@ export class ResourceManager {
     ]).then(() => null);
   }
 
+  /**
+   * Loads the GroundTypes resource.
+   */
   static loadTileInfo(): Promise<void> {
     return new Promise((resolve: () => void, reject: (error: Error) => void) => {
       this.tiles = {};
@@ -45,6 +54,9 @@ export class ResourceManager {
     });
   }
 
+  /**
+   * Loads the Objects resource.
+   */
   static loadObjects(): Promise<any> {
     return new Promise((resolve: () => void, reject: (error: Error) => void) => {
       this.objects = {};

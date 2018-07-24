@@ -3,9 +3,21 @@ import { DataPacket } from '../packet';
 
 export class TradeItem implements DataPacket {
 
+  /**
+   * The item id.
+   */
   item: number;
+  /**
+   * Unknown.
+   */
   slotType: number;
+  /**
+   * Whether or not the item is tradeable.
+   */
   tradeable: boolean;
+  /**
+   * Whether or not the item is included in an active trade.
+   */
   included: boolean;
 
   read(packet: PacketBuffer): void {

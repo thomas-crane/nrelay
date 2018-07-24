@@ -1,5 +1,9 @@
 import { MoveRecord } from '../networking/data/move-record';
 
+/**
+ * This code is mostly ported from the RotMG game client. It's
+ * exact functionality is unknown.
+ */
 export class MoveRecords {
   lastClearTime: number;
   records: MoveRecord[];

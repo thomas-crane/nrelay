@@ -2,21 +2,57 @@ import { PacketBuffer } from '../../packet-buffer';
 import { PacketType } from '../../packet-type';
 import { IncomingPacket } from '../../packet';
 
+/**
+ * Received in response to the `HelloPacket`.
+ */
 export class MapInfoPacket implements IncomingPacket {
 
   type = PacketType.MAPINFO;
 
   //#region packet-specific members
+  /**
+   * The width of the map.
+   */
   width: number;
+  /**
+   * The height of the map.
+   */
   height: number;
+  /**
+   * The name of the map.
+   */
   name: string;
+  /**
+   * > Unknown.
+   */
   displayName: string;
+  /**
+   * The difficulty rating of the map.
+   */
   difficulty: number;
+  /**
+   * The seed value for the client's PRNG.
+   */
   fp: number;
+  /**
+   * > Unkown.
+   */
   background: number;
+  /**
+   * Whether or not players can teleport in the map.
+   */
   allowPlayerTeleport: boolean;
+  /**
+   * > Unkown.
+   */
   showDisplays: boolean;
+  /**
+   * > Unkown.
+   */
   clientXML: string[];
+  /**
+   * > Unkown.
+   */
   extraXML: string[];
   //#endregion
 

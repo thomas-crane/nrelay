@@ -2,20 +2,63 @@ import { GameObject, ProjectileInfo } from './object';
 import { ResourceManager } from '../core/resource-manager';
 import { Point } from '../services/pathfinding/point';
 
+/**
+ * A projectile entity.
+ */
 export class Projectile {
 
+  /**
+   * The id of the entity that produced this projectile.
+   */
   containerType: number;
+  /**
+   * The local identifier of the `containerType`s projectile list.
+   * @see `ProjectileInfo.id`
+   */
   bulletType: number;
+  /**
+   * The object id of the entity which produced this projectile.
+   */
   ownerObjectId: number;
+  /**
+   * The identifier for this particular projectile. Similar to the object id of entities.
+   */
   bulletId: number;
+  /**
+   * The angle at which this projectile was fired.
+   */
   startAngle: number;
+  /**
+   * The client time at the point when this projectile was fired.
+   */
   startTime: number;
+  /**
+   * The position which this projectile was fired at.
+   */
   startPosition: Point;
+  /**
+   * The properties of the container used to produce this projectile.
+   */
   containerProperties: GameObject;
+  /**
+   * The properties of this projectile.
+   */
   projectileProperties: ProjectileInfo;
+  /**
+   * Whether or not this projectile damages players.
+   */
   damagePlayers: boolean;
+  /**
+   * Whether or not this projectile damages enemies.
+   */
   damageEnemies: boolean;
+  /**
+   * The damage which will be applied by this projectile if it hits an entity.
+   */
   damage: number;
+  /**
+   * The current position of this projectile.
+   */
   currentPosition: Point;
 
   constructor(

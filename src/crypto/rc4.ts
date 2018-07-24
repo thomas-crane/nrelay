@@ -1,3 +1,6 @@
+/**
+ * An inline-based implementation of the RC4 stream cipher.
+ */
 export class RC4 {
 
   private state: number[];
@@ -16,8 +19,7 @@ export class RC4 {
   }
 
   /**
-   * Performs an inline XOR on all bits in the data buffer with
-   * the next bit of the Keystream.
+   * Performs an inline cipher on the entire contents of the `data` buffer.
    * @param data A stream of data to cipher using the Keystream.
    */
   cipher(data: Buffer): void {

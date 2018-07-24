@@ -8,12 +8,22 @@ import { ObjectData } from './object-data';
 
 export class ObjectStatusData implements DataPacket {
 
+  /**
+   * Processes the `data` and returns the resulting `PlayerData` object.
+   * @param data The data to process.
+   */
   static processObject(data: ObjectData): PlayerData {
     const playerData = this.processObjectStatus(data.status);
     playerData.class = data.objectType;
     return playerData;
   }
 
+  /**
+   * Processes the `data` and returns the result. If `currentData` is provided, it will be
+   * used as a starting point for the returned `PlayerData`.
+   * @param data The data to process.
+   * @param currentData The existing `PlayerData`.
+   */
   static processObjectStatus(data: ObjectStatusData, currentData?: PlayerData): PlayerData {
     const playerData = this.processStatData(data.stats, currentData);
     playerData.worldPos = data.pos;
@@ -22,6 +32,12 @@ export class ObjectStatusData implements DataPacket {
     return playerData;
   }
 
+  /**
+   * Process a list of stats and returns the result. If `currentData` is provided, it will be
+   * used as a starting point for the returned `PlayerData`.
+   * @param stats The stats to process.
+   * @param currentData The existing `PlayerData`.
+   */
   static processStatData(stats: StatData[], currentData?: PlayerData): PlayerData {
     const playerData = currentData || {} as PlayerData;
     if (!playerData.inventory) {
@@ -115,8 +131,17 @@ export class ObjectStatusData implements DataPacket {
     return playerData;
   }
 
+  /**
+   * The object id of the object which this status is for.
+   */
   objectId: number;
+  /**
+   * The position of the object which this status is for.
+   */
   pos: WorldPosData;
+  /**
+   * A list of stats for the object which this status is for.
+   */
   stats: StatData[];
 
   read(packet: PacketBuffer): void {

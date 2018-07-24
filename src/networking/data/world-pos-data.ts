@@ -4,7 +4,13 @@ import { Point } from '../../services';
 
 export class WorldPosData implements DataPacket {
 
+  /**
+   * The X coordinate of this position.
+   */
   x: number;
+  /**
+   * The Y coordinate of this position.
+   */
   y: number;
 
   constructor(x?: number, y?: number) {
@@ -22,12 +28,19 @@ export class WorldPosData implements DataPacket {
     packet.writeFloat(this.y);
   }
 
+  /**
+   * Returns the distance, squared, between this position and the `location`.
+   * @param location The other location.
+   */
   squareDistanceTo(location: WorldPosData | Point): number {
     const a = location.x - this.x;
     const b = location.y - this.y;
     return a ** 2 + b ** 2;
   }
 
+  /**
+   * Returns a new `WorldPosData` object with the same X/Y coordinates.
+   */
   clone(): WorldPosData {
     const clone = new WorldPosData();
     clone.x = this.x;
@@ -35,6 +48,9 @@ export class WorldPosData implements DataPacket {
     return clone;
   }
 
+  /**
+   * Returns a `Point` with the same X/Y coordinates.
+   */
   toPrecisePoint(): Point {
     return {
       x: this.x,
@@ -42,6 +58,9 @@ export class WorldPosData implements DataPacket {
     };
   }
 
+  /**
+   * Returns a `Point` with the floored X/Y coordinates.
+   */
   toPoint(): Point {
     return {
       x: Math.floor(this.x),

@@ -1,3 +1,6 @@
+/**
+ * The object types of all classes in the game.
+ */
 export enum Classes {
   Rogue = 768,
   Archer = 775,

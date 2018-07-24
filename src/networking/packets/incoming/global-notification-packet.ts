@@ -2,12 +2,21 @@ import { PacketBuffer } from '../../packet-buffer';
 import { PacketType } from '../../packet-type';
 import { IncomingPacket } from '../../packet';
 
+/**
+ * Received when a global notification is sent out to all players.
+ */
 export class GlobalNotificationPacket implements IncomingPacket {
 
   type = PacketType.GLOBALNOTIFICATION;
 
   //#region packet-specific members
+  /**
+   * The type of notification received.
+   */
   notificationType: number;
+  /**
+   * The notification message.
+   */
   text: string;
   //#endregion
 

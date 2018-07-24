@@ -3,6 +3,9 @@ import { PluginManager } from './../core/plugin-manager';
 import { Logger, LogLevel } from '../services';
 import { VALID_PACKET_HOOKS } from './valid-packets';
 
+/**
+ * Indicates that the decorated method should be called when it's packet type is received by a client.
+ */
 export function PacketHook(): MethodDecorator {
   return (target, key) => {
     const params = (Reflect.getMetadata('design:paramtypes', target, key) || [])

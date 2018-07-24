@@ -2,12 +2,21 @@ import { PacketBuffer } from '../../packet-buffer';
 import { PacketType } from '../../packet-type';
 import { IncomingPacket } from '../../packet';
 
+/**
+ * Received to give the player information about their stats.
+ */
 export class ClientStatPacket implements IncomingPacket {
 
   type = PacketType.CLIENTSTAT;
 
   //#region packet-specific members
+  /**
+   * The name of the stat.
+   */
   name: string;
+  /**
+   * The value of the stat.
+   */
   value: number;
   //#endregion
 

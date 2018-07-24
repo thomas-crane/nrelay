@@ -4,17 +4,30 @@ import { IncomingPacket } from '../../packet';
 import { GroundTileData } from '../../data/ground-tile-data';
 import { ObjectData } from '../../data/object-data';
 
+/**
+ * Received when an update even occurs. Some events include
+ * + One or more new objects have entered the map (become visible)
+ * + One or more objects have left the map (become invisible)
+ * + New tiles are visible
+ */
 export class UpdatePacket implements IncomingPacket {
 
   type = PacketType.UPDATE;
 
   //#region packet-specific members
+  /**
+   * The new tiles which are visible.
+   */
   tiles: GroundTileData[];
+  /**
+   * The new objects which have entered the map (become visible).
+   */
   newObjects: ObjectData[];
+  /**
+   * The visible objects which have left the map (become invisible).
+   */
   drops: number[];
   //#endregion
-
-  data: PacketBuffer;
 
   read(buffer: PacketBuffer): void {
     const tilesLen = buffer.readShort();

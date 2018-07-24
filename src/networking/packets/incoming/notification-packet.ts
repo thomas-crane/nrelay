@@ -2,13 +2,25 @@ import { PacketBuffer } from '../../packet-buffer';
 import { PacketType } from '../../packet-type';
 import { IncomingPacket } from '../../packet';
 
+/**
+ * Received when a notification is received by the player.
+ */
 export class NotificationPacket implements IncomingPacket {
 
   type = PacketType.NOTIFICATION;
 
   //#region packet-specific members
+  /**
+   * The object id of the entity which the notification is for.
+   */
   objectId: number;
+  /**
+   * The notification message.
+   */
   message: string;
+  /**
+   * The color of the notification text.
+   */
   color: number;
   //#endregion
 

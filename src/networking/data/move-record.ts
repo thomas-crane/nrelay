@@ -3,8 +3,17 @@ import { DataPacket } from '../packet';
 
 export class MoveRecord implements DataPacket {
 
+  /**
+   * The client time of this move record.
+   */
   time: number;
+  /**
+   * The X coordinate of this move record.
+   */
   x: number;
+  /**
+   * The Y coordinate of this move record.
+   */
   y: number;
 
   read(packet: PacketBuffer): void {
