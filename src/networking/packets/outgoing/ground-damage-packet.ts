@@ -3,12 +3,21 @@ import { PacketType } from '../../packet-type';
 import { OutgoingPacket } from '../../packet';
 import { WorldPosData } from '../../data/world-pos-data';
 
+/**
+ * Sent when the client takes damage from a ground source, such as lava.
+ */
 export class GroundDamagePacket implements OutgoingPacket {
 
   type = PacketType.GROUNDDAMAGE;
 
   //#region packet-specific members
+  /**
+   * The current client time.
+   */
   time: number;
+  /**
+   * The current client position.
+   */
   position: WorldPosData;
   //#endregion
 

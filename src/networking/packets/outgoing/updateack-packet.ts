@@ -2,6 +2,9 @@ import { PacketBuffer } from '../../packet-buffer';
 import { PacketType } from '../../packet-type';
 import { OutgoingPacket } from '../../packet';
 
+/**
+ * Sent to acknowledge an `UpdatePacket`.
+ */
 export class UpdateAckPacket implements OutgoingPacket {
 
   type = PacketType.UPDATEACK;

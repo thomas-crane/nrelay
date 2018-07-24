@@ -2,13 +2,25 @@ import { PacketBuffer } from '../../packet-buffer';
 import { PacketType } from '../../packet-type';
 import { OutgoingPacket } from '../../packet';
 
+/**
+ * > Unknown.
+ */
 export class SquareHitPacket implements OutgoingPacket {
 
   type = PacketType.SQUAREHIT;
 
   //#region packet-specific members
+  /**
+   * The current client time.
+   */
   time: number;
+  /**
+   * > Unknown.
+   */
   bulletId: number;
+  /**
+   * > Unknown.
+   */
   objectId: number;
   //#endregion
 

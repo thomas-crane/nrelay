@@ -43,7 +43,15 @@ import { UpdatePacket } from './packets/incoming/update-packet';
 import { VerifyEmailPacket } from './packets/incoming/verify-email-packet';
 import { IncomingPacket } from './packet';
 
+/**
+ * A static utility class for creating packet objects from a `PacketType`.
+ */
 export class Packets {
+  /**
+   * Creates the correct packet object for the given type.
+   * @param type The type of packet to create.
+   * @throws {Error} if the packet cannot be created.
+   */
   static create(type: PacketType): IncomingPacket {
     if (!PacketType[type]) {
       throw new Error(`Invalid packet type: ${type}`);

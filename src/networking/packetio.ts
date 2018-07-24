@@ -8,6 +8,9 @@ import { Mapper } from './mapper';
 import { PacketType } from './packet-type';
 import { Logger, LogLevel } from '../core';
 
+/**
+ * A utility class which implements the RotMG messaging protocol on top of a `Socket`.
+ */
 export class PacketIO {
 
   private sendRC4: RC4;
@@ -18,6 +21,10 @@ export class PacketIO {
   private packetBuffer: PacketBuffer;
   private outgoingBuffer: PacketBuffer;
 
+  /**
+   * Creates a new `PacketIO` on top of the given `socket`.
+   * @param socket The socket to implement the protocol on top of.
+   */
   constructor(socket: Socket) {
     this.resetBuffer();
     this.outgoingBuffer = new PacketBuffer(2048);

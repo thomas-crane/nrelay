@@ -2,6 +2,9 @@ import { PacketBuffer } from '../../packet-buffer';
 import { PacketType } from '../../packet-type';
 import { OutgoingPacket } from '../../packet';
 
+/**
+ * Sent to cancel the current active trade.
+ */
 export class CancelTradePacket implements OutgoingPacket {
 
   type = PacketType.CANCELTRADE;
