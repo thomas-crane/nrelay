@@ -9,6 +9,7 @@ import { FailureCode } from '../../../models/failure-code';
 export class FailurePacket implements IncomingPacket {
 
   type = PacketType.FAILURE;
+  propagate = true;
 
   //#region packet-specific members
   /**

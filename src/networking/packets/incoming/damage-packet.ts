@@ -8,6 +8,7 @@ import { IncomingPacket } from '../../packet';
 export class DamagePacket implements IncomingPacket {
 
   type = PacketType.DAMAGE;
+  propagate = true;
 
   //#region packet-specific members
   /**

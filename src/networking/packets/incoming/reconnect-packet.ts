@@ -8,6 +8,7 @@ import { IncomingPacket } from '../../packet';
 export class ReconnectPacket implements IncomingPacket {
 
   type = PacketType.RECONNECT;
+  propagate = true;
 
   //#region packet-specific members
   /**

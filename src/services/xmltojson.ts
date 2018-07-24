@@ -4,7 +4,14 @@ const SERVER_REGEX = /<Server><Name>(\w+)<\/Name><DNS>(\d+\.\d+\.\d+\.\d+)<\/DNS
 
 const ACCOUNT_INFO_REGEX = /<Chars nextCharId="(\d+)" maxNumChars="(\d+)">(?:<Char id="(\d+)">)*/;
 
+/**
+ * A static utility class for converting common RotMG web requests from XML to JSON.
+ */
 export class XMLtoJSON {
+  /**
+   * Parses the server list XML into a dictionary of servers keyed by server name.
+   * @param xml The XML to parse.
+   */
   static parseServers(xml: string): { [id: string]: Server } {
     let match = SERVER_REGEX.exec(xml);
     const servers = {} as { [id: string]: Server };
@@ -20,6 +27,10 @@ export class XMLtoJSON {
     return servers;
   }
 
+  /**
+   * Parses the account info XML into a `CharacterInfo` object.
+   * @param xml The XML to parse.
+   */
   static parseAccountInfo(xml: string): CharacterInfo {
     const acc = {
       nextCharId: 2,

@@ -25,6 +25,15 @@ export interface IncomingPacket {
    */
   type: PacketType;
   /**
+   * Whether or not the packet should keep invoking packet hooks.
+   *
+   * If this is set to `false` by a packet hook, then that packet hook will
+   * be the last one which receives the packet. The client's packet hooks are
+   * always the last ones to be called, so if this is set to `false` the packet
+   * will not reach the client.
+   */
+  propagate: boolean;
+  /**
    * Reads data from the `buffer` according to the structure of the packet.
    * @param buffer The buffer to read from.
    */

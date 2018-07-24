@@ -8,6 +8,7 @@ import { IncomingPacket } from '../../packet';
 export class InvResultPacket implements IncomingPacket {
 
   type = PacketType.INVRESULT;
+  propagate = true;
 
   //#region packet-specific members
   /**

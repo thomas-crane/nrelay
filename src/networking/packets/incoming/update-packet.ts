@@ -13,6 +13,7 @@ import { ObjectData } from '../../data/object-data';
 export class UpdatePacket implements IncomingPacket {
 
   type = PacketType.UPDATE;
+  propagate = true;
 
   //#region packet-specific members
   /**

@@ -9,6 +9,7 @@ import { WorldPosData } from '../../data/world-pos-data';
 export class EnemyShootPacket implements IncomingPacket {
 
   type = PacketType.ENEMYSHOOT;
+  propagate = true;
 
   //#region packet-specific members
   /**

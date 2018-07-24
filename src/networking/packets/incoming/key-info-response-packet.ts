@@ -8,6 +8,7 @@ import { IncomingPacket } from '../../packet';
 export class KeyInfoResponsePacket implements IncomingPacket {
 
   type = PacketType.KEYINFO_RESPONSE;
+  propagate = true;
 
   //#region packet-specific members
   /**

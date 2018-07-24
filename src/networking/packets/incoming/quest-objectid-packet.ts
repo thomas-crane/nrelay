@@ -8,6 +8,7 @@ import { IncomingPacket } from '../../packet';
 export class QuestObjectIdPacket implements IncomingPacket {
 
   type = PacketType.QUESTOBJID;
+  propagate = true;
 
   //#region packet-specific members
   /**

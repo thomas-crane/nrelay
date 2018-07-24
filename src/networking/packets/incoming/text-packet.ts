@@ -8,6 +8,7 @@ import { IncomingPacket } from '../../packet';
 export class TextPacket implements IncomingPacket {
 
   type = PacketType.TEXT;
+  propagate = true;
 
   //#region packet-specific members
   /**

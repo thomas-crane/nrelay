@@ -8,6 +8,7 @@ import { IncomingPacket } from '../../packet';
 export class ClaimDailyRewardResponse implements IncomingPacket {
 
   type = PacketType.LOGINREWARD_MSG;
+  propagate = true;
 
   //#region packet-specific members
   /**

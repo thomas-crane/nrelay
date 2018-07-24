@@ -8,6 +8,7 @@ import { IncomingPacket } from '../../../packet';
 export class DeletePetMessage implements IncomingPacket {
 
   type = PacketType.DELETEPET;
+  propagate = true;
 
   //#region packet-specific members
   /**

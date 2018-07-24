@@ -8,6 +8,7 @@ import { IncomingPacket } from '../../packet';
 export class DeathPacket implements IncomingPacket {
 
   type = PacketType.DEATH;
+  propagate = true;
 
   //#region packet-specific members
   /**

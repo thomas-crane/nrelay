@@ -8,6 +8,7 @@ import { IncomingPacket } from '../../../packet';
 export class ImminentArenaWavePacket implements IncomingPacket {
 
   type = PacketType.IMMINENTARENA_WAVE;
+  propagate = true;
 
   //#region packet-specific members
   /**

@@ -141,6 +141,9 @@ export class PluginManager {
     if (this.hookStore.has(name)) {
       const hooks = this.hookStore.get(name);
       for (const hook of hooks) {
+        if (!packet.propagate) {
+          return;
+        }
         try {
           const caller = this.libStore.get(hook.target);
           if (caller && caller.instance) {
@@ -152,9 +155,9 @@ export class PluginManager {
         }
       }
     }
-    // if (!packet.send) {
-    //   return;
-    // }
+    if (!packet.propagate) {
+      return;
+    }
     if (this.clientHookStore.has(name)) {
       const hook = this.clientHookStore.get(name);
       (client as any)[hook.method].call(client, client, packet);

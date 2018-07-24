@@ -8,6 +8,7 @@ import { IncomingPacket } from '../../packet';
 export class ClientStatPacket implements IncomingPacket {
 
   type = PacketType.CLIENTSTAT;
+  propagate = true;
 
   //#region packet-specific members
   /**

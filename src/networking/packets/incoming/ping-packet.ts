@@ -8,6 +8,7 @@ import { IncomingPacket } from '../../packet';
 export class PingPacket implements IncomingPacket {
 
   type = PacketType.PING;
+  propagate = true;
 
   //#region packet-specific members
   /**

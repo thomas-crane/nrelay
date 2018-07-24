@@ -2,6 +2,9 @@ import { LogProvider, LogLevel } from './logger';
 import { WriteStream } from 'fs';
 import { StringUtils } from './string-utils';
 
+/**
+ * A logger which writes log messages to a `WriteStream`.
+ */
 export class FileLogger implements LogProvider {
 
   constructor(private logStream: WriteStream) { }

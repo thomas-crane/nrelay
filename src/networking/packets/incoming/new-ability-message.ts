@@ -8,6 +8,7 @@ import { IncomingPacket } from '../../packet';
 export class NewAbilityMessage implements IncomingPacket {
 
   type = PacketType.NEWABILITY;
+  propagate = true;
 
   //#region packet-specific members
   /**

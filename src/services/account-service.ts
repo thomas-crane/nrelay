@@ -9,6 +9,10 @@ import { Storage } from './storage';
 const ACCOUNT_IN_USE_REGEX = /Account in use \((\d+) seconds? until timeout\)/;
 const ERROR_REGEX = /<Error\/?>(.+)<\/?Error>/;
 
+/**
+ * A static singleton class which provides utility methods for retrieving
+ * information about an account.
+ */
 export class AccountService {
 
   /**

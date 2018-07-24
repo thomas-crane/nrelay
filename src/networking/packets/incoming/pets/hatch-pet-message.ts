@@ -8,6 +8,7 @@ import { IncomingPacket } from '../../../packet';
 export class HatchPetMessage implements IncomingPacket {
 
   type = PacketType.HATCHPET;
+  propagate = true;
 
   //#region packet-specific members
   /**

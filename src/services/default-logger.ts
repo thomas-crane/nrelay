@@ -2,6 +2,9 @@ import chalk from 'chalk';
 import { LogProvider, LogLevel } from './logger';
 import { StringUtils } from './string-utils';
 
+/**
+ * The default logger used by the CLI.
+ */
 export class DefaultLogger implements LogProvider {
 
   constructor(private minLevel: LogLevel = LogLevel.Info) { }

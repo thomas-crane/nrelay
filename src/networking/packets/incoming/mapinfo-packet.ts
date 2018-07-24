@@ -8,6 +8,7 @@ import { IncomingPacket } from '../../packet';
 export class MapInfoPacket implements IncomingPacket {
 
   type = PacketType.MAPINFO;
+  propagate = true;
 
   //#region packet-specific members
   /**

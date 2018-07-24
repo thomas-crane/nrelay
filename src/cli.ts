@@ -5,6 +5,9 @@ import * as net from 'net';
 import * as argParser from './services/arg-parser';
 import { Mapper } from './networking';
 
+/**
+ * The command line interface of nrelay.
+ */
 export class CLI {
   /**
    * Creates a new client with the `account` details provided.

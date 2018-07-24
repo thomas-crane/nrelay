@@ -8,6 +8,7 @@ import { IncomingPacket } from '../../packet';
 export class BuyResultPacket implements IncomingPacket {
 
   type = PacketType.BUYRESULT;
+  propagate = true;
 
   //#region packet-specific members
   /**

@@ -9,6 +9,7 @@ import { WorldPosData } from '../../data/world-pos-data';
 export class ServerPlayerShootPacket implements IncomingPacket {
 
   type = PacketType.SERVERPLAYERSHOOT;
+  propagate = true;
 
   //#region packet-specific members
   /**

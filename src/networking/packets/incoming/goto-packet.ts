@@ -9,6 +9,7 @@ import { WorldPosData } from '../../data/world-pos-data';
 export class GotoPacket implements IncomingPacket {
 
   type = PacketType.GOTO;
+  propagate = true;
 
   //#region packet-specific members
   /**

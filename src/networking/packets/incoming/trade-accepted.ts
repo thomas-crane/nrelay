@@ -8,6 +8,7 @@ import { IncomingPacket } from '../../packet';
 export class TradeAcceptedPacket implements IncomingPacket {
 
   type = PacketType.TRADEACCEPTED;
+  propagate = true;
 
   //#region packet-specific members
   /**

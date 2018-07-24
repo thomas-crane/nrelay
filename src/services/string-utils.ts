@@ -1,5 +1,8 @@
 const EMAIL_REPLACE_REGEX = /.+?(.+?)(?:@|\+\d+).+?(.+?)\./;
 
+/**
+ * A static utility class containing several methods for creating strings.
+ */
 export class StringUtils {
   /**
    * Replaces the local part and domain of an email address with asterisks.

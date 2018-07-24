@@ -9,6 +9,7 @@ import { WorldPosData } from '../../data/world-pos-data';
 export class AoePacket implements IncomingPacket {
 
   type = PacketType.AOE;
+  propagate = true;
 
   //#region packet-specific members
   /**

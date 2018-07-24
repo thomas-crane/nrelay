@@ -18,11 +18,17 @@ const GSC_PATH = path.join(
 const DEFAULT_SWF_PATH = path.join(dir, 'src', 'services', 'updater-assets');
 const DEFAULT_VERSION_PATH = path.join(dir, 'versions.json');
 
+/**
+ * Information about the local version of the assets.
+ */
 export interface VersionInfo {
   clientVersion: string;
   assetVersion: string;
 }
 
+/**
+ * A static singleton class used to update the local game assets and packet ids.
+ */
 export class Updater {
 
   /**
@@ -67,12 +73,22 @@ export class Updater {
     }
   }
 
+  /**
+   * Stores the new asset `version` in the version info file at `versionPath`.
+   * @param version The new version.
+   * @param versionPath The path of the version info file.
+   */
   static updateLocalAssetVersion(version: string, versionPath: string): void {
     const current = this.getCurrentVersion(versionPath);
     current.assetVersion = version;
     fs.writeFileSync(versionPath, JSON.stringify(current));
   }
 
+  /**
+   * Stores the new client `version` in the version info file at `versionPath`.
+   * @param version The new version.
+   * @param versionPath The path of the version info file.
+   */
   static updateLocalClientVersion(version: string, versionPath: string): void {
     const current = this.getCurrentVersion(versionPath);
     current.clientVersion = version;
@@ -173,14 +189,23 @@ export class Updater {
     });
   }
 
+  /**
+   * Gets the remote client version.
+   */
   static getRemoteClientVersion(): Promise<string> {
     return HttpClient.get(CLIENT_VERSION_ENDPOINT);
   }
 
+  /**
+   * Gets the remote asset version.
+   */
   static getRemoteAssetVersion(): Promise<string> {
     return HttpClient.get(ASSET_ENDPOINT + '/current/version.txt');
   }
 
+  /**
+   * Gets the remote version of both the client and the assets.
+   */
   static getRemoteVersions(): Promise<VersionInfo> {
     return Promise.all([
       this.getRemoteClientVersion(),
@@ -193,6 +218,9 @@ export class Updater {
     });
   }
 
+  /**
+   * Gets the latest assets and updates the local version number.
+   */
   static getLatestAssets(): Promise<any> {
     return Promise.all([
       this.getGroundTypes(),
@@ -204,15 +232,18 @@ export class Updater {
     });
   }
 
+  /**
+   * Gets the latest client, updates the local packet ids, then updates the local version number.
+   */
   static getLatestClient(): Promise<any> {
     let clientVersion: string;
     return this.getRemoteClientVersion().then((version) => {
       clientVersion = version;
       return this.getClient(clientVersion);
     }).then(() => {
-      return this.updateLocalClientVersion(clientVersion, DEFAULT_VERSION_PATH);
-    }).then(() => {
       return this.updateFrom(DEFAULT_SWF_PATH);
+    }).then(() => {
+      return this.updateLocalClientVersion(clientVersion, DEFAULT_VERSION_PATH);
     });
   }
 

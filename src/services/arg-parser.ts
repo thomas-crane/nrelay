@@ -1,9 +1,16 @@
+/**
+ * Parses command line arguments into an `ArgsResult` object.
+ * @param args The arguments to parse.
+ */
 export function parse(args: string[]): ArgsResult {
   let result: ArgsResult;
   // single dash args
   const singleDashFlags = args.filter((arg) => arg.charAt(0) === '-' && arg.charAt(1) !== '-');
   result = singleDashFlags.reduce((obj, flag) => {
-    obj[flag.substring(1)] = true;
+    const flags = flag.substring(1).split('');
+    for (const f of flags) {
+      obj[f] = true;
+    }
     return obj;
   }, {} as ArgsResult);
 
@@ -31,7 +38,16 @@ export function parse(args: string[]): ArgsResult {
   return result;
 }
 
+/**
+ * A dictionary-like object containing the result of parsing some command line arguments.
+ */
 export interface ArgsResult {
+  /**
+   * An array of arguments which were 'floating' (not part of any flag).
+   */
   args: string[];
+  /**
+   * A dictionary of parsed flags.
+   */
   [flag: string]: any;
 }

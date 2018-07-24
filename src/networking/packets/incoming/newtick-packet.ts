@@ -9,6 +9,7 @@ import { ObjectStatusData } from '../../data/object-status-data';
 export class NewTickPacket implements IncomingPacket {
 
   type = PacketType.NEWTICK;
+  propagate = true;
 
   //#region packet-specific members
   /**

@@ -1,3 +1,6 @@
+/**
+ * An implementation of the PRNG used by the RotMG game client.
+ */
 export class Random {
   private seed: number;
 
@@ -5,6 +8,11 @@ export class Random {
     this.seed = seed;
   }
 
+  /**
+   * Gets the next integer in the given range.
+   * @param min The minimum value.
+   * @param max The maximum value.
+   */
   nextIntInRange(min: number, max: number): number {
     if (min === max) {
       return min;

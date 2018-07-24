@@ -8,6 +8,7 @@ import { IncomingPacket } from '../../packet';
 export class GuildResultPacket implements IncomingPacket {
 
   type = PacketType.GUILDRESULT;
+  propagate = true;
 
   //#region packet-specific members
   /**

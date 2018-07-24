@@ -4,6 +4,9 @@ import { SocketWrapper, environment } from '../models';
 import { EventEmitter } from 'events';
 
 const DEFAULT_PORT = 5680;
+/**
+ * A static singleton class which manages a local TCP server.
+ */
 export class LocalServer {
 
   /**

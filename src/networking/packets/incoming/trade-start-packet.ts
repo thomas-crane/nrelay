@@ -9,6 +9,7 @@ import { TradeItem } from '../../data/trade-item';
 export class TradeStartPacket implements IncomingPacket {
 
   type = PacketType.TRADESTART;
+  propagate = true;
 
   //#region packet-specific members
   /**

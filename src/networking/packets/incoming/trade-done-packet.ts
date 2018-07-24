@@ -10,6 +10,7 @@ import { TradeResult } from '../../../models/trade-result';
 export class TradeDonePacket implements IncomingPacket {
 
   type = PacketType.TRADEDONE;
+  propagate = true;
 
   //#region packet-specific members
   /**

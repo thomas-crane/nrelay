@@ -8,6 +8,7 @@ import { IncomingPacket } from '../../packet';
 export class ReskinUnlockPacket implements IncomingPacket {
 
   type = PacketType.RESKINUNLOCK;
+  propagate = true;
 
   //#region packet-specific members
   /**

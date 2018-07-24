@@ -9,6 +9,7 @@ import { IncomingPacket } from '../../packet';
 export class AccountListPacket implements IncomingPacket {
 
   type = PacketType.ACCOUNTLIST;
+  propagate = true;
 
   //#region packet-specific members
   /**

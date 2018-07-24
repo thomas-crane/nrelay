@@ -8,6 +8,7 @@ import { IncomingPacket } from '../../packet';
 export class GlobalNotificationPacket implements IncomingPacket {
 
   type = PacketType.GLOBALNOTIFICATION;
+  propagate = true;
 
   //#region packet-specific members
   /**

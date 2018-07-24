@@ -9,6 +9,7 @@ import { WorldPosData } from '../../data/world-pos-data';
 export class ShowEffectPacket implements IncomingPacket {
 
   type = PacketType.SHOWEFFECT;
+  propagate = true;
 
   //#region packet-specific members
   /**

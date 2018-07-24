@@ -7,6 +7,9 @@ const BUILD_VERSION_REGEX = /"buildVersion":\s*"([X.0-9]+)"/;
 // tslint:disable-next-line:no-var-requires
 const packageFile = require('../../package.json');
 
+/**
+ * A static singleton class used to provide utility methods for interacting with the filesystem.
+ */
 export class Storage {
   /**
    * Gets the contents of the file at the specified filepath and returns the result as a JSON object.

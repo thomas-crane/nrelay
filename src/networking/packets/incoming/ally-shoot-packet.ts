@@ -8,6 +8,7 @@ import { IncomingPacket } from '../../packet';
 export class AllyShootPacket implements IncomingPacket {
 
   type = PacketType.ALLYSHOOT;
+  propagate = true;
 
   //#region packet-specific members
   /**
