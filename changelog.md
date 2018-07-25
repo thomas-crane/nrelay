@@ -1,6 +1,18 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `7.4.0`
+> Not backwards compatible.
+### Changes:
+ + Updated the `plugin-components` doc (now `the-standard-library`).
+ + Added the Object Tracker standard library.
+ + `PluginManager` has been renamed to `LibraryManager`.
+ + The `packet` and `packets` exports have been removed from the plugin module.
+ + The plugin module has been renamed to `library-module`.
+ + `trackAllPlayers()` and `trackPlayersFor()` have been removed from the player tracker. Tracking is now always enabled.
+ + The Player Tracker now uses `(player: PlayerData, client: Client)` as the event emitter signature.
+ + The file which the `Library` decorator is exported from has been renamed to `library`.
+
 ## `7.3.0`
 > Not backwards compatible.
 ### Changes:

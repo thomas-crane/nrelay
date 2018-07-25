@@ -47,7 +47,7 @@ import {
   GroundTileData,
   ObjectStatusData,
 } from './../networking/data';
-import { PluginManager, ResourceManager } from './../core';
+import { LibraryManager, ResourceManager } from './../core';
 import { PacketHook } from './../decorators';
 import { EventEmitter } from 'events';
 import { SocksClient } from 'socks';
@@ -953,7 +953,7 @@ export class Client {
       if (index > -1) {
         this.blockedPackets = this.blockedPackets.filter((p) => p !== data.type);
       } else {
-        PluginManager.callHooks(data, this);
+        LibraryManager.callHooks(data, this);
       }
     });
     this.packetio.on('error', (err: Error) => {

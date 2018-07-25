@@ -1,6 +1,6 @@
 import { Updater, LocalServer, Logger, LogLevel, Storage, AccountService, StringUtils, DefaultLogger, FileLogger } from './services';
 import { AccountInfo, Account, CharacterInfo, Server, environment } from './models';
-import { PluginManager, ResourceManager, Client } from './core';
+import { LibraryManager, ResourceManager, Client } from './core';
 import * as net from 'net';
 import * as argParser from './services/arg-parser';
 import { Mapper } from './networking';
@@ -136,7 +136,7 @@ export class CLI {
 
     ResourceManager.loadAllResources().then(() => {
       if (environment.loadPlugins) {
-        PluginManager.loadPlugins();
+        LibraryManager.loadPlugins();
       } else {
         Logger.log('NRelay', 'Load plugins disabled. No plugins will be loaded.', LogLevel.Warning);
       }

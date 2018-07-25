@@ -1,6 +1,6 @@
 {
   "name": "nrelay",
-  "version": "7.3.0",
+  "version": "7.4.0",
   "description": "A console based modular client for Realm of the Mad God built with Node.js and TypeScript.",
   "main": "index.js",
   "bin": {
@@ -9,7 +9,7 @@
   "scripts": {
     "build": "gulp",
     "start": "gulp && node index",
-    "index": "tsai --path src --exclude plugins updater-assets"
+    "index": "tsai --path src --exclude plugins updater-assets stdlib"
   },
   "author": "thomas-crane",
   "license": "MIT",

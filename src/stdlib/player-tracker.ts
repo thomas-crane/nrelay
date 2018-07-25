@@ -1,12 +1,18 @@
-import { Library, PacketHook, Client, Logger, LogLevel } from './../core';
+import { Library, PacketHook, Client } from './../core';
 import { PlayerData, Classes } from './../models';
 import { UpdatePacket, NewTickPacket } from './../networking/packets/incoming';
 import { ObjectStatusData } from './../networking/data';
 import { EventEmitter } from 'events';
 
+/**
+ * An event listener for events emitted by the `PlayerTracker`.
+ */
+export type PlayerEventListener = (player: PlayerData, client: Client) => void;
+
 @Library({
   name: 'Player Tracker',
-  author: 'tcrane'
+  author: 'tcrane',
+  description: 'A utility library for keeping track of other players visible to connected clients.'
 })
 export class PlayerTracker {
 
@@ -14,17 +20,12 @@ export class PlayerTracker {
   private readonly trackedPlayers: {
     [guid: string]: PlayerData[]
   };
-  private trackAll = false;
 
   constructor() {
-    if (!this.emitter) {
-      this.emitter = new EventEmitter();
-    }
+    this.emitter = new EventEmitter();
     this.trackedPlayers = {};
     Client.on('connect', (client) => {
-      if (this.trackedPlayers.hasOwnProperty(client.guid)) {
-        this.trackedPlayers[client.guid] = [];
-      }
+      this.trackedPlayers[client.guid] = [];
     });
   }
 
@@ -33,36 +34,8 @@ export class PlayerTracker {
    * @param event The event to attach the listener to.
    * @param listener The function to invoke when the event is fired.
    */
-  on(event: string | symbol, listener: (...args: any[]) => void): EventEmitter {
-    if (!this.emitter) {
-      this.emitter = new EventEmitter();
-    }
+  on(event: 'enter' | 'leave', listener: PlayerEventListener): EventEmitter {
     return this.emitter.on(event, listener);
-  }
-
-  /**
-   * Enables tracking for all clients including clients added at runtime.
-   */
-  trackAllPlayers(): void {
-    if (!this.trackAll) {
-      Logger.log('Player Tracker', 'Enabled tracking for all clients.', LogLevel.Success);
-      this.trackAll = true;
-    } else {
-      Logger.log('Player Tracker', 'Tracking for all players has already been enabled.', LogLevel.Warning);
-    }
-  }
-
-  /**
-   * Enables player tracking for the specified client.
-   * @param client The client to enable tracking for.
-   */
-  trackPlayersFor(client: Client): void {
-    if (!this.trackedPlayers.hasOwnProperty(client.guid)) {
-      this.trackedPlayers[client.guid] = [];
-      Logger.log('Player Tracker', `Tracking players for ${client.alias}`, LogLevel.Success);
-    } else {
-      Logger.log('Player Tracker', `Already tracking players for ${client.alias}`, LogLevel.Warning);
-    }
   }
 
   /**
@@ -84,8 +57,7 @@ export class PlayerTracker {
    */
   getPlayersFor(client: Client): PlayerData[] | null {
     if (!this.trackedPlayers.hasOwnProperty(client.guid)) {
-      Logger.log('Player Tracker', `Players are not being tracked for ${client.alias}. Did you forget to call trackPlayersFor(client)?`);
-      return null;
+      return [];
     }
     return this.trackedPlayers[client.guid];
   }
@@ -93,25 +65,21 @@ export class PlayerTracker {
   @PacketHook()
   private onUpdate(client: Client, update: UpdatePacket): void {
     if (!this.trackedPlayers.hasOwnProperty(client.guid)) {
-      if (this.trackAll) {
-        this.trackedPlayers[client.guid] = [];
-      } else {
-        return;
-      }
+      this.trackedPlayers[client.guid] = [];
     }
     for (const obj of update.newObjects) {
       if (Classes[obj.objectType]) {
         const pd = ObjectStatusData.processObject(obj);
         pd.server = client.server.name;
         this.trackedPlayers[client.guid].push(pd);
-        this.emitter.emit('enter', pd);
+        this.emitter.emit('enter', pd, client);
       }
     }
     for (const drop of update.drops) {
       for (let n = 0; n < this.trackedPlayers[client.guid].length; n++) {
         if (this.trackedPlayers[client.guid][n].objectId === drop) {
           const pd = this.trackedPlayers[client.guid].splice(n, 1)[0];
-          this.emitter.emit('leave', pd);
+          this.emitter.emit('leave', pd, client);
           break;
         }
       }
@@ -121,11 +89,7 @@ export class PlayerTracker {
   @PacketHook()
   private onNewTick(client: Client, newTick: NewTickPacket): void {
     if (!this.trackedPlayers.hasOwnProperty(client.guid)) {
-      if (this.trackAll) {
-        this.trackedPlayers[client.guid] = [];
-      } else {
-        return;
-      }
+      this.trackedPlayers[client.guid] = [];
     }
     for (const status of newTick.statuses) {
       for (let n = 0; n < this.trackedPlayers[client.guid].length; n++) {

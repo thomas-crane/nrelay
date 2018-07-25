@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { PluginManager } from './../core/plugin-manager';
+import { LibraryManager } from './../core/library-manager';
 import { Logger, LogLevel } from '../services';
 import { VALID_PACKET_HOOKS } from './valid-packets';
 
@@ -23,7 +23,7 @@ export function PacketHook(): MethodDecorator {
       Logger.log('PluginManager', `${getDescription(target, key, params)} will never be called.`, LogLevel.Error);
       return;
     }
-    PluginManager.loadHook({
+    LibraryManager.loadHook({
       target: target.constructor.name,
       method: key.toString(),
       packet: params[1]

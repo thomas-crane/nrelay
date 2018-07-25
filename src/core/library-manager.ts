@@ -1,6 +1,5 @@
 import { Logger, LogLevel, Storage } from './../services';
 import { Client } from './client';
-import { environment } from './../models';
 import * as fs from 'fs';
 import { LoadedLib, ManagedLib, HookInfo } from './lib-info';
 import { IncomingPacket } from '../networking';
@@ -10,7 +9,7 @@ const PLUGIN_REGEX = /^.+\.js$/;
 /**
  * A static singleton class used to load libraries and packet hooks.
  */
-export class PluginManager {
+export class LibraryManager {
 
   static readonly libStore: Map<string, ManagedLib<any>> = new Map();
   static readonly hookStore: Map<string, Array<HookInfo<any>>> = new Map();
