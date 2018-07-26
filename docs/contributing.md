@@ -18,7 +18,7 @@ If you are able to provide additional information, you should still try to follo
 #### Submitting an issue
 There are a few things you should always include with any issue report:
  + __Which version of nrelay are you using?__ This helps developers work out if the issue was introduced recently, or if it has been around for a long time.
- + __Which version of RotMG is nrelay running?__ You can find the RotMG version in the `src/services/updater-assets/version.txt` file. This helps developers work out if the issue is related to a specific version of RotMG.
+ + __Which version of RotMG is nrelay running?__ You can find the RotMG version in the `versions.json` file. This helps developers work out if the issue is related to a specific version of RotMG.
  + __Which plugins are you using?__ Providing a list of plugins you are using (where to find them is helpful too) can help the developers determine if a specific plugin is causing an issue, or if the problem is within one of the plugins. If you are using unreleased or private plugins, you can instead provide information about which features of nrelay the plugins use (such as the `ResourceManager` or which packets the plugins use).
 
 If you are able to provide steps to reproduce the issue, these can greatly reduce the time required to fix the issue.
