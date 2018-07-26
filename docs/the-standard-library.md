@@ -13,13 +13,13 @@ Because of the dependency injection system, using a library in your plugin is an
 
 Firstly, you need to import the library you want to use from the `stdlib` module.
 ```typescript
-import { PlayerTracker } from '../stdlib';
+import { PlayerTracker } from '../stdlib/player-tracker';
 ```
 To allow the library to be used from your plugin, you can simply include it as a constructor argument.
 
 ```typescript
 import { Library } from '../core';
-import { PlayerTracker } from '../stdlib';
+import { PlayerTracker } from '../stdlib/player-tracker';
 
 @Library({ name: 'Example plugin', author: 'tcrane' })
 class ExamplePlugin {
@@ -40,7 +40,7 @@ This library is designed to abstract the logic of tracking players and keeping t
 as well as providing an event emitter for players entering and leaving the map.
 ```typescript
 import { Library } from '../core';
-import { PlayerTracker } from '../stdlib';
+import { PlayerTracker } from '../stdlib/player-tracker';
 
 @Library({ name: 'Example plugin', author: 'tcrane' })
 class ExamplePlugin {
@@ -70,7 +70,7 @@ This plugin prints the number of players visible to each client when a `NewTickP
 ```typescript
 import { Library, PacketHook, Client, Logger } from '../core';
 import { NewTickPacket } from '../networking';
-import { PlayerTracker } from '../stdlib';
+import { PlayerTracker } from '../stdlib/player-tracker';
 
 @Library({ name: 'Example plugin', author: 'tcrane' })
 class ExamplePlugin {
@@ -91,7 +91,7 @@ This library is designed to provide an event based way of detecting when objects
 Objects won't be detected unless tracking has been enabled for them. See the API section for info on how to enable tracking for certain objects.
 ```typescript
 import { Library } from '../core';
-import { ObjectTracker } from '../stdlib';
+import { ObjectTracker } from '../stdlib/object-tracker';
 
 @Library({ name: 'Example plugin', author: 'tcrane' })
 class ExamplePlugin {
@@ -140,7 +140,7 @@ This method returns the Object Tracker that it was called on, so it can be used 
 This plugin logs a message when a dungeon that is being tracked has been opened.
 ```typescript
 import { Library, PacketHook, Logger } from '../core';
-import { ObjectTracker } from '../stdlib';
+import { ObjectTracker } from '../stdlib/object-tracker';
 
 const TOMB_TYPE = 0x072c; // the tomb portal object type.
 const HALLS_TYPE = 0xb024; // the lost halls portal object type.

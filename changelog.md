@@ -1,6 +1,11 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `7.5.0`
+> Not backwards compatible.
+### Changes:
+ + Removed `stdlib` index file. The index was causing the *all* libs to be loaded when just one was referenced. Libs must now be imported from their specific files.
+
 ## `7.4.0`
 > Not backwards compatible.
 ### Changes:
