@@ -1,4 +1,7 @@
 /**
+ * @module models
+ */
+/**
  * The error codes of errors which can be received in the `FailurePacket`.
  */
 export enum FailureCode {

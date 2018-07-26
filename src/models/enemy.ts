@@ -1,3 +1,6 @@
+/**
+ * @module models
+ */
 import { GameObject } from './object';
 import { ObjectStatusData } from '../networking/data/object-status-data';
 import { PlayerData } from './playerdata';

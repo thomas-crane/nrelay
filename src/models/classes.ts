@@ -1,4 +1,7 @@
 /**
+ * @module models
+ */
+/**
  * The object types of all classes in the game.
  */
 export enum Classes {

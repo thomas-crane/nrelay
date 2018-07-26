@@ -1,4 +1,7 @@
 /**
+ * @module crypto
+ */
+/**
  * An inline-based implementation of the RC4 stream cipher.
  */
 export class RC4 {

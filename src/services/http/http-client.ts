@@ -1,3 +1,6 @@
+/**
+ * @module services/http
+ */
 import * as url from 'url';
 import * as qs from 'querystring';
 import { Proxy } from '../../models';

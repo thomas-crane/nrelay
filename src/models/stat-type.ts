@@ -1,4 +1,7 @@
 /**
+ * @module models
+ */
+/**
  * A list of the stat type values as they are received on the network.
  */
 export enum StatType {

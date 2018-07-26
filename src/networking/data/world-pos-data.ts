@@ -1,3 +1,6 @@
+/**
+ * @module networking/data
+ */
 import { PacketBuffer } from '../packet-buffer';
 import { DataPacket } from '../packet';
 import { Point } from '../../services';

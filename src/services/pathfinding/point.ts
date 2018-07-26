@@ -1,4 +1,7 @@
 /**
+ * @module services/pathfinding
+ */
+/**
  * A point on the X/Y plane.
  */
 export interface Point {

@@ -1,4 +1,7 @@
 /**
+ * @module services/pathfinding
+ */
+/**
  * An object which can generate a unique hash code.
  */
 export interface Hashable {

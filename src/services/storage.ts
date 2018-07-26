@@ -1,3 +1,6 @@
+/**
+ * @module services
+ */
 import { AccountInfo } from './../models';
 import { Logger, LogLevel } from './logger';
 import * as fs from 'fs';

@@ -1,3 +1,6 @@
+/**
+ * @module networking
+ */
 import { PacketBuffer } from './packet-buffer';
 import { PacketType } from './packet-type';
 

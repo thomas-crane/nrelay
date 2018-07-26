@@ -1,3 +1,6 @@
+/**
+ * @module networking
+ */
 import { EventEmitter } from 'events';
 import { Socket } from 'net';
 import { PacketBuffer } from './packet-buffer';

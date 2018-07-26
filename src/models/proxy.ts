@@ -1,4 +1,7 @@
 /**
+ * @module models
+ */
+/**
  * Configuration settings for a proxy.
  */
 export interface Proxy {

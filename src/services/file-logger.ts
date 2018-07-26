@@ -1,3 +1,6 @@
+/**
+ * @module services/logging
+ */
 import { LogProvider, LogLevel } from './logger';
 import { WriteStream } from 'fs';
 import { StringUtils } from './string-utils';

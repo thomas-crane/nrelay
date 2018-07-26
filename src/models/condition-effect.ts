@@ -1,4 +1,7 @@
 /**
+ * @module models
+ */
+/**
  * A static helper class for determining if a condition number has a particular `effect`.
  * @example
  * const isDazed = ConditionEffects.has(this.condition, ConditionEffect.DAZED);

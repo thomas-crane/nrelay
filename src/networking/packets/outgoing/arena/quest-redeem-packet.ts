@@ -1,3 +1,6 @@
+/**
+ * @module networking/packets/outgoing
+ */
 import { PacketBuffer } from '../../../packet-buffer';
 import { PacketType } from '../../../packet-type';
 import { SlotObjectData } from '../../../data/slot-object-data';

@@ -1,3 +1,6 @@
+/**
+ * @module decorators
+ */
 import 'reflect-metadata';
 import { LibraryManager } from './../core/library-manager';
 import { LibraryInfo } from './../models/plugin-info';

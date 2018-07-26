@@ -1,3 +1,6 @@
+/**
+ * @module stdlib
+ */
 import { Library, PacketHook, Client } from './../core';
 import { PlayerData, Classes } from './../models';
 import { UpdatePacket, NewTickPacket } from './../networking/packets/incoming';

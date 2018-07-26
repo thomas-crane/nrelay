@@ -1,4 +1,7 @@
 /**
+ * @module models
+ */
+/**
  * An object loaded from the Objects resource
  */
 export interface GameObject {

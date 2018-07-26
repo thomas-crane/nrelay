@@ -1,4 +1,7 @@
 /**
+ * @module models
+ */
+/**
  * Configuration settings which affect how nrelay behaves.
  */
 export const environment = {

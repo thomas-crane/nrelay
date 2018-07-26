@@ -1,3 +1,6 @@
+/**
+ * @module networking
+ */
 import { PacketType } from './packet-type';
 import { Logger, LogLevel } from '../core';
 

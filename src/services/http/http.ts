@@ -1,7 +1,15 @@
+/**
+ * @module services/http
+ */
 import * as http from 'http';
 import * as qs from 'querystring';
 import * as url from 'url';
 
+/**
+ * A class used internally by the `HttpClient` to work with http urls.
+ *
+ * @see HttpClient The `HttpClient` class should be used instead of this one.
+ */
 export class Http {
   /**
    * This method is used internally by the `HttpClient` class.

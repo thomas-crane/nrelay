@@ -1,4 +1,7 @@
 /**
+ * @module cli
+ */
+/**
  * Parses command line arguments into an `ArgsResult` object.
  * @param args The arguments to parse.
  */

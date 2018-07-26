@@ -1,3 +1,6 @@
+/**
+ * @module services/pathfinding
+ */
 import { Node } from './node';
 import { Point } from './point';
 import { Heap } from './heap';

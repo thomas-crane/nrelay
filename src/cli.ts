@@ -1,3 +1,6 @@
+/**
+ * @module cli
+ */
 import { Updater, LocalServer, Logger, LogLevel, Storage, AccountService, StringUtils, DefaultLogger, FileLogger } from './services';
 import { AccountInfo, Account, CharacterInfo, Server, environment } from './models';
 import { LibraryManager, ResourceManager, Client } from './core';

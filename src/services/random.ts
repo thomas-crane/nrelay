@@ -1,4 +1,7 @@
 /**
+ * @module services
+ */
+/**
  * An implementation of the PRNG used by the RotMG game client.
  */
 export class Random {

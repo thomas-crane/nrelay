@@ -1,7 +1,15 @@
+/**
+ * @module services/http
+ */
 import * as https from 'https';
 import * as url from 'url';
 import * as qs from 'querystring';
 
+/**
+ * A class used internally by the `HttpClient` to work with https urls.
+ *
+ * @see HttpClient The `HttpClient` class should be used instead of this one.
+ */
 export class Https {
   /**
    * This method is used internally by the `HttpClient` class.

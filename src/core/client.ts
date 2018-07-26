@@ -1,3 +1,6 @@
+/**
+ * @module core
+ */
 import { Socket } from 'net';
 import { Logger, LogLevel, Random, Storage } from '../services';
 import { PacketType, PacketIO, IncomingPacket } from './../networking';

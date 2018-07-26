@@ -1,3 +1,6 @@
+/**
+ * @module services
+ */
 import { Server, CharacterInfo } from './../models';
 
 const SERVER_REGEX = /<Server><Name>(\w+)<\/Name><DNS>(\d+\.\d+\.\d+\.\d+)<\/DNS>/g;

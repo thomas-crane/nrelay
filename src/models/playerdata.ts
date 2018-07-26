@@ -1,3 +1,6 @@
+/**
+ * @module models
+ */
 import { WorldPosData } from './../networking/data/world-pos-data';
 import { Classes } from './classes';
 import { GuildRank } from './guildrank';

@@ -1,4 +1,7 @@
 /**
+ * @module networking
+ */
+/**
  * A wrapper class for providing read/write methods on top of
  * a Buffer.
  */

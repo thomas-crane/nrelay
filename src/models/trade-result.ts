@@ -1,4 +1,7 @@
 /**
+ * @module models
+ */
+/**
  * The values used to represent the result of a trade.
  */
 export enum TradeResult {

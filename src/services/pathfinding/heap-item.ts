@@ -1,4 +1,7 @@
 /**
+ * @module services/pathfinding
+ */
+/**
  * An item in a heap.
  */
 export interface HeapItem<T> {

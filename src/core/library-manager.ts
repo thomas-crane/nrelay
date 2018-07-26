@@ -1,3 +1,6 @@
+/**
+ * @module core
+ */
 import { Logger, LogLevel, Storage } from './../services';
 import { Client } from './client';
 import * as fs from 'fs';

@@ -1,3 +1,6 @@
+/**
+ * @module core
+ */
 import { LibraryInfo } from './../models/plugin-info';
 
 /**

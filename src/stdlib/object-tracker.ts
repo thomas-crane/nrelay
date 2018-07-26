@@ -1,3 +1,6 @@
+/**
+ * @module stdlib
+ */
 import { Library, PacketHook, Client } from '../core';
 import { EventEmitter } from 'events';
 import { ObjectData, UpdatePacket, NewTickPacket } from '../networking';

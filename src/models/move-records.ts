@@ -1,3 +1,6 @@
+/**
+ * @module models
+ */
 import { MoveRecord } from '../networking/data/move-record';
 
 /**

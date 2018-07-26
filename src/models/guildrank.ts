@@ -1,4 +1,7 @@
 /**
+ * @module models
+ */
+/**
  * The values corresponding to guild ranks as they are received over the network.
  */
 export enum GuildRank {

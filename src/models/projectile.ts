@@ -1,3 +1,6 @@
+/**
+ * @module models
+ */
 import { GameObject, ProjectileInfo } from './object';
 import { ResourceManager } from '../core/resource-manager';
 import { Point } from '../services/pathfinding/point';

@@ -1,3 +1,6 @@
+/**
+ * @module core
+ */
 import { Logger, LogLevel, Storage } from './../services';
 import { GameObject, ProjectileInfo, Tile, environment } from './../models';
 

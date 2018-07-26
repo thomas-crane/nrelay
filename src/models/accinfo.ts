@@ -1,3 +1,6 @@
+/**
+ * @module models
+ */
 import { Proxy } from './proxy';
 /**
  * A list of `Account`s and configuration settings used by nrelay at startup time.

@@ -1,3 +1,6 @@
+/**
+ * @module networking
+ */
 import { PacketType } from './packet-type';
 import { ArenaDeathPacket } from './packets/incoming/arena/arena-death';
 import { ImminentArenaWavePacket } from './packets/incoming/arena/imminent-arena-wave';

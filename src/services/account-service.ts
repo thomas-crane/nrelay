@@ -1,3 +1,6 @@
+/**
+ * @module services
+ */
 import { Proxy, CharacterInfo, SERVER_ENDPOINT, Server } from '../models';
 import { HttpClient } from './http';
 import { XMLtoJSON } from './xmltojson';

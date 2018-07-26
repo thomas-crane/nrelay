@@ -1,3 +1,6 @@
+/**
+ * @module services
+ */
 import { createServer, Server, Socket } from 'net';
 import { Logger, LogLevel } from './logger';
 import { SocketWrapper, environment } from '../models';
