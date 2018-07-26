@@ -77,6 +77,9 @@ export class ObjectTracker {
       }
     }
 
+    if (!this.trackedObjects.hasOwnProperty(client.guid)) {
+      return;
+    }
     for (const drop of update.drops) {
       for (let n = 0; n < this.trackedObjects[client.guid].length; n++) {
         if (this.trackedObjects[client.guid][n].status.objectId === drop) {
@@ -89,7 +92,7 @@ export class ObjectTracker {
 
   @PacketHook()
   private onNewTick(client: Client, newTick: NewTickPacket): void {
-    if (this.trackedObjects[client.guid].length < 1) {
+    if (!this.trackedObjects.hasOwnProperty(client.guid) || this.trackedObjects[client.guid].length < 1) {
       return;
     }
     for (const status of newTick.statuses) {
