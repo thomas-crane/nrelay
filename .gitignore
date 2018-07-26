@@ -4,6 +4,10 @@ node_modules/
 # Build result
 dist/
 
+# Auto generated docs
+api-docs/public
+api-docs/firebase-debug.log
+
 # Any plugins except defaults
 src/plugins/*
 !src/plugins/hello-plugin.ts

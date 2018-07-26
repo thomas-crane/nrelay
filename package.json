@@ -9,7 +9,8 @@
   "scripts": {
     "build": "gulp",
     "start": "gulp && node index",
-    "index": "tsai --path src --exclude plugins updater-assets stdlib"
+    "index": "tsai --path src --exclude plugins updater-assets stdlib",
+    "docs": "typedoc --options ./typedoc.json"
   },
   "author": "thomas-crane",
   "license": "MIT",
@@ -27,6 +28,8 @@
     "run-sequence": "^2.2.0",
     "tsai": "^2.0.0",
     "tslint": "^5.7.0",
+    "typedoc": "^0.11.1",
+    "typedoc-plugin-external-module-name": "^1.1.3",
     "typescript": "^2.5.2"
   },
   "dependencies": {
