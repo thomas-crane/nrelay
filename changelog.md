@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `7.5.1`
+### Fixes:
+ + Fixed a bug where passing a custom value for `level` to the `FileLogger` would throw an error.
+
 ## `7.5.0`
 > Not backwards compatible.
 ### Changes:
