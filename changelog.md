@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
-
+## `6.21.0`
+### Changes:
+ + Added Auto-Proxy optional config to acc-config.json.
+ + Added `ProxyGrabber` service.
+ + Disabled logging spam in Http Service for `proxiedGet()`.
 ## `6.20.0`
 ### Changes:
  + Added `tsai` dev dependency and npm task for indexing nrelay.

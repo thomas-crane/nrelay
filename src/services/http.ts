@@ -29,7 +29,7 @@ export class Http {
         return new Promise((resolve: (data: string) => void, reject: (err: Error) => void) => {
             const endpoint = url.parse(path);
             const qs = this.parseQueryString(query);
-            Log('Http', 'Establishing proxy for GET request.', LogLevel.Info);
+            //Log('Http', 'Establishing proxy for GET request.', LogLevel.Info);
             const socket = SocksClient.createConnection({
                 destination: {
                     host: endpoint.host,
@@ -44,7 +44,7 @@ export class Http {
                     password: proxy.password
                 }
             }).then((info) => {
-                Log('Http', 'Established proxy!', LogLevel.Success);
+                //Log('Http', 'Established proxy!', LogLevel.Success);
                 let data = '';
                 info.socket.setEncoding('utf8');
                 info.socket.write(`GET /char/list${qs} HTTP/1.1\r\n`);
@@ -65,7 +65,7 @@ export class Http {
                     info.socket.destroy();
                     reject(err);
                 });
-            }, reject);
+            }, (err) => reject(err));
         });
     }
 
