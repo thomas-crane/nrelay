@@ -7,3 +7,4 @@ export * from './random';
 export * from './storage';
 export * from './updater';
 export * from './xmltojson';
+export * from './proxy-grabber';

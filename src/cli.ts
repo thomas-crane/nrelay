@@ -1,5 +1,5 @@
-import { parseServers, parseAccountInfo, parseError, Updater, LocalServer, Http, Log, LogLevel, Storage } from './services';
-import { IAccountInfo, IAccount, ICharacterInfo, SERVER_ENDPOINT, IServer, environment } from './models';
+import { parseServers, parseAccountInfo, parseError, Updater, LocalServer, Http, Log, LogLevel, Storage, ProxyGrabber } from './services';
+import { IAccountInfo, IAccount, ICharacterInfo, SERVER_ENDPOINT, IServer, environment, IProxy } from './models';
 import { PluginManager, ResourceManager, Client } from './core';
 import fs = require('fs');
 import net = require('net');
@@ -29,6 +29,15 @@ export class CLI {
                 const err = new Error(account.alias + ' has already been added.');
                 reject(err);
                 return;
+            }
+            
+            if (this.autoProxy) {
+                if (this.autoProxyIndexAccounts > this.autoProxyAccountsPerIP) {
+                    this.autoProxyIndexProxys++
+                    this.autoProxyIndexAccounts = 0;
+                }
+                account.proxy = this.autoProxies[this.autoProxyIndexProxys];
+                this.autoProxyIndexAccounts++;
             }
             const handler = (info: IAccount) => {
                 let server: IServer;
@@ -131,6 +140,12 @@ export class CLI {
     private static internalServerList: { [id: string]: IServer };
     private static buildVersion: string;
 
+    private static autoProxy: boolean;
+    private static autoProxyAccountsPerIP: number;
+    private static autoProxyIndexProxys: number;
+    private static autoProxyIndexAccounts: number;
+    private static autoProxies: IProxy[];
+
     private static getAccountInfo(account: IAccount): Promise<IAccount> {
         return new Promise((resolve: (acc: IAccount) => void, reject: (err: Error | string) => void) => {
             const handler = (data: string) => {
@@ -198,16 +213,36 @@ export class CLI {
         loadResources.then(() => {
             PluginManager.loadPlugins();
         });
-
-        for (let i = 0; i < accInfo.accounts.length; i++) {
-            const acc = accInfo.accounts[i];
-            setTimeout(() => {
-                this.addClient(acc).then(() => {
-                    Log('NRelay', `Authorized ${acc.alias}`, LogLevel.Success);
-                }).catch((error: Error) => {
-                    Log('NRelay', `${acc.alias}: ${error.message}`, LogLevel.Error);
-                });
-            }, (i * 1000));
+        if (accInfo.autoProxy) {
+            Log('NRelay', 'Auto Proxy is enabled gathering proxies! (This may take a minute!)', LogLevel.Info);
+            this.autoProxy = accInfo.autoProxy.enabled;
+            this.autoProxyAccountsPerIP = accInfo.autoProxy.accountsPerIP;
+            this.autoProxyIndexProxys = 0;
+            this.autoProxyIndexAccounts = 0;
+            ProxyGrabber.getProxies().then((proxies: IProxy[]) => {
+                this.autoProxies = proxies;
+                for (let i = 0; i < accInfo.accounts.length; i++) {
+                    const acc = accInfo.accounts[i];
+                    setTimeout(() => {
+                        this.addClient(acc).then(() => {
+                            Log('NRelay', `Authorized ${acc.alias}`, LogLevel.Success);
+                        }).catch((error: Error) => {
+                            Log('NRelay', `${acc.alias}: ${error.message}`, LogLevel.Error);
+                        });
+                    }, (i * 1000));
+                }
+            });
+        } else {
+            for (let i = 0; i < accInfo.accounts.length; i++) {
+                const acc = accInfo.accounts[i];
+                setTimeout(() => {
+                    this.addClient(acc).then(() => {
+                        Log('NRelay', `Authorized ${acc.alias}`, LogLevel.Success);
+                    }).catch((error: Error) => {
+                        Log('NRelay', `${acc.alias}: ${error.message}`, LogLevel.Error);
+                    });
+                }, (i * 1000));
+            }
         }
     }
 

@@ -3,6 +3,10 @@ import { IProxy } from './proxy';
 export interface IAccountInfo {
     buildVersion: string;
     localServer?: ILocalServerSettings;
+    autoProxy?: {
+        enabled: boolean,
+        accountsPerIP: number
+    }
     accounts: IAccount[];
 }
 export interface IAccount {
