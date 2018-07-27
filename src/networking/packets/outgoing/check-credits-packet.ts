@@ -1,18 +1,22 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class CheckCreditsPacket extends Packet {
+/**
+ * > Unknown.
+ */
+export class CheckCreditsPacket implements OutgoingPacket {
 
-    public type = PacketType.CHECKCREDITS;
+  type = PacketType.CHECKCREDITS;
 
-    //#region packet-specific members
+  //#region packet-specific members
 
-    //#endregion
+  //#endregion
 
-    public read(): void {
-
-    }
-
-    public write(): void {
-
-    }
+  write(buffer: PacketBuffer): void {
+    //
+  }
 }

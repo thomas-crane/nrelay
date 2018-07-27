@@ -1,66 +1,94 @@
-import { Packet, PacketType } from '../../packet';
-import { encryptGUID } from '../../../crypto/guid-encrypt';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
+import { RSA } from '../../../crypto';
 
-export class HelloPacket extends Packet {
+/**
+ * Sent to prompt the server to accept the connection of an account
+ * and reply with a `MapInfoPacket`.
+ */
+export class HelloPacket implements OutgoingPacket {
 
-    public type = PacketType.HELLO;
+  type = PacketType.HELLO;
 
-    //#region packet-specific members
-    buildVersion: string;
-    gameId: number;
-    guid: string;
-    random1: number;
-    password: string;
-    random2: number;
-    secret: string;
-    keyTime: number;
-    key: Int8Array;
-    mapJSON: string;
-    entryTag: string;
-    gameNet: string;
-    gameNetUserId: string;
-    playPlatform: string;
-    platformToken: string;
-    userToken: string;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The current build version of RotMG.
+   */
+  buildVersion: string;
+  /**
+   * The id of the map to connect to.
+   */
+  gameId: number;
+  /**
+   * The email of the account being used.
+   */
+  guid: string;
+  /**
+   * The password of the account being used.
+   */
+  password: string;
+  /**
+   * The client secret of the account being used.
+   */
+  secret: string;
+  /**
+   * The key time of the `key` being used.
+   */
+  keyTime: number;
+  /**
+   * The key of the map to connect to.
+   */
+  key: number[];
+  /**
+   * > Unknown.
+   */
+  mapJSON: string;
+  /**
+   * > Unknown.
+   */
+  entryTag: string;
+  /**
+   * > Unknown.
+   */
+  gameNet: string;
+  /**
+   * > Unknown.
+   */
+  gameNetUserId: string;
+  /**
+   * > Unknown.
+   */
+  playPlatform: string;
+  /**
+   * > Unknown.
+   */
+  platformToken: string;
+  /**
+   * > Unknown.
+   */
+  userToken: string;
+  //#endregion
 
-    data: Buffer;
-
-    public read(): void {
-        this.buildVersion = this.readString();
-        this.gameId = this.readInt32();
-        this.guid = this.readString();
-        this.random1 = this.readInt32();
-        this.password = this.readString();
-        this.random2 = this.readInt32();
-        this.secret = this.readString();
-        this.keyTime = this.readInt32();
-        this.key = this.readByteArray();
-        this.mapJSON = this.readStringUTF32();
-        this.entryTag = this.readString();
-        this.gameNet = this.readString();
-        this.gameNetUserId = this.readString();
-        this.playPlatform = this.readString();
-        this.platformToken = this.readString();
-        this.userToken = this.readString();
-    }
-
-    public write(): void {
-        this.writeString(this.buildVersion);
-        this.writeInt32(this.gameId);
-        this.writeString(encryptGUID(this.guid));
-        this.writeInt32(this.random1);
-        this.writeString(encryptGUID(this.password));
-        this.writeInt32(this.random2);
-        this.writeString(encryptGUID(this.secret));
-        this.writeInt32(this.keyTime);
-        this.writeByteArray(this.key);
-        this.writeStringUTF32(this.mapJSON);
-        this.writeString(this.entryTag);
-        this.writeString(this.gameNet);
-        this.writeString(this.gameNetUserId);
-        this.writeString(this.playPlatform);
-        this.writeString(this.platformToken);
-        this.writeString(this.userToken);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeString(this.buildVersion);
+    buffer.writeInt32(this.gameId);
+    buffer.writeString(RSA.encrypt(this.guid));
+    buffer.writeInt32(Math.floor(Math.random() * 1000000000));
+    buffer.writeString(RSA.encrypt(this.password));
+    buffer.writeInt32(Math.floor(Math.random() * 1000000000));
+    buffer.writeString(RSA.encrypt(this.secret));
+    buffer.writeInt32(this.keyTime);
+    buffer.writeByteArray(this.key);
+    buffer.writeStringUTF32(this.mapJSON);
+    buffer.writeString(this.entryTag);
+    buffer.writeString(this.gameNet);
+    buffer.writeString(this.gameNetUserId);
+    buffer.writeString(this.playPlatform);
+    buffer.writeString(this.platformToken);
+    buffer.writeString(this.userToken);
+  }
 }

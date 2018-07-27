@@ -1,21 +1,30 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class LoadPacket extends Packet {
+/**
+ * Sent in response to a `MapInfoPacket` to load a character into the map.
+ */
+export class LoadPacket implements OutgoingPacket {
 
-    public type = PacketType.LOAD;
+  type = PacketType.LOAD;
 
-    //#region packet-specific members
-    charId: number;
-    isFromArena: boolean;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The id of the character to load.
+   */
+  charId: number;
+  /**
+   * Whether or not the `MapInfoPacket` being responded to is from the arena.
+   */
+  isFromArena: boolean;
+  //#endregion
 
-    public read(): void {
-        this.charId = this.readInt32();
-        this.isFromArena = this.readBoolean();
-    }
-
-    public write(): void {
-        this.writeInt32(this.charId);
-        this.writeBoolean(this.isFromArena);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.charId);
+    buffer.writeBoolean(this.isFromArena);
+  }
 }

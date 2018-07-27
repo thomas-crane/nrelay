@@ -1,6 +1,81 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `7.5.1`
+### Fixes:
+ + Fixed a bug where passing a custom value for `level` to the `FileLogger` would throw an error.
+
+## `7.5.0`
+> Not backwards compatible.
+### Changes:
+ + Removed `stdlib` index file. The index was causing the *all* libs to be loaded when just one was referenced. Libs must now be imported from their specific files.
+
+## `7.4.0`
+> Not backwards compatible.
+### Changes:
+ + Updated the `plugin-components` doc (now `the-standard-library`).
+ + Added the Object Tracker standard library.
+ + `PluginManager` has been renamed to `LibraryManager`.
+ + The `packet` and `packets` exports have been removed from the plugin module.
+ + The plugin module has been renamed to `library-module`.
+ + `trackAllPlayers()` and `trackPlayersFor()` have been removed from the player tracker. Tracking is now always enabled.
+ + The Player Tracker now uses `(player: PlayerData, client: Client)` as the event emitter signature.
+ + The file which the `Library` decorator is exported from has been renamed to `library`.
+
+## `7.3.0`
+> Not backwards compatible.
+### Changes:
+ + The packet's `send` property is now called `propagate`, and is only present on `IncomingPacket`s.
+
+### Fixes:
+ + Fix updater updating local client version before client update process was complete.
+ + Arg parser now treats args like `-abc` as if they were `-a -b -c`.
+
+## `7.2.0`
+> Not backwards compatible.
+### Changes:
+ + Rework networking code.
+ + Packet classes now read/write from a `PacketBuffer` instead of having a buffer as a class member.
+ + Packet ids are now stored in a .json file instead of in the source.
+ + Replaced `guidEncrypt()` with `RSA.encrypt()`
+ + Updater now maintains two versions, one for the client and one for the assets.
+ + Rework logging mechanism. `Log()` has been replaced by `Logger.log()`, custom loggers can now be used.
+ + Interfaces are no longer prefixed with `I`. (e.g. `IPlayerData` has become `PlayerData`).
+ + Indendation of all files has changed from 4 spaces to 2.
+
+## `7.1.0`
+> Not backwards compatible.
+### Changes:
+ + The `NrPlugin` decorator has been renamed to `Library`.
+ + The `HookPacket` decorator has been replaced by `PacketHook` which does not require any parameters.
+ + `PluginManager.getInstanceOf` has been deprecated in favor of dependency injection.
+ + Warning are now raised if a packet hook method has problems (e.g. incorrect signature or too many params).
+
+## `7.0.0`
+> Not backwards compatible.
+>
+> For a guide on how to migrate from v6 to v7, see [the migration guide.](docs/migration/6-to-7.md)
+### Changes:
+ + `client.nextPos` is now a queue instead of a single value.
+ + The signature of `Client.on` has been changed to `(client: Client)`.
+ + Improved `FailurePacket` handler.
+ + Removed `CLI.getClient` and `CLI.removeClient` in favor of `CLI.getAny` and `CLI.removeAny`.
+ + `WorldPosData` now takes `(x?: number, y?: number)` in the constructor.
+ + Renamed `packet.writeUnsigedByte` to `packet.writeUnsignedByte`
+ + The build version no longer needs to be manually updated.
+ + The source will automatically be rebuilt after updates are downloaded.
+ + Added `HttpClient` to replace the `Http` class.
+ + Removed `XMLtoJSON.parseError` method.
+ + The `--no-plugins` flag has been added which can be used to prevent nrelay from loading any plugins.
+ + The `--update-from="C:\path\to\client.swf"` flag has been added. This can be used to update from a custom swf.
+
+### Fixes:
+ + Teleporting no longer instantly disconnects the client.
+ + Fixed radian/degree conversion issue in the shoot method.
+ + Fixed player tracker occasionally not clearing players on map changes.
+ + `XMLtoJSON.parseAccountInfo` now correctly parses a missing `charId`.
+ + Fix pathfinder being destroyed before it was created.
+
 ## `6.20.0`
 ### Changes:
  + Added `tsai` dev dependency and npm task for indexing nrelay.
@@ -453,7 +528,7 @@ Client.on('disconnect', (client: Client) => {
 
 ## `3.3.0`
 ### Changes:
- + Added `Objects.xml` and `GrounTypes.xml` to updater.
+ + Added `Objects.xml` and `GroundTypes.xml` to updater.
  + Added `resources/` to `.gitignore`. Manually change your version to force an update which will download the latest xml resources.
 
 ## `3.2.2`

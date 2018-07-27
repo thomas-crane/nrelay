@@ -1,139 +1,171 @@
-import { Packet } from './../packet';
+/**
+ * @module networking/data
+ */
+import { PacketBuffer } from '../packet-buffer';
+import { DataPacket } from '../packet';
 import { WorldPosData } from './world-pos-data';
 import { StatData } from './stat-data';
-import { IPlayerData, getDefaultPlayerData } from './../../models/playerdata';
+import { StatType } from '../../models/stat-type';
+import { PlayerData } from '../../models';
 import { ObjectData } from './object-data';
-import { Classes } from './../../models/classes';
 
-export class ObjectStatusData {
+export class ObjectStatusData implements DataPacket {
 
-    public static processObject(data: ObjectData): IPlayerData {
-        const playerData = this.processObjectStatus(data.status);
-        playerData.class = data.objectType;
-        return playerData;
+  /**
+   * Processes the `data` and returns the resulting `PlayerData` object.
+   * @param data The data to process.
+   */
+  static processObject(data: ObjectData): PlayerData {
+    const playerData = this.processObjectStatus(data.status);
+    playerData.class = data.objectType;
+    return playerData;
+  }
+
+  /**
+   * Processes the `data` and returns the result. If `currentData` is provided, it will be
+   * used as a starting point for the returned `PlayerData`.
+   * @param data The data to process.
+   * @param currentData The existing `PlayerData`.
+   */
+  static processObjectStatus(data: ObjectStatusData, currentData?: PlayerData): PlayerData {
+    const playerData = this.processStatData(data.stats, currentData);
+    playerData.worldPos = data.pos;
+    playerData.objectId = data.objectId;
+
+    return playerData;
+  }
+
+  /**
+   * Process a list of stats and returns the result. If `currentData` is provided, it will be
+   * used as a starting point for the returned `PlayerData`.
+   * @param stats The stats to process.
+   * @param currentData The existing `PlayerData`.
+   */
+  static processStatData(stats: StatData[], currentData?: PlayerData): PlayerData {
+    const playerData = currentData || {} as PlayerData;
+    if (!playerData.inventory) {
+      playerData.inventory = [];
     }
-
-    public static processObjectStatus(data: ObjectStatusData, currentData?: IPlayerData): IPlayerData {
-        const playerData = this.processStatData(data.stats, currentData);
-        playerData.worldPos = data.pos;
-        playerData.objectId = data.objectId;
-
-        return playerData;
+    for (const stat of stats) {
+      switch (stat.statType) {
+        case StatType.NAME_STAT:
+          playerData.name = stat.stringStatValue;
+          continue;
+        case StatType.LEVEL_STAT:
+          playerData.level = stat.statValue;
+          continue;
+        case StatType.EXP_STAT:
+          playerData.exp = stat.statValue;
+          continue;
+        case StatType.CURR_FAME_STAT:
+          playerData.currentFame = stat.statValue;
+          continue;
+        case StatType.NUM_STARS_STAT:
+          playerData.stars = stat.statValue;
+          continue;
+        case StatType.ACCOUNT_ID_STAT:
+          playerData.accountId = stat.stringStatValue;
+          continue;
+        case StatType.FAME_STAT:
+          playerData.accountFame = stat.statValue;
+          continue;
+        case StatType.CREDITS_STAT:
+          playerData.gold = stat.statValue;
+          continue;
+        case StatType.MAX_HP_STAT:
+          playerData.maxHP = stat.statValue;
+          continue;
+        case StatType.MAX_MP_STAT:
+          playerData.maxMP = stat.statValue;
+          continue;
+        case StatType.HP_STAT:
+          playerData.hp = stat.statValue;
+          continue;
+        case StatType.MP_STAT:
+          playerData.mp = stat.statValue;
+          continue;
+        case StatType.ATTACK_STAT:
+          playerData.atk = stat.statValue;
+          continue;
+        case StatType.DEFENSE_STAT:
+          playerData.def = stat.statValue;
+          continue;
+        case StatType.SPEED_STAT:
+          playerData.spd = stat.statValue;
+          continue;
+        case StatType.DEXTERITY_STAT:
+          playerData.dex = stat.statValue;
+          continue;
+        case StatType.VITALITY_STAT:
+          playerData.vit = stat.statValue;
+          continue;
+        case StatType.CONDITION_STAT:
+          playerData.condition = stat.statValue;
+          continue;
+        case StatType.WISDOM_STAT:
+          playerData.wis = stat.statValue;
+          continue;
+        case StatType.HEALTH_POTION_STACK_STAT:
+          playerData.hpPots = stat.statValue;
+          continue;
+        case StatType.MAGIC_POTION_STACK_STAT:
+          playerData.mpPots = stat.statValue;
+          continue;
+        case StatType.HASBACKPACK_STAT:
+          playerData.hasBackpack = stat.statValue === 1;
+          continue;
+        case StatType.NAME_CHOSEN_STAT:
+          playerData.nameChosen = stat.statValue !== 0;
+          continue;
+        case StatType.GUILD_NAME_STAT:
+          playerData.guildName = stat.stringStatValue;
+          continue;
+        case StatType.GUILD_RANK_STAT:
+          playerData.guildRank = stat.statValue;
+          continue;
+        default:
+          if (stat.statType >= StatType.INVENTORY_0_STAT && stat.statType <= StatType.INVENTORY_11_STAT) {
+            playerData.inventory[stat.statType - 8] = stat.statValue;
+          } else if (stat.statType >= StatType.BACKPACK_0_STAT && stat.statType <= StatType.BACKPACK_7_STAT) {
+            playerData.inventory[stat.statType - 59] = stat.statValue;
+          }
+      }
     }
+    return playerData;
+  }
 
-    public static processStatData(data: StatData[], currentData?: IPlayerData): IPlayerData {
-        const playerData = currentData || getDefaultPlayerData();
-        for (let i = 0; i < data.length; i++) {
-            switch (data[i].statType) {
-                case StatData.NAME_STAT:
-                    playerData.name = data[i].stringStatValue;
-                    continue;
-                case StatData.LEVEL_STAT:
-                    playerData.level = data[i].statValue;
-                    continue;
-                case StatData.EXP_STAT:
-                    playerData.exp = data[i].statValue;
-                    continue;
-                case StatData.CURR_FAME_STAT:
-                    playerData.currentFame = data[i].statValue;
-                    continue;
-                case StatData.NUM_STARS_STAT:
-                    playerData.stars = data[i].statValue;
-                    continue;
-                case StatData.ACCOUNT_ID_STAT:
-                    playerData.accountId = data[i].stringStatValue;
-                    continue;
-                case StatData.FAME_STAT:
-                    playerData.accountFame = data[i].statValue;
-                    continue;
-                case StatData.CREDITS_STAT:
-                    playerData.gold = data[i].statValue;
-                    continue;
-                case StatData.MAX_HP_STAT:
-                    playerData.maxHP = data[i].statValue;
-                    continue;
-                case StatData.MAX_MP_STAT:
-                    playerData.maxMP = data[i].statValue;
-                    continue;
-                case StatData.HP_STAT:
-                    playerData.hp = data[i].statValue;
-                    continue;
-                case StatData.MP_STAT:
-                    playerData.mp = data[i].statValue;
-                    continue;
-                case StatData.ATTACK_STAT:
-                    playerData.atk = data[i].statValue;
-                    continue;
-                case StatData.DEFENSE_STAT:
-                    playerData.def = data[i].statValue;
-                    continue;
-                case StatData.SPEED_STAT:
-                    playerData.spd = data[i].statValue;
-                    continue;
-                case StatData.DEXTERITY_STAT:
-                    playerData.dex = data[i].statValue;
-                    continue;
-                case StatData.VITALITY_STAT:
-                    playerData.vit = data[i].statValue;
-                    continue;
-                case StatData.CONDITION_STAT:
-                    playerData.condition = data[i].statValue;
-                    continue;
-                case StatData.WISDOM_STAT:
-                    playerData.wis = data[i].statValue;
-                    continue;
-                case StatData.HEALTH_POTION_STACK_STAT:
-                    playerData.hpPots = data[i].statValue;
-                    continue;
-                case StatData.MAGIC_POTION_STACK_STAT:
-                    playerData.mpPots = data[i].statValue;
-                    continue;
-                case StatData.HASBACKPACK_STAT:
-                    playerData.hasBackpack = data[i].statValue === 1;
-                    continue;
-                case StatData.NAME_CHOSEN_STAT:
-                    playerData.nameChosen = data[i].statValue !== 0;
-                    continue;
-                case StatData.GUILD_NAME_STAT:
-                    playerData.guildName = data[i].stringStatValue;
-                    continue;
-                case StatData.GUILD_RANK_STAT:
-                    playerData.guildRank = data[i].statValue;
-                    continue;
-                default:
-                    if (data[i].statType >= StatData.INVENTORY_0_STAT && data[i].statType <= StatData.INVENTORY_11_STAT) {
-                        playerData.inventory[data[i].statType - 8] = data[i].statValue;
-                    } else if (data[i].statType >= StatData.BACKPACK_0_STAT && data[i].statType <= StatData.BACKPACK_7_STAT) {
-                        playerData.inventory[data[i].statType - 59] = data[i].statValue;
-                    }
-            }
-        }
-        return playerData;
+  /**
+   * The object id of the object which this status is for.
+   */
+  objectId: number;
+  /**
+   * The position of the object which this status is for.
+   */
+  pos: WorldPosData;
+  /**
+   * A list of stats for the object which this status is for.
+   */
+  stats: StatData[];
+
+  read(packet: PacketBuffer): void {
+    this.objectId = packet.readInt32();
+    this.pos = new WorldPosData();
+    this.pos.read(packet);
+    const statLen = packet.readShort();
+    this.stats = new Array(statLen);
+    for (let i = 0; i < statLen; i++) {
+      const sd = new StatData();
+      sd.read(packet);
+      this.stats[i] = sd;
     }
+  }
 
-    objectId: number;
-    pos: WorldPosData;
-    stats: StatData[];
-
-    public read(packet: Packet): void {
-        this.objectId = packet.readInt32();
-        this.pos = new WorldPosData();
-        this.pos.read(packet);
-        const statLen = packet.readShort();
-        this.stats = new Array(statLen);
-        for (let i = 0; i < statLen; i++) {
-            const sd = new StatData();
-            sd.read(packet);
-            this.stats[i] = sd;
-        }
+  write(packet: PacketBuffer): void {
+    packet.writeInt32(this.objectId);
+    this.pos.write(packet);
+    packet.writeShort(this.stats.length);
+    for (const stat of this.stats) {
+      stat.write(packet);
     }
-
-    public write(packet: Packet): void {
-        packet.writeInt32(this.objectId);
-        this.pos.write(packet);
-        packet.writeShort(this.stats.length);
-        for (let i = 0; i < this.stats.length; i++) {
-            this.stats[i].write(packet);
-        }
-    }
+  }
 }

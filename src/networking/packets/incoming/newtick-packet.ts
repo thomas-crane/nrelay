@@ -1,34 +1,49 @@
-import { Packet, PacketType } from '../../packet';
-import { ObjectStatusData } from './../../data/object-status-data';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
+import { ObjectStatusData } from '../../data/object-status-data';
 
-export class NewTickPacket extends Packet {
+/**
+ * Received to notify the player of a new game tick.
+ */
+export class NewTickPacket implements IncomingPacket {
 
-    public type = PacketType.NEWTICK;
+  type = PacketType.NEWTICK;
+  propagate = true;
 
-    //#region packet-specific members
-    tickId: number;
-    tickTime: number;
-    statuses: ObjectStatusData[];
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The id of the tick.
+   */
+  tickId: number;
+  /**
+   * The time between the last tick and this tick, in milliseconds.
+   *
+   * This is not always accurate, so it is better to calculate it manually
+   * if millisecond-level accuracy is required.
+   */
+  tickTime: number;
+  /**
+   * An array of statuses for objects which are currently visible to the player.
+   *
+   * "visible" objects can include objects which would normally be off screen,
+   * such as players, which are always at least visible on the minimap.
+   */
+  statuses: ObjectStatusData[];
+  //#endregion
 
-    public read(): void {
-        this.tickId = this.readInt32();
-        this.tickTime = this.readInt32();
-        const statusesLen = this.readShort();
-        this.statuses = new Array<ObjectStatusData>(statusesLen);
-        for (let i = 0; i < statusesLen; i++) {
-            const osd = new ObjectStatusData();
-            osd.read(this);
-            this.statuses[i] = osd;
-        }
+  read(buffer: PacketBuffer): void {
+    this.tickId = buffer.readInt32();
+    this.tickTime = buffer.readInt32();
+    const statusesLen = buffer.readShort();
+    this.statuses = new Array<ObjectStatusData>(statusesLen);
+    for (let i = 0; i < statusesLen; i++) {
+      const osd = new ObjectStatusData();
+      osd.read(buffer);
+      this.statuses[i] = osd;
     }
-
-    public write(): void {
-        this.writeInt32(this.tickId);
-        this.writeInt32(this.tickTime);
-        this.writeShort(this.statuses.length);
-        for (let i = 0; i < this.statuses.length; i++) {
-            this.statuses[i].write(this);
-        }
-    }
+  }
 }

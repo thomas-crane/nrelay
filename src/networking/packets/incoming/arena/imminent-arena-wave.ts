@@ -1,18 +1,26 @@
-import { Packet, PacketType } from '../../../packet';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../../packet-buffer';
+import { PacketType } from '../../../packet-type';
+import { IncomingPacket } from '../../../packet';
 
-export class ImminentArenaWavePacket extends Packet {
+/**
+ * Received when a new arena wave is about to begin.
+ */
+export class ImminentArenaWavePacket implements IncomingPacket {
 
-    public type = PacketType.IMMINENTARENA_WAVE;
+  type = PacketType.IMMINENTARENA_WAVE;
+  propagate = true;
 
-    //#region packet-specific members
-    currentRuntime: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The length of time the player has been in the arena for.
+   */
+  currentRuntime: number;
+  //#endregion
 
-    public read(): void {
-        this.currentRuntime = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeInt32(this.currentRuntime);
-    }
+  read(buffer: PacketBuffer): void {
+    this.currentRuntime = buffer.readInt32();
+  }
 }

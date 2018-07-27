@@ -1,21 +1,30 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class ChangeGuildRankPacket extends Packet {
+/**
+ * Sent to change the guild rank of a member in the player's guild.
+ */
+export class ChangeGuildRankPacket implements OutgoingPacket {
 
-    public type = PacketType.CHANGEGUILDRANK;
+  type = PacketType.CHANGEGUILDRANK;
 
-    //#region packet-specific members
-    name: string;
-    guildRank: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The name of the player whose rank will change.
+   */
+  name: string;
+  /**
+   * The new rank of the player.
+   */
+  guildRank: number;
+  //#endregion
 
-    public read(): void {
-        this.name = this.readString();
-        this.guildRank = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeString(this.name);
-        this.writeInt32(this.guildRank);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeString(this.name);
+    buffer.writeInt32(this.guildRank);
+  }
 }

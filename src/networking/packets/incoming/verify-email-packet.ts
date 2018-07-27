@@ -1,18 +1,23 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class VerifyEmailPacket extends Packet {
+/**
+ * Received to prompt the player to verify their email.
+ */
+export class VerifyEmailPacket implements IncomingPacket {
 
-    public type = PacketType.VERIFYEMAIL;
+  type = PacketType.VERIFYEMAIL;
+  propagate = true;
 
-    //#region packet-specific members
+  //#region packet-specific members
 
-    //#endregion
+  //#endregion
 
-    public read(): void {
-
-    }
-
-    public write(): void {
-
-    }
+  read(buffer: PacketBuffer): void {
+    //
+  }
 }

@@ -1,24 +1,36 @@
-import { Packet, PacketType } from '../../../packet';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../../packet-buffer';
+import { PacketType } from '../../../packet-type';
+import { IncomingPacket } from '../../../packet';
 
-export class EvolvedPetMessage extends Packet {
+/**
+ * Received to give the player information about a newly evolved pet.
+ */
+export class EvolvedPetMessage implements IncomingPacket {
 
-    public type = PacketType.EVOLVEPET;
+  type = PacketType.EVOLVEPET;
+  propagate = true;
 
-    //#region packet-specific members
-    petId: number;
-    initialSkin: number;
-    finalSkin: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The id of the pet which has evolved.
+   */
+  petId: number;
+  /**
+   * The current skin id of the pet.
+   */
+  initialSkin: number;
+  /**
+   * The skin id of the pet after its evolution.
+   */
+  finalSkin: number;
+  //#endregion
 
-    public read(): void {
-        this.petId = this.readInt32();
-        this.initialSkin = this.readInt32();
-        this.finalSkin = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeInt32(this.petId);
-        this.writeInt32(this.initialSkin);
-        this.writeInt32(this.finalSkin);
-    }
+  read(buffer: PacketBuffer): void {
+    this.petId = buffer.readInt32();
+    this.initialSkin = buffer.readInt32();
+    this.finalSkin = buffer.readInt32();
+  }
 }

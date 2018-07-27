@@ -1,18 +1,26 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class QuestObjectIdPacket extends Packet {
+/**
+ * Received to tell the player the object id of their current quest.
+ */
+export class QuestObjectIdPacket implements IncomingPacket {
 
-    public type = PacketType.QUESTOBJID;
+  type = PacketType.QUESTOBJID;
+  propagate = true;
 
-    //#region packet-specific members
-    objectId: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The object id of the current quest.
+   */
+  objectId: number;
+  //#endregion
 
-    public read(): void {
-        this.objectId = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeInt32(this.objectId);
-    }
+  read(buffer: PacketBuffer): void {
+    this.objectId = buffer.readInt32();
+  }
 }

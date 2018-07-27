@@ -1,18 +1,26 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class PasswordPromptPacket extends Packet {
+/**
+ * Received to prompt the player to enter their password.
+ */
+export class PasswordPromptPacket implements IncomingPacket {
 
-    public type = PacketType.PASSWORDPROMPT;
+  type = PacketType.PASSWORDPROMPT;
+  propagate = true;
 
-    //#region packet-specific members
-    cleanPasswordStatus: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * > Unknown.
+   */
+  cleanPasswordStatus: number;
+  //#endregion
 
-    public read(): void {
-        this.cleanPasswordStatus = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeInt32(this.cleanPasswordStatus);
-    }
+  read(buffer: PacketBuffer): void {
+    this.cleanPasswordStatus = buffer.readInt32();
+  }
 }

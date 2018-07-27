@@ -1,31 +1,42 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 import { SlotObjectData } from '../../data/slot-object-data';
 import { WorldPosData } from '../../data/world-pos-data';
 
-export class UseItemPacket extends Packet {
+/**
+ * Sent to use an item, such as an ability or consumable.
+ */
+export class UseItemPacket implements OutgoingPacket {
 
-    public type = PacketType.USEITEM;
+  type = PacketType.USEITEM;
 
-    //#region packet-specific members
-    time: number;
-    slotObject: SlotObjectData;
-    itemUsePos: WorldPosData;
-    useType: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The current client time.
+   */
+  time: number;
+  /**
+   * The slot of the item being used.
+   */
+  slotObject: SlotObjectData;
+  /**
+   * The position at which the item was used.
+   */
+  itemUsePos: WorldPosData;
+  /**
+   * The type of item usage.
+   */
+  useType: number;
+  //#endregion
 
-    public read(): void {
-        this.time = this.readInt32();
-        this.slotObject = new SlotObjectData();
-        this.slotObject.read(this);
-        this.itemUsePos = new WorldPosData();
-        this.itemUsePos.read(this);
-        this.useType = this.readByte();
-    }
-
-    public write(): void {
-        this.writeInt32(this.time);
-        this.slotObject.write(this);
-        this.itemUsePos.write(this);
-        this.writeByte(this.useType);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.time);
+    this.slotObject.write(buffer);
+    this.itemUsePos.write(buffer);
+    buffer.writeByte(this.useType);
+  }
 }

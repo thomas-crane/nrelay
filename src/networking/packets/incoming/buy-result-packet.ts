@@ -1,21 +1,31 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class BuyResultPacket extends Packet {
+/**
+ * Received in response to a `BuyPacket`.
+ */
+export class BuyResultPacket implements IncomingPacket {
 
-    public type = PacketType.BUYRESULT;
+  type = PacketType.BUYRESULT;
+  propagate = true;
 
-    //#region packet-specific members
-    result: number;
-    resultString: string;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The result code.
+   */
+  result: number;
+  /**
+   * > Unknown.
+   */
+  resultString: string;
+  //#endregion
 
-    public read(): void {
-        this.result = this.readInt32();
-        this.resultString = this.readString();
-    }
-
-    public write(): void {
-        this.writeInt32(this.result);
-        this.writeString(this.resultString);
-    }
+  read(buffer: PacketBuffer): void {
+    this.result = buffer.readInt32();
+    this.resultString = buffer.readString();
+  }
 }

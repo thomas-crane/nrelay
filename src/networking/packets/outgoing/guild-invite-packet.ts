@@ -1,18 +1,25 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class GuildInvitePacket extends Packet {
+/**
+ * Sent to invite a player to the client's current guild.
+ */
+export class GuildInvitePacket implements OutgoingPacket {
 
-    public type = PacketType.GUILDINVITE;
+  type = PacketType.GUILDINVITE;
 
-    //#region packet-specific members
-    name: string;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The name of the player to invite.
+   */
+  name: string;
+  //#endregion
 
-    public read(): void {
-        this.name = this.readString();
-    }
-
-    public write(): void {
-        this.writeString(this.name);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeString(this.name);
+  }
 }

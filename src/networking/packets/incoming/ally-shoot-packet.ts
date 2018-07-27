@@ -1,27 +1,41 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class AllyShootPacket extends Packet {
+/**
+ * Received when another player shoots a projectile.
+ */
+export class AllyShootPacket implements IncomingPacket {
 
-    public type = PacketType.ALLYSHOOT;
+  type = PacketType.ALLYSHOOT;
+  propagate = true;
 
-    //#region packet-specific members
-    bulletId: number;
-    ownerId: number;
-    containerType: number;
-    angle: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The bullet id of the projectile which was produced.
+   */
+  bulletId: number;
+  /**
+   * The object id of the player who fired the projectile.
+   */
+  ownerId: number;
+  /**
+   * The item id of the weapon used to fire the projectile.
+   */
+  containerType: number;
+  /**
+   * The angle at which the projectile was fired.
+   */
+  angle: number;
+  //#endregion
 
-    public read(): void {
-        this.bulletId = this.readUnsignedByte();
-        this.ownerId = this.readInt32();
-        this.containerType = this.readShort();
-        this.angle = this.readFloat();
-    }
-
-    public write(): void {
-        this.writeUnsigedByte(this.bulletId);
-        this.writeInt32(this.ownerId);
-        this.writeShort(this.containerType);
-        this.writeFloat(this.angle);
-    }
+  read(buffer: PacketBuffer): void {
+    this.bulletId = buffer.readUnsignedByte();
+    this.ownerId = buffer.readInt32();
+    this.containerType = buffer.readShort();
+    this.angle = buffer.readFloat();
+  }
 }

@@ -1,18 +1,26 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class RequestTradePacket extends Packet {
+/**
+ * Sent to request a trade with a player, as well as
+ * to accept a pending trade with a player.
+ */
+export class RequestTradePacket implements OutgoingPacket {
 
-    public type = PacketType.REQUESTTRADE;
+  type = PacketType.REQUESTTRADE;
 
-    //#region packet-specific members
-    name: string;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The name of the player to request the trade with.
+   */
+  name: string;
+  //#endregion
 
-    public read(): void {
-        this.name = this.readString();
-    }
-
-    public write(): void {
-        this.writeString(this.name);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeString(this.name);
+  }
 }

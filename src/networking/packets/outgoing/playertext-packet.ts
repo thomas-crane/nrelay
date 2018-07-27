@@ -1,18 +1,25 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class PlayerTextPacket extends Packet {
+/**
+ * Sent when the client sends a chat message.
+ */
+export class PlayerTextPacket implements OutgoingPacket {
 
-    public type = PacketType.PLAYERTEXT;
+  type = PacketType.PLAYERTEXT;
 
-    //#region packet-specific members
-    text: string;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The message to send.
+   */
+  text: string;
+  //#endregion
 
-    public read(): void {
-        this.text = this.readString();
-    }
-
-    public write(): void {
-        this.writeString(this.text);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeString(this.text);
+  }
 }

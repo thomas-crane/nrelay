@@ -1,21 +1,31 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class ClientStatPacket extends Packet {
+/**
+ * Received to give the player information about their stats.
+ */
+export class ClientStatPacket implements IncomingPacket {
 
-    public type = PacketType.CLIENTSTAT;
+  type = PacketType.CLIENTSTAT;
+  propagate = true;
 
-    //#region packet-specific members
-    name: string;
-    value: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The name of the stat.
+   */
+  name: string;
+  /**
+   * The value of the stat.
+   */
+  value: number;
+  //#endregion
 
-    public read(): void {
-        this.name = this.readString();
-        this.value = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeString(this.name);
-        this.writeInt32(this.value);
-    }
+  read(buffer: PacketBuffer): void {
+    this.name = buffer.readString();
+    this.value = buffer.readInt32();
+  }
 }

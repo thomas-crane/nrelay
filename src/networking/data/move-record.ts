@@ -1,28 +1,41 @@
-import { Packet } from './../packet';
+/**
+ * @module networking/data
+ */
+import { PacketBuffer } from '../packet-buffer';
+import { DataPacket } from '../packet';
 
-export class MoveRecord {
+export class MoveRecord implements DataPacket {
 
-    time: number;
-    x: number;
-    y: number;
+  /**
+   * The client time of this move record.
+   */
+  time: number;
+  /**
+   * The X coordinate of this move record.
+   */
+  x: number;
+  /**
+   * The Y coordinate of this move record.
+   */
+  y: number;
 
-    public read(packet: Packet): void {
-        this.time = packet.readInt32();
-        this.x = packet.readFloat();
-        this.y = packet.readFloat();
-    }
+  read(packet: PacketBuffer): void {
+    this.time = packet.readInt32();
+    this.x = packet.readFloat();
+    this.y = packet.readFloat();
+  }
 
-    public write(packet: Packet): void {
-        packet.writeInt32(this.time);
-        packet.writeFloat(this.x);
-        packet.writeFloat(this.y);
-    }
+  write(packet: PacketBuffer): void {
+    packet.writeInt32(this.time);
+    packet.writeFloat(this.x);
+    packet.writeFloat(this.y);
+  }
 
-    public clone(): MoveRecord {
-        const clone = new MoveRecord();
-        clone.time = this.time;
-        clone.x = this.x;
-        clone.y = this.y;
-        return clone;
-    }
+  clone(): MoveRecord {
+    const clone = new MoveRecord();
+    clone.time = this.time;
+    clone.x = this.x;
+    clone.y = this.y;
+    return clone;
+  }
 }

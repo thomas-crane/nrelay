@@ -1,21 +1,30 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class PongPacket extends Packet {
+/**
+ * Sent to acknowledge the `PingPacket.`
+ */
+export class PongPacket implements OutgoingPacket {
 
-    public type = PacketType.PONG;
+  type = PacketType.PONG;
 
-    //#region packet-specific members
-    serial: number;
-    time: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The serial value received in the `PingPacket` which this acknowledges.
+   */
+  serial: number;
+  /**
+   * The current client time.
+   */
+  time: number;
+  //#endregion
 
-    public read(): void {
-        this.serial = this.readInt32();
-        this.time = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeInt32(this.serial);
-        this.writeInt32(this.time);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.serial);
+    buffer.writeInt32(this.time);
+  }
 }

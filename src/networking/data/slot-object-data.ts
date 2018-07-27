@@ -1,20 +1,33 @@
-import { Packet } from './../packet';
+/**
+ * @module networking/data
+ */
+import { PacketBuffer } from '../packet-buffer';
+import { DataPacket } from '../packet';
 
-export class SlotObjectData {
+export class SlotObjectData implements DataPacket {
 
-    objectId: number;
-    slotId: number;
-    objectType: number;
+  /**
+   * The object id of the entity which owns the slot.
+   */
+  objectId: number;
+  /**
+   * The index of the slot. E.g. The 4th inventory slot has the slot id `3`.
+   */
+  slotId: number;
+  /**
+   * The item id of the item in the slot, or `-1` if it is empty.
+   */
+  objectType: number;
 
-    public read(packet: Packet): void {
-        this.objectId = packet.readInt32();
-        this.slotId = packet.readUnsignedByte();
-        this.objectType = packet.readUInt32();
-    }
+  read(packet: PacketBuffer): void {
+    this.objectId = packet.readInt32();
+    this.slotId = packet.readUnsignedByte();
+    this.objectType = packet.readUInt32();
+  }
 
-    public write(packet: Packet): void {
-        packet.writeInt32(this.objectId);
-        packet.writeUnsigedByte(this.slotId);
-        packet.writeInt32(this.objectType);
-    }
+  write(packet: PacketBuffer): void {
+    packet.writeInt32(this.objectId);
+    packet.writeUnsignedByte(this.slotId);
+    packet.writeInt32(this.objectType);
+  }
 }

@@ -1,24 +1,35 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class SquareHitPacket extends Packet {
+/**
+ * > Unknown.
+ */
+export class SquareHitPacket implements OutgoingPacket {
 
-    public type = PacketType.SQUAREHIT;
+  type = PacketType.SQUAREHIT;
 
-    //#region packet-specific members
-    time: number;
-    bulletId: number;
-    objectId: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The current client time.
+   */
+  time: number;
+  /**
+   * > Unknown.
+   */
+  bulletId: number;
+  /**
+   * > Unknown.
+   */
+  objectId: number;
+  //#endregion
 
-    public read(): void {
-        this.time = this.readInt32();
-        this.bulletId = this.readByte();
-        this.objectId = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeInt32(this.time);
-        this.writeByte(this.bulletId);
-        this.writeInt32(this.objectId);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.time);
+    buffer.writeByte(this.bulletId);
+    buffer.writeInt32(this.objectId);
+  }
 }

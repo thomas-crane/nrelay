@@ -1,0 +1,11 @@
+{
+  "name": "nrelay",
+  "readme": "./api-docs/readme.md",
+  "mode": "modules",
+  "exclude": [
+    "**/*+(index).ts",
+    "**/plugins/*.ts"
+  ],
+  "excludeExternals": true,
+  "out": "./api-docs/public"
+}

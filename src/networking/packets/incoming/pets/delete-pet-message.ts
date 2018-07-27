@@ -1,18 +1,26 @@
-import { Packet, PacketType } from '../../../packet';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../../packet-buffer';
+import { PacketType } from '../../../packet-type';
+import { IncomingPacket } from '../../../packet';
 
-export class DeletePetMessage extends Packet {
+/**
+ * Received to notify the player that a pet has been deleted.
+ */
+export class DeletePetMessage implements IncomingPacket {
 
-    public type = PacketType.DELETEPET;
+  type = PacketType.DELETEPET;
+  propagate = true;
 
-    //#region packet-specific members
-    petId: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The id of the pet which has been deleted.
+   */
+  petId: number;
+  //#endregion
 
-    public read(): void {
-        this.petId = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeInt32(this.petId);
-    }
+  read(buffer: PacketBuffer): void {
+    this.petId = buffer.readInt32();
+  }
 }

@@ -1,45 +1,51 @@
-import { Packet, PacketType } from '../../packet';
-import { TradeItem } from './../../data/trade-item';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
+import { TradeItem } from '../../data/trade-item';
 
-export class TradeStartPacket extends Packet {
+/**
+ * Received when a new active trade has been initiated.
+ */
+export class TradeStartPacket implements IncomingPacket {
 
-    public type = PacketType.TRADESTART;
+  type = PacketType.TRADESTART;
+  propagate = true;
 
-    //#region packet-specific members
-    clientItems: TradeItem[];
-    partnerName: string;
-    partnerItems: TradeItem[];
-    //#endregion
+  //#region packet-specific members
+  /**
+   * A description of the player's inventory. Items 0-3 are the hotbar items,
+   * and 4-12 are the 8 inventory slots.
+   */
+  clientItems: TradeItem[];
+  /**
+   * The trade partner's name.
+   */
+  partnerName: string;
+  /**
+   * A description of the trade partner's inventory. Items 0-3 are the
+   * hotbar items, and 4-12 are the 8 inventory slots.
+   */
+  partnerItems: TradeItem[];
+  //#endregion
 
-    public read(): void {
-        const clientItemsLen = this.readShort();
-        this.clientItems = new Array(clientItemsLen);
-        for (let i = 0; i < clientItemsLen; i++) {
-            const item = new TradeItem();
-            item.read(this);
-            this.clientItems[i] = item;
-        }
-        this.partnerName = this.readString();
-        const partnerItemsLen = this.readShort();
-        this.partnerItems = new Array(partnerItemsLen);
-        for (let i = 0; i < partnerItemsLen; i++) {
-            const item = new TradeItem();
-            item.read(this);
-            this.partnerItems[i] = item;
-        }
+  read(buffer: PacketBuffer): void {
+    const clientItemsLen = buffer.readShort();
+    this.clientItems = new Array(clientItemsLen);
+    for (let i = 0; i < clientItemsLen; i++) {
+      const item = new TradeItem();
+      item.read(buffer);
+      this.clientItems[i] = item;
     }
-
-    public write(): void {
-        this.writeShort(this.clientItems.length);
-        for (let i = 0; i < this.clientItems.length; i++) {
-            const item = new TradeItem();
-            item.write(this);
-        }
-        this.writeString(this.partnerName);
-        this.writeShort(this.partnerItems.length);
-        for (let i = 0; i < this.partnerItems.length; i++) {
-            const item = new TradeItem();
-            item.write(this);
-        }
+    this.partnerName = buffer.readString();
+    const partnerItemsLen = buffer.readShort();
+    this.partnerItems = new Array(partnerItemsLen);
+    for (let i = 0; i < partnerItemsLen; i++) {
+      const item = new TradeItem();
+      item.read(buffer);
+      this.partnerItems[i] = item;
     }
+  }
 }

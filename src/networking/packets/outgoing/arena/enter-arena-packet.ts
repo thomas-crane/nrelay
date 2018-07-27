@@ -1,18 +1,25 @@
-import { Packet, PacketType } from '../../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../../packet-buffer';
+import { PacketType } from '../../../packet-type';
+import { OutgoingPacket } from '../../../packet';
 
-export class EnterArenaPacket extends Packet {
+/**
+ * Sent to enter the arena.
+ */
+export class EnterArenaPacket implements OutgoingPacket {
 
-    public type = PacketType.ENTERARENA;
+  type = PacketType.ENTERARENA;
 
-    //#region packet-specific members
-    currency: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * > Unknown.
+   */
+  currency: number;
+  //#endregion
 
-    public read(): void {
-        this.currency = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeInt32(this.currency);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.currency);
+  }
 }
