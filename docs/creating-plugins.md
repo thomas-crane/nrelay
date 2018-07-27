@@ -338,7 +338,7 @@ Now, if you send the bot `/tell <yourname> set New reposnse text` it should repl
 If you try the `hello` command again, it should now say `<yourname> New response text`
 
 ## The Logger class
-If you need to print out some information for debugging or logging purposes, you should use the `Log` method.
+If you need to print out some information for debugging or logging purposes, you should use the `Logger` class.
 Normally, you could use something like
 ```typescript
 console.log('Player name: ' + client.playerData.name);
@@ -348,48 +348,36 @@ console.log('Player name: ' + client.playerData.name);
 // Player name: Eendi
 //
 ```
-The `Logger` class allows you to log messages with senders and log levels.
+Using the logger class instead of `console.log` allows you to take advantage of nrelay's logging mechanism.
 Firstly, you need to import the `Logger` class exports
 ```typescript
-import { Library, PacketHook, Client, Log, LogLevel } from './../core';
-//                                    ^^^^^^^^^^^^^
+import { Logger, LogLevel } from './../core';
 ```
 `LogLevel` is an enum which describes the type of message you are trying to log. It consists of
 ```typescript
 enum LogLevel {
-    Info,
-    Message,
-    Warning,
-    Error,
-    Success,
+  Debug,
+  Info,
+  Message,
+  Warning,
+  Error,
+  Success,
 }
 ```
-The default value is `Message`, so to log a message you can use
+The logger class has a `log` method which takes a sender, a message and a level parameter. The level parameter has a default value of `LogLevel.Message` so it can be excluded if you are using this level.
 ```typescript
-Log('MyPlugin', 'Player name: ' + client.playerData.name);
+Logger.log('MyPlugin', `Player name: ${client.playerData.name}`);
 
 // prints
 //
 // [MyPlugin] Player name: Eendi
 //
 ```
-The log level can be provided as a third argument to change the color of the message.
-```
-   Info = Dark gray
-Message = White
-Warning = Yellow
-  Error = Red
-Success = Green
-```
-For example:
-```typescript
-try {
-    this.methodThatThrowsError();
-} catch (error) {
-   Log('MyPlugin', 'Error: ' + error.Message, LogLevel.Error); 
-}
-```
-Will print the error message in red.
+The log level can be used to describe the nature of your message. Loggers can use this additional information to change the way that the message is logged.
+
+For example, the `DefaultLogger` will print any log message with a level of `LogLevel.Error` in red, and any message with a level of `Success` in green.
+
+The [logging guide](logging-guide.md) provides more information about the logging mechanism, and includes a guide on how to create your own custom loggers, including a Discord logger.
 
 ## Plugin Interop
 nrelay supports plugin interoperability through dependency injection. For larger or more complex plugins, it may be desirable to split the plugin up into multiple different 'modules' which have only a single responsibility. The plugin interop can be used to achieve such a design pattern.
