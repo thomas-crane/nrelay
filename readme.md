@@ -1,26 +1,7 @@
 # nrelay
 A console based modular client for Realm of the Mad God built with Node.js and TypeScript.
 
-## Important notes.
-### Version `7.2.0`
-Version `7.2.0` has seen most of the codebase receive massive changes or reworks. Because of this, the documentation has now become outdated to the point where it is no longer useful.
-
-The decision was made to release the code changes *before* the documentation has been fully updated, as the task of updating the documentation is a large one and will take some time.
-Don't let the lack of updated documentation discourage you from trying out version `7.2.0`, as it will help you become familiar with the changes, and will help uncover any bugs.
-
-All `7.x.x` versions will remain on the `7.0.0-preview` branch until the documentation is updated to a satisfactory standard. 
-
----
-
-This is a preview of version `7.0.0`. 
-Because of this, breaking changes may be commited to this branch **without a major version increment.**
-This includes changes that may break existing features, or features introduced in `7.0.0`.
-
-If you need a stable version of nrelay, please use the `master` or the `dev` branch for now.
-
-Upgrading to `7.0.0`? [Check out the migration guide.](docs/migration/6-to-7.md)
-
----
+Upgrading to v7? [Check out the migration guide.](docs/migration/6-to-7.md)
 
 ## Contents
  + [Docs](#docs)
@@ -140,48 +121,8 @@ If a proxy is specified, nrelay will route all traffic including the initial web
 The proxy a client is using can also be changed during runtime by using the `Client.setProxy(proxy: IProxy): void` method.
 
 ### Using the Local Server
-nrelay provides the option to enable a local web server which supports TCP connections. The server can be used to both send to and receive data from nrelay. The server is disabled by default, but can be enabled by adding a property to the account config.
-```json
-{
-    "buildVersion": "X25.1.1",
-    "localServer": {
-        "enabled": true
-    },
-    "accounts": [
+nrelay has a built in Local Server which can be used to transfer data between nrelay and another process, such as KRelay. If you are interested in using the local server, take a look at the [local server guide.](/docs/the-local-server.md)
 
-    ]
-}
-```
-By default, the server will use the port `5680`, but this can be changed by adding a `port` property to the account config.
-```json
-"localServer": {
-    "enabled": true,
-    "port": 9000
-}
-```
-#### Sending data to the Local Server
-After you have connected to the local server, you can send data to it by simply writing data to the socket. nrelay will convert any received data to a `UTF8` encoded string. Message paging is not supported, so the entire message should be written at once.
-
-__Nodejs example:__
-```javascript
-const net = require('net');
-
-var socket = net.createConnection(5680, 'localhost', () => {
-    console.log('Connected to nrelay server!');
-    socket.write('Hello, nrelay!');
-});
-```
-
-#### Receiving data from the Local Server
-Data is sent from nrelay in the form of a `UTF8` encoded string. All outgoing messages from nrelay include a 4-byte header which indicates the length of the message as an Int32 (excluding the 4 byte header).
-The header is written to the socket in Little-Endian format, so a message length of `4` would produce the header `04 00 00 00` instead of `00 00 00 04`.
-
-For example, the outgoing message `'test'` would be received as follows: (this example shows hex encoded bits. The actual data is not hex encoded.)
-```
-|  Header   |   Data    |
- 04 00 00 00 74 65 73 74
-|          4| t  e  s  t|
-```
 
 ## Run
 After setting up the `acc-config.json` file, nrelay is ready to go. To run nrelay, simply use the command `nrelay` in the console. If you have setup your `acc-config` properly (and used the correct credentials) you should see an output similar to this

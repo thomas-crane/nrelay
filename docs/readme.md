@@ -21,5 +21,11 @@ This document includes documentation for all packets which are currently impleme
 
 Use this document to learn about what members are available for packets of interest.
 
+### [`running-on-android.md`](running-on-android.md)
+This document, written by [Gravitir314](https://github.com/Gravitir314) describes how nrelay can be installed and run on an Android phone.
+
+### [`the-local-server.md`](the-local-server.md)
+This document provides an overview of the Local Server provided by nrelay, and describes how the local server can be used to send data between nrelay and another process.
+
 ### [`the-standard-library.md`](the-standard-library.md)
 This document provides an overview of the nrelay standard library, and includes example usages of each library that is available to use.
