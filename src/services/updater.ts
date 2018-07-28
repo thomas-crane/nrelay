@@ -196,14 +196,18 @@ export class Updater {
    * Gets the remote client version.
    */
   static getRemoteClientVersion(): Promise<string> {
-    return HttpClient.get(CLIENT_VERSION_ENDPOINT);
+    return HttpClient.get(CLIENT_VERSION_ENDPOINT).then((result) => {
+      return result.replace(/[^0-9]/g, '');
+    });
   }
 
   /**
    * Gets the remote asset version.
    */
   static getRemoteAssetVersion(): Promise<string> {
-    return HttpClient.get(ASSET_ENDPOINT + '/current/version.txt');
+    return HttpClient.get(ASSET_ENDPOINT + '/current/version.txt').then((result) => {
+      return result.replace(/[^0-9]/g, '');
+    });
   }
 
   /**

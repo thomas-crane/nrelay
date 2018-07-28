@@ -162,7 +162,7 @@ export class CLI {
         case 'ACCOUNT_IN_USE':
           const timeout: number = (error as any).timeout__;
           Logger.log(acc.alias, `Account in use. (${timeout} second${timeout !== 1 ? 's' : ''})`, LogLevel.Warning);
-          const shortTimeout = Math.floor(timeout / 4) + 1;
+          const shortTimeout = Math.max(Math.floor(timeout / 4), 10);
           Logger.log(acc.alias, `Reconnecting in ${shortTimeout} second${shortTimeout !== 1 ? 's' : ''}`);
           setTimeout(() => {
             this.addClient(acc).catch((err) => this.handleAddAccountError(acc, err));

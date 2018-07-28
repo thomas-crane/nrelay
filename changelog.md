@@ -1,6 +1,11 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `7.5.2`
+### Fixes:
+ + Remote client and asset versions are now cleaned before use.
+ + A minimum value has been added to the account in use reconnect timer.
+
 ## `7.5.1`
 ### Fixes:
  + Fixed a bug where passing a custom value for `level` to the `FileLogger` would throw an error.
