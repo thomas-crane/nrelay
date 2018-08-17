@@ -177,6 +177,12 @@ export class CLI {
 
   constructor() {
     const args = argParser.parse(process.argv.slice(2));
+    if (args.version || args.v) {
+      // tslint:disable-next-line:no-var-requires
+      const nrelayVersion = require('../package.json').version;
+      console.log(`v${nrelayVersion}`);
+      return;
+    }
     this.updateEnvironment(args);
 
     // logger
@@ -235,8 +241,9 @@ export class CLI {
         }
       }).then(() => {
         CLI.proceed();
-      }).catch(() => {
-        Logger.log('NRelay', 'Error while checking for update, starting anyway.', LogLevel.Info);
+      }).catch((err) => {
+        Logger.log('NRelay', 'Error while checking for update, starting anyway.', LogLevel.Warning);
+        Logger.log('NRelay', err.message, LogLevel.Warning);
         CLI.proceed();
       });
     }

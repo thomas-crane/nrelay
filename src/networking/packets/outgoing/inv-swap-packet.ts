@@ -35,6 +35,7 @@ export class InvSwapPacket implements OutgoingPacket {
 
   write(buffer: PacketBuffer): void {
     buffer.writeInt32(this.time);
+    this.position.write(buffer);
     this.slotObject1.write(buffer);
     this.slotObject2.write(buffer);
   }

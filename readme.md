@@ -154,6 +154,9 @@ You will only be able to use the command `nrelay` if you performed step 6 and 7 
 ## Command line arguments
 There are several command line arguments which can be provided when starting nrelay to change the behaviour.
 
+#### `--version` or `-v`
+This will print the nrelay version number to the console and exit.
+
 #### `--debug`
 This will start nrelay in debug mode. Debug mode provides a higher detail of logging. It is not recommended to use debug mode unless you are experiencing errors and need more info.
 

@@ -18,5 +18,6 @@ export enum Classes {
   Mystic = 803,
   Trickster = 804,
   Sorcerer = 805,
-  Ninja = 806
+  Ninja = 806,
+  Samurai = 785
 }

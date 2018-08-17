@@ -1,6 +1,17 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `7.6.0`
+### Changes:
+ + Several improvements to the `HttpClient` including proper request headers.
+ + Added the Samurai class to the `Classes` enum.
+ + Added the `--version` command line arg.
+
+### Fixes:
+ + The `HttpClient` now unzips gzipped responses.
+ + Added missing property to the write method of the `InvSwapPacket`.
+ + The `PacketIO` no longer tries to log `null` packets.
+
 ## `7.5.2`
 ### Fixes:
  + Remote client and asset versions are now cleaned before use.
@@ -13,7 +24,7 @@ This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 ## `7.5.0`
 > Not backwards compatible.
 ### Changes:
- + Removed `stdlib` index file. The index was causing the *all* libs to be loaded when just one was referenced. Libs must now be imported from their specific files.
+ + Removed `stdlib` index file. The index was causing *all* libs to be loaded when just one was referenced. Libs must now be imported from their specific files.
 
 ## `7.4.0`
 > Not backwards compatible.

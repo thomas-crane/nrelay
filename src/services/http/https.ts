@@ -4,6 +4,7 @@
 import * as https from 'https';
 import * as url from 'url';
 import * as qs from 'querystring';
+import { REQUEST_HEADERS, HttpClient } from './http-client';
 
 /**
  * A class used internally by the `HttpClient` to work with https urls.
@@ -17,24 +18,35 @@ export class Https {
    * **It is not recommended to use this method directly. Use `HttpClient.get` instead.**
    */
   static get(path: string, query: string): Promise<string> {
+    const opts: https.RequestOptions = {
+      hostname: path,
+      path: query,
+      method: 'GET',
+      headers: REQUEST_HEADERS
+    };
     return new Promise((resolve, reject) => {
-      https.get(path + query, (response) => {
-        response.setEncoding('utf8');
-        let data = '';
-        response.on('data', (chunk) => {
-          data += chunk;
-        });
-        response.once('end', () => {
-          response.removeAllListeners('data');
-          response.removeAllListeners('error');
-          resolve(data);
-        });
-        response.once('error', (error) => {
-          response.removeAllListeners('data');
-          response.removeAllListeners('end');
-          reject(error);
-        });
+      const req = https.get(opts, (response) => {
+        if (response.headers['content-encoding'] === 'gzip') {
+          HttpClient.unzip(response).then(resolve, reject);
+        } else {
+          const data: Buffer[] = [];
+          response.on('data', (chunk) => {
+            data.push(chunk as Buffer);
+          });
+          response.once('end', () => {
+            response.removeAllListeners('data');
+            response.removeAllListeners('error');
+            const str = Buffer.concat(data).toString();
+            resolve(str);
+          });
+          response.once('error', (error) => {
+            response.removeAllListeners('data');
+            response.removeAllListeners('end');
+            reject(error);
+          });
+        }
       });
+      req.end();
     });
   }
 

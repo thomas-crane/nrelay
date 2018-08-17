@@ -3,11 +3,24 @@
  */
 import * as url from 'url';
 import * as qs from 'querystring';
+import * as zlib from 'zlib';
 import { Proxy } from '../../models';
 import { Http } from './http';
 import { Https } from './https';
 import { SocksClient } from 'socks';
 import { Logger, LogLevel } from '../logger';
+import { IncomingMessage } from 'http';
+
+/**
+ * The HTTP headers to include in each request.
+ */
+export const REQUEST_HEADERS = {
+  'Cache-Control': 'max-age=0',
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
+  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+  'Accept-Encoding': 'gzip, deflate',
+  'Connection': 'keep-alive'
+};
 
 /**
  * A static helper class used to provide an interface for Promise based web requests.
@@ -31,11 +44,37 @@ export class HttpClient {
       return this.getWithProxy(endpoint, options.proxy, queryString);
     } else {
       if (endpoint.protocol === 'http:') {
-        return Http.get(path, queryString);
+        return Http.get(endpoint.hostname, endpoint.path + queryString);
       } else {
-        return Https.get(path, queryString);
+        return Https.get(endpoint.hostname, endpoint.path + queryString);
       }
     }
+  }
+
+  /**
+   * Unzips a gzipped HTTP response.
+   * @param zipped The gzipped response to unzip.
+   */
+  static unzip(zipped: IncomingMessage): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const unzip = zlib.createGunzip();
+      zipped.pipe(unzip);
+      const data: Buffer[] = [];
+      unzip.on('data', (chunk) => {
+        data.push(chunk as Buffer);
+      });
+      unzip.once('end', () => {
+        unzip.removeAllListeners('data');
+        unzip.removeAllListeners('error');
+        const str = Buffer.concat(data).toString();
+        resolve(str);
+      });
+      unzip.once('error', (error) => {
+        unzip.removeAllListeners('data');
+        unzip.removeAllListeners('end');
+        reject(error);
+      });
+    });
   }
 
   /**

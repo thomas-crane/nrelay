@@ -188,8 +188,8 @@ export class PacketIO {
         this.resetBuffer();
         return;
       }
+      Logger.log('PacketIO', `READ: ${PacketType[packet.type]}, size: ${this.packetBuffer.data.length}`, LogLevel.Debug);
     }
-    Logger.log('PacketIO', `READ: ${PacketType[packet.type]}, size: ${this.packetBuffer.data.length}`, LogLevel.Debug);
     this.resetBuffer();
     return packet;
   }

@@ -4,6 +4,7 @@
 import * as http from 'http';
 import * as qs from 'querystring';
 import * as url from 'url';
+import { REQUEST_HEADERS, HttpClient } from './http-client';
 
 /**
  * A class used internally by the `HttpClient` to work with http urls.
@@ -17,24 +18,35 @@ export class Http {
    * **It is not recommended to use this method directly. Use `HttpClient.get` instead.**
    */
   static get(path: string, query: string): Promise<string> {
-    return new Promise((resolve: (data: string) => void, reject: (err: Error) => void) => {
-      http.get(path + query, (response) => {
-        response.setEncoding('utf8');
-        let data = '';
-        response.on('data', (chunk) => {
-          data += chunk;
-        });
-        response.once('end', () => {
-          response.removeAllListeners('data');
-          response.removeAllListeners('error');
-          resolve(data);
-        });
-        response.once('error', (error) => {
-          response.removeAllListeners('data');
-          response.removeAllListeners('end');
-          reject(error);
-        });
+    const opts: http.RequestOptions = {
+      hostname: path,
+      path: query,
+      method: 'GET',
+      headers: REQUEST_HEADERS
+    };
+    return new Promise((resolve, reject) => {
+      const req = http.get(opts, (response) => {
+        if (response.headers['content-encoding'] === 'gzip') {
+          HttpClient.unzip(response).then(resolve, reject);
+        } else {
+          const data: Buffer[] = [];
+          response.on('data', (chunk) => {
+            data.push(chunk as Buffer);
+          });
+          response.once('end', () => {
+            response.removeAllListeners('data');
+            response.removeAllListeners('error');
+            const str = Buffer.concat(data).toString();
+            resolve(str);
+          });
+          response.once('error', (error) => {
+            response.removeAllListeners('data');
+            response.removeAllListeners('end');
+            reject(error);
+          });
+        }
       });
+      req.end();
     });
   }
 
