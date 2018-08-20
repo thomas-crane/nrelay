@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `7.6.1`
+### Fixes:
+ + Fixed a bug where disabling a plugin would remove the wrong packet hooks.
+
 ## `7.6.0`
 ### Changes:
  + Several improvements to the `HttpClient` including proper request headers.

@@ -82,7 +82,7 @@ export class LibraryManager {
     if (lib.info.enabled === false) {
       // unload hooks
       for (const store of this.hookStore) {
-        this.hookStore.set(store[0], store[1].filter((info) => info.target === lib.info.name));
+        this.hookStore.set(store[0], store[1].filter((info) => info.target !== lib.target.name));
       }
       return;
     }
