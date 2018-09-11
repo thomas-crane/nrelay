@@ -1,36 +1,54 @@
-import { Packet, PacketType } from '../../packet';
-import { WorldPosData } from './../../data/world-pos-data';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
+import { WorldPosData } from '../../data/world-pos-data';
 
-export class ShowEffectPacket extends Packet {
+/**
+ * Received to tell the player to display an effect such as an AOE grenade.
+ */
+export class ShowEffectPacket implements IncomingPacket {
 
-    public type = PacketType.SHOWEFFECT;
+  type = PacketType.SHOWEFFECT;
+  propagate = true;
 
-    //#region packet-specific members
-    effectType: number;
-    targetObjectId: number;
-    pos1: WorldPosData;
-    pos2: WorldPosData;
-    color: number;
-    duration: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The type of effect to display.
+   */
+  effectType: number;
+  /**
+   * > Unknown. Probably the start position of the effect.
+   */
+  targetObjectId: number;
+  /**
+   * > Unknown. Probably the end position of the effect.
+   */
+  pos1: WorldPosData;
+  /**
+   * > Unknown.
+   */
+  pos2: WorldPosData;
+  /**
+   * The color of the effect.
+   */
+  color: number;
+  /**
+   * The duration of the effect.
+   */
+  duration: number;
+  //#endregion
 
-    public read(): void {
-        this.effectType = this.readUnsignedByte();
-        this.targetObjectId = this.readInt32();
-        this.pos1 = new WorldPosData();
-        this.pos1.read(this);
-        this.pos2 = new WorldPosData();
-        this.pos2.read(this);
-        this.color = this.readInt32();
-        this.duration = this.readFloat();
-    }
-
-    public write(): void {
-        this.writeUnsigedByte(this.effectType);
-        this.writeInt32(this.targetObjectId);
-        this.pos1.write(this);
-        this.pos2.write(this);
-        this.writeInt32(this.color);
-        this.writeFloat(this.duration);
-    }
+  read(buffer: PacketBuffer): void {
+    this.effectType = buffer.readUnsignedByte();
+    this.targetObjectId = buffer.readInt32();
+    this.pos1 = new WorldPosData();
+    this.pos1.read(buffer);
+    this.pos2 = new WorldPosData();
+    this.pos2.read(buffer);
+    this.color = buffer.readInt32();
+    this.duration = buffer.readFloat();
+  }
 }

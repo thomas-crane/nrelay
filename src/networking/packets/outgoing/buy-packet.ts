@@ -1,21 +1,30 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class BuyPacket extends Packet {
+/**
+ * Sent to buy an item.
+ */
+export class BuyPacket implements OutgoingPacket {
 
-    public type = PacketType.BUY;
+  type = PacketType.BUY;
 
-    //#region packet-specific members
-    objectId: number;
-    quantity: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The object id of the item being purchased.
+   */
+  objectId: number;
+  /**
+   * The number of items being purchased.
+   */
+  quantity: number;
+  //#endregion
 
-    public read(): void {
-        this.objectId = this.readInt32();
-        this.quantity = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeInt32(this.objectId);
-        this.writeInt32(this.quantity);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.objectId);
+    buffer.writeInt32(this.quantity);
+  }
 }

@@ -1,27 +1,40 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class OtherHitPacket extends Packet {
+/**
+ * Sent when a non-destructable object, such as a tree, has been hit by a player.
+ */
+export class OtherHitPacket implements OutgoingPacket {
 
-    public type = PacketType.OTHERHIT;
+  type = PacketType.OTHERHIT;
 
-    //#region packet-specific members
-    time: number;
-    bulletId: number;
-    objectId: number;
-    targetId: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The current client time.
+   */
+  time: number;
+  /**
+   * The id of the bullet which hit the object.
+   */
+  bulletId: number;
+  /**
+   * The object id of player who fired the projectile which hit the object.
+   */
+  objectId: number;
+  /**
+   * The object id of the object which was hit.
+   */
+  targetId: number;
+  //#endregion
 
-    public read(): void {
-        this.time = this.readInt32();
-        this.bulletId = this.readByte();
-        this.objectId = this.readInt32();
-        this.targetId = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeInt32(this.time);
-        this.writeByte(this.bulletId);
-        this.writeInt32(this.objectId);
-        this.writeInt32(this.targetId);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.time);
+    buffer.writeByte(this.bulletId);
+    buffer.writeInt32(this.objectId);
+    buffer.writeInt32(this.targetId);
+  }
 }

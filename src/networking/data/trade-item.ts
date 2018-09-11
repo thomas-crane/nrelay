@@ -1,23 +1,39 @@
-import { Packet } from './../packet';
+/**
+ * @module networking/data
+ */
+import { PacketBuffer } from '../packet-buffer';
+import { DataPacket } from '../packet';
 
-export class TradeItem {
+export class TradeItem implements DataPacket {
 
-    item: number;
-    slotType: number;
-    tradeable: boolean;
-    included: boolean;
+  /**
+   * The item id.
+   */
+  item: number;
+  /**
+   * Unknown.
+   */
+  slotType: number;
+  /**
+   * Whether or not the item is tradeable.
+   */
+  tradeable: boolean;
+  /**
+   * Whether or not the item is included in an active trade.
+   */
+  included: boolean;
 
-    public read(packet: Packet): void {
-        this.item = packet.readInt32();
-        this.slotType = packet.readInt32();
-        this.tradeable = packet.readBoolean();
-        this.included = packet.readBoolean();
-    }
+  read(packet: PacketBuffer): void {
+    this.item = packet.readInt32();
+    this.slotType = packet.readInt32();
+    this.tradeable = packet.readBoolean();
+    this.included = packet.readBoolean();
+  }
 
-    public write(packet: Packet): void {
-        packet.writeInt32(this.item);
-        packet.writeInt32(this.slotType);
-        packet.writeBoolean(this.tradeable);
-        packet.writeBoolean(this.included);
-    }
+  write(packet: PacketBuffer): void {
+    packet.writeInt32(this.item);
+    packet.writeInt32(this.slotType);
+    packet.writeBoolean(this.tradeable);
+    packet.writeBoolean(this.included);
+  }
 }

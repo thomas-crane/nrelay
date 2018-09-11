@@ -19,31 +19,31 @@ To demonstrate how to create plugins and interact with packets/player data this 
 
 To get started, first delete the contents of the file `src/plugins/hello-plugin.ts`.
 
-The first step of creating a plugin is to import some types from nrelay in order to declare the plugin. __All plugins need these 5 imports__:
+The first step of creating a plugin is to import some types from nrelay in order to declare the plugin. __All plugins need these imports__:
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core';
+import { Library, PacketHook, Client } from './../core';
 ```
 
 Now that we have the essentials imported, we can declare the plugin class.
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core';
+import { Library, PacketHook, Client } from './../core';
 
 class HelloPlugin {
 
 }
 ```
 
-In order for nrelay to recognize this class as a plugin, it needs to be decorated using the `NrPlugin` decorator. The `NrPlugin` decorator requires an object parameter which is used to describe the plugin.
+In order for nrelay to recognize this class as a plugin, it needs to be decorated using the `Library` decorator. The `Library` decorator requires an object parameter which is used to describe the plugin.
 ```typescript
-@NrPlugin({ name: 'Hello plugin', author: 'tcrane' })
+@Library({ name: 'Hello plugin', author: 'tcrane' })
 class HelloPlugin {
 
 }
 ```
-If the `@NrPlugin` decorator is not present, the plugin will not be loaded. A `description` can optionally be included to describe the plugin, and `enabled` can be used to tell nrelay whether or not to load the plugin
+If the `@Library` decorator is not present, the plugin will not be loaded. A `description` can optionally be included to describe the plugin, and `enabled` can be used to tell nrelay whether or not to load the plugin
 ```typescript
 // this plugin will be loaded
-@NrPlugin({
+@Library({
     name: 'CoolPlugin',
     author: 'tcrane',
     description: 'A cool plugin'
@@ -54,7 +54,7 @@ class CoolPlugin {
 }
 
 // this plugin won't be loaded
-@NrPlugin({
+@Library({
     name: 'CoolPlugin',
     author: 'tcrane',
     enabled: false
@@ -96,9 +96,10 @@ hookUpdate(client: Client, packet: Packet) {
     ...
 }
 ```
-The hello packet needs to respond to the text packet, so a packet hook method needs to be added for the text packet
+
+The hello packet needs to respond to the text packet, so a packet hook method needs to be added for it.
 ```typescript
-@NrPlugin({ name: 'Hello plugin', author: 'tcrane' })
+@Library({ name: 'Hello plugin', author: 'tcrane' })
 class HelloPlugin {
 
     public onTextPacket(client: Client, packet: Packet): void {
@@ -106,36 +107,37 @@ class HelloPlugin {
     }
 }
 ```
-Similarly to the plugin class itself, nrelay doesn't know about the packet hook method yet. This is where the `HookPacket` decorator is used. The `HookPacket` decorator requires a `PacketType` enum value as a parameter. A number can be used, but is not recommended as the packet type numbers can change when RotMG is updated.
-`PacketType` is simply an enum containing all packets which can be hooked.
+nrelay's packet hook system relies on specific packet types being used to call the packet hooks at the right time, so using a general type like `Packet` will not work. We will fix this problem in a moment.
+
+Similarly to the plugin class itself, nrelay doesn't know about the packet hook method yet. This is where the `PacketHook` decorator is used.
 ```typescript
-@NrPlugin({ name: 'Hello plugin', author: 'tcrane' })
+@Library({ name: 'Hello plugin', author: 'tcrane' })
 class HelloPlugin {
 
-    @HookPacket(PacketType.TEXT)
+    @PacketHook()
     public onTextPacket(client: Client, packet: Packet): void {
 
     }
 }
 ```
-Now that the HookPacket decorator is present, nrelay will be able to detect this method and will call it any time a text packet is received. The method will be called with the `Client` instance which received the packet, and the packet itself as a `Packet` object.
+Now that the `PacketHook` decorator is present, nrelay will be able to detect this method, but doesn't yet know when to call it. To give nrelay the information it needs, we need to use a specific packet type in the method signature.
 
-In order to access the text packet properties, we need to cast the `packet` parameter to the correct type. To do this we first need to import the type of packet we want to cast to. In this case we want to use the `TextPacket` so we need to add another import to the top of the file
+To do this we first need to import the type of packet we want to hook. In this case we want to use the `TextPacket` so we need to add another import to the top of the file.
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core';
+import { Library, PacketHook, Client } from './../core';
 
 import { TextPacket } from './../networking/packets/incoming'; // Add this line.
 ```
-Because the `TextPacket` type is a subclass of the `Packet` type, we can simply specify the parameter's type as the subclass `TextPacket`. This will implicitly cast the packet to a `TextPacket` object.
+Now, we can simply specify the parameter's type as `TextPacket`.
 ```typescript
-@HookPacket(PacketType.TEXT)
+@PacketHook()
 public onTextPacket(client: Client, textPacket: TextPacket): void {
 
 }
 ```
-The text packet properties such as `text` and `name` can now be accessed. In order to check if the packet was a PM for the client, we need to check the `recipient` property
+The text packet properties such as `text` and `name` can now be accessed, and nrelay now knows to call this method whenever it receives a `TextPacket`. In order to check if the packet was a PM for the client, we need to check the `recipient` property
 ```typescript
-@HookPacket(PacketType.TEXT)
+@PacketHook()
 public onTextPacket(client: Client, textPacket: TextPacket): void {
 
     if (textPacket.recipient === client.playerData.name) {
@@ -155,7 +157,7 @@ if (textPacket.recipient === client.playerData.name) {
 ```
 To send a message we need to use the `PlayerTextPacket` which needs to be imported. Once again, add another import to the top of the file
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core';
+import { Library, PacketHook, Client } from './../core';
 
 import { TextPacket } from './../networking/packets/incoming';
 import { PlayerTextPacket } from './../networking/packets/outgoing'; // Add this line.
@@ -178,18 +180,18 @@ if (textPacket.recipient === client.playerData.name) {
 ```
 The entire plugin file should now look similar to the following
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core';
+import { Library, PacketHook, Client } from './../core';
 
 import { TextPacket } from './../networking/packets/incoming';
 import { PlayerTextPacket } from './../networking/packets/outgoing';
 
-@NrPlugin({
+@Library({
     name: 'Hello Plugin',
     author: 'tcrane'
 })
 class HelloPlugin {
 
-    @HookPacket(PacketType.TEXT)
+    @PacketHook()
     onText(client: Client, textPacket: TextPacket): void {
 
         if (textPacket.recipient === client.playerData.name) {
@@ -224,7 +226,7 @@ The goal is to add a command which will change the response of the bot when we u
 
 To do this, we should use a variable to store the bot's response message.
 ```typescript
-@NrPlugin({
+@Library({
     name: 'Hello Plugin',
     author: 'tcrane'
 })
@@ -232,7 +234,7 @@ class HelloPlugin {
 
     private response: string;
 
-    @HookPacket(PacketType.TEXT)
+    @PacketHook()
     onText(client: Client, textPacket: TextPacket): void {
         ...
     }
@@ -256,7 +258,7 @@ Regex won't be explained in a lot of detail here, but [regexr.com](https://regex
 
 We can use another variable to store the regex in case it ever needs to change.
 ```typescript
-@NrPlugin({
+@Library({
     name: 'Hello Plugin',
     author: 'tcrane'
 })
@@ -265,7 +267,7 @@ class HelloPlugin {
     private response: string;
     private setRegex = /^set\s+(\S+.*)$/;
 
-    @HookPacket(PacketType.TEXT)
+    @PacketHook()
     onText(client: Client, textPacket: TextPacket): void {
         ...
     }
@@ -281,7 +283,7 @@ In short, this regex matches any string which starts with `set` and then has at 
 ```
 Now we can use the regex to detect the command
 ```typescript
-@HookPacket(PacketType.TEXT)
+@PacketHook()
 onText(client: Client, textPacket: TextPacket): void {
 
     if (textPacket.recipient === client.playerData.name) {
@@ -300,7 +302,7 @@ If the regex matches the text, the matched group of the regex will be `match[1]`
 
 There is one more thing to do before we can test the command. When the plugin starts, the variable `response` will be `null`. To give it a default value, we will use the `constructor`. This will only be called once when the plugin loads, so it should be used for initialisation of variables.
 ```typescript
-@NrPlugin({
+@Library({
     name: 'Hello Plugin',
     author: 'tcrane'
 })
@@ -313,7 +315,7 @@ class HelloPlugin {
         this.response = 'Default response';
     }
 
-    @HookPacket(PacketType.TEXT)
+    @PacketHook()
     onText(client: Client, textPacket: TextPacket): void {
         ...
     }
@@ -336,7 +338,7 @@ Now, if you send the bot `/tell <yourname> set New reposnse text` it should repl
 If you try the `hello` command again, it should now say `<yourname> New response text`
 
 ## The Logger class
-If you need to print out some information for debugging or logging purposes, you should use the `Log` method.
+If you need to print out some information for debugging or logging purposes, you should use the `Logger` class.
 Normally, you could use something like
 ```typescript
 console.log('Player name: ' + client.playerData.name);
@@ -346,112 +348,115 @@ console.log('Player name: ' + client.playerData.name);
 // Player name: Eendi
 //
 ```
-The `Logger` class allows you to log messages with senders and log levels.
+Using the logger class instead of `console.log` allows you to take advantage of nrelay's logging mechanism.
 Firstly, you need to import the `Logger` class exports
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client, Log, LogLevel } from './../core';
-//                                                         ^^^^^^^^^^^^^
+import { Logger, LogLevel } from './../core';
 ```
 `LogLevel` is an enum which describes the type of message you are trying to log. It consists of
 ```typescript
 enum LogLevel {
-    Info,
-    Message,
-    Warning,
-    Error,
-    Success,
+  Debug,
+  Info,
+  Message,
+  Warning,
+  Error,
+  Success,
 }
 ```
-The default value is `Message`, so to log a message you can use
+The logger class has a `log` method which takes a sender, a message and a level parameter. The level parameter has a default value of `LogLevel.Message` so it can be excluded if you are using this level.
 ```typescript
-Log('MyPlugin', 'Player name: ' + client.playerData.name);
+Logger.log('MyPlugin', `Player name: ${client.playerData.name}`);
 
 // prints
 //
 // [MyPlugin] Player name: Eendi
 //
 ```
-The log level can be provided as a third argument to change the color of the message.
-```
-   Info = Dark gray
-Message = White
-Warning = Yellow
-  Error = Red
-Success = Green
-```
-For example:
-```typescript
-try {
-    this.methodThatThrowsError();
-} catch (error) {
-   Log('MyPlugin', 'Error: ' + error.Message, LogLevel.Error); 
-}
-```
-Will print the error message in red.
+The log level can be used to describe the nature of your message. Loggers can use this additional information to change the way that the message is logged.
+
+For example, the `DefaultLogger` will print any log message with a level of `LogLevel.Error` in red, and any message with a level of `Success` in green.
+
+The [logging guide](logging-guide.md) provides more information about the logging mechanism, and includes a guide on how to create your own custom loggers, including a Discord logger.
 
 ## Plugin Interop
-nrelay supports plugin interoperability through the `PluginManager` class. For larger or more complex plugins, it may be desirable to split the plugin up into multiple different 'modules' which have only a single responsibility. The plugin interop can be used to achieve such a design pattern.
+nrelay supports plugin interoperability through dependency injection. For larger or more complex plugins, it may be desirable to split the plugin up into multiple different 'modules' which have only a single responsibility. The plugin interop can be used to achieve such a design pattern.
 
-To expose a class to the `PluginManager`, the `export` keyword should be used when declaring the class.
+To allow a class to be injected into others, the `export` keyword should be used when declaring the class.
 ```typescript
 // this plugin can be accessed by other plugins.
-@NrPlugin({ name: 'Component A', author: 'tcrane' })
+@Library({ name: 'Component A', author: 'tcrane' })
 export class MyPluginComponent {
     ...
 }
 
 // this plugin won't be exposed and is inaccessible by other plugins.
-@NrPlugin({ name: 'Cool Plugin', author: 'tcrane' })
+@Library({ name: 'Cool Plugin', author: 'tcrane' })
 class CoolPlugin {
     ...
 }
 ```
-The `PluginManager` manages instances of all loaded plugins. To access the plugin instances, the `PluginManager.getInstanceOf(...)` method can be used.
-`PluginManager.getInstanceOf(...)` is a static method which takes a `class` as its parameter and returns the managed instance of the same type as the `class` parameter. If there is no managed instance of the `class` type, then the method will return `null`.
-
-Since some plugins may be loaded before others, it is **strongly recommended** to use the static helper method `PluginManager.afterInit(method: () => void)` to defer the call to `getInstanceOf` to ensure that the instance you are trying to retreive has actually loaded.
-The `afterInit` method takes a method as a parameter, and will invoke that method once all of the plugins have been loaded. For example
-```typescript
-PluginManager.afterInit(() => {
-    console.log('All plugins have been loaded.');
-});
-```
 
 If you have a plugin component `ComponentA`
 ```typescript
-@NrPlugin({ name: 'Component A', author: 'tcrane' })
+@Library({ name: 'Component A', author: 'tcrane' })
 export class ComponentA {
     public myString = 'Test String';
 }
 ```
-The managed instance of `ComponentA` can be accessed from another class using the `getInstanceOf` method.
+You can inject it into another plugin by simply declaring it as a constructor parameter of that plugin.
 ```typescript
 import { PluginManager } from './../core';
 import { ComponentA } from './component-a'; // the class needs to be imported to be used.
 
-@NrPlugin({ name: 'Component A', author: 'tcrane' })
+@Library({ name: 'Component A', author: 'tcrane' })
 class PluginCore {
 
-    private componentInstance: ComponentA;
+    constructor(componentA: ComponentA) {
+        console.log('My string: ' + componentA.myString);
+        // Prints:
+        // My string: Test String
+    }
+}
+```
+If you need to use the injected plugin from other parts of the plugin, (e.g. packet hooks) you can use TypeScript constructor assignment to make the injected component a property of the plugin.
+```typescript
+@Library({ name: 'Component A', author: 'tcrane' })
+class PluginCore {
 
-    constructor() {
-        PluginManager.afterInit(() => {
-            this.componentInstance = PluginManager.getInstanceOf(ComponentA);
-            console.log('My string: ' + this.componentInstance.myString);
-            // Prints:
-            // My string: Test String
-        });
+    // The subtle difference here is the word 'private' before the name.
+    constructor(private componentA: ComponentA) {
+        console.log('My string: ' + this.componentA.myString);
+        // Prints:
+        // My string: Test String
+    }
+
+    @PacketHook()
+    onSomePacket(...) {
+        console.log(this.componentA.myString); // componentA is also accessible here.
     }
 }
 ```
 
+TypeScript constructor assignment sytnax is equivalent to
+```typescript
+class MyClass {
+    private myProperty: MyType;
+    
+    constructor(myProperty: MyType) {
+        this.myProperty = myProperty;
+    }
+}
+```
+
+
 ## Plugin template
 ```typescript
-import { NrPlugin, HookPacket, Packet, PacketType, Client } from './../core';
+import { Library, PacketHook, Client } from './../core';
 
 import { UpdatePacket } from './../networking/packets/incoming';
 
-@NrPlugin({
+@Library({
     name: 'Your Plugin Name',
     author: 'Your Name'
 })
@@ -461,7 +466,7 @@ class YourPluginName {
 
     }
 
-    @HookPacket(PacketType.UPDATE)
+    @PacketHook()
     onUpdate(client: Client, updatePacket: UpdatePacket): void {
 
     }

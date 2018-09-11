@@ -1,26 +1,33 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
+import { TradeResult } from '../../../models/trade-result';
 
-export class TradeDonePacket extends Packet {
+/**
+ * Received when the active trade has completed, regardless of whether
+ * it was accepted or cancelled.
+ */
+export class TradeDonePacket implements IncomingPacket {
 
-    public type = PacketType.TRADEDONE;
+  type = PacketType.TRADEDONE;
+  propagate = true;
 
-    //#region packet-specific members
-    code: TradeResult;
-    description: string;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The result of the trade.
+   */
+  code: TradeResult;
+  /**
+   * > Unknown.
+   */
+  description: string;
+  //#endregion
 
-    public read(): void {
-        this.code = this.readInt32();
-        this.description = this.readString();
-    }
-
-    public write(): void {
-        this.writeInt32(this.code);
-        this.writeString(this.description);
-    }
-}
-
-export enum TradeResult {
-    Successful = 0,
-    PlayerCanceled = 1
+  read(buffer: PacketBuffer): void {
+    this.code = buffer.readInt32();
+    this.description = buffer.readString();
+  }
 }

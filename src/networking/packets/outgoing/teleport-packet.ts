@@ -1,18 +1,25 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class TeleportPacket extends Packet {
+/**
+ * Sent to teleport to another player.
+ */
+export class TeleportPacket implements OutgoingPacket {
 
-    public type = PacketType.TELEPORT;
+  type = PacketType.TELEPORT;
 
-    //#region packet-specific members
-    objectId: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The object id of the player to teleport to.
+   */
+  objectId: number;
+  //#endregion
 
-    public read(): void {
-        this.objectId = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeInt32(this.objectId);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.objectId);
+  }
 }

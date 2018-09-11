@@ -1,18 +1,26 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class InvResultPacket extends Packet {
+/**
+ * > Unknown.
+ */
+export class InvResultPacket implements IncomingPacket {
 
-    public type = PacketType.INVRESULT;
+  type = PacketType.INVRESULT;
+  propagate = true;
 
-    //#region packet-specific members
-    result: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * > Unknown.
+   */
+  result: number;
+  //#endregion
 
-    public read(): void {
-        this.result = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeInt32(this.result);
-    }
+  read(buffer: PacketBuffer): void {
+    this.result = buffer.readInt32();
+  }
 }

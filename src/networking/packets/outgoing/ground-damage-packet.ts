@@ -1,23 +1,31 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 import { WorldPosData } from '../../data/world-pos-data';
 
-export class GroundDamagePacket extends Packet {
+/**
+ * Sent when the client takes damage from a ground source, such as lava.
+ */
+export class GroundDamagePacket implements OutgoingPacket {
 
-    public type = PacketType.GROUNDDAMAGE;
+  type = PacketType.GROUNDDAMAGE;
 
-    //#region packet-specific members
-    time: number;
-    position: WorldPosData;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The current client time.
+   */
+  time: number;
+  /**
+   * The current client position.
+   */
+  position: WorldPosData;
+  //#endregion
 
-    public read(): void {
-        this.time = this.readInt32();
-        this.position = new WorldPosData();
-        this.position.read(this);
-    }
-
-    public write(): void {
-        this.writeInt32(this.time);
-        this.position.write(this);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.time);
+    this.position.write(buffer);
+  }
 }

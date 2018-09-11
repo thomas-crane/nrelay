@@ -1,18 +1,26 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class ReskinUnlockPacket extends Packet {
+/**
+ * Received to notify the player that a new skin has been unlocked.
+ */
+export class ReskinUnlockPacket implements IncomingPacket {
 
-    public type = PacketType.RESKINUNLOCK;
+  type = PacketType.RESKINUNLOCK;
+  propagate = true;
 
-    //#region packet-specific members
-    skinId: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The id of the skin that was unlocked.
+   */
+  skinId: number;
+  //#endregion
 
-    public read(): void {
-        this.skinId = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeInt32(this.skinId);
-    }
+  read(buffer: PacketBuffer): void {
+    this.skinId = buffer.readInt32();
+  }
 }

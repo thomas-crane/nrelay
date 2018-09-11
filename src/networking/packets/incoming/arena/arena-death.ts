@@ -1,18 +1,26 @@
-import { Packet, PacketType } from '../../../packet';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../../packet-buffer';
+import { PacketType } from '../../../packet-type';
+import { IncomingPacket } from '../../../packet';
 
-export class ArenaDeathPacket extends Packet {
+/**
+ * Received when the player has been killed in the arena.
+ */
+export class ArenaDeathPacket implements IncomingPacket {
 
-    public type = PacketType.ARENADEATH;
+  type = PacketType.ARENADEATH;
+  propagate = true;
 
-    //#region packet-specific members
-    cost: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The cost in gold to be revived.
+   */
+  cost: number;
+  //#endregion
 
-    public read(): void {
-        this.cost = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeInt32(this.cost);
-    }
+  read(buffer: PacketBuffer): void {
+    this.cost = buffer.readInt32();
+  }
 }

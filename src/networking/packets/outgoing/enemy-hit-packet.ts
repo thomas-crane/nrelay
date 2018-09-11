@@ -1,27 +1,40 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class EnemyHitPacket extends Packet {
+/**
+ * Sent when an enemy has been hit by the player.
+ */
+export class EnemyHitPacket implements OutgoingPacket {
 
-    public type = PacketType.ENEMYHIT;
+  type = PacketType.ENEMYHIT;
 
-    //#region packet-specific members
-    time: number;
-    bulletId: number;
-    targetId: number;
-    kill: boolean;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The current client time.
+   */
+  time: number;
+  /**
+   * The id of the bullet which hit the enemy.
+   */
+  bulletId: number;
+  /**
+   * The object id of the enemy which was hit.
+   */
+  targetId: number;
+  /**
+   * Whether or not the projectile will kill the enemy.
+   */
+  kill: boolean;
+  //#endregion
 
-    public read(): void {
-        this.time = this.readInt32();
-        this.bulletId = this.readByte();
-        this.targetId = this.readInt32();
-        this.kill = this.readBoolean();
-    }
-
-    public write(): void {
-        this.writeInt32(this.time);
-        this.writeByte(this.bulletId);
-        this.writeInt32(this.targetId);
-        this.writeBoolean(this.kill);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.time);
+    buffer.writeByte(this.bulletId);
+    buffer.writeInt32(this.targetId);
+    buffer.writeBoolean(this.kill);
+  }
 }

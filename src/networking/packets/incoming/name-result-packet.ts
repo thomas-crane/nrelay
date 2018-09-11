@@ -1,21 +1,31 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class NameResultPacket extends Packet {
+/**
+ * Received in response to a `ChooseNamePacket`.
+ */
+export class NameResultPacket implements IncomingPacket {
 
-    public type = PacketType.NAMERESULT;
+  type = PacketType.NAMERESULT;
+  propagate = true;
 
-    //#region packet-specific members
-    success: boolean;
-    errorText: string;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * Whether or not the name change was successful.
+   */
+  success: boolean;
+  /**
+   * The error which occurred, if the result was not successful.
+   */
+  errorText: string;
+  //#endregion
 
-    public read(): void {
-        this.success = this.readBoolean();
-        this.errorText = this.readString();
-    }
-
-    public write(): void {
-        this.writeBoolean(this.success);
-        this.writeString(this.errorText);
-    }
+  read(buffer: PacketBuffer): void {
+    this.success = buffer.readBoolean();
+    this.errorText = buffer.readString();
+  }
 }

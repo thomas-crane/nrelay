@@ -1,21 +1,30 @@
-import { Packet, PacketType } from '../../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../../packet-buffer';
+import { PacketType } from '../../../packet-type';
+import { OutgoingPacket } from '../../../packet';
 
-export class ActivePetUpdateRequestPacket extends Packet {
+/**
+ * Sent to make an update to the pet currently following the player.
+ */
+export class ActivePetUpdateRequestPacket implements OutgoingPacket {
 
-    public type = PacketType.ACTIVEPET_UPDATE_REQUEST;
+  type = PacketType.ACTIVEPET_UPDATE_REQUEST;
 
-    //#region packet-specific members
-    commandType: number;
-    instanceId: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The type of update to perform.
+   */
+  commandType: number;
+  /**
+   * The instance id of the pet to update.
+   */
+  instanceId: number;
+  //#endregion
 
-    public read(): void {
-        this.commandType = this.readByte();
-        this.instanceId = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeByte(this.commandType);
-        this.writeInt32(this.instanceId);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeByte(this.commandType);
+    buffer.writeInt32(this.instanceId);
+  }
 }

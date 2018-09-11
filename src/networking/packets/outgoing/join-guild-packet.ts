@@ -1,18 +1,25 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class JoinGuildPacket extends Packet {
+/**
+ * Sent to accept a pending guild invite.
+ */
+export class JoinGuildPacket implements OutgoingPacket {
 
-    public type = PacketType.JOINGUILD;
+  type = PacketType.JOINGUILD;
 
-    //#region packet-specific members
-    guildName: string;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The name of the guild for which there is a pending invite.
+   */
+  guildName: string;
+  //#endregion
 
-    public read(): void {
-        this.guildName = this.readString();
-    }
-
-    public write(): void {
-        this.writeString(this.guildName);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeString(this.guildName);
+  }
 }

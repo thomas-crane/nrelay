@@ -1,21 +1,30 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class SetConditionPacket extends Packet {
+/**
+ * Sent when the player inflicts a condition effect.
+ */
+export class SetConditionPacket implements OutgoingPacket {
 
-    public type = PacketType.SETCONDITION;
+  type = PacketType.SETCONDITION;
 
-    //#region packet-specific members
-    conditionEffect: number;
-    conditionDuration: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The condition effect being conflicted.
+   */
+  conditionEffect: number;
+  /**
+   * The duration of the conditin effect.
+   */
+  conditionDuration: number;
+  //#endregion
 
-    public read(): void {
-        this.conditionEffect = this.readByte();
-        this.conditionDuration = this.readFloat();
-    }
-
-    public write(): void {
-        this.writeByte(this.conditionEffect);
-        this.writeFloat(this.conditionDuration);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeByte(this.conditionEffect);
+    buffer.writeFloat(this.conditionDuration);
+  }
 }

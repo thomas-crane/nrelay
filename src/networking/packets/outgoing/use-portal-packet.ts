@@ -1,18 +1,26 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class UsePortalPacket extends Packet {
+/**
+ * Sent to prompt the server to send a `ReconnectPacket` which
+ * contains the reconnect information for the used portal.
+ */
+export class UsePortalPacket implements OutgoingPacket {
 
-    public type = PacketType.USEPORTAL;
+  type = PacketType.USEPORTAL;
 
-    //#region packet-specific members
-    objectId: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The object id of the portal to enter.
+   */
+  objectId: number;
+  //#endregion
 
-    public read(): void {
-        this.objectId = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeInt32(this.objectId);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.objectId);
+  }
 }

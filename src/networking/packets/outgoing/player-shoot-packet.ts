@@ -1,32 +1,46 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 import { WorldPosData } from '../../data/world-pos-data';
 
-export class PlayerShootPacket extends Packet {
+/**
+ * Sent when the player shoots a projectile.
+ */
+export class PlayerShootPacket implements OutgoingPacket {
 
-    public type = PacketType.PLAYERSHOOT;
+  type = PacketType.PLAYERSHOOT;
 
-    //#region packet-specific members
-    time: number;
-    bulletId: number;
-    containerType: number;
-    startingPos: WorldPosData;
-    angle: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The current client time.
+   */
+  time: number;
+  /**
+   * The id of the bullet which was fired.
+   */
+  bulletId: number;
+  /**
+   * The item id of the weapon used to fire the projectile.
+   */
+  containerType: number;
+  /**
+   * The position at which the projectile was fired.
+   */
+  startingPos: WorldPosData;
+  /**
+   * The angle at which the projectile was fired.
+   */
+  angle: number;
+  //#endregion
 
-    public read(): void {
-        this.time = this.readInt32();
-        this.bulletId = this.readByte();
-        this.containerType = this.readShort();
-        this.startingPos = new WorldPosData();
-        this.startingPos.read(this);
-        this.angle = this.readFloat();
-    }
-
-    public write(): void {
-        this.writeInt32(this.time);
-        this.writeByte(this.bulletId);
-        this.writeShort(this.containerType);
-        this.startingPos.write(this);
-        this.writeFloat(this.angle);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.time);
+    buffer.writeByte(this.bulletId);
+    buffer.writeShort(this.containerType);
+    this.startingPos.write(buffer);
+    buffer.writeFloat(this.angle);
+  }
 }

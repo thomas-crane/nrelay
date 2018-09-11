@@ -1,18 +1,25 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class KeyInfoRequestPacket extends Packet {
+/**
+ * > Unknown.
+ */
+export class KeyInfoRequestPacket implements OutgoingPacket {
 
-    public type = PacketType.KEYINFO_REQUEST;
+  type = PacketType.KEYINFO_REQUEST;
 
-    //#region packet-specific members
-    itemType: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * > Unknown.
+   */
+  itemType: number;
+  //#endregion
 
-    public read(): void {
-        this.itemType = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeInt32(this.itemType);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.itemType);
+  }
 }
