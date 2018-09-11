@@ -389,6 +389,16 @@ export class Client {
   }
 
   /**
+   * Connects to `gameId` on the current server
+   *  @param gameId The gameId to use uppon connecting.
+   */
+  changeGameId(gameId: GameId): void {
+    Logger.log(this.alias, `Switching gameId to ${gameId}`, LogLevel.Info);
+    this.gameId = gameId;
+    this.connect();
+  }
+
+  /**
    * Blocks the next packet of the specified type.
    * @param packetType The packet type to block.
    * @deprecated Prefer using a library to hook the desired packet
