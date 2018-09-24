@@ -1,10 +1,11 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
-## `7.6.2`
+## `7.7.0`
 ### Additions:
- + Added `changeGameId(gameId: number)` to client.ts
- + Added `GameId` Enum to networking.
+ + Added bounds checking for `nextPos`. The client will no longer walk through occupied squares.
+ + Added `changeGameId(gameId: GameId)` to the client class.
+ + Added the `GameId` enum.
 
 ## `7.6.1`
 ### Fixes:
