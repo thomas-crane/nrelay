@@ -9,6 +9,7 @@ export * from './environment';
 export * from './failure-code';
 export * from './game-ids';
 export * from './guildrank';
+export * from './map-tile';
 export * from './mapinfo';
 export * from './move-records';
 export * from './object';

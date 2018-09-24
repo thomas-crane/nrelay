@@ -58,6 +58,7 @@ import { CLI } from '..';
 import { Pathfinder, NodeUpdate, Point } from '../services/pathfinding';
 import { FailureCode } from '../models/failure-code';
 import { GameId } from '../models/game-ids';
+import { MapTile } from '../models/map-tile';
 
 const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
@@ -114,18 +115,14 @@ export class Client {
    * of the map.
    * @example
    * ```
-   * getTile(client: Client, x: number, y: number): GroundTileData {
+   * getTile(client: Client, x: number, y: number): MapTile {
    *   const tileX = Math.floor(x);
    *   const tileY = Math.floor(y);
    *   return client.mapTiles.mapTiles[tileY * client.mapInfo.height + tileX];
    * }
    * ```
    */
-  mapTiles: GroundTileData[];
-  /**
-   * TODO: doc
-   */
-  unwalkables: boolean[];
+  mapTiles: MapTile[];
   /**
    * A queue of positions for the client to move towards. If
    * the queue is not empty, the client will move towards the first
@@ -350,7 +347,6 @@ export class Client {
 
     // resources.
     this.mapTiles = null;
-    this.unwalkables = null;
     this.projectiles = null;
     this.enemies = null;
 
@@ -571,8 +567,7 @@ export class Client {
       this.packetio.sendPacket(createPacket);
     }
     this.random = new Random(mapInfoPacket.fp);
-    this.mapTiles = new Array<GroundTileData>(mapInfoPacket.width * mapInfoPacket.height);
-    this.unwalkables = new Array<boolean>(mapInfoPacket.width * mapInfoPacket.height).fill(false);
+    this.mapTiles = [];
     this.mapInfo = { width: mapInfoPacket.width, height: mapInfoPacket.height, name: mapInfoPacket.name };
     if (this.pathfinderEnabled) {
       this.pathfinder = new Pathfinder(mapInfoPacket.width);
@@ -596,7 +591,12 @@ export class Client {
       if (ResourceManager.objects[obj.objectType]) {
         const gameObject = ResourceManager.objects[obj.objectType];
         if (gameObject.fullOccupy || gameObject.occupySquare) {
-          this.unwalkables[Math.floor(obj.status.pos.y) * this.mapInfo.width + Math.floor(obj.status.pos.x)] = true;
+          const index = Math.floor(obj.status.pos.y) * this.mapInfo.width + Math.floor(obj.status.pos.x);
+          if (!this.mapTiles[index]) {
+            this.mapTiles[index] = { occupied: true } as MapTile;
+          } else {
+            this.mapTiles[index].occupied = true;
+          }
         }
         if (this.pathfinderEnabled) {
           if (gameObject.fullOccupy || gameObject.occupySquare) {
@@ -620,7 +620,13 @@ export class Client {
 
     // map tiles
     for (const tile of updatePacket.tiles) {
-      this.mapTiles[tile.y * this.mapInfo.width + tile.x] = tile;
+      const index = tile.y * this.mapInfo.width + tile.x;
+      let occupied = false;
+      if (this.mapTiles[index]) {
+        occupied = this.mapTiles[index].occupied;
+      }
+      this.mapTiles[index] = tile as MapTile;
+      this.mapTiles[index].occupied = occupied;
       if (this.pathfinderEnabled) {
         if (ResourceManager.tiles[tile.type].noWalk) {
           pathfinderUpdates.push({
@@ -993,12 +999,8 @@ export class Client {
     const step = this.getSpeed();
     if (this.worldPos.squareDistanceTo(target) > step ** 2) {
       const angle: number = Math.atan2(target.y - this.worldPos.y, target.x - this.worldPos.x);
-      //this.worldPos.x += Math.cos(angle) * step;
-      //this.worldPos.y += Math.sin(angle) * step;
       this.walkTo(this.worldPos.x + Math.cos(angle) * step, this.worldPos.y + Math.sin(angle) * step);
     } else {
-      //this.worldPos.x = target.x;
-      //this.worldPos.y = target.y;
       this.walkTo(target.x, target.y);
       this.nextPos.shift();
       if (this.nextPos.length === 0 && this.pathfinderTarget) {
@@ -1006,12 +1008,12 @@ export class Client {
       }
     }
   }
-  
+
   private walkTo(x: number, y: number): void {
-    if (!this.unwalkables[Math.floor(this.worldPos.y) * this.mapInfo.width + Math.floor(x)]) {
+    if (!this.mapTiles[Math.floor(this.worldPos.y) * this.mapInfo.width + Math.floor(x)].occupied) {
       this.worldPos.x = x;
     }
-    if (!this.unwalkables[Math.floor(y) * this.mapInfo.width + Math.floor(this.worldPos.x)]) {
+    if (!this.mapTiles[Math.floor(y) * this.mapInfo.width + Math.floor(this.worldPos.x)].occupied) {
       this.worldPos.y = y;
     }
   }

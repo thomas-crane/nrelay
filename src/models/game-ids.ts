@@ -1,4 +1,7 @@
 /**
+ * @module models
+ */
+/**
  * The game IDs for various maps which the client can connect to.
  */
 export enum GameId {
