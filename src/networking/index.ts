@@ -8,4 +8,3 @@ export * from './packetio';
 export * from './packets';
 export * from './data/index';
 export * from './packets/index';
-export * from './packet-ids';

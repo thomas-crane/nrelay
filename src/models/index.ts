@@ -7,6 +7,7 @@ export * from './condition-effect';
 export * from './enemy';
 export * from './environment';
 export * from './failure-code';
+export * from './game-ids';
 export * from './guildrank';
 export * from './mapinfo';
 export * from './move-records';

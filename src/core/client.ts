@@ -57,6 +57,7 @@ import { SocksClient } from 'socks';
 import { CLI } from '..';
 import { Pathfinder, NodeUpdate, Point } from '../services/pathfinding';
 import { FailureCode } from '../models/failure-code';
+import { GameId } from '../models/game-ids';
 
 const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
@@ -212,7 +213,7 @@ export class Client {
   // reconnect info
   private key: number[];
   private keyTime: number;
-  private gameId: number;
+  private gameId: GameId;
   private reconnectCooldown: number;
 
   // packet control
@@ -243,7 +244,7 @@ export class Client {
     this.autoAim = true;
     this.key = [];
     this.keyTime = -1;
-    this.gameId = -2;
+    this.gameId = GameId.Nexus;
     this.playerData = getDefaultPlayerData();
     this.playerData.server = server.name;
     this.nextPos = [];
@@ -390,10 +391,10 @@ export class Client {
 
   /**
    * Connects to `gameId` on the current server
-   *  @param gameId The gameId to use uppon connecting.
+   *  @param gameId The gameId to use upon connecting.
    */
   changeGameId(gameId: GameId): void {
-    Logger.log(this.alias, `Switching gameId to ${gameId}`, LogLevel.Info);
+    Logger.log(this.alias, `Changing gameId to ${gameId}`, LogLevel.Info);
     this.gameId = gameId;
     this.connect();
   }
