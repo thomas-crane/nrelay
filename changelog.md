@@ -1,6 +1,11 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `7.6.2`
+### Additions:
+ + Added `changeGameId(gameId: number)` to client.ts
+ + Added `GameId` Enum to networking.
+
 ## `7.6.1`
 ### Fixes:
  + Fixed a bug where disabling a plugin would remove the wrong packet hooks.
