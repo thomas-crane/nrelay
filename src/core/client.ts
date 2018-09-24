@@ -844,17 +844,10 @@ export class Client {
     hp.gameId = this.gameId;
     hp.guid = this.guid;
     hp.password = this.password;
-    hp.secret = '';
     hp.keyTime = this.keyTime;
     hp.key = this.key;
-    hp.mapJSON = '';
-    hp.entryTag = '';
-    hp.gameNet = '';
     hp.gameNet = 'rotmg';
-    hp.gameNetUserId = '';
     hp.playPlatform = 'rotmg';
-    hp.platformToken = '';
-    hp.userToken = '';
     this.packetio.sendPacket(hp);
   }
 
