@@ -123,6 +123,10 @@ export class Client {
    */
   mapTiles: GroundTileData[];
   /**
+   * TODO: doc
+   */
+  unwalkables: boolean[];
+  /**
    * A queue of positions for the client to move towards. If
    * the queue is not empty, the client will move towards the first
    * item in it. The first item will be removed when the client has reached it.
@@ -346,6 +350,7 @@ export class Client {
 
     // resources.
     this.mapTiles = null;
+    this.unwalkables = null;
     this.projectiles = null;
     this.enemies = null;
 
@@ -567,6 +572,7 @@ export class Client {
     }
     this.random = new Random(mapInfoPacket.fp);
     this.mapTiles = new Array<GroundTileData>(mapInfoPacket.width * mapInfoPacket.height);
+    this.unwalkables = new Array<boolean>(mapInfoPacket.width * mapInfoPacket.height).fill(false);
     this.mapInfo = { width: mapInfoPacket.width, height: mapInfoPacket.height, name: mapInfoPacket.name };
     if (this.pathfinderEnabled) {
       this.pathfinder = new Pathfinder(mapInfoPacket.width);
@@ -589,6 +595,9 @@ export class Client {
       }
       if (ResourceManager.objects[obj.objectType]) {
         const gameObject = ResourceManager.objects[obj.objectType];
+        if (gameObject.fullOccupy || gameObject.occupySquare) {
+          this.unwalkables[Math.floor(obj.status.pos.y) * this.mapInfo.width + Math.floor(obj.status.pos.x)] = true;
+        }
         if (this.pathfinderEnabled) {
           if (gameObject.fullOccupy || gameObject.occupySquare) {
             const x = obj.status.pos.x;
@@ -984,15 +993,26 @@ export class Client {
     const step = this.getSpeed();
     if (this.worldPos.squareDistanceTo(target) > step ** 2) {
       const angle: number = Math.atan2(target.y - this.worldPos.y, target.x - this.worldPos.x);
-      this.worldPos.x += Math.cos(angle) * step;
-      this.worldPos.y += Math.sin(angle) * step;
+      //this.worldPos.x += Math.cos(angle) * step;
+      //this.worldPos.y += Math.sin(angle) * step;
+      this.walkTo(this.worldPos.x + Math.cos(angle) * step, this.worldPos.y + Math.sin(angle) * step);
     } else {
-      this.worldPos.x = target.x;
-      this.worldPos.y = target.y;
+      //this.worldPos.x = target.x;
+      //this.worldPos.y = target.y;
+      this.walkTo(target.x, target.y);
       this.nextPos.shift();
       if (this.nextPos.length === 0 && this.pathfinderTarget) {
         this.pathfinderTarget = null;
       }
+    }
+  }
+  
+  private walkTo(x: number, y: number): void {
+    if (!this.unwalkables[Math.floor(this.worldPos.y) * this.mapInfo.width + Math.floor(x)]) {
+      this.worldPos.x = x;
+    }
+    if (!this.unwalkables[Math.floor(y) * this.mapInfo.width + Math.floor(this.worldPos.x)]) {
+      this.worldPos.y = y;
     }
   }
 
