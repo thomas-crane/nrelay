@@ -275,24 +275,25 @@ export class Client {
    * Shoots a projectile at the specified angle.
    * @param angle The angle in radians to shoot towards.
    */
-  shoot(angle: number): boolean {
+  public shoot(angle: number): boolean {
     if (ConditionEffects.has(this.playerData.condition, ConditionEffect.STUNNED)) {
       return;
     }
     const time = this.getTime();
     const item = ResourceManager.items[this.playerData.inventory[0]];
     const attackPeriod = 1 / this.getAttackFrequency() * (1 / item.rateOfFire);
+    const numProjectiles = item.numProjectiles > 0 ? item.numProjectiles : 1;
     if (time < this.lastAttackTime + attackPeriod) {
       return false;
     }
     this.lastAttackTime = time;
     const arcRads = item.arcGap / 180 * Math.PI;
-    let totalArc = arcRads * (item.numProjectiles - 1);
+    let totalArc = arcRads * (numProjectiles - 1);
     if (arcRads <= 0) {
       totalArc = 0;
     }
     angle -= totalArc / 2;
-    for (let i = 0; i < item.numProjectiles; i++) {
+    for (let i = 0; i < numProjectiles; i++) {
       const shootPacket = new PlayerShootPacket();
       shootPacket.bulletId = this.getBulletId();
       shootPacket.angle = angle;
