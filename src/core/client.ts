@@ -276,52 +276,52 @@ export class Client {
    * @param angle The angle in radians to shoot towards.
    */
   public shoot(angle: number): boolean {
-      if (ConditionEffects.has(this.playerData.condition, ConditionEffect.STUNNED)) {
-        return;
-      }
-      const time = this.getTime();
-      const item = ResourceManager.items[this.playerData.inventory[0]];
-      const attackPeriod = 1 / this.getAttackFrequency() * (1 / item.rateOfFire);
-      const numProjectiles = item.numProjectiles > 0 ? item.numProjectiles : 1;
-      if (time < this.lastAttackTime + attackPeriod) {
-        return false;
-      }
-      this.lastAttackTime = time;
-      const arcRads = item.arcGap / 180 * Math.PI;
-      let totalArc = arcRads * (numProjectiles - 1);
-      if (arcRads <= 0) {
-        totalArc = 0;
-      }
-      angle -= totalArc / 2;
-      for (let i = 0; i < numProjectiles; i++) {
-        const shootPacket = new PlayerShootPacket();
-        shootPacket.bulletId = this.getBulletId();
-        shootPacket.angle = angle;
-        shootPacket.containerType = item.type;
-        shootPacket.time = time;
-        shootPacket.startingPos = this.worldPos.clone();
-        shootPacket.startingPos.x += (Math.cos(angle) * 0.3);
-        shootPacket.startingPos.y += (Math.sin(angle) * 0.3);
-        this.packetio.sendPacket(shootPacket);
-        this.projectiles.push(new Projectile(item.type, 0, this.objectId, shootPacket.bulletId, angle, time, {
-          x: shootPacket.startingPos.x,
-          y: shootPacket.startingPos.y
-        }));
-        if (arcRads > 0) {
-          angle += arcRads;
-        }
-
-        const projectile = item.projectile;
-        let damage = this.random.nextIntInRange(projectile.minDamage, projectile.maxDamage);
-        if (time > this.moveRecords.lastClearTime + 600) {
-          damage = 0;
-        }
-        this.projectiles[this.projectiles.length - 1].setDamage(damage * this.getAttackMultiplier());
-      }
-
-      this.checkProjectiles();
-      return true;
+    if (ConditionEffects.has(this.playerData.condition, ConditionEffect.STUNNED)) {
+      return;
     }
+    const time = this.getTime();
+    const item = ResourceManager.items[this.playerData.inventory[0]];
+    const attackPeriod = 1 / this.getAttackFrequency() * (1 / item.rateOfFire);
+    const numProjectiles = item.numProjectiles > 0 ? item.numProjectiles : 1;
+    if (time < this.lastAttackTime + attackPeriod) {
+      return false;
+    }
+    this.lastAttackTime = time;
+    const arcRads = item.arcGap / 180 * Math.PI;
+    let totalArc = arcRads * (numProjectiles - 1);
+    if (arcRads <= 0) {
+      totalArc = 0;
+    }
+    angle -= totalArc / 2;
+    for (let i = 0; i < numProjectiles; i++) {
+      const shootPacket = new PlayerShootPacket();
+      shootPacket.bulletId = this.getBulletId();
+      shootPacket.angle = angle;
+      shootPacket.containerType = item.type;
+      shootPacket.time = time;
+      shootPacket.startingPos = this.worldPos.clone();
+      shootPacket.startingPos.x += (Math.cos(angle) * 0.3);
+      shootPacket.startingPos.y += (Math.sin(angle) * 0.3);
+      this.packetio.sendPacket(shootPacket);
+      this.projectiles.push(new Projectile(item.type, 0, this.objectId, shootPacket.bulletId, angle, time, {
+        x: shootPacket.startingPos.x,
+        y: shootPacket.startingPos.y
+      }));
+      if (arcRads > 0) {
+        angle += arcRads;
+      }
+
+      const projectile = item.projectile;
+      let damage = this.random.nextIntInRange(projectile.minDamage, projectile.maxDamage);
+      if (time > this.moveRecords.lastClearTime + 600) {
+        damage = 0;
+      }
+      this.projectiles[this.projectiles.length - 1].setDamage(damage * this.getAttackMultiplier());
+    }
+
+    this.checkProjectiles();
+    return true;
+  }
 
   /**
    * Removes all event listeners and releases any resources held by the client.
