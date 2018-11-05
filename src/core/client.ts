@@ -275,7 +275,7 @@ export class Client {
    * Shoots a projectile at the specified angle.
    * @param angle The angle in radians to shoot towards.
    */
-  public shoot(angle: number): boolean {
+  shoot(angle: number): boolean {
     if (ConditionEffects.has(this.playerData.condition, ConditionEffect.STUNNED)) {
       return;
     }

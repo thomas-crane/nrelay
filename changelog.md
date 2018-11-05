@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `7.7.1`
+### Fixes:
+ + Fixed a bug where weapons with single projectiles could not be fired.
+
 ## `7.7.0`
 ### Additions:
  + Added bounds checking for `nextPos`. The client will no longer walk through occupied squares.
