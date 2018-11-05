@@ -1,23 +1,31 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class CreateSuccessPacket extends Packet {
+/**
+ * Received in response to a `CreatePacket`.
+ */
+export class CreateSuccessPacket implements IncomingPacket {
 
-    public type = PacketType.CREATESUCCESS;
+  type = PacketType.CREATESUCCESS;
+  propagate = true;
 
-    //#region packet-specific members
-    objectId: number;
-    charId: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The object id of the player's character.
+   */
+  objectId: number;
+  /**
+   * The character id of the player's character.
+   */
+  charId: number;
+  //#endregion
 
-    data: Buffer;
-
-    public read(): void {
-        this.objectId = this.readInt32();
-        this.charId = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeInt32(this.objectId);
-        this.writeInt32(this.charId);
-    }
+  read(buffer: PacketBuffer): void {
+    this.objectId = buffer.readInt32();
+    this.charId = buffer.readInt32();
+  }
 }

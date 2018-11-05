@@ -1,23 +1,33 @@
-import { Packet, PacketType } from '../../packet';
-import { WorldPosData } from './../../../networking/data/world-pos-data';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
+import { WorldPosData } from '../../data/world-pos-data';
 
-export class GotoPacket extends Packet {
+/**
+ * Received when an entity has moved to a new position.
+ */
+export class GotoPacket implements IncomingPacket {
 
-    public type = PacketType.GOTO;
+  type = PacketType.GOTO;
+  propagate = true;
 
-    //#region packet-specific members
-    objectId: number;
-    position: WorldPosData;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The object id of the entity which moved.
+   */
+  objectId: number;
+  /**
+   * The new position of the entity.
+   */
+  position: WorldPosData;
+  //#endregion
 
-    public read(): void {
-        this.objectId = this.readInt32();
-        this.position = new WorldPosData();
-        this.position.read(this);
-    }
-
-    public write(): void {
-        this.writeInt32(this.objectId);
-        this.position.write(this);
-    }
+  read(buffer: PacketBuffer): void {
+    this.objectId = buffer.readInt32();
+    this.position = new WorldPosData();
+    this.position.read(buffer);
+  }
 }

@@ -1,21 +1,31 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class GlobalNotificationPacket extends Packet {
+/**
+ * Received when a global notification is sent out to all players.
+ */
+export class GlobalNotificationPacket implements IncomingPacket {
 
-    public type = PacketType.GLOBALNOTIFICATION;
+  type = PacketType.GLOBALNOTIFICATION;
+  propagate = true;
 
-    //#region packet-specific members
-    notificationType: number;
-    text: string;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The type of notification received.
+   */
+  notificationType: number;
+  /**
+   * The notification message.
+   */
+  text: string;
+  //#endregion
 
-    public read(): void {
-        this.notificationType = this.readInt32();
-        this.text = this.readString();
-    }
-
-    public write(): void {
-        this.writeInt32(this.notificationType);
-        this.writeString(this.text);
-    }
+  read(buffer: PacketBuffer): void {
+    this.notificationType = buffer.readInt32();
+    this.text = buffer.readString();
+  }
 }

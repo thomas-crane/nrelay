@@ -1,33 +1,45 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class TradeAcceptedPacket extends Packet {
+/**
+ * Received when the active trade is accepted.
+ */
+export class TradeAcceptedPacket implements IncomingPacket {
 
-    public type = PacketType.TRADEACCEPTED;
+  type = PacketType.TRADEACCEPTED;
+  propagate = true;
 
-    //#region packet-specific members
-    clientOffer: boolean[];
-    partnerOffer: boolean[];
-    //#endregion
+  //#region packet-specific members
+  /**
+   * A description of which items in the client's inventory are selected.
+   * Items 0-3 are the hotbar items, and 4-12 are the 8 inventory slots.
+   *
+   * If a value is `true`, then the item is selected.
+   */
+  clientOffer: boolean[];
+  /**
+   * A description of which items in the trade partner's inventory are selected.
+   * Items 0-3 are the hotbar items, and 4-12 are the 8 inventory slots.
+   *
+   * If a value is `true`, then the item is selected.
+   */
+  partnerOffer: boolean[];
+  //#endregion
 
-    public read(): void {
-        const clientOfferLen = this.readShort();
-        this.clientOffer = new Array<boolean>(clientOfferLen);
-        for (let i = 0; i < clientOfferLen; i++) {
-            this.clientOffer[i] = this.readBoolean();
-        }
-        const partnerOfferLen = this.readShort();
-        this.partnerOffer = new Array<boolean>(partnerOfferLen);
-        for (let i = 0; i < partnerOfferLen; i++) {
-            this.partnerOffer[i] = this.readBoolean();
-        }
+  read(buffer: PacketBuffer): void {
+    const clientOfferLen = buffer.readShort();
+    this.clientOffer = new Array<boolean>(clientOfferLen);
+    for (let i = 0; i < clientOfferLen; i++) {
+      this.clientOffer[i] = buffer.readBoolean();
     }
-
-    public write(): void {
-        for (let i = 0; i < this.clientOffer.length; i++) {
-            this.writeBoolean(this.clientOffer[i]);
-        }
-        for (let i = 0; i < this.partnerOffer.length; i++) {
-            this.writeBoolean(this.partnerOffer[i]);
-        }
+    const partnerOfferLen = buffer.readShort();
+    this.partnerOffer = new Array<boolean>(partnerOfferLen);
+    for (let i = 0; i < partnerOfferLen; i++) {
+      this.partnerOffer[i] = buffer.readBoolean();
     }
+  }
 }

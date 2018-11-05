@@ -1,23 +1,33 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
+import { FailureCode } from '../../../models/failure-code';
 
-export class FailurePacket extends Packet {
+/**
+ * Received when an error has occurred.
+ */
+export class FailurePacket implements IncomingPacket {
 
-    public type = PacketType.FAILURE;
+  type = PacketType.FAILURE;
+  propagate = true;
 
-    //#region packet-specific members
-    errorId: number;
-    errorDescription: string;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The error id of the failure.
+   * @see `FailureCode`
+   */
+  errorId: FailureCode;
+  /**
+   * A description of the error.
+   */
+  errorDescription: string;
+  //#endregion
 
-    data: Buffer;
-
-    public read(): void {
-        this.errorId = this.readInt32();
-        this.errorDescription = this.readString();
-    }
-
-    public write(): void {
-        this.writeInt32(this.errorId);
-        this.writeString(this.errorDescription);
-    }
+  read(buffer: PacketBuffer): void {
+    this.errorId = buffer.readInt32();
+    this.errorDescription = buffer.readString();
+  }
 }

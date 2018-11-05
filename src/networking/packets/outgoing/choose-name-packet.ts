@@ -1,18 +1,25 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class ChooseNamePacket extends Packet {
+/**
+ * Sent to change the client's account name.
+ */
+export class ChooseNamePacket implements OutgoingPacket {
 
-    public type = PacketType.CHOOSENAME;
+  type = PacketType.CHOOSENAME;
 
-    //#region packet-specific members
-    name: string;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The name to change the account's name to.
+   */
+  name: string;
+  //#endregion
 
-    public read(): void {
-        this.name = this.readString();
-    }
-
-    public write(): void {
-        this.writeString(this.name);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeString(this.name);
+  }
 }

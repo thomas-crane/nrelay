@@ -1,30 +1,34 @@
-import { Packet, PacketType } from '../../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../../packet-buffer';
+import { PacketType } from '../../../packet-type';
 import { SlotObjectData } from '../../../data/slot-object-data';
+import { OutgoingPacket } from '../../../packet';
 
-export class QuestRedeemPacket extends Packet {
+/**
+ * > Unknown.
+ */
+export class QuestRedeemPacket implements OutgoingPacket {
 
-    public type = PacketType.QUESTREDEEM;
+  type = PacketType.QUESTREDEEM;
 
-    //#region packet-specific members
-    questId: string;
-    slots: SlotObjectData[];
-    //#endregion
+  //#region packet-specific members
+  /**
+   * > Unknown.
+   */
+  questId: string;
+  /**
+   * > Unknown.
+   */
+  slots: SlotObjectData[];
+  //#endregion
 
-    public read(): void {
-        this.questId = this.readString();
-        const slotsLen = this.readShort();
-        this.slots = new Array<SlotObjectData>(slotsLen);
-        for (let i = 0; i < slotsLen; i++) {
-            this.slots[i] = new SlotObjectData();
-            this.slots[i].read(this);
-        }
+  write(buffer: PacketBuffer): void {
+    buffer.writeString(this.questId);
+    buffer.writeShort(this.slots.length);
+    for (const slot of this.slots) {
+      slot.write(buffer);
     }
-
-    public write(): void {
-        this.writeString(this.questId);
-        this.writeShort(this.slots.length);
-        for (let i = 0; i < this.slots.length; i++) {
-            this.slots[i].write(this);
-        }
-    }
+  }
 }

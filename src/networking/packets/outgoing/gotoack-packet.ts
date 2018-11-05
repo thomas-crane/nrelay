@@ -1,18 +1,25 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class GotoAckPacket extends Packet {
+/**
+ * Sent to acknowledge a `GotoPacket`.
+ */
+export class GotoAckPacket implements OutgoingPacket {
 
-    public type = PacketType.GOTOACK;
+  type = PacketType.GOTOACK;
 
-    //#region packet-specific members
-    time: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The current client time.
+   */
+  time: number;
+  //#endregion
 
-    public read(): void {
-        this.time = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeInt32(this.time);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.time);
+  }
 }

@@ -1,21 +1,41 @@
 # Documentation
-This folder contains all documentation for nrelay.
+
+This folder contains guides and other miscellaneous documentation for nrelay.
+
+The code in the `src/` folder has extensive inline documentation through the use of JSDoc comments. One of the best ways to explore this documentation is by using a code editor like [VSCode](https://code.visualstudio.com/), which utilises these comments to provide a rich intellisense experience.
+
+If you prefer to read through the documentation online, or simply need a quick reference, the entire inline documentation is also available at [docs.nrelay.net](https://docs.nrelay.net/)
 
 ## Contents
-The contents of the `docs` folder mirrors that of the `src` folder. For example, the `Client` class is in `src/core/client`, so the docs will be at `docs/core/client`.
 
-### `plugin-recipes`
+### `plugin-recipes/`
+
 The plugin recipes folder contains tutorials on how to create a variety of plugins. Use these docs if you are looking for ideas for plugins, or want to learn more about how to create functional plugins.
 
-### `creating-plugins`
+### [`creating-plugins.md`](creating-plugins.md)
+
 This is a guide which provides a tutorial on how to write a basic plugin, including some of the services which are available to plugins.
 
 Use this document to learn about the process of creating plugins which utilize available features.
 
-### `packet-structures`
+### [`logging-guide.md`](logging-guide.md)
+
+This document describes how the logging mechanism in nrelay works, and includes guides on how to create custom loggers with rich functionality.
+
+### [`packet-structures.md`](packet-structures.md)
+
 This document includes documentation for all packets which are currently implemented. The documentation includes all members which are available in the packets as well as a description of what the members are. __Some of the member descriptions may not be accurate__. If an inacuracy is suspected, there will usually be a note outlining several possibilities of what the member actually is. If you notice an incorrect member description, please open an issue outlining which description is incorrect and what the correct description is.
 
 Use this document to learn about what members are available for packets of interest.
 
-### `plugin-components`
-This document gives an overview of all plugin components which are available for other plugins to use.
+### [`running-on-android.md`](running-on-android.md)
+
+This document, written by [Gravitir314](https://github.com/Gravitir314) describes how nrelay can be installed and run on an Android phone.
+
+### [`the-local-server.md`](the-local-server.md)
+
+This document provides an overview of the Local Server provided by nrelay, and describes how the local server can be used to send data between nrelay and another process.
+
+### [`the-standard-library.md`](the-standard-library.md)
+
+This document provides an overview of the nrelay standard library, and includes example usages of each library that is available to use.

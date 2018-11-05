@@ -1,20 +1,26 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 import { SlotObjectData } from '../../data/slot-object-data';
 
-export class InvDropPacket extends Packet {
+/**
+ * Sent to drop an item from the client's inventory.
+ */
+export class InvDropPacket implements OutgoingPacket {
 
-    public type = PacketType.INVDROP;
+  type = PacketType.INVDROP;
 
-    //#region packet-specific members
-    slotObject: SlotObjectData;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The slot to drop the item from.
+   */
+  slotObject: SlotObjectData;
+  //#endregion
 
-    public read(): void {
-        this.slotObject = new SlotObjectData();
-        this.slotObject.read(this);
-    }
-
-    public write(): void {
-        this.slotObject.write(this);
-    }
+  write(buffer: PacketBuffer): void {
+    this.slotObject.write(buffer);
+  }
 }

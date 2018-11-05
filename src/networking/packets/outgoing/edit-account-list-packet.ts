@@ -1,24 +1,35 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class EditAccountListPacket extends Packet {
+/**
+ * Sent to edit an account id list.
+ */
+export class EditAccountListPacket implements OutgoingPacket {
 
-    public type = PacketType.EDITACCOUNTLIST;
+  type = PacketType.EDITACCOUNTLIST;
 
-    //#region packet-specific members
-    accountListId: number;
-    add: boolean;
-    objectId: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The id of the account id list being edited.
+   */
+  accountListId: number;
+  /**
+   * Whether the edit is to add to the list or remove from it.
+   */
+  add: boolean;
+  /**
+   * The object id of the player to add to the list.
+   */
+  objectId: number;
+  //#endregion
 
-    public read(): void {
-        this.accountListId = this.readInt32();
-        this.add = this.readBoolean();
-        this.objectId = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeInt32(this.accountListId);
-        this.writeBoolean(this.add);
-        this.writeInt32(this.objectId);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.accountListId);
+    buffer.writeBoolean(this.add);
+    buffer.writeInt32(this.objectId);
+  }
 }

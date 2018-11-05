@@ -1,21 +1,30 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class ClaimDailyRewardMessage extends Packet {
+/**
+ * Sent to claim rewards from the login calendar.
+ */
+export class ClaimDailyRewardMessage implements OutgoingPacket {
 
-    public type = PacketType.CLAIMLOGIN_REWARD_MSG;
+  type = PacketType.CLAIMLOGIN_REWARD_MSG;
 
-    //#region packet-specific members
-    claimKey: string;
-    claimType: string;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The key of the item being claimed.
+   */
+  claimKey: string;
+  /**
+   * The type of claim being made.
+   */
+  claimType: string;
+  //#endregion
 
-    public read(): void {
-        this.claimKey = this.readString();
-        this.claimType = this.readString();
-    }
-
-    public write(): void {
-        this.writeString(this.claimKey);
-        this.writeString(this.claimType);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeString(this.claimKey);
+    buffer.writeString(this.claimType);
+  }
 }

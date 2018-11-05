@@ -1,18 +1,26 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class PingPacket extends Packet {
+/**
+ * Received occasionally by the server to prompt a response from the client.
+ */
+export class PingPacket implements IncomingPacket {
 
-    public type = PacketType.PING;
+  type = PacketType.PING;
+  propagate = true;
 
-    //#region packet-specific members
-    serial: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * A nonce value which is expected to be present in the reply.
+   */
+  serial: number;
+  //#endregion
 
-    public read(): void {
-        this.serial = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeInt32(this.serial);
-    }
+  read(buffer: PacketBuffer): void {
+    this.serial = buffer.readInt32();
+  }
 }

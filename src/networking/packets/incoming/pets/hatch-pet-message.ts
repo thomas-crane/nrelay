@@ -1,21 +1,31 @@
-import { Packet, PacketType } from '../../../packet';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../../packet-buffer';
+import { PacketType } from '../../../packet-type';
+import { IncomingPacket } from '../../../packet';
 
-export class HatchPetMessage extends Packet {
+/**
+ * Recieved to give the player information about a newly hatched pet.
+ */
+export class HatchPetMessage implements IncomingPacket {
 
-    public type = PacketType.HATCHPET;
+  type = PacketType.HATCHPET;
+  propagate = true;
 
-    //#region packet-specific members
-    petName: string;
-    petSkin: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The name of the hatched pet.
+   */
+  petName: string;
+  /**
+   * The skin id of the hatched pet.
+   */
+  petSkin: number;
+  //#endregion
 
-    public read(): void {
-        this.petName = this.readString();
-        this.petSkin = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeString(this.petName);
-        this.writeInt32(this.petSkin);
-    }
+  read(buffer: PacketBuffer): void {
+    this.petName = buffer.readString();
+    this.petSkin = buffer.readInt32();
+  }
 }

@@ -1,18 +1,25 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/outgoing
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { OutgoingPacket } from '../../packet';
 
-export class ReskinPacket extends Packet {
+/**
+ * Sent to activate a new skin for the current character.
+ */
+export class ReskinPacket implements OutgoingPacket {
 
-    public type = PacketType.RESKIN;
+  type = PacketType.RESKIN;
 
-    //#region packet-specific members
-    skinId: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The id of the skin to activate.
+   */
+  skinId: number;
+  //#endregion
 
-    public read(): void {
-        this.skinId = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeInt32(this.skinId);
-    }
+  write(buffer: PacketBuffer): void {
+    buffer.writeInt32(this.skinId);
+  }
 }

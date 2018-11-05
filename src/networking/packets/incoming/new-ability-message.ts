@@ -1,18 +1,26 @@
-import { Packet, PacketType } from '../../packet';
+/**
+ * @module networking/packets/incoming
+ */
+import { PacketBuffer } from '../../packet-buffer';
+import { PacketType } from '../../packet-type';
+import { IncomingPacket } from '../../packet';
 
-export class NewAbilityMessage extends Packet {
+/**
+ * Received when a new ability has been unlocked by the player.
+ */
+export class NewAbilityMessage implements IncomingPacket {
 
-    public type = PacketType.NEWABILITY;
+  type = PacketType.NEWABILITY;
+  propagate = true;
 
-    //#region packet-specific members
-    abilityType: number;
-    //#endregion
+  //#region packet-specific members
+  /**
+   * The type of ability which has been unlocked.
+   */
+  abilityType: number;
+  //#endregion
 
-    public read(): void {
-        this.abilityType = this.readInt32();
-    }
-
-    public write(): void {
-        this.writeInt32(this.abilityType);
-    }
+  read(buffer: PacketBuffer): void {
+    this.abilityType = buffer.readInt32();
+  }
 }
