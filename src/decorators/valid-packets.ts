@@ -35,6 +35,7 @@ export const VALID_PACKET_HOOKS = [
   'PingPacket',
   'QuestObjectIdPacket',
   'QuestRedeemResponsePacket',
+  'RealmHeroLeftMsgPacket',
   'ReconnectPacket',
   'ReskinUnlockPacket',
   'ServerPlayerShootPacket',
