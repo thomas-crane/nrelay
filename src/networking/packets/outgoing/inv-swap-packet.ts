@@ -35,8 +35,6 @@ export class InvSwapPacket implements OutgoingPacket {
 
   write(buffer: PacketBuffer): void {
     buffer.writeInt32(this.time);
-    console.log(this.slotObject1.objectId + ' ' + this.slotObject1.objectType + ' ' + this.slotObject1.slotId);
-    console.log(this.slotObject2.objectId + ' ' + this.slotObject2.objectType + ' ' + this.slotObject2.slotId);
     this.position.write(buffer);
     this.slotObject1.write(buffer);
     this.slotObject2.write(buffer);
