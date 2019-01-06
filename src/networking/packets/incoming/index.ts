@@ -40,3 +40,4 @@ export * from './update-packet';
 export * from './verify-email-packet';
 export * from './arena/index';
 export * from './pets/index';
+export * from './realm-hero-left-msg';
