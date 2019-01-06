@@ -8,7 +8,7 @@ import { IncomingPacket } from '../../packet';
 /**
  * Received to tell the player the heroes left in the realm.
  */
-export class RealmHeroLeftMsgPacket implements IncomingPacket {
+export class RealmHeroLeftMessage implements IncomingPacket {
 
   type = PacketType.REALMHERO_LEFT_MSG;
   propagate = true;

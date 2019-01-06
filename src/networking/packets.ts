@@ -45,7 +45,7 @@ import { TradeStartPacket } from './packets/incoming/trade-start-packet';
 import { UpdatePacket } from './packets/incoming/update-packet';
 import { VerifyEmailPacket } from './packets/incoming/verify-email-packet';
 import { IncomingPacket } from './packet';
-import { RealmHeroLeftMsgPacket } from './packets/incoming/realm-hero-left-msg';
+import { RealmHeroLeftMessage } from './packets/incoming/realm-hero-left-msg';
 
 /**
  * A static utility class for creating packet objects from a `PacketType`.
@@ -189,7 +189,7 @@ export class Packets {
         packet = new VerifyEmailPacket();
         break;
       case PacketType.REALMHERO_LEFT_MSG:
-        packet = new RealmHeroLeftMsgPacket();
+        packet = new RealmHeroLeftMessage();
         break;
     }
     return packet;
