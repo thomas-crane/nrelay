@@ -1,64 +1,63 @@
 /**
  * @module core
  */
-import { Socket } from 'net';
-import { Logger, LogLevel, Random, Storage } from '../services';
-import { PacketType, PacketIO, IncomingPacket } from './../networking';
+import {Socket} from 'net';
+import {Logger, LogLevel, Random, Storage} from '../services';
+import {IncomingPacket, PacketIO, PacketType} from './../networking';
 import {
+  AoeAckPacket,
+  CreatePacket,
+  EnemyHitPacket,
+  GotoAckPacket,
   HelloPacket,
   LoadPacket,
-  PongPacket,
   MovePacket,
-  CreatePacket,
-  GotoAckPacket,
-  AoeAckPacket,
-  ShootAckPacket,
-  UpdateAckPacket,
-  PlayerShootPacket,
   PlayerHitPacket,
-  EnemyHitPacket
+  PlayerShootPacket,
+  PongPacket,
+  ShootAckPacket,
+  UpdateAckPacket
 } from './../networking/packets/outgoing';
 import {
-  UpdatePacket,
-  PingPacket,
-  NewTickPacket,
-  FailurePacket,
-  CreateSuccessPacket,
-  MapInfoPacket,
-  GotoPacket,
-  ReconnectPacket,
   AoePacket,
+  CreateSuccessPacket,
+  DamagePacket,
   EnemyShootPacket,
+  FailurePacket,
+  GotoPacket,
+  MapInfoPacket,
+  NewTickPacket,
+  PingPacket,
+  ReconnectPacket,
   ServerPlayerShootPacket,
-  DamagePacket
+  UpdatePacket
 } from './../networking/packets/incoming';
 import {
-  Account, CharacterInfo,
-  PlayerData, getDefaultPlayerData,
+  Account,
+  CharacterInfo,
   Classes,
-  MapInfo,
-  environment,
-  Projectile,
+  ConditionEffect,
+  ConditionEffects,
   Enemy,
+  GameId,
+  getDefaultPlayerData,
+  MapInfo,
   MoveRecords,
-  ConditionEffects, ConditionEffect,
+  PlayerData,
+  Projectile,
   Proxy,
   Server
 } from './../models';
-import {
-  WorldPosData,
-  GroundTileData,
-  ObjectStatusData,
-} from './../networking/data';
-import { LibraryManager, ResourceManager } from './../core';
-import { PacketHook } from './../decorators';
-import { EventEmitter } from 'events';
-import { SocksClient } from 'socks';
-import { CLI } from '..';
-import { Pathfinder, NodeUpdate, Point } from '../services/pathfinding';
-import { FailureCode } from '../models/failure-code';
-import { GameId } from '../models/game-ids';
-import { MapTile } from '../models/map-tile';
+import {ObjectStatusData, WorldPosData,} from './../networking/data';
+import {LibraryManager, ResourceManager} from './../core';
+import {PacketHook} from './../decorators';
+import {EventEmitter} from 'events';
+import {SocksClient} from 'socks';
+import {CLI} from '..';
+import {NodeUpdate, Pathfinder, Point} from '../services/pathfinding';
+import {FailureCode} from '../models/failure-code';
+import {GameId} from '../models/game-ids';
+import {MapTile} from '../models/map-tile';
 
 const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
@@ -396,6 +395,14 @@ export class Client {
    *  @param gameId The gameId to use upon connecting.
    */
   changeGameId(gameId: GameId): void {
+    switch (gameId) {
+      case GameId.Nexus:
+      case GameId.Vault:
+      case GameId.QuestRoom:
+      case GameId.Tutorial:
+        this.internalServer = Object.assign({}, this.nexusServer);
+        break;
+    }
     Logger.log(this.alias, `Changing gameId to ${gameId}`, LogLevel.Info);
     this.gameId = gameId;
     this.connect();
