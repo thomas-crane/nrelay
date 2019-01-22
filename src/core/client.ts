@@ -2,7 +2,7 @@
  * @module core
  */
 import {Socket} from 'net';
-import {Logger, LogLevel, Random, Storage} from '../services';
+import {AccountService, Logger, LogLevel, Random, Storage} from '../services';
 import {IncomingPacket, PacketIO, PacketType} from './../networking';
 import {
   AoeAckPacket,
@@ -389,6 +389,18 @@ export class Client {
       const PROXY = P[Math.floor(Math.random() * P.length)];
       this.setProxy(PROXY);
     }
+  }
+
+  /**
+   * Connect the bot to the random internal server.
+   */
+  switchServer(): void {
+    const NAME = AccountService.internalServerNames[Math.floor(Math.random() * AccountService.internalServerNames.length)];
+    AccountService.getServerList().then(servers => {
+      this.connectToServer(servers[NAME]);
+    }).catch(e => {
+      Logger.log(this.alias, e.message, LogLevel.Error);
+    });
   }
 
   /**
