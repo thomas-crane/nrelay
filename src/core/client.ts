@@ -380,6 +380,18 @@ export class Client {
   }
 
   /**
+   * Switches the client connect to a proxied connection.
+   * Get proxies from `nrelay/resources/proxy.json`.
+   * Use Proxy interface as format example.
+   */
+  switchProxy() {
+    const P = Storage.getProxyList();
+    if (!P) return;
+    const PROXY = P[Math.floor(Math.random() * P.length)];
+    this.setProxy(PROXY);
+  }
+
+  /**
    * Connects the bot to the `server`.
    * @param server The server to connect to.
    */
@@ -963,6 +975,8 @@ export class Client {
       }).catch((error) => {
         Logger.log(this.alias, 'Error establishing proxy', LogLevel.Error);
         Logger.log(this.alias, error, LogLevel.Error);
+        //Logger.log(this.alias, 'Switch to the random proxy', LogLevel.Info);
+        //this.switchProxy();
       });
     } else {
       this.clientSocket = new Socket({

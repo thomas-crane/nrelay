@@ -1,7 +1,7 @@
 /**
  * @module services
  */
-import { AccountInfo } from './../models';
+import { AccountInfo, Proxy } from './../models';
 import { Logger, LogLevel } from './logger';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -92,6 +92,14 @@ export class Storage {
   static getAccountConfig(): AccountInfo {
     return require('./../../acc-config.json');
   }
+
+  /**
+   * Gets the contents of the 'proxy.json' file and returns
+   * it as an `Proxy` array.
+   */
+  static getProxyList(): Proxy[] {
+    return require(Storage.makePath('resources') + '/proxy.json');
+  };
 
   /**
    * Replaces the "buildVersion" value in the acc-config with `newVersion`.
