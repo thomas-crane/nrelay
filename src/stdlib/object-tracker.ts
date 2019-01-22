@@ -8,7 +8,7 @@ import { ObjectData, UpdatePacket, NewTickPacket } from '../networking';
 /**
  * An event listener for events emitted by the `ObjectTracker`.
  */
-export type ObjectEventListener = (obj: ObjectData, client: Client) => void;
+export type ObjectEventListener = (obj: ObjectData | number, client: Client) => void;
 
 @Library({
   name: 'Object Tracker',
@@ -35,7 +35,7 @@ export class ObjectTracker {
    * @param event The event to attach the listener to.
    * @param listener The function to invoke when the event is fired.
    */
-  on(event: number | 'any', listener: ObjectEventListener): this {
+  on(event: number | 'update' | 'drop', listener: ObjectEventListener): this {
     this.emitter.on(event.toString(), listener);
     return this;
   }
@@ -76,7 +76,7 @@ export class ObjectTracker {
         }
         this.trackedObjects[client.guid].push(obj);
         this.emitter.emit(obj.objectType.toString(), obj, client);
-        this.emitter.emit('any', obj, client);
+        this.emitter.emit('update', obj, client);
       }
     }
 
@@ -87,6 +87,7 @@ export class ObjectTracker {
       for (let n = 0; n < this.trackedObjects[client.guid].length; n++) {
         if (this.trackedObjects[client.guid][n].status.objectId === drop) {
           this.trackedObjects[client.guid].splice(n, 1);
+          this.emitter.emit('drop', drop, client);
           break;
         }
       }

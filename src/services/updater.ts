@@ -342,7 +342,7 @@ export class Updater {
         }
         Logger.log('Updater', `Unpacked ${swfName}`, LogLevel.Success);
         resolve();
-      })
+      });
     });
   }
 
