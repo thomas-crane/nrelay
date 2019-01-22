@@ -99,7 +99,7 @@ export class Storage {
    */
   static getProxyList(): Proxy[] {
     return require(Storage.makePath('resources') + '/proxy.json');
-  };
+  }
 
   /**
    * Replaces the "buildVersion" value in the acc-config with `newVersion`.

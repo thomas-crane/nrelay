@@ -48,7 +48,7 @@ import {
   Proxy,
   Server
 } from './../models';
-import {ObjectStatusData, WorldPosData,} from './../networking/data';
+import {ObjectStatusData, WorldPosData} from './../networking/data';
 import {LibraryManager, ResourceManager} from './../core';
 import {PacketHook} from './../decorators';
 import {EventEmitter} from 'events';
@@ -56,7 +56,6 @@ import {SocksClient} from 'socks';
 import {CLI} from '..';
 import {NodeUpdate, Pathfinder, Point} from '../services/pathfinding';
 import {FailureCode} from '../models/failure-code';
-import {GameId} from '../models/game-ids';
 import {MapTile} from '../models/map-tile';
 
 const MIN_MOVE_SPEED = 0.004;
@@ -384,11 +383,12 @@ export class Client {
    * Get proxies from `nrelay/resources/proxy.json`.
    * Use Proxy interface as format example.
    */
-  switchProxy() {
+  switchProxy(): void {
     const P = Storage.getProxyList();
-    if (!P) return;
-    const PROXY = P[Math.floor(Math.random() * P.length)];
-    this.setProxy(PROXY);
+    if (P) {
+      const PROXY = P[Math.floor(Math.random() * P.length)];
+      this.setProxy(PROXY);
+    }
   }
 
   /**
@@ -975,8 +975,8 @@ export class Client {
       }).catch((error) => {
         Logger.log(this.alias, 'Error establishing proxy', LogLevel.Error);
         Logger.log(this.alias, error, LogLevel.Error);
-        //Logger.log(this.alias, 'Switch to the random proxy', LogLevel.Info);
-        //this.switchProxy();
+        // Logger.log(this.alias, 'Switch to the random proxy', LogLevel.Info);
+        // this.switchProxy();
       });
     } else {
       this.clientSocket = new Socket({

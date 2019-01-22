@@ -357,7 +357,7 @@ export class Updater {
     FILES.forEach((filename, index) => {
       const NAME = filename.match(IMAGE_REGEX);
       if (NAME) {
-        fs.copyFileSync(`${assetPath}/${filename}`, `${DIR}/${NAME[1]}.${NAME[2]}`)
+        fs.copyFileSync(`${assetPath}/${filename}`, `${DIR}/${NAME[1]}.${NAME[2]}`);
       }
     });
 
