@@ -7,12 +7,13 @@ import { exec } from 'child_process';
 
 import * as https from 'https';
 import { createWriteStream, PathLike } from 'fs';
-import { Logger, LogLevel } from './../services';
+import { Logger, LogLevel, Storage } from './../services';
 import { ASSET_ENDPOINT, CLIENT_VERSION_ENDPOINT, CLIENT_DL_ENDPOINT } from '../models';
 import { HttpClient } from './http';
 import { PacketIdMap, PacketType, Mapper } from '../networking';
 
 const PACKET_REGEX = /static const ([A-Z_]+):int = (\d+);/g;
+const IMAGE_REGEX = /_(\w+)Embed_\.(png|jpg)$/;
 const dir = path.dirname(require.main.filename);
 const GSC_PATH = path.join(
   'scripts', 'kabam', 'rotmg', 'messaging',
@@ -287,6 +288,7 @@ export class Updater {
       Logger.log('Updater', 'Updating assets.', LogLevel.Info);
       const packets = this.extractPacketInfo(path.join(swfDir, 'decompiled', GSC_PATH));
       this.updatePackets(packets);
+      this.updateTextures(path.join(swfDir, 'decompiled', 'images'));
     });
   }
 
@@ -312,7 +314,7 @@ export class Updater {
   private static unpackSwf(parentDir: string, swfName: string): Promise<any> {
     return new Promise((resolve: () => void, reject: (err: Error) => void) => {
       Logger.log('Updater', `Unpacking ${swfName}`, LogLevel.Info);
-      const args = [
+      let args = [
         '-jar',
         (`"${path.join(dir, 'lib', 'jpexs', 'ffdec.jar')}"`),
         '-selectclass kabam.rotmg.messaging.impl.GameServerConnection',
@@ -325,10 +327,40 @@ export class Updater {
           reject(error);
           return;
         }
+      });
+      args = [
+        '-jar',
+        (`"${path.join(dir, 'lib', 'jpexs', 'ffdec.jar')}"`),
+        '-export image',
+        (`"${path.join(parentDir, 'decompiled', 'images')}"`),
+        (`"${path.join(parentDir, swfName)}"`)
+      ];
+      exec(`java ${args.join(' ')}`, (error, stdout, stderr) => {
+        if (error) {
+          reject(error);
+          return;
+        }
         Logger.log('Updater', `Unpacked ${swfName}`, LogLevel.Success);
         resolve();
-      });
+      })
     });
+  }
+
+  /**
+   * Update the textures from the given folder to `nrelay/resources/textures` folder.
+   * @param assetPath The path to the folder that contain extracted assets.
+   */
+  private static updateTextures(assetPath: string): void {
+    const DIR = Storage.makePath('resources', 'textures');
+    fs.mkdirSync(DIR);
+    const FILES = fs.readdirSync(assetPath);
+    FILES.forEach((filename, index) => {
+      const NAME = filename.match(IMAGE_REGEX);
+      if (NAME) {
+        fs.copyFileSync(`${assetPath}/${filename}`, `${DIR}/${NAME[1]}.${NAME[2]}`)
+      }
+    });
+
   }
 
   /**
