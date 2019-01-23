@@ -18,6 +18,8 @@ const ERROR_REGEX = /<Error\/?>(.+)<\/?Error>/;
  */
 export class AccountService {
 
+  static internalServerNames: string[];
+
   /**
    * Ensures that the `proxy` has an IPv4 or IPv6 as the
    * host instead of a hostname.
@@ -66,7 +68,7 @@ export class AccountService {
       // try to read last-known-servers.json
       return Storage.get('last-known-servers.json');
     }).then((servers) => {
-      //this.internalServerNames = AccountService.getServersFromCache(servers);
+      // this.internalServerNames = AccountService.getServersFromCache(servers);
       this.internalServerList = servers;
       return this.internalServerList;
     }).catch((error) => {
@@ -112,7 +114,6 @@ export class AccountService {
     });
   }
 
-  public static internalServerNames: string[];
   private static internalServerList: { [name: string]: Server };
 
   private static checkErrors(response: string): void {

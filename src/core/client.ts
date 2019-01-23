@@ -396,10 +396,10 @@ export class Client {
    */
   switchServer(): void {
     const NAME = AccountService.internalServerNames[Math.floor(Math.random() * AccountService.internalServerNames.length)];
-    AccountService.getServerList().then(servers => {
+    AccountService.getServerList().then((servers) => {
       this.connectToServer(servers[NAME]);
-    }).catch(e => {
-      Logger.log(this.alias, e.message, LogLevel.Error);
+    }).catch((error) => {
+      Logger.log(this.alias, error.message, LogLevel.Error);
     });
   }
 
