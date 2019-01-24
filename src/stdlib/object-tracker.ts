@@ -8,7 +8,7 @@ import { ObjectData, UpdatePacket, NewTickPacket } from '../networking';
 /**
  * An event listener for events emitted by the `ObjectTracker`.
  */
-export type ObjectEventListener = (obj: ObjectData | number, client: Client) => void;
+export type ObjectEventListener = (obj: ObjectData, client: Client) => void;
 
 @Library({
   name: 'Object Tracker',
@@ -86,8 +86,8 @@ export class ObjectTracker {
     for (const drop of update.drops) {
       for (let n = 0; n < this.trackedObjects[client.guid].length; n++) {
         if (this.trackedObjects[client.guid][n].status.objectId === drop) {
+          this.emitter.emit('drop', this.trackedObjects[client.guid][n], client);
           this.trackedObjects[client.guid].splice(n, 1);
-          this.emitter.emit('drop', drop, client);
           break;
         }
       }
