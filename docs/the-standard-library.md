@@ -101,16 +101,17 @@ class ExamplePlugin {
 ### API
 The public methods available on the Object Tracker for plugins to use.
 
-#### `on(event: number | 'any', listener: ObjectEventListener): this`
+#### `on(event: number | 'update' | 'drop, listener: ObjectEventListener): this`
 Used to attach an event listener to the object tracker.
 
 `ObjectEventListener` is a type which represents the method signature `(obj: ObjectData, client: Client) => void`, where `obj` is the object which the event is about, and `client` is the client which the event was triggered for.
 
 The `event` can be either:
 + A number, which should be the object type of an object. If an object that is being tracked is detected, the listener will be called.
-+ `'any'`, which will call the listener if *any* of the tracked objects are detected.
++ `'update'`, which will call the listener if *any* of the tracked objects are detected.
++ `'drop'`, which will call the listener if *any* of the tracked objects are gone.
 
-Be aware that the `'any'` event, as the name suggests, is raised when *any* tracked object is detected. This may include objects that **other plugins** have enabled tracking for!
+Be aware that the `'update'` and `'drop''` events, is raised when *any* tracked object is detected. This may include objects that **other plugins** have enabled tracking for!
 
 This method returns the Object Tracker that it was called on, so it can be used in a chained call.
 
@@ -157,7 +158,7 @@ class ExamplePlugin {
     objectTracker
       .startTracking(TOMB_TYPE)
       .startTracking(HALLS_TYPE)
-      .on('any', (obj, client) => {
+      .on('update', (obj, client) => {
         const portalName = NAMES[obj.objectType];
         Logger.log('Dungeons', `A ${portalName} was opened in ${client.server.name}!`);
       });
