@@ -48,4 +48,5 @@ export const VALID_PACKET_HOOKS = [
   'TradeStartPacket',
   'UpdatePacket',
   'VerifyEmailPacket',
+  'RealmHeroLeftMessage',
 ];

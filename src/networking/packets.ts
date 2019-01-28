@@ -44,8 +44,8 @@ import { TradeRequestedPacket } from './packets/incoming/trade-requested-packet'
 import { TradeStartPacket } from './packets/incoming/trade-start-packet';
 import { UpdatePacket } from './packets/incoming/update-packet';
 import { VerifyEmailPacket } from './packets/incoming/verify-email-packet';
-import { IncomingPacket } from './packet';
 import { RealmHeroLeftMessage } from './packets/incoming/realm-hero-left-msg';
+import { IncomingPacket } from './packet';
 
 /**
  * A static utility class for creating packet objects from a `PacketType`.
