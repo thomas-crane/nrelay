@@ -59,7 +59,7 @@ export class AccountService {
       this.checkErrors(response);
       Logger.log('AccountService', 'Server list loaded.', LogLevel.Success);
       this.internalServerList = XMLtoJSON.parseServers(response);
-      this.internalServerNames = XMLtoJSON.parseNames(response);
+      this.internalServerNames = Object.keys(this.internalServerList);
       return Storage.set(this.internalServerList, 'last-known-servers.json');
     }).then(() => {
       Logger.log('AccountService', 'Cached server list.', LogLevel.Success);
@@ -68,7 +68,7 @@ export class AccountService {
       // try to read last-known-servers.json
       return Storage.get('last-known-servers.json');
     }).then((servers) => {
-      // this.internalServerNames = AccountService.getServersFromCache(servers);
+      this.internalServerNames = Object.keys(servers);
       this.internalServerList = servers;
       return this.internalServerList;
     }).catch((error) => {
@@ -76,15 +76,6 @@ export class AccountService {
       return {};
     });
   }
-
-  /*private static getServersFromCache(servers: any): string[] {
-    let output = [] as string[];
-    servers.forEach((server: any) => {
-      console.log(server);
-      output.push(server.name)
-    });
-    return output;
-  }*/
 
   /**
    * Gets the character info for the account provided.
@@ -105,7 +96,7 @@ export class AccountService {
       this.checkErrors(response);
       const info = XMLtoJSON.parseAccountInfo(response);
       this.internalServerList = XMLtoJSON.parseServers(response);
-      this.internalServerNames = XMLtoJSON.parseNames(response);
+      this.internalServerNames = Object.keys(this.internalServerList);
       Storage.set(this.internalServerList, 'last-known-servers.json').catch((error) => {
         Logger.log('AccountService', 'Error while caching servers.', LogLevel.Warning);
         Logger.log('AccountService', error.message, LogLevel.Warning);

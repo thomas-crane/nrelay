@@ -31,20 +31,6 @@ export class XMLtoJSON {
   }
 
   /**
-   * Parses the server list XML into a strings array that contain server name.
-   * @param xml The XML to parse.
-   */
-  static parseNames(xml: string): string[] {
-    let match = SERVER_REGEX.exec(xml);
-    const servers = [] as string[];
-    while (match != null) {
-      servers.push(match[1]);
-      match = SERVER_REGEX.exec(xml);
-    }
-    return servers;
-  }
-
-  /**
    * Parses the account info XML into a `CharacterInfo` object.
    * @param xml The XML to parse.
    */
