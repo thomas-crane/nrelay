@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `7.7.2`
+### Fixes:
+ + Fixed a bug where proxies could not be used to make get requests with the `HttpClient`.
+
 ## `7.7.1`
 ### Fixes:
  + Fixed a bug where weapons with single projectiles could not be fired.
