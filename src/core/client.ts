@@ -656,8 +656,14 @@ export class Client {
 
   @PacketHook()
   private onReconnectPacket(client: Client, reconnectPacket: ReconnectPacket): void {
-    this.internalServer.address = (reconnectPacket.host === '' ? this.nexusServer.address : reconnectPacket.host);
-    this.internalServer.name = (reconnectPacket.host === '' ? this.nexusServer.name : reconnectPacket.name);
+    // if there is a new host, then switch to it.
+    if (reconnectPacket.host !== '') {
+      this.internalServer.address = reconnectPacket.host;
+    }
+    // same story with the name.
+    if (reconnectPacket.name !== '') {
+      this.internalServer.name = reconnectPacket.name;
+    }
     this.gameId = reconnectPacket.gameId;
     this.key = reconnectPacket.key;
     this.keyTime = reconnectPacket.keyTime;

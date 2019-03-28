@@ -1,6 +1,11 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `7.7.3`
+### Fixes:
+ + Fixed a bug where reconnect packets would sometimes use the wrong host.
+ + Fixed a race condition in the PacketIO.
+
 ## `7.7.2`
 ### Fixes:
  + Fixed a bug where proxies could not be used to make get requests with the `HttpClient`.
