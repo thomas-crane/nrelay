@@ -59,11 +59,14 @@ export class PacketIO {
       this.socket.removeListener('data', this.processData.bind(this));
       this.socket.removeListener('close', this.onClose.bind(this));
     }
-    this.receiveRC4 = null;
-    this.sendRC4 = null;
-    this.packetBuffer = null;
     this.emitter.removeAllListeners('error');
     this.emitter.removeAllListeners('packet');
+    process.nextTick(() => {
+      // if data is currently being processed, let it finish.
+      this.receiveRC4 = null;
+      this.sendRC4 = null;
+      this.packetBuffer = null;
+    });
   }
 
   /**
