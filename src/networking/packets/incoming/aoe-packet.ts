@@ -45,6 +45,10 @@ export class AoePacket implements IncomingPacket {
    * > The encoding of the color is unknown.
    */
   color: number;
+  /**
+   * Whether or not this AoE grenade is armor piercing.
+   */
+  armorPiercing: boolean;
   //#endregion
 
   read(buffer: PacketBuffer): void {
@@ -56,5 +60,6 @@ export class AoePacket implements IncomingPacket {
     this.duration = buffer.readFloat();
     this.origType = buffer.readUnsignedShort();
     this.color = buffer.readInt32();
+    this.armorPiercing = buffer.readBoolean();
   }
 }
