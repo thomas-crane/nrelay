@@ -1,64 +1,62 @@
 /**
  * @module core
  */
-import { Socket } from 'net';
-import { Logger, LogLevel, Random, Storage } from '../services';
-import { PacketType, PacketIO, IncomingPacket } from './../networking';
-import {
-  HelloPacket,
-  LoadPacket,
-  PongPacket,
-  MovePacket,
-  CreatePacket,
-  GotoAckPacket,
-  AoeAckPacket,
-  ShootAckPacket,
-  UpdateAckPacket,
-  PlayerShootPacket,
-  PlayerHitPacket,
-  EnemyHitPacket
-} from './../networking/packets/outgoing';
-import {
-  UpdatePacket,
-  PingPacket,
-  NewTickPacket,
-  FailurePacket,
-  CreateSuccessPacket,
-  MapInfoPacket,
-  GotoPacket,
-  ReconnectPacket,
-  AoePacket,
-  EnemyShootPacket,
-  ServerPlayerShootPacket,
-  DamagePacket
-} from './../networking/packets/incoming';
-import {
-  Account, CharacterInfo,
-  PlayerData, getDefaultPlayerData,
-  Classes,
-  MapInfo,
-  environment,
-  Projectile,
-  Enemy,
-  MoveRecords,
-  ConditionEffects, ConditionEffect,
-  Proxy,
-  Server
-} from './../models';
-import {
-  WorldPosData,
-  GroundTileData,
-  ObjectStatusData,
-} from './../networking/data';
-import { LibraryManager, ResourceManager } from './../core';
-import { PacketHook } from './../decorators';
 import { EventEmitter } from 'events';
+import { Socket } from 'net';
 import { SocksClient } from 'socks';
-import { CLI } from '..';
-import { Pathfinder, NodeUpdate, Point } from '../services/pathfinding';
 import { FailureCode } from '../models/failure-code';
 import { GameId } from '../models/game-ids';
 import { MapTile } from '../models/map-tile';
+import { Runtime } from '../runtime/runtime';
+import { Logger, LogLevel, Random } from '../services';
+import { NodeUpdate, Pathfinder, Point } from '../services/pathfinding';
+import { LibraryManager } from './../core';
+import { PacketHook } from './../decorators';
+import {
+  Account,
+  CharacterInfo,
+  Classes,
+  ConditionEffect,
+  ConditionEffects,
+  Enemy,
+  getDefaultPlayerData,
+  MapInfo,
+  MoveRecords,
+  PlayerData,
+  Projectile,
+  Proxy,
+  Server,
+} from './../models';
+import { IncomingPacket, PacketIO } from './../networking';
+import { ObjectStatusData, WorldPosData } from './../networking/data';
+import {
+  AoePacket,
+  CreateSuccessPacket,
+  DamagePacket,
+  EnemyShootPacket,
+  FailurePacket,
+  GotoPacket,
+  MapInfoPacket,
+  NewTickPacket,
+  PingPacket,
+  ReconnectPacket,
+  ServerPlayerShootPacket,
+  UpdatePacket,
+} from './../networking/packets/incoming';
+import {
+  AoeAckPacket,
+  CreatePacket,
+  EnemyHitPacket,
+  GotoAckPacket,
+  HelloPacket,
+  LoadPacket,
+  MovePacket,
+  PlayerHitPacket,
+  PlayerShootPacket,
+  PongPacket,
+  ShootAckPacket,
+  UpdateAckPacket,
+} from './../networking/packets/outgoing';
 
 const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
@@ -166,6 +164,10 @@ export class Client {
    */
   readonly password: string;
   /**
+   * The runtime in which this client is running.
+   */
+  readonly runtime: Runtime;
+  /**
    * Whether or not the client should automatically shoot at enemies.
    */
   autoAim: boolean;
@@ -217,9 +219,6 @@ export class Client {
   private gameId: GameId;
   private reconnectCooldown: number;
 
-  // packet control
-  private blockedPackets: PacketType[];
-
   // enemies/projeciles
   private projectiles: Projectile[];
   private random: Random;
@@ -231,11 +230,11 @@ export class Client {
    * @param buildVersion The current build version of RotMG.
    * @param accInfo The account info to connect with.
    */
-  constructor(server: Server, buildVersion: string, accInfo: Account) {
+  constructor(runtime: Runtime, server: Server, accInfo: Account) {
     if (!Client.emitter) {
       Client.emitter = new EventEmitter();
     }
-    this.blockedPackets = [];
+    this.runtime = runtime;
     this.projectiles = [];
     this.enemies = new Map();
     this.autoAim = true;
@@ -252,7 +251,7 @@ export class Client {
     this.socketConnected = false;
     this.guid = accInfo.guid;
     this.password = accInfo.password;
-    this.buildVersion = buildVersion;
+    this.buildVersion = this.runtime.buildVersion;
     this.alias = accInfo.alias;
     this.proxy = accInfo.proxy;
     this.pathfinderEnabled = accInfo.pathfinder || false;
@@ -276,7 +275,7 @@ export class Client {
       return;
     }
     const time = this.getTime();
-    const item = ResourceManager.items[this.playerData.inventory[0]];
+    const item = this.runtime.resources.items[this.playerData.inventory[0]];
     const attackPeriod = 1 / this.getAttackFrequency() * (1 / item.rateOfFire);
     const numProjectiles = item.numProjectiles > 0 ? item.numProjectiles : 1;
     if (time < this.lastAttackTime + attackPeriod) {
@@ -391,32 +390,6 @@ export class Client {
     Logger.log(this.alias, `Changing gameId to ${gameId}`, LogLevel.Info);
     this.gameId = gameId;
     this.connect();
-  }
-
-  /**
-   * Blocks the next packet of the specified type.
-   * @param packetType The packet type to block.
-   * @deprecated Prefer using a library to hook the desired packet
-   * and set its `send` property to `false`.
-   */
-  blockNext(packetType: PacketType): void {
-    if (this.blockedPackets.indexOf(packetType) < 0) {
-      this.blockedPackets.push(packetType);
-    }
-  }
-
-  /**
-   * Broadcasts a packet to all connected clients except
-   * the client which broadcasted the packet.
-   * @param packet The packet to broadcast.
-   */
-  broadcastPacket(packet: IncomingPacket): void {
-    const clients = CLI.getClients();
-    for (const client of clients) {
-      if (client.guid !== this.guid) {
-        client.packetio.emitPacket(packet);
-      }
-    }
   }
 
   /**
@@ -571,8 +544,8 @@ export class Client {
         this.playerData = ObjectStatusData.processObject(obj);
         this.playerData.server = this.internalServer.name;
       }
-      if (ResourceManager.objects[obj.objectType]) {
-        const gameObject = ResourceManager.objects[obj.objectType];
+      if (this.runtime.resources.objects[obj.objectType]) {
+        const gameObject = this.runtime.resources.objects[obj.objectType];
         if (gameObject.fullOccupy || gameObject.occupySquare) {
           const index = Math.floor(obj.status.pos.y) * this.mapInfo.width + Math.floor(obj.status.pos.x);
           if (!this.mapTiles[index]) {
@@ -610,7 +583,7 @@ export class Client {
       this.mapTiles[index] = tile as MapTile;
       this.mapTiles[index].occupied = occupied;
       if (this.pathfinderEnabled) {
-        if (ResourceManager.tiles[tile.type].noWalk) {
+        if (this.runtime.resources.tiles[tile.type].noWalk) {
           pathfinderUpdates.push({
             x: Math.floor(tile.x),
             y: Math.floor(tile.y),
@@ -670,7 +643,7 @@ export class Client {
       case FailureCode.IncorrectVersion:
         Logger.log(this.alias, 'buildVersion out of date. Updating and reconnecting...');
         this.buildVersion = failurePacket.errorDescription;
-        Storage.updateBuildVersion(failurePacket.errorDescription);
+        // Storage.updateBuildVersion(failurePacket.errorDescription);
         break;
       case FailureCode.InvalidTeleportTarget:
         Logger.log(this.alias, 'Invalid teleport target.', LogLevel.Warning);
@@ -751,7 +724,7 @@ export class Client {
     }
 
     if (this.autoAim && this.playerData.inventory[0] !== -1 && this.enemies.size > 0) {
-      const projectile = ResourceManager.items[this.playerData.inventory[0]].projectile;
+      const projectile = this.runtime.resources.items[this.playerData.inventory[0]].projectile;
       const distance = projectile.lifetimeMS * (projectile.speed / 10000);
       for (const enemy of this.enemies.values()) {
         if (enemy.squareDistanceTo(this.worldPos) < distance ** 2) {
@@ -958,14 +931,9 @@ export class Client {
     if (this.packetio) {
       this.packetio.destroy();
     }
-    this.packetio = new PacketIO(this.clientSocket);
+    this.packetio = new PacketIO(this.clientSocket, this.runtime.packetMap);
     this.packetio.on('packet', (data: IncomingPacket) => {
-      const index = this.blockedPackets.indexOf(data.type);
-      if (index > -1) {
-        this.blockedPackets = this.blockedPackets.filter((p) => p !== data.type);
-      } else {
-        LibraryManager.callHooks(data, this);
-      }
+      LibraryManager.callHooks(data, this);
     });
     this.packetio.on('error', (err: Error) => {
       Logger.log(this.alias, `Received PacketIO error: ${err.message}`, LogLevel.Error);
@@ -1027,8 +995,8 @@ export class Client {
     const y = Math.floor(this.worldPos.y);
     let multiplier = 1;
 
-    if (this.mapTiles[y * this.mapInfo.width + x] && ResourceManager.tiles[this.mapTiles[y * this.mapInfo.width + x].type]) {
-      multiplier = ResourceManager.tiles[this.mapTiles[y * this.mapInfo.width + x].type].speed;
+    if (this.mapTiles[y * this.mapInfo.width + x] && this.runtime.resources.tiles[this.mapTiles[y * this.mapInfo.width + x].type]) {
+      multiplier = this.runtime.resources.tiles[this.mapTiles[y * this.mapInfo.width + x].type].speed;
     }
 
     // tslint:disable no-bitwise
