@@ -223,9 +223,7 @@ export class Client {
   // enemies/projeciles
   private projectiles: Projectile[];
   private random: Random;
-  private enemies: {
-    [objectId: number]: Enemy;
-  };
+  private enemies: Map<number, Enemy>;
 
   /**
    * Creates a new instance of the client and begins the connection process to the specified server.
@@ -239,7 +237,7 @@ export class Client {
     }
     this.blockedPackets = [];
     this.projectiles = [];
-    this.enemies = {};
+    this.enemies = new Map();
     this.autoAim = true;
     this.key = [];
     this.keyTime = -1;
@@ -485,15 +483,12 @@ export class Client {
       } else {
         let closestEnemy: Enemy;
         let closestDistance = 10000000;
-        for (const enemyId in this.enemies) {
-          if (this.enemies.hasOwnProperty(enemyId)) {
-            const enemy = this.enemies[+enemyId];
-            const dist = enemy.squareDistanceTo(this.projectiles[i].currentPosition);
-            if (dist < 0.25) {
-              if (dist < closestDistance) {
-                closestDistance = dist;
-                closestEnemy = enemy;
-              }
+        for (const enemy of this.enemies.values()) {
+          const dist = enemy.squareDistanceTo(this.projectiles[i].currentPosition);
+          if (dist < 0.25) {
+            if (dist < closestDistance) {
+              closestDistance = dist;
+              closestEnemy = enemy;
             }
           }
         }
@@ -522,17 +517,20 @@ export class Client {
 
   @PacketHook()
   private onDamage(client: Client, damage: DamagePacket): void {
-    if (this.enemies[damage.targetId]) {
-      this.enemies[damage.targetId].objectData.hp -= damage.damageAmount;
-      if (this.enemies[damage.targetId].objectData.hp < 0 || damage.kill) {
-        delete this.enemies[damage.targetId];
+    // if the bullet hit an enemy, do damage to that enemy
+    if (this.enemies.has(damage.targetId)) {
+      const enemy = this.enemies.get(damage.targetId);
+      enemy.objectData.hp -= damage.damageAmount;
+      // remove the enemy if it's dead.
+      if (enemy.objectData.hp < 0 || damage.kill) {
+        this.enemies.delete(damage.targetId);
       }
       return;
     }
-    if (this.enemies[damage.objectId]) {
-      this.projectiles = this.projectiles.filter((p) => {
-        return !(p.ownerObjectId === damage.objectId && p.bulletId === p.bulletId);
-      });
+    // if an enemy was the target of the damage, remove the projectile.
+    // TODO: handle multi-hit projectiles.
+    if (this.enemies.has(damage.objectId)) {
+      this.projectiles = this.projectiles.filter((p) => p.ownerObjectId !== damage.objectId);
     }
   }
 
@@ -595,9 +593,8 @@ export class Client {
           }
         }
         if (gameObject.enemy) {
-          if (!this.enemies[obj.status.objectId]) {
-            this.enemies[obj.status.objectId]
-              = new Enemy(gameObject, obj.status);
+          if (!this.enemies.has(obj.status.objectId)) {
+            this.enemies.set(obj.status.objectId, new Enemy(gameObject, obj.status));
           }
         }
       }
@@ -625,8 +622,8 @@ export class Client {
 
     // drops
     for (const drop of updatePacket.drops) {
-      if (this.enemies[drop]) {
-        delete this.enemies[drop];
+      if (this.enemies.has(drop)) {
+        this.enemies.delete(drop);
       }
     }
 
@@ -662,8 +659,8 @@ export class Client {
     if (gotoPacket.objectId === this.objectId) {
       this.worldPos = gotoPacket.position.clone();
     }
-    if (this.enemies[gotoPacket.objectId]) {
-      this.enemies[gotoPacket.objectId].onGoto(gotoPacket.position.x, gotoPacket.position.y, this.lastFrameTime);
+    if (this.enemies.has(gotoPacket.objectId)) {
+      this.enemies.get(gotoPacket.objectId).onGoto(gotoPacket.position.x, gotoPacket.position.y, this.lastFrameTime);
     }
   }
 
@@ -748,17 +745,15 @@ export class Client {
         this.playerData.server = this.internalServer.name;
         continue;
       }
-      if (this.enemies[status.objectId]) {
-        this.enemies[status.objectId].onNewTick(status, elapsedMS, newTickPacket.tickId, this.lastFrameTime);
+      if (this.enemies.has(status.objectId)) {
+        this.enemies.get(status.objectId).onNewTick(status, elapsedMS, newTickPacket.tickId, this.lastFrameTime);
       }
     }
 
-    if (this.autoAim && this.playerData.inventory[0] !== -1) {
-      const keys = Object.keys(this.enemies);
+    if (this.autoAim && this.playerData.inventory[0] !== -1 && this.enemies.size > 0) {
       const projectile = ResourceManager.items[this.playerData.inventory[0]].projectile;
       const distance = projectile.lifetimeMS * (projectile.speed / 10000);
-      for (const key of keys) {
-        const enemy = this.enemies[+key];
+      for (const enemy of this.enemies.values()) {
         if (enemy.squareDistanceTo(this.worldPos) < distance ** 2) {
           const angle = Math.atan2(enemy.objectData.worldPos.y - this.worldPos.y, enemy.objectData.worldPos.x - this.worldPos.x);
           this.shoot(angle);
@@ -780,7 +775,7 @@ export class Client {
   private onEnemyShoot(client: Client, enemyShootPacket: EnemyShootPacket): void {
     const shootAck = new ShootAckPacket();
     shootAck.time = this.getTime();
-    const owner = this.enemies[enemyShootPacket.ownerId];
+    const owner = this.enemies.get(enemyShootPacket.ownerId);
     if (!owner || owner.dead) {
       shootAck.time = -1;
     }
@@ -835,9 +830,8 @@ export class Client {
       if (this.worldPos) {
         this.moveRecords.addRecord(time, this.worldPos.x, this.worldPos.y);
       }
-      const enemies = Object.keys(this.enemies).map((k) => this.enemies[+k]);
-      if (enemies.length > 0) {
-        for (const enemy of enemies) {
+      if (this.enemies.size > 0) {
+        for (const enemy of this.enemies.values()) {
           enemy.frameTick(this.lastTickId, time);
         }
       }
@@ -857,7 +851,7 @@ export class Client {
     this.currentTickTime = 0;
     this.lastTickId = -1;
     this.currentBulletId = 1;
-    this.enemies = {};
+    this.enemies = new Map();
     this.projectiles = [];
     this.moveRecords = new MoveRecords();
     this.sendHello();
@@ -893,7 +887,7 @@ export class Client {
       this.pathfinder.destroy();
     }
     this.projectiles = [];
-    this.enemies = {};
+    this.enemies = new Map();
     if (this.frameUpdateTimer) {
       clearInterval(this.frameUpdateTimer);
       this.frameUpdateTimer = null;
