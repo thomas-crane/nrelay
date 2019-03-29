@@ -1,32 +1,99 @@
 /**
  * @module services
  */
-import { Proxy, CharacterInfo, SERVER_ENDPOINT, Server } from '../models';
-import { HttpClient } from './http';
-import { XMLtoJSON } from './xmltojson';
-import * as net from 'net';
 import * as dns from 'dns';
+import * as net from 'net';
 import { Logger, LogLevel } from '../core';
-import { Storage } from './storage';
+import { CharacterInfo, Proxy, SERVER_ENDPOINT } from '../models';
+import { Environment } from '../runtime/environment';
+import { ServerList } from '../runtime/server-list';
+import { HttpClient } from './http';
+import * as xmlToJSON from './xmltojson';
 
 const ACCOUNT_IN_USE_REGEX = /Account in use \((\d+) seconds? until timeout\)/;
 const ERROR_REGEX = /<Error\/?>(.+)<\/?Error>/;
 
-/**
- * A static singleton class which provides utility methods for retrieving
- * information about an account.
- */
+interface CharInfoCache {
+  [guid: string]: CharacterInfo;
+}
+
 export class AccountService {
+  constructor(readonly env: Environment) { }
 
   /**
-   * Ensures that the `proxy` has an IPv4 or IPv6 as the
-   * host instead of a hostname.
-   * @param proxy The proxy to resolve.
+   * Gets the list of servers available to connect to. This will
+   * look in the cache first and will only make a web request if
+   * the cache does not exist.
    */
-  static resolveProxyHostname(proxy: Proxy): Promise<void> {
-    if (!proxy) {
-      return Promise.resolve();
+  getServerList(): Promise<ServerList> {
+    Logger.log('AccountService', 'Loading server list...', LogLevel.Info);
+    const cachedServerList = this.env.readJSON<ServerList>('servers.cache.json');
+    if (cachedServerList) {
+      Logger.log('AccountService', 'Cached server list loaded!', LogLevel.Success);
+      return Promise.resolve(cachedServerList);
+    } else {
+      // if there is no cache, fetch the servers.
+      return HttpClient.get(SERVER_ENDPOINT).then((response) => {
+        // check for errors.
+        const maybeError = this.getError(response);
+        if (maybeError) {
+          throw maybeError;
+        } else {
+          const servers: ServerList = xmlToJSON.parseServers(response);
+          Logger.log('AccountService', 'Server list loaded!', LogLevel.Success);
+          // update the cache.
+          this.env.writeJSON(servers, 'servers.cache.json');
+          return servers;
+        }
+      });
     }
+  }
+
+  /**
+   * Gets the character info for the account with the guid/password provided.
+   * This will look in the cache first, and it will only request the info
+   * from the rotmg server if the char info was not found in the cache.
+   * @param guid The guid of the account to get the character info of.
+   * @param password The password of the account to get the character info of.
+   * @param proxy An optional proxy to use when making the request.
+   */
+  getCharacterInfo(guid: string, password: string, proxy?: Proxy): Promise<CharacterInfo> {
+    // look in the cache.
+    Logger.log('AccountService', 'Loading character info...', LogLevel.Info);
+    const cachedCharInfo = this.env.readJSON<CharInfoCache>('char-info.cache.json');
+    if (cachedCharInfo && cachedCharInfo.hasOwnProperty(guid)) {
+      Logger.log('AccountService', 'Cached character info loaded!', LogLevel.Success);
+      return Promise.resolve(cachedCharInfo[guid]);
+    } else {
+      // if there is no cache, fetch the info.
+      return HttpClient.get(SERVER_ENDPOINT, {
+        proxy: proxy,
+        query: {
+          guid, password
+        }
+      }).then((response) => {
+        // check for errors.
+        const maybeError = this.getError(response);
+        if (maybeError) {
+          throw maybeError;
+        }
+        const charInfo = xmlToJSON.parseAccountInfo(response);
+        Logger.log('AccountService', 'Character info loaded!', LogLevel.Success);
+        // update the cache.
+        const cacheUpdate: CharInfoCache = {};
+        cacheUpdate[guid] = charInfo;
+        this.env.updateJSON(cacheUpdate, 'char-info.cache.json');
+        return charInfo;
+      });
+    }
+  }
+
+  /**
+   * Resolves a proxy hostname to ensure its `host` field
+   * is always an IP instead of possibly a hostname.
+   * @param proxy The proxy to resolve the hostname of.
+   */
+  resolveProxyHostname(proxy: Proxy): Promise<void> {
     if (net.isIP(proxy.host) === 0) {
       Logger.log('AccountService', 'Resolving proxy hostname.', LogLevel.Info);
       return new Promise((resolve, reject) => {
@@ -45,76 +112,23 @@ export class AccountService {
     }
   }
 
-  /**
-   * Gets the list of servers, or returns the cached version.
-   */
-  static getServerList(): Promise<{ [name: string]: Server }> {
-    if (this.internalServerList) {
-      return Promise.resolve(this.internalServerList);
-    }
-    Logger.log('AccountService', 'Loading server list', LogLevel.Info);
-    return HttpClient.get(SERVER_ENDPOINT).then((response) => {
-      this.checkErrors(response);
-      Logger.log('AccountService', 'Server list loaded.', LogLevel.Success);
-      this.internalServerList = XMLtoJSON.parseServers(response);
-      return Storage.set(this.internalServerList, 'last-known-servers.json');
-    }).then(() => {
-      Logger.log('AccountService', 'Cached server list.', LogLevel.Success);
-      return this.internalServerList;
-    }).catch((error) => {
-      // try to read last-known-servers.json
-      return Storage.get('last-known-servers.json');
-    }).then((servers) => {
-      this.internalServerList = servers;
-      return this.internalServerList;
-    }).catch((error) => {
-      Logger.log('AccountService', `Error while getting server list: ${error.message}`, LogLevel.Error);
-      return {};
-    });
-  }
-
-  /**
-   * Gets the character info for the account provided.
-   * @param guid The account email.
-   * @param password The account password.
-   * @param proxy An optional proxy to use for the request.
-   */
-  static getCharacterInfo(guid: string, password: string, proxy?: Proxy): Promise<CharacterInfo> {
-    return HttpClient.get(SERVER_ENDPOINT, {
-      proxy: proxy,
-      query: {
-        guid, password
-      }
-    }).then((response) => {
-      if (!response) {
-        throw new Error(`Empty response from server.`);
-      }
-      this.checkErrors(response);
-      const info = XMLtoJSON.parseAccountInfo(response);
-      this.internalServerList = XMLtoJSON.parseServers(response);
-      Storage.set(this.internalServerList, 'last-known-servers.json').catch((error) => {
-        Logger.log('AccountService', 'Error while caching servers.', LogLevel.Warning);
-        Logger.log('AccountService', error.message, LogLevel.Warning);
-      });
-      return info;
-    });
-  }
-
-  private static internalServerList: { [name: string]: Server };
-
-  private static checkErrors(response: string): void {
+  private getError(response: string): Error {
+    // check for acc in use.
     const accInUse = ACCOUNT_IN_USE_REGEX.exec(response);
     if (accInUse) {
-      const error = new Error(`Account in use.`);
+      const error = new Error(`Account in use. (${accInUse[1]} until timeout)`);
       error.name = 'ACCOUNT_IN_USE';
-      (error as any).timeout__ = +accInUse[1];
-      throw error;
+      return error;
     }
+    // check for the generic <Error>some error</Error>
     const otherError = ERROR_REGEX.exec(response);
     if (otherError) {
-      const error = new Error(`${otherError[1]}`);
+      const error = new Error(otherError[1]);
       error.name = 'OTHER_ERROR';
-      throw error;
+      return error;
     }
+
+    // no errors.
+    return undefined;
   }
 }
