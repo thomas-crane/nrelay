@@ -7,9 +7,9 @@ import { PacketBuffer } from './packet-buffer';
 import { Packets } from './packets';
 import { RC4, OUTGOING_KEY, INCOMING_KEY } from '../crypto';
 import { IncomingPacket, OutgoingPacket } from './packet';
-import { Mapper } from './mapper';
 import { PacketType } from './packet-type';
 import { Logger, LogLevel } from '../core';
+import { PacketMap } from './packet-map';
 
 /**
  * A utility class which implements the RotMG messaging protocol on top of a `Socket`.
@@ -20,6 +20,7 @@ export class PacketIO {
   private receiveRC4: RC4;
   private socket: Socket;
   private emitter: EventEmitter;
+  private packetMap: PacketMap;
 
   private packetBuffer: PacketBuffer;
   private outgoingBuffer: PacketBuffer;
@@ -28,11 +29,12 @@ export class PacketIO {
    * Creates a new `PacketIO` on top of the given `socket`.
    * @param socket The socket to implement the protocol on top of.
    */
-  constructor(socket: Socket) {
+  constructor(socket: Socket, packetMap: PacketMap) {
     this.resetBuffer();
     this.outgoingBuffer = new PacketBuffer(2048);
     this.emitter = new EventEmitter();
     this.socket = socket;
+    this.packetMap = packetMap;
     this.sendRC4 = new RC4(Buffer.from(OUTGOING_KEY, 'hex'));
     this.receiveRC4 = new RC4(Buffer.from(INCOMING_KEY, 'hex'));
 
@@ -85,7 +87,7 @@ export class PacketIO {
     this.sendRC4.cipher(this.outgoingBuffer.data.slice(5, packetSize));
 
     this.outgoingBuffer.bufferIndex = 0;
-    const type = Mapper.reverseMap.get(packet.type);
+    const type = this.packetMap[packet.type];
     this.outgoingBuffer.writeInt32(packetSize);
     this.outgoingBuffer.writeByte(type);
 
@@ -175,7 +177,7 @@ export class PacketIO {
 
     let packet: IncomingPacket;
     try {
-      const type = Mapper.map.get(this.packetBuffer.data.readInt8(4));
+      const type = this.packetMap[this.packetBuffer.data.readInt8(4)];
       packet = Packets.create(type);
     } catch (error) {
       Logger.log('PacketIO', error.message, LogLevel.Error);
