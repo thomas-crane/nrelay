@@ -222,7 +222,6 @@ export class Client {
 
   // enemies/projeciles
   private projectiles: Projectile[];
-  private projectileUpdateTimer: NodeJS.Timer;
   private random: Random;
   private enemies: {
     [objectId: number]: Enemy;
@@ -240,7 +239,6 @@ export class Client {
     }
     this.blockedPackets = [];
     this.projectiles = [];
-    this.projectileUpdateTimer = null;
     this.enemies = {};
     this.autoAim = true;
     this.key = [];
@@ -337,10 +335,6 @@ export class Client {
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
     }
-    if (this.projectileUpdateTimer) {
-      clearInterval(this.projectileUpdateTimer);
-      this.projectileUpdateTimer = null;
-    }
     if (this.frameUpdateTimer) {
       clearInterval(this.frameUpdateTimer);
       this.frameUpdateTimer = null;
@@ -431,7 +425,7 @@ export class Client {
    * Returns how long the client has been connected for, in milliseconds.
    */
   getTime(): number {
-    return (Date.now() - this.connectTime);
+    return Date.now() - this.connectTime;
   }
 
   /**
@@ -477,61 +471,51 @@ export class Client {
   }
 
   private checkProjectiles(): void {
-    if (this.projectiles.length > 0) {
-      if (!this.projectileUpdateTimer) {
-        this.projectileUpdateTimer = setInterval(() => {
-          for (let i = 0; i < this.projectiles.length; i++) {
-            if (!this.projectiles[i].update(this.getTime())) {
-              this.projectiles.splice(i, 1);
-              continue;
-            }
-            if (this.projectiles[i].damagePlayers) {
-              if (this.worldPos.squareDistanceTo(this.projectiles[i].currentPosition) < 0.25) {
-                // hit.
-                this.damage(this.projectiles[i].damage, this.projectiles[i].bulletId, this.projectiles[i].ownerObjectId);
-                this.projectiles.splice(i, 1);
-              }
-            } else {
-              let closestEnemy: Enemy;
-              let closestDistance = 10000000;
-              for (const enemyId in this.enemies) {
-                if (this.enemies.hasOwnProperty(enemyId)) {
-                  const enemy = this.enemies[+enemyId];
-                  const dist = enemy.squareDistanceTo(this.projectiles[i].currentPosition);
-                  if (dist < 0.25) {
-                    if (dist < closestDistance) {
-                      closestDistance = dist;
-                      closestEnemy = enemy;
-                    }
-                  }
-                }
-              }
-              if (closestEnemy) {
-                const lastUpdate = (this.getTime() - closestEnemy.lastUpdate);
-                if (lastUpdate > 400) {
-                  Logger.log(this.alias, `Preventing EnemyHit. Time since last update: ${lastUpdate}`, LogLevel.Debug);
-                  this.projectiles.splice(i, 1);
-                  continue;
-                }
-                const enemyHit = new EnemyHitPacket();
-                const damage = closestEnemy.damage(this.projectiles[i].damage);
-                enemyHit.bulletId = this.projectiles[i].bulletId;
-                enemyHit.targetId = closestEnemy.objectData.objectId;
-                enemyHit.time = this.getTime();
-                enemyHit.kill = closestEnemy.objectData.hp <= damage;
-                this.packetio.sendPacket(enemyHit);
-                this.projectiles.splice(i, 1);
-                if (enemyHit.kill) {
-                  closestEnemy.dead = true;
-                }
+    for (let i = 0; i < this.projectiles.length; i++) {
+      if (!this.projectiles[i].update(this.getTime())) {
+        this.projectiles.splice(i, 1);
+        continue;
+      }
+      if (this.projectiles[i].damagePlayers) {
+        if (this.worldPos.squareDistanceTo(this.projectiles[i].currentPosition) < 0.25) {
+          // hit.
+          this.damage(this.projectiles[i].damage, this.projectiles[i].bulletId, this.projectiles[i].ownerObjectId);
+          this.projectiles.splice(i, 1);
+        }
+      } else {
+        let closestEnemy: Enemy;
+        let closestDistance = 10000000;
+        for (const enemyId in this.enemies) {
+          if (this.enemies.hasOwnProperty(enemyId)) {
+            const enemy = this.enemies[+enemyId];
+            const dist = enemy.squareDistanceTo(this.projectiles[i].currentPosition);
+            if (dist < 0.25) {
+              if (dist < closestDistance) {
+                closestDistance = dist;
+                closestEnemy = enemy;
               }
             }
           }
-          if (this.projectiles.length === 0) {
-            clearInterval(this.projectileUpdateTimer);
-            this.projectileUpdateTimer = null;
+        }
+        if (closestEnemy) {
+          const lastUpdate = (this.getTime() - closestEnemy.lastUpdate);
+          if (lastUpdate > 400) {
+            Logger.log(this.alias, `Preventing EnemyHit. Time since last update: ${lastUpdate}`, LogLevel.Debug);
+            this.projectiles.splice(i, 1);
+            continue;
           }
-        }, 1000 / 30);
+          const enemyHit = new EnemyHitPacket();
+          const damage = closestEnemy.damage(this.projectiles[i].damage);
+          enemyHit.bulletId = this.projectiles[i].bulletId;
+          enemyHit.targetId = closestEnemy.objectData.objectId;
+          enemyHit.time = this.getTime();
+          enemyHit.kill = closestEnemy.objectData.hp <= damage;
+          this.packetio.sendPacket(enemyHit);
+          this.projectiles.splice(i, 1);
+          if (enemyHit.kill) {
+            closestEnemy.dead = true;
+          }
+        }
       }
     }
   }
@@ -729,9 +713,6 @@ export class Client {
     const movePacket = new MovePacket();
     movePacket.tickId = newTickPacket.tickId;
     movePacket.time = this.getTime();
-    if (this.nextPos.length > 0) {
-      this.moveTo(this.nextPos[0]);
-    }
     movePacket.newPosition = this.worldPos;
     movePacket.records = [];
     const lastClear = this.moveRecords.lastClearTime;
@@ -821,7 +802,6 @@ export class Client {
       );
       this.projectiles[this.projectiles.length - 1].setDamage(enemyShootPacket.damage);
     }
-    this.checkProjectiles();
   }
 
   @PacketHook()
@@ -843,6 +823,15 @@ export class Client {
     Client.emitter.emit('ready', this);
     this.frameUpdateTimer = setInterval(() => {
       const time = this.getTime();
+      if (this.nextPos.length > 0) {
+        /**
+         * We don't want to move further than we are allowed to, so if the
+         * timer was late (which is likely) we should use 1000/30 ms instead
+         * of the real time elapsed.
+         */
+        const diff = Math.min(1000 / 30, time - this.lastFrameTime);
+        this.moveTo(this.nextPos[0], diff);
+      }
       if (this.worldPos) {
         this.moveRecords.addRecord(time, this.worldPos.x, this.worldPos.y);
       }
@@ -851,6 +840,9 @@ export class Client {
         for (const enemy of enemies) {
           enemy.frameTick(this.lastTickId, time);
         }
+      }
+      if (this.projectiles.length > 0) {
+        this.checkProjectiles();
       }
       this.lastFrameTime = time;
     }, 1000 / 30);
@@ -935,10 +927,6 @@ export class Client {
     if (this.projectiles.length > 0) {
       this.projectiles = [];
     }
-    if (this.projectileUpdateTimer) {
-      clearInterval(this.projectileUpdateTimer);
-      this.projectileUpdateTimer = null;
-    }
 
     if (this.proxy) {
       Logger.log(this.alias, 'Establishing proxy', LogLevel.Info);
@@ -999,11 +987,11 @@ export class Client {
     this.clientSocket.on('error', this.onError.bind(this));
   }
 
-  private moveTo(target: WorldPosData): void {
+  private moveTo(target: WorldPosData, timeElapsed: number): void {
     if (!target) {
       return;
     }
-    const step = this.getSpeed();
+    const step = this.getSpeed(timeElapsed);
     if (this.worldPos.squareDistanceTo(target) > step ** 2) {
       const angle: number = Math.atan2(target.y - this.worldPos.y, target.x - this.worldPos.x);
       this.walkTo(this.worldPos.x + Math.cos(angle) * step, this.worldPos.y + Math.sin(angle) * step);
@@ -1036,7 +1024,7 @@ export class Client {
     return attackMultiplier;
   }
 
-  private getSpeed(): number {
+  private getSpeed(timeElapsed: number): number {
     if (ConditionEffects.has(this.playerData.condition, ConditionEffect.SLOWED)) {
       return MIN_MOVE_SPEED;
     }
@@ -1048,18 +1036,14 @@ export class Client {
     if (this.mapTiles[y * this.mapInfo.width + x] && ResourceManager.tiles[this.mapTiles[y * this.mapInfo.width + x].type]) {
       multiplier = ResourceManager.tiles[this.mapTiles[y * this.mapInfo.width + x].type].speed;
     }
-    let tickTime = this.currentTickTime - this.lastTickTime;
 
-    if (tickTime > 200) {
-      tickTime = 200;
-    }
     // tslint:disable no-bitwise
     if (ConditionEffects.has(this.playerData.condition, ConditionEffect.SPEEDY | ConditionEffect.NINJA_SPEEDY)) {
       speed *= 1.5;
     }
     // tslint:enable no-bitwise
 
-    return (speed * multiplier * tickTime * this.internalMoveMultiplier);
+    return (speed * multiplier * timeElapsed * this.internalMoveMultiplier);
   }
 
   private getAttackFrequency(): number {
