@@ -10,7 +10,7 @@ import { IncomingPacket } from '../../packet';
  */
 export class VerifyEmailPacket implements IncomingPacket {
 
-  type = PacketType.VERIFYEMAIL;
+  type = PacketType.VERIFY_EMAIL;
   propagate = true;
 
   //#region packet-specific members

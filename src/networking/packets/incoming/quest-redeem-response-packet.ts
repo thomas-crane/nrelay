@@ -10,7 +10,7 @@ import { IncomingPacket } from '../../packet';
  */
 export class QuestRedeemResponsePacket implements IncomingPacket {
 
-  type = PacketType.QUESTREDEEM_RESPONSE;
+  type = PacketType.QUEST_REDEEM_RESPONSE;
   propagate = true;
 
   //#region packet-specific members

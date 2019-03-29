@@ -10,7 +10,7 @@ import { IncomingPacket } from '../../packet';
  */
 export class KeyInfoResponsePacket implements IncomingPacket {
 
-  type = PacketType.KEYINFO_RESPONSE;
+  type = PacketType.KEY_INFO_RESPONSE;
   propagate = true;
 
   //#region packet-specific members

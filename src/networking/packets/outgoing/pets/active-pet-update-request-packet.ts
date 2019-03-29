@@ -10,7 +10,7 @@ import { OutgoingPacket } from '../../../packet';
  */
 export class ActivePetUpdateRequestPacket implements OutgoingPacket {
 
-  type = PacketType.ACTIVEPET_UPDATE_REQUEST;
+  type = PacketType.ACTIVE_PET_UPDATE_REQUEST;
 
   //#region packet-specific members
   /**

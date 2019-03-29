@@ -10,7 +10,7 @@ import { OutgoingPacket } from '../../packet';
  */
 export class KeyInfoRequestPacket implements OutgoingPacket {
 
-  type = PacketType.KEYINFO_REQUEST;
+  type = PacketType.KEY_INFO_REQUEST;
 
   //#region packet-specific members
   /**

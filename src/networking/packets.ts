@@ -62,19 +62,19 @@ export class Packets {
     }
     let packet: IncomingPacket;
     switch (type) {
-      case PacketType.ARENADEATH:
+      case PacketType.ARENA_DEATH:
         packet = new ArenaDeathPacket();
         break;
-      case PacketType.IMMINENTARENA_WAVE:
+      case PacketType.IMMINENT_ARENA_WAVE:
         packet = new ImminentArenaWavePacket();
         break;
-      case PacketType.DELETEPET:
+      case PacketType.DELETE_PET:
         packet = new DeletePetMessage();
         break;
-      case PacketType.PETCHANGE_FORM_MSG:
+      case PacketType.PET_CHANGE_FORM_MSG:
         packet = new EvolvedPetMessage();
         break;
-      case PacketType.HATCHPET:
+      case PacketType.HATCH_PET:
         packet = new HatchPetMessage();
         break;
       case PacketType.ACCOUNTLIST:
@@ -92,7 +92,7 @@ export class Packets {
       case PacketType.CLIENTSTAT:
         packet = new ClientStatPacket();
         break;
-      case PacketType.CREATESUCCESS:
+      case PacketType.CREATE_SUCCESS:
         packet = new CreateSuccessPacket();
         break;
       case PacketType.DAMAGE:
@@ -107,7 +107,7 @@ export class Packets {
       case PacketType.FAILURE:
         packet = new FailurePacket();
         break;
-      case PacketType.GLOBALNOTIFICATION:
+      case PacketType.GLOBAL_NOTIFICATION:
         packet = new GlobalNotificationPacket();
         break;
       case PacketType.GOTO:
@@ -122,7 +122,7 @@ export class Packets {
       case PacketType.INVITEDTOGUILD:
         packet = new InvitedToGuildPacket();
         break;
-      case PacketType.KEYINFO_RESPONSE:
+      case PacketType.KEY_INFO_RESPONSE:
         packet = new KeyInfoResponsePacket();
         break;
       case PacketType.MAPINFO:
@@ -131,7 +131,7 @@ export class Packets {
       case PacketType.NAMERESULT:
         packet = new NameResultPacket();
         break;
-      case PacketType.NEWABILITY:
+      case PacketType.NEW_ABILITY:
         packet = new NewAbilityMessage();
         break;
       case PacketType.NEWTICK:
@@ -140,7 +140,7 @@ export class Packets {
       case PacketType.NOTIFICATION:
         packet = new NotificationPacket();
         break;
-      case PacketType.PASSWORDPROMPT:
+      case PacketType.PASSWORD_PROMPT:
         packet = new PasswordPromptPacket();
         break;
       case PacketType.PING:
@@ -149,13 +149,13 @@ export class Packets {
       case PacketType.QUESTOBJID:
         packet = new QuestObjectIdPacket();
         break;
-      case PacketType.QUESTREDEEM_RESPONSE:
+      case PacketType.QUEST_REDEEM_RESPONSE:
         packet = new QuestRedeemResponsePacket();
         break;
       case PacketType.RECONNECT:
         packet = new ReconnectPacket();
         break;
-      case PacketType.RESKINUNLOCK:
+      case PacketType.RESKIN_UNLOCK:
         packet = new ReskinUnlockPacket();
         break;
       case PacketType.SERVERPLAYERSHOOT:
@@ -185,10 +185,10 @@ export class Packets {
       case PacketType.UPDATE:
         packet = new UpdatePacket();
         break;
-      case PacketType.VERIFYEMAIL:
+      case PacketType.VERIFY_EMAIL:
         packet = new VerifyEmailPacket();
         break;
-      case PacketType.REALMHERO_LEFT_MSG:
+      case PacketType.REALM_HERO_LEFT_MSG:
         packet = new RealmHeroLeftMessage();
         break;
     }

@@ -10,7 +10,7 @@ import { OutgoingPacket } from '../../../packet';
  */
 export class EnterArenaPacket implements OutgoingPacket {
 
-  type = PacketType.ENTERARENA;
+  type = PacketType.ENTER_ARENA;
 
   //#region packet-specific members
   /**

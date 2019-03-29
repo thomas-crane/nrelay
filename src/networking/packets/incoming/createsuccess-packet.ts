@@ -10,7 +10,7 @@ import { IncomingPacket } from '../../packet';
  */
 export class CreateSuccessPacket implements IncomingPacket {
 
-  type = PacketType.CREATESUCCESS;
+  type = PacketType.CREATE_SUCCESS;
   propagate = true;
 
   //#region packet-specific members

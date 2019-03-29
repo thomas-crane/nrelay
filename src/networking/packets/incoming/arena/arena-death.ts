@@ -10,7 +10,7 @@ import { IncomingPacket } from '../../../packet';
  */
 export class ArenaDeathPacket implements IncomingPacket {
 
-  type = PacketType.ARENADEATH;
+  type = PacketType.ARENA_DEATH;
   propagate = true;
 
   //#region packet-specific members

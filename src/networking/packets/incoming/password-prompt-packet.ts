@@ -10,7 +10,7 @@ import { IncomingPacket } from '../../packet';
  */
 export class PasswordPromptPacket implements IncomingPacket {
 
-  type = PacketType.PASSWORDPROMPT;
+  type = PacketType.PASSWORD_PROMPT;
   propagate = true;
 
   //#region packet-specific members

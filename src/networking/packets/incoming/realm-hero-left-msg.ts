@@ -10,7 +10,7 @@ import { IncomingPacket } from '../../packet';
  */
 export class RealmHeroLeftMessage implements IncomingPacket {
 
-  type = PacketType.REALMHERO_LEFT_MSG;
+  type = PacketType.REALM_HERO_LEFT_MSG;
   propagate = true;
 
   //#region packet-specific members

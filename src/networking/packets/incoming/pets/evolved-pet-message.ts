@@ -10,7 +10,7 @@ import { IncomingPacket } from '../../../packet';
  */
 export class EvolvedPetMessage implements IncomingPacket {
 
-  type = PacketType.EVOLVEPET;
+  type = PacketType.EVOLVE_PET;
   propagate = true;
 
   //#region packet-specific members

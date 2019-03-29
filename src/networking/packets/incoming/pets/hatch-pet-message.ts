@@ -10,7 +10,7 @@ import { IncomingPacket } from '../../../packet';
  */
 export class HatchPetMessage implements IncomingPacket {
 
-  type = PacketType.HATCHPET;
+  type = PacketType.HATCH_PET;
   propagate = true;
 
   //#region packet-specific members

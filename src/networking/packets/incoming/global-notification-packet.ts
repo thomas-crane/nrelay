@@ -10,7 +10,7 @@ import { IncomingPacket } from '../../packet';
  */
 export class GlobalNotificationPacket implements IncomingPacket {
 
-  type = PacketType.GLOBALNOTIFICATION;
+  type = PacketType.GLOBAL_NOTIFICATION;
   propagate = true;
 
   //#region packet-specific members

@@ -10,7 +10,7 @@ import { IncomingPacket } from '../../packet';
  */
 export class ReskinUnlockPacket implements IncomingPacket {
 
-  type = PacketType.RESKINUNLOCK;
+  type = PacketType.RESKIN_UNLOCK;
   propagate = true;
 
   //#region packet-specific members

@@ -11,7 +11,7 @@ import { OutgoingPacket } from '../../packet';
  */
 export class GoToQuestRoomPacket implements OutgoingPacket {
 
-  type = PacketType.QUESTROOM_MSG;
+  type = PacketType.QUEST_ROOM_MSG;
 
   //#region packet-specific members
 

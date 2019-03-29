@@ -11,7 +11,7 @@ import { OutgoingPacket } from '../../../packet';
  */
 export class QuestRedeemPacket implements OutgoingPacket {
 
-  type = PacketType.QUESTREDEEM;
+  type = PacketType.QUEST_REDEEM;
 
   //#region packet-specific members
   /**
