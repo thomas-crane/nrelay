@@ -2,9 +2,9 @@
  * @module services
  */
 import * as resx from '@realmlib/resx';
-import { Environment } from '../runtime/environment';
 import * as fs from 'fs';
 import { Logger, LogLevel } from '../core';
+import { Environment } from '../runtime/environment';
 import { Versions } from '../runtime/versions';
 
 /**

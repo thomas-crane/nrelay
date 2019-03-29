@@ -19,8 +19,8 @@ export function parseServers(xml: string): ServerList {
     const name = match[1];
     const ip = match[2];
     servers[name] = {
-      name: name,
-      address: ip
+      name,
+      address: ip,
     };
     match = SERVER_REGEX.exec(xml);
   }
@@ -35,7 +35,7 @@ export function parseAccountInfo(xml: string): CharacterInfo {
   const acc = {
     nextCharId: 2,
     charId: 1,
-    maxNumChars: 1
+    maxNumChars: 1,
   };
   const match = ACCOUNT_INFO_REGEX.exec(xml);
   if (match) {

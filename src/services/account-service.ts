@@ -67,10 +67,10 @@ export class AccountService {
     } else {
       // if there is no cache, fetch the info.
       return HttpClient.get(SERVER_ENDPOINT, {
-        proxy: proxy,
+        proxy,
         query: {
-          guid, password
-        }
+          guid, password,
+        },
       }).then((response) => {
         // check for errors.
         const maybeError = this.getError(response);
