@@ -2,34 +2,14 @@
 node_modules/
 
 # Build result
-dist/
+lib/
 
 # Auto generated docs
 api-docs/public
 api-docs/firebase-debug.log
 
-# Any plugins except defaults
-src/plugins/*
-!src/plugins/hello-plugin.ts
-!src/plugins/player-tracker.ts
-
-# Config
-acc-config.json
-last-known-servers.json
-packets.json
-versions.json
-
-# Updater assets
-src/services/updater-assets/*
-!src/services/updater-assets/.gitkeep
-resources/*
-!resources/.gitkeep
-
 # User prefs
 .vscode/
-
-# Log files
-nrelay-log.log
 
 # Mac files
 .DS_Store
