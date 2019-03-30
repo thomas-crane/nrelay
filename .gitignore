@@ -13,3 +13,6 @@ api-docs/firebase-debug.log
 
 # Mac files
 .DS_Store
+
+# npm pack files
+*.tgz
