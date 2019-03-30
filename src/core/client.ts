@@ -297,10 +297,21 @@ export class Client {
       shootPacket.startingPos.x += (Math.cos(angle) * 0.3);
       shootPacket.startingPos.y += (Math.sin(angle) * 0.3);
       this.packetio.sendPacket(shootPacket);
-      this.projectiles.push(new Projectile(item.type, 0, this.objectId, shootPacket.bulletId, angle, time, {
-        x: shootPacket.startingPos.x,
-        y: shootPacket.startingPos.y
-      }));
+      const containerProps = this.runtime.resources.objects[item.type];
+      const newProj = new Projectile(
+        item.type,
+        containerProps,
+        0,
+        this.objectId,
+        shootPacket.bulletId,
+        angle,
+        time,
+        {
+          x: shootPacket.startingPos.x,
+          y: shootPacket.startingPos.y,
+        },
+      );
+      this.projectiles.push(newProj);
       if (arcRads > 0) {
         angle += arcRads;
       }
@@ -759,6 +770,7 @@ export class Client {
       this.projectiles.push(
         new Projectile(
           owner.properties.type,
+          this.runtime.resources.objects[owner.properties.type],
           enemyShootPacket.bulletType,
           enemyShootPacket.ownerId,
           (enemyShootPacket.bulletId + i) % 256,

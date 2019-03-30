@@ -1,9 +1,8 @@
 /**
  * @module models
  */
-import { GameObject, ProjectileInfo } from './object';
-import { ResourceManager } from '../core/resource-manager';
 import { Point } from '../services/pathfinding/point';
+import { GameObject, ProjectileInfo } from './object';
 
 /**
  * A projectile entity.
@@ -66,12 +65,13 @@ export class Projectile {
 
   constructor(
     containerType: number,
+    containerProps: any,
     bulletType: number,
     ownerObjectId: number,
     bulletId: number,
     startAngle: number,
     startTime: number,
-    startPosition: Point
+    startPosition: Point,
   ) {
     this.containerType = containerType;
     this.bulletType = bulletType;
@@ -80,7 +80,7 @@ export class Projectile {
     this.startAngle = startAngle;
     this.startTime = startTime;
     this.startPosition = startPosition;
-    this.containerProperties = ResourceManager.objects[containerType];
+    this.containerProperties = containerProps;
     this.projectileProperties = this.containerProperties.projectiles[bulletType];
     this.damagePlayers = this.containerProperties.enemy;
     this.damageEnemies = !this.damagePlayers;
@@ -103,7 +103,7 @@ export class Projectile {
   private getPositionAt(time: number): Point {
     const point: Point = {
       x: this.startPosition.x,
-      y: this.startPosition.y
+      y: this.startPosition.y,
     };
     let distanceTravelled = time * (this.projectileProperties.speed / 10000);
     const phase = this.bulletId % 2 === 0 ? 0 : Math.PI;
