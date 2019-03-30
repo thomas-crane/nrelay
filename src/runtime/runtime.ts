@@ -1,8 +1,17 @@
 import { createWriteStream, WriteStream } from 'fs';
-import { Client, ResourceManager } from '../core';
+import { Client, LibraryManager, ResourceManager } from '../core';
 import { Account, Server } from '../models';
 import { PacketMap } from '../networking/packet-map';
-import { AccountService, ArgsResult, DefaultLogger, FileLogger, Logger, LogLevel, StringUtils, Updater } from '../services';
+import {
+  AccountService,
+  ArgsResult,
+  DefaultLogger,
+  FileLogger,
+  Logger,
+  LogLevel,
+  StringUtils,
+  Updater,
+} from '../services';
 import { Environment } from './environment';
 import { Versions } from './versions';
 
@@ -34,6 +43,10 @@ export class Runtime {
    */
   readonly clients: Map<string, Client>;
   /**
+   * The library manager used by this runtime.
+   */
+  readonly libraryManager: LibraryManager;
+  /**
    * A bidirectional map of packet ids.
    */
   packetMap: PacketMap;
@@ -52,6 +65,7 @@ export class Runtime {
     this.updater = new Updater(this.env);
     this.accountService = new AccountService(this.env);
     this.resources = new ResourceManager(this.env);
+    this.libraryManager = new LibraryManager(this);
     this.clients = new Map();
   }
 
@@ -63,6 +77,7 @@ export class Runtime {
     // if we want to get the version, just print it and exit.
     if (args.version || args.v) {
       const nrelayVersion = require('../../package.json').version;
+      // tslint:disable-next-line: no-console
       console.log(`v${nrelayVersion}`);
       process.exit(0);
     }
@@ -131,6 +146,13 @@ export class Runtime {
     } else {
       Logger.log('Runtime', 'Cannot load buildVersion. It will be loaded when a client connects.', LogLevel.Warning);
     }
+
+    // load the plugins. The default is to load plugins from `lib/`, but we can change that with an arg.
+    let pluginFolder = 'lib';
+    if (args.pluginPath && typeof args.pluginPath === 'string') {
+      pluginFolder = args.pluginPath;
+    }
+    this.libraryManager.loadPlugins(pluginFolder);
 
     // finally, load any accounts.
     const accounts = this.env.readJSON<Account[]>('accounts.json');

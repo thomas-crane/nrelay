@@ -7,7 +7,7 @@ import { LibraryInfo } from './../models/plugin-info';
  * A type which can be created using `new` syntax.
  * @example
  * function create<T>(type: Type<T>): T {
- *  return new T();
+ *  return new type();
  * }
  */
 export interface Type<T> {

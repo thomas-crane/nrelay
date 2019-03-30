@@ -10,7 +10,6 @@ import { MapTile } from '../models/map-tile';
 import { Runtime } from '../runtime/runtime';
 import { Logger, LogLevel, Random } from '../services';
 import { NodeUpdate, Pathfinder, Point } from '../services/pathfinding';
-import { LibraryManager } from './../core';
 import { PacketHook } from './../decorators';
 import {
   Account,
@@ -933,7 +932,7 @@ export class Client {
     }
     this.packetio = new PacketIO(this.clientSocket, this.runtime.packetMap);
     this.packetio.on('packet', (data: IncomingPacket) => {
-      LibraryManager.callHooks(data, this);
+      this.runtime.libraryManager.callHooks(data, this);
     });
     this.packetio.on('error', (err: Error) => {
       Logger.log(this.alias, `Received PacketIO error: ${err.message}`, LogLevel.Error);

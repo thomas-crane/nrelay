@@ -2,8 +2,10 @@
  * @module decorators
  */
 import 'reflect-metadata';
-import { LibraryManager } from './../core/library-manager';
+import { LoadedLib } from '../core';
 import { LibraryInfo } from './../models/plugin-info';
+
+const libraries: Array<LoadedLib<any>> = [];
 
 /**
  * Indicates that the decorated class is a Library which may contain packet hooks.
@@ -13,10 +15,17 @@ export function Library(libInfo: LibraryInfo): ClassDecorator {
   return (target: any) => {
     const params = Reflect.getMetadata('design:paramtypes', target) || [];
     const dependencies = params.map((type: any) => type.name);
-    LibraryManager.loadLibrary({
+    libraries.push({
       info: libInfo,
       target,
-      dependencies
+      dependencies,
     });
   };
+}
+
+/**
+ * Returns a copy of the loaded libraries.
+ */
+export function getLibs(): Array<LoadedLib<any>> {
+  return [...libraries];
 }
