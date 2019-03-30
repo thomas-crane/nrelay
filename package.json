@@ -1,11 +1,11 @@
 {
   "name": "nrelay",
-  "version": "7.7.3",
+  "version": "8.0.0-rc",
   "description": "A console based modular client for Realm of the Mad God built with Node.js and TypeScript.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "build": "tsc -p .",
+    "compile": "tsc -p .",
     "index": "tsai --path src --exclude stdlib --overwrite",
     "docs": "typedoc --options ./typedoc.json"
   },
