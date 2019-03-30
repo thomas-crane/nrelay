@@ -9,6 +9,10 @@
     "index": "tsai --path src --exclude stdlib --overwrite",
     "docs": "typedoc --options ./typedoc.json"
   },
+  "files": [
+    "lib/",
+    "license.md"
+  ],
   "author": "thomas-crane",
   "license": "MIT",
   "repository": {
