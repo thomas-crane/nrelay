@@ -110,7 +110,6 @@ export class Runtime {
           Logger.log('Runtime', 'Checking for updates...', LogLevel.Info);
           const updateInfo = await this.updater.checkForUpdates();
           await this.updater.performUpdate(updateInfo);
-          Logger.log('Runtime', 'Done!', LogLevel.Success);
         } catch (err) {
           Logger.log('Runtime', `Error while updating: ${err.message}`, LogLevel.Error);
         }
@@ -158,7 +157,9 @@ export class Runtime {
     const accounts = this.env.readJSON<Account[]>('accounts.json');
     if (accounts) {
       for (const account of accounts) {
-        this.addClient(account);
+        this.addClient(account).catch((err) => {
+          Logger.log('Runtime', `Error adding account "${account.alias}": ${err.message}`, LogLevel.Error);
+        });
       }
     }
   }
@@ -175,7 +176,7 @@ export class Runtime {
 
     // make sure it's not already part of this runtime.
     if (this.clients.has(account.guid)) {
-      return Promise.reject(new Error(`The account "${account.alias}" is already managed by this runtime.`));
+      return Promise.reject(new Error(`This account is already managed by this runtime.`));
     }
 
     Logger.log('Runtime', `Loading ${account.alias}...`);
