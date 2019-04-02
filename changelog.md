@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `7.7.4`
+### Fixes:
+ + Fixed a bug where valid packet hooks would not be loaded due to `VALID_PACKET_HOOKS` being incomplete.
+
 ## `7.7.3`
 ### Fixes:
  + Fixed a bug where reconnect packets would sometimes use the wrong host.
