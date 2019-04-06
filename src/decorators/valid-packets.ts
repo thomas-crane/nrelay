@@ -1,51 +1,9 @@
 /**
  * @module decorators
  */
+import * as incomingPackets from '@realmlib/net/lib/packets/incoming';
+
 /**
  * A list of all packet types that are valid for a packet hook.
  */
-export const VALID_PACKET_HOOKS = [
-  'ArenaDeathPacket',
-  'ImminentArenaWavePacket',
-  'DeletePetMessage',
-  'EvolvedPetMessage',
-  'HatchPetMessage',
-  'AccountListPacket',
-  'AllyShootPacket',
-  'AoePacket',
-  'BuyResultPacket',
-  'ClientStatPacket',
-  'CreateSuccessPacket',
-  'DamagePacket',
-  'DeathPacket',
-  'EnemyShootPacket',
-  'FailurePacket',
-  'GlobalNotificationPacket',
-  'GotoPacket',
-  'GuildResultPacket',
-  'InvResultPacket',
-  'InvitedToGuildPacket',
-  'KeyInfoResponsePacket',
-  'MapInfoPacket',
-  'NameResultPacket',
-  'NewAbilityMessage',
-  'NewTickPacket',
-  'NotificationPacket',
-  'PasswordPromptPacket',
-  'PingPacket',
-  'QuestObjectIdPacket',
-  'QuestRedeemResponsePacket',
-  'RealmHeroLeftMsgPacket',
-  'ReconnectPacket',
-  'ReskinUnlockPacket',
-  'ServerPlayerShootPacket',
-  'ShowEffectPacket',
-  'TextPacket',
-  'TradeAcceptedPacket',
-  'TradeChangedPacket',
-  'TradeDonePacket',
-  'TradeRequestedPacket',
-  'TradeStartPacket',
-  'UpdatePacket',
-  'VerifyEmailPacket',
-];
+export const VALID_PACKET_HOOKS = Object.keys(incomingPackets);

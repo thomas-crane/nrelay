@@ -1,7 +1,7 @@
 /**
  * @module models
  */
-import { MoveRecord } from '../networking/data/move-record';
+import { MoveRecord } from '@realmlib/net';
 
 /**
  * This code is mostly ported from the RotMG game client. It's

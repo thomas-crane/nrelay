@@ -1,11 +1,11 @@
 /**
  * @module models
  */
-import { GameObject } from './object';
-import { ObjectStatusData } from '../networking/data/object-status-data';
-import { PlayerData } from './playerdata';
+import { ObjectStatusData } from '@realmlib/net';
 import { Point } from '../services/pathfinding/point';
-import { WorldPosData } from '../networking/data/world-pos-data';
+import * as parsers from '../util/parsers';
+import { GameObject } from './object';
+import { PlayerData } from './playerdata';
 
 /**
  * An enemy game object.
@@ -50,27 +50,27 @@ export class Enemy {
 
   constructor(properties: GameObject, status: ObjectStatusData) {
     this.properties = properties;
-    this.objectData = ObjectStatusData.processObjectStatus(status);
+    this.objectData = parsers.processObjectStatus(status);
     this.dead = false;
     this.lastUpdate = 0;
     this.lastTickId = -1;
-    this.currentPos = status.pos.toPrecisePoint();
+    this.currentPos = status.pos.clone();
     this.tickPos = {
       x: this.currentPos.x,
-      y: this.currentPos.y
+      y: this.currentPos.y,
     };
     this.posAtTick = {
       x: this.currentPos.x,
-      y: this.currentPos.y
+      y: this.currentPos.y,
     };
     this.moveVector = {
       x: 0,
-      y: 0
+      y: 0,
     };
   }
 
   onNewTick(objectStatus: ObjectStatusData, tickTime: number, tickId: number, clientTime: number): void {
-    this.objectData = ObjectStatusData.processObjectStatus(objectStatus, this.objectData);
+    this.objectData = parsers.processObjectStatus(objectStatus, this.objectData);
     if (this.lastTickId < tickId) {
       this.moveTo(this.tickPos.x, this.tickPos.y);
     }
@@ -81,13 +81,13 @@ export class Enemy {
     this.posAtTick.y = this.currentPos.y;
     this.moveVector = {
       x: (this.tickPos.x - this.posAtTick.x) / tickTime,
-      y: (this.tickPos.y - this.posAtTick.y) / tickTime
+      y: (this.tickPos.y - this.posAtTick.y) / tickTime,
     };
     this.lastTickId = tickId;
     this.lastUpdate = clientTime;
   }
 
-  squareDistanceTo(point: Point | WorldPosData): number {
+  squareDistanceTo<T extends Point>(point: T): number {
     const a = point.x - this.currentPos.x;
     const b = point.y - this.currentPos.y;
     return a ** 2 + b ** 2;

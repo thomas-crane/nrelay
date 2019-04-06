@@ -1,11 +1,11 @@
 /**
  * @module stdlib
  */
-import { Library, PacketHook, Client } from './../core';
-import { PlayerData, Classes } from './../models';
-import { UpdatePacket, NewTickPacket } from './../networking/packets/incoming';
-import { ObjectStatusData } from './../networking/data';
+import { NewTickPacket, UpdatePacket } from '@realmlib/net';
 import { EventEmitter } from 'events';
+import * as parsers from '../util/parsers';
+import { Client, Library, PacketHook } from './../core';
+import { Classes, PlayerData } from './../models';
 
 /**
  * An event listener for events emitted by the `PlayerTracker`.
@@ -15,13 +15,13 @@ export type PlayerEventListener = (player: PlayerData, client: Client) => void;
 @Library({
   name: 'Player Tracker',
   author: 'tcrane',
-  description: 'A utility library for keeping track of other players visible to connected clients.'
+  description: 'A utility library for keeping track of other players visible to connected clients.',
 })
 export class PlayerTracker {
 
   private emitter: EventEmitter;
   private readonly trackedPlayers: {
-    [guid: string]: PlayerData[]
+    [guid: string]: PlayerData[],
   };
 
   constructor() {
@@ -72,7 +72,7 @@ export class PlayerTracker {
     }
     for (const obj of update.newObjects) {
       if (Classes[obj.objectType]) {
-        const pd = ObjectStatusData.processObject(obj);
+        const pd = parsers.processObject(obj);
         pd.server = client.server.name;
         this.trackedPlayers[client.guid].push(pd);
         this.emitter.emit('enter', pd, client);
@@ -98,7 +98,7 @@ export class PlayerTracker {
       for (let n = 0; n < this.trackedPlayers[client.guid].length; n++) {
         if (status.objectId === this.trackedPlayers[client.guid][n].objectId) {
           this.trackedPlayers[client.guid][n] =
-            ObjectStatusData.processStatData(status.stats, this.trackedPlayers[client.guid][n]);
+            parsers.processStatData(status.stats, this.trackedPlayers[client.guid][n]);
           this.trackedPlayers[client.guid][n].worldPos = status.pos;
           break;
         }

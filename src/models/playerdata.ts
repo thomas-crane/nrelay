@@ -1,7 +1,7 @@
 /**
  * @module models
  */
-import { WorldPosData } from './../networking/data/world-pos-data';
+import { WorldPosData } from '@realmlib/net';
 import { Classes } from './classes';
 import { GuildRank } from './guildrank';
 
@@ -147,18 +147,18 @@ export interface PlayerData {
 export function getDefaultPlayerData(): PlayerData {
   return {
     objectId: 0,
-    worldPos: null,
-    name: null,
+    worldPos: undefined,
+    name: undefined,
     level: 0,
     exp: 0,
     currentFame: 0,
     stars: 0,
-    accountId: null,
+    accountId: undefined,
     accountFame: 0,
     gold: 0,
     class: Classes.Wizard,
     nameChosen: false,
-    guildName: null,
+    guildName: undefined,
     guildRank: GuildRank.NoRank,
     maxHP: 0,
     maxMP: 0,
@@ -175,6 +175,6 @@ export function getDefaultPlayerData(): PlayerData {
     mpPots: 0,
     hasBackpack: false,
     inventory: new Array<number>(20).fill(-1),
-    server: null
+    server: undefined,
   };
 }
