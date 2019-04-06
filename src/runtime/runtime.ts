@@ -1,17 +1,9 @@
+import { PacketMap } from '@realmlib/net';
 import { createWriteStream, WriteStream } from 'fs';
+import { Arguments } from 'yargs';
 import { Client, LibraryManager, ResourceManager } from '../core';
 import { Account, Server } from '../models';
-import { PacketMap } from '../networking/packet-map';
-import {
-  AccountService,
-  ArgsResult,
-  DefaultLogger,
-  FileLogger,
-  Logger,
-  LogLevel,
-  StringUtils,
-  Updater,
-} from '../services';
+import { AccountService, DefaultLogger, FileLogger, Logger, LogLevel, StringUtils, Updater } from '../services';
 import { Environment } from './environment';
 import { Versions } from './versions';
 
@@ -73,14 +65,7 @@ export class Runtime {
    * Starts this runtime.
    * @param args The arguments to start the runtime with.
    */
-  async run(args: ArgsResult): Promise<void> {
-    // if we want to get the version, just print it and exit.
-    if (args.version || args.v) {
-      const nrelayVersion = require('../../package.json').version;
-      // tslint:disable-next-line: no-console
-      console.log(`v${nrelayVersion}`);
-      process.exit(0);
-    }
+  async run(args: Arguments): Promise<void> {
 
     // set up the logging.
     let minLevel = LogLevel.Info;
@@ -205,6 +190,14 @@ export class Runtime {
       this.clients.set(client.guid, client);
       return client;
     });
+  }
+
+  /**
+   * Updates the build version stored in the versions.json file.
+   * @param buildVersion The new build version to store.
+   */
+  updateBuildVersion(buildVersion: string): void {
+    this.env.updateJSON<Versions>({ buildVersion } as Versions, 'versions.json');
   }
 
   /**
