@@ -1,61 +1,19 @@
 /**
  * @module core
  */
+import { AoeAckPacket, AoePacket, CreatePacket, CreateSuccessPacket, DamagePacket, EnemyHitPacket, EnemyShootPacket, FailurePacket, GotoAckPacket, GotoPacket, HelloPacket, LoadPacket, MapInfoPacket, MovePacket, NewTickPacket, Packet, PacketIO, PingPacket, PlayerHitPacket, PlayerShootPacket, PongPacket, ReconnectPacket, ServerPlayerShootPacket, ShootAckPacket, UpdateAckPacket, UpdatePacket, WorldPosData, FailureCode } from '@realmlib/net';
 import { EventEmitter } from 'events';
 import { Socket } from 'net';
-import { SocksClient } from 'socks';
-import { FailureCode } from '../models/failure-code';
+import * as rsa from '../crypto/rsa';
 import { GameId } from '../models/game-ids';
 import { MapTile } from '../models/map-tile';
 import { Runtime } from '../runtime/runtime';
 import { Logger, LogLevel, Random } from '../services';
 import { NodeUpdate, Pathfinder, Point } from '../services/pathfinding';
+import { createConnection } from '../util/net-util';
+import * as parsers from '../util/parsers';
 import { PacketHook } from './../decorators';
-import {
-  Account,
-  CharacterInfo,
-  Classes,
-  ConditionEffect,
-  ConditionEffects,
-  Enemy,
-  getDefaultPlayerData,
-  MapInfo,
-  MoveRecords,
-  PlayerData,
-  Projectile,
-  Proxy,
-  Server,
-} from './../models';
-import { IncomingPacket, PacketIO } from './../networking';
-import { ObjectStatusData, WorldPosData } from './../networking/data';
-import {
-  AoePacket,
-  CreateSuccessPacket,
-  DamagePacket,
-  EnemyShootPacket,
-  FailurePacket,
-  GotoPacket,
-  MapInfoPacket,
-  NewTickPacket,
-  PingPacket,
-  ReconnectPacket,
-  ServerPlayerShootPacket,
-  UpdatePacket,
-} from './../networking/packets/incoming';
-import {
-  AoeAckPacket,
-  CreatePacket,
-  EnemyHitPacket,
-  GotoAckPacket,
-  HelloPacket,
-  LoadPacket,
-  MovePacket,
-  PlayerHitPacket,
-  PlayerShootPacket,
-  PongPacket,
-  ShootAckPacket,
-  UpdateAckPacket,
-} from './../networking/packets/outgoing';
+import { Account, CharacterInfo, Classes, ConditionEffect, ConditionEffects, Enemy, getDefaultPlayerData, MapInfo, MoveRecords, PlayerData, Projectile, Proxy, Server } from './../models';
 
 const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
@@ -104,7 +62,7 @@ export class Client {
    * The PacketIO instance associated with the client.
    * @see `PacketIO` for more info.
    */
-  packetio: PacketIO;
+  io: PacketIO;
   /**
    * The tiles of the current map. These are stored in a
    * 1d array, so to access the tile at x, y the index
@@ -261,6 +219,16 @@ export class Client {
     }
     this.internalServer = Object.assign({}, server);
     this.nexusServer = Object.assign({}, server);
+
+    this.io = new PacketIO({ packetMap: this.runtime.packetMap });
+    this.io.on('packet', (data: Packet) => {
+      this.runtime.libraryManager.callHooks(data, this);
+    });
+    this.io.on('error', (err: Error) => {
+      Logger.log(this.alias, `Received PacketIO error: ${err.message}`, LogLevel.Error);
+      this.clientSocket.destroy();
+    });
+
     Logger.log(this.alias, `Starting connection to ${server.name}`, LogLevel.Info);
     this.connect();
   }
@@ -271,7 +239,7 @@ export class Client {
    */
   shoot(angle: number): boolean {
     if (ConditionEffects.has(this.playerData.condition, ConditionEffect.STUNNED)) {
-      return;
+      return false;
     }
     const time = this.getTime();
     const item = this.runtime.resources.items[this.playerData.inventory[0]];
@@ -296,7 +264,7 @@ export class Client {
       shootPacket.startingPos = this.worldPos.clone();
       shootPacket.startingPos.x += (Math.cos(angle) * 0.3);
       shootPacket.startingPos.y += (Math.sin(angle) * 0.3);
-      this.packetio.sendPacket(shootPacket);
+      this.io.send(shootPacket);
       const containerProps = this.runtime.resources.objects[item.type];
       const newProj = new Projectile(
         item.type,
@@ -334,8 +302,9 @@ export class Client {
    */
   destroy(): void {
     // packet io.
-    if (this.packetio) {
-      this.packetio.destroy();
+    if (this.io) {
+      this.io.detach();
+      this.io = null;
     }
 
     // timers.
@@ -368,7 +337,7 @@ export class Client {
 
   /**
    * Switches the client connect to a proxied connection. Setting this to
-   * `null` will remove the current proxy if there is one.
+   * `undefined` will remove the current proxy if there is one.
    * @param proxy The proxy to use.
    */
   setProxy(proxy: Proxy): void {
@@ -387,8 +356,8 @@ export class Client {
    */
   connectToServer(server: Server): void {
     Logger.log(this.alias, `Switching to ${server.name}.`, LogLevel.Info);
-    this.internalServer = server;
-    this.nexusServer = server;
+    this.internalServer = Object.assign({}, server);
+    this.nexusServer = Object.assign({}, server);
     this.connect();
   }
 
@@ -421,7 +390,7 @@ export class Client {
     }
     to.x = Math.floor(to.x);
     to.y = Math.floor(to.y);
-    this.pathfinder.findPath(this.worldPos.toPoint(), to).then((path) => {
+    this.pathfinder.findPath(this.worldPos, to).then((path) => {
       if (path.length === 0) {
         this.pathfinderTarget = null;
         this.nextPos.length = 0;
@@ -448,7 +417,7 @@ export class Client {
     const playerHit = new PlayerHitPacket();
     playerHit.bulletId = bulletId;
     playerHit.objectId = objectId;
-    this.packetio.sendPacket(playerHit);
+    this.io.send(playerHit);
   }
 
   private checkProjectiles(): void {
@@ -488,7 +457,7 @@ export class Client {
           enemyHit.targetId = closestEnemy.objectData.objectId;
           enemyHit.time = this.getTime();
           enemyHit.kill = closestEnemy.objectData.hp <= damage;
-          this.packetio.sendPacket(enemyHit);
+          this.io.send(enemyHit);
           this.projectiles.splice(i, 1);
           if (enemyHit.kill) {
             closestEnemy.dead = true;
@@ -524,13 +493,13 @@ export class Client {
       loadPacket.charId = this.charInfo.charId;
       loadPacket.isFromArena = false;
       Logger.log(this.alias, `Connecting to ${mapInfoPacket.name}`, LogLevel.Info);
-      this.packetio.sendPacket(loadPacket);
+      this.io.send(loadPacket);
     } else {
       const createPacket = new CreatePacket();
       createPacket.classType = Classes.Wizard;
       createPacket.skinType = 0;
       Logger.log(this.alias, 'Creating new char', LogLevel.Info);
-      this.packetio.sendPacket(createPacket);
+      this.io.send(createPacket);
     }
     this.random = new Random(mapInfoPacket.fp);
     this.mapTiles = [];
@@ -544,14 +513,14 @@ export class Client {
   private onUpdate(client: Client, updatePacket: UpdatePacket): void {
     // reply
     const updateAck = new UpdateAckPacket();
-    this.packetio.sendPacket(updateAck);
+    this.io.send(updateAck);
 
     const pathfinderUpdates: NodeUpdate[] = [];
     // playerdata
     for (const obj of updatePacket.newObjects) {
       if (obj.status.objectId === this.objectId) {
         this.worldPos = obj.status.pos;
-        this.playerData = ObjectStatusData.processObject(obj);
+        this.playerData = parsers.processObject(obj);
         this.playerData.server = this.internalServer.name;
       }
       if (this.runtime.resources.objects[obj.objectType]) {
@@ -638,7 +607,7 @@ export class Client {
   private onGotoPacket(client: Client, gotoPacket: GotoPacket): void {
     const ack = new GotoAckPacket();
     ack.time = this.getTime();
-    this.packetio.sendPacket(ack);
+    this.io.send(ack);
     if (gotoPacket.objectId === this.objectId) {
       this.worldPos = gotoPacket.position.clone();
     }
@@ -653,7 +622,7 @@ export class Client {
       case FailureCode.IncorrectVersion:
         Logger.log(this.alias, 'buildVersion out of date. Updating and reconnecting...');
         this.buildVersion = failurePacket.errorDescription;
-        // Storage.updateBuildVersion(failurePacket.errorDescription);
+        this.runtime.updateBuildVersion(failurePacket.errorDescription);
         break;
       case FailureCode.InvalidTeleportTarget:
         Logger.log(this.alias, 'Invalid teleport target.', LogLevel.Warning);
@@ -681,7 +650,7 @@ export class Client {
     if (aoePacket.pos.squareDistanceTo(this.worldPos) < aoePacket.radius ** 2) {
       this.playerData.hp -= aoePacket.damage;
     }
-    this.packetio.sendPacket(aoeAck);
+    this.io.send(aoeAck);
   }
 
   @PacketHook()
@@ -706,7 +675,7 @@ export class Client {
       }
     }
     this.moveRecords.clear(movePacket.time);
-    this.packetio.sendPacket(movePacket);
+    this.io.send(movePacket);
 
     // hp.
     const elapsedMS = this.currentTickTime - this.lastTickTime;
@@ -718,7 +687,7 @@ export class Client {
     for (const status of newTickPacket.statuses) {
       if (status.objectId === this.objectId) {
         const beforeHP = this.playerData.hp;
-        this.playerData = ObjectStatusData.processStatData(status.stats, this.playerData);
+        this.playerData = parsers.processStatData(status.stats, this.playerData);
         // synchronise the client hp if the difference is more than 30% of the HP.
         if (Math.abs(beforeHP - this.playerData.hp) < this.playerData.maxHP * 0.3) {
           this.playerData.hp = beforeHP;
@@ -751,7 +720,7 @@ export class Client {
     const pongPacket = new PongPacket();
     pongPacket.serial = pingPacket.serial;
     pongPacket.time = this.getTime();
-    this.packetio.sendPacket(pongPacket);
+    this.io.send(pongPacket);
   }
 
   @PacketHook()
@@ -762,7 +731,7 @@ export class Client {
     if (!owner || owner.dead) {
       shootAck.time = -1;
     }
-    this.packetio.sendPacket(shootAck);
+    this.io.send(shootAck);
     if (!owner || owner.dead) {
       return;
     }
@@ -776,8 +745,8 @@ export class Client {
           (enemyShootPacket.bulletId + i) % 256,
           enemyShootPacket.angle + i * enemyShootPacket.angleInc,
           this.getTime(),
-          enemyShootPacket.startingPos.toPrecisePoint()
-        )
+          enemyShootPacket.startingPos,
+        ),
       );
       this.projectiles[this.projectiles.length - 1].setDamage(enemyShootPacket.damage);
     }
@@ -788,7 +757,7 @@ export class Client {
     if (serverPlayerShoot.ownerId === this.objectId) {
       const ack = new ShootAckPacket();
       ack.time = this.getTime();
-      this.packetio.sendPacket(ack);
+      this.io.send(ack);
     }
   }
 
@@ -845,13 +814,15 @@ export class Client {
     const hp: HelloPacket = new HelloPacket();
     hp.buildVersion = this.buildVersion;
     hp.gameId = this.gameId;
-    hp.guid = this.guid;
-    hp.password = this.password;
+    hp.guid = rsa.encrypt(this.guid);
+    hp.random1 = Math.floor(Math.random() * 1000000000);
+    hp.password = rsa.encrypt(this.password);
+    hp.random2 = Math.floor(Math.random() * 1000000000);
     hp.keyTime = this.keyTime;
     hp.key = this.key;
     hp.gameNet = 'rotmg';
     hp.playPlatform = 'rotmg';
-    this.packetio.sendPacket(hp);
+    this.io.send(hp);
   }
 
   private getBulletId(): number {
@@ -893,7 +864,7 @@ export class Client {
 
   private connect(): void {
     if (this.clientSocket) {
-      this.clientSocket.removeAllListeners('connect');
+      this.io.detach();
       this.clientSocket.removeAllListeners('close');
       this.clientSocket.removeAllListeners('error');
       this.clientSocket.destroy();
@@ -908,56 +879,22 @@ export class Client {
 
     if (this.proxy) {
       Logger.log(this.alias, 'Establishing proxy', LogLevel.Info);
-      SocksClient.createConnection({
-        proxy: {
-          ipaddress: this.proxy.host,
-          port: this.proxy.port,
-          type: this.proxy.type,
-          userId: this.proxy.userId,
-          password: this.proxy.password
-        },
-        command: 'connect',
-        destination: {
-          host: this.internalServer.address,
-          port: 2050
-        }
-      }).then((info) => {
-        Logger.log(this.alias, 'Established proxy!', LogLevel.Success);
-        this.clientSocket = info.socket;
-        this.initSocket(false);
-      }).catch((error) => {
-        Logger.log(this.alias, 'Error establishing proxy', LogLevel.Error);
-        Logger.log(this.alias, error, LogLevel.Error);
-      });
-    } else {
-      this.clientSocket = new Socket({
-        readable: true,
-        writable: true
-      });
-      this.initSocket(true);
     }
-  }
+    createConnection(this.internalServer.address, 2050, this.proxy).then((socket) => {
+      this.clientSocket = socket;
 
-  private initSocket(connect: boolean): void {
-    if (this.packetio) {
-      this.packetio.destroy();
-    }
-    this.packetio = new PacketIO(this.clientSocket, this.runtime.packetMap);
-    this.packetio.on('packet', (data: IncomingPacket) => {
-      this.runtime.libraryManager.callHooks(data, this);
-    });
-    this.packetio.on('error', (err: Error) => {
-      Logger.log(this.alias, `Received PacketIO error: ${err.message}`, LogLevel.Error);
-      this.clientSocket.destroy();
-    });
-    if (connect) {
-      this.clientSocket.connect(2050, this.internalServer.address);
-    } else {
+      // attach the packetio
+      this.io.attach(this.clientSocket);
+
+      // add the event listeners.
+      this.clientSocket.on('close', this.onClose.bind(this));
+      this.clientSocket.on('error', this.onError.bind(this));
+
+      // perform the connection logic.
       this.onConnect();
-    }
-    this.clientSocket.on('connect', this.onConnect.bind(this));
-    this.clientSocket.on('close', this.onClose.bind(this));
-    this.clientSocket.on('error', this.onError.bind(this));
+    }).catch((err) => {
+      Logger.log(this.alias, `Error while connecting: ${err.message}`, LogLevel.Error);
+    });
   }
 
   private moveTo(target: WorldPosData, timeElapsed: number): void {
