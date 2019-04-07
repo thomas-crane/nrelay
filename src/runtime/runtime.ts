@@ -1,11 +1,17 @@
 import { PacketMap } from '@realmlib/net';
 import { createWriteStream, WriteStream } from 'fs';
-import { Arguments } from 'yargs';
 import { Client, LibraryManager, ResourceManager } from '../core';
 import { Account, Server } from '../models';
 import { AccountService, DefaultLogger, FileLogger, Logger, LogLevel, StringUtils, Updater } from '../services';
 import { Environment } from './environment';
 import { Versions } from './versions';
+
+/**
+ * An object which can be provided to the runtime when running.
+ */
+interface Arguments {
+  [argName: string]: unknown;
+}
 
 /**
  * The runtime manages clients, resources, plugins and any other services
