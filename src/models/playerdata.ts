@@ -91,25 +91,49 @@ export interface PlayerData {
    */
   atk: number;
   /**
+   * The amount of attack which has been added due to bonuses (e.g. equipping armor).
+   */
+  atkBoost: number;
+  /**
    * The defense stat of this player. This includes stat bonuses from equipped items.
    */
   def: number;
+  /**
+   * The amount of defense which has been added due to bonuses (e.g. equipping armor).
+   */
+  defBoost: number;
   /**
    * The speed stat of this player. This includes stat bonuses from equipped items.
    */
   spd: number;
   /**
+   * The amount of speed which has been added due to bonuses (e.g. equipping armor).
+   */
+  spdBoost: number;
+  /**
    * The dexterity stat of this player. This includes stat bonuses from equipped items.
    */
   dex: number;
+  /**
+   * The amount of dexterity which has been added due to bonuses (e.g. equipping armor).
+   */
+  dexBoost: number;
   /**
    * The wisdom stat of this player. This includes stat bonuses from equipped items.
    */
   wis: number;
   /**
+   * The amount of wisdom which has been added due to bonuses (e.g. equipping armor).
+   */
+  wisBoost: number;
+  /**
    * The vitality stat of this player. This includes stat bonuses from equipped items.
    */
   vit: number;
+  /**
+   * The amount of vitality which has been added due to bonuses (e.g. equipping armor).
+   */
+  vitBoost: number;
   /**
    * The condition flags for this entity. The number itself will be meaningless, as
    * the effects are represented with individual bits of the number.
@@ -165,11 +189,17 @@ export function getDefaultPlayerData(): PlayerData {
     hp: 0,
     mp: 0,
     atk: 0,
+    atkBoost: 0,
     def: 0,
+    defBoost: 0,
     spd: 0,
+    spdBoost: 0,
     dex: 0,
+    dexBoost: 0,
     wis: 0,
+    wisBoost: 0,
     vit: 0,
+    vitBoost: 0,
     condition: 0,
     hpPots: 0,
     mpPots: 0,
