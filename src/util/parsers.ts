@@ -77,23 +77,41 @@ export function processStatData(stats: StatData[], currentData?: PlayerData): Pl
       case StatType.ATTACK_STAT:
         playerData.atk = stat.statValue;
         continue;
+      case StatType.ATTACK_BOOST_STAT:
+        playerData.atkBoost = stat.statValue;
+        continue;
       case StatType.DEFENSE_STAT:
         playerData.def = stat.statValue;
+        continue;
+      case StatType.DEFENSE_BOOST_STAT:
+        playerData.defBoost = stat.statValue;
         continue;
       case StatType.SPEED_STAT:
         playerData.spd = stat.statValue;
         continue;
+      case StatType.SPEED_BOOST_STAT:
+        playerData.spdBoost = stat.statValue;
+        continue;
       case StatType.DEXTERITY_STAT:
         playerData.dex = stat.statValue;
         continue;
+      case StatType.DEXTERITY_BOOST_STAT:
+        playerData.dexBoost = stat.statValue;
+        continue;
       case StatType.VITALITY_STAT:
         playerData.vit = stat.statValue;
+        continue;
+      case StatType.VITALITY_BOOST_STAT:
+        playerData.vitBoost = stat.statValue;
         continue;
       case StatType.CONDITION_STAT:
         playerData.condition = stat.statValue;
         continue;
       case StatType.WISDOM_STAT:
         playerData.wis = stat.statValue;
+        continue;
+      case StatType.WISDOM_BOOST_STAT:
+        playerData.wisBoost = stat.statValue;
         continue;
       case StatType.HEALTH_POTION_STACK_STAT:
         playerData.hpPots = stat.statValue;
