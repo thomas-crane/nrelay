@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `7.8.1`
+### Changes
+ + Added hp and mp boosts to player data.
+
 ## `7.8.0`
 ### Changes
  + Added stat boosts to player data.

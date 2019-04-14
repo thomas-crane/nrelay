@@ -75,9 +75,17 @@ export interface PlayerData {
    */
   maxHP: number;
   /**
+   * The amount of HP which has been added due to bonuses (e.g. equipping armor).
+   */
+  maxHPBoost: number;
+  /**
    * The maximum MP of the player.
    */
   maxMP: number;
+  /**
+   * The amount of MP which has been added due to bonuses (e.g. equipping armor).
+   */
+  maxMPBoost: number;
   /**
    * The current HP of the entity.
    */
@@ -185,7 +193,9 @@ export function getDefaultPlayerData(): PlayerData {
     guildName: null,
     guildRank: GuildRank.NoRank,
     maxHP: 0,
+    maxHPBoost: 0,
     maxMP: 0,
+    maxMPBoost: 0,
     hp: 0,
     mp: 0,
     atk: 0,
