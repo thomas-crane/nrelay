@@ -75,8 +75,14 @@ export class ObjectStatusData implements DataPacket {
         case StatType.MAX_HP_STAT:
           playerData.maxHP = stat.statValue;
           continue;
+        case StatType.MAX_HP_BOOST_STAT:
+          playerData.maxHPBoost = stat.statValue;
+          continue;
         case StatType.MAX_MP_STAT:
           playerData.maxMP = stat.statValue;
+          continue;
+        case StatType.MAX_MP_BOOST_STAT:
+          playerData.maxMPBoost = stat.statValue;
           continue;
         case StatType.HP_STAT:
           playerData.hp = stat.statValue;
