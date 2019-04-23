@@ -2,7 +2,7 @@ import { PacketMap } from '@realmlib/net';
 import { createWriteStream, WriteStream } from 'fs';
 import { Client, LibraryManager, ResourceManager } from '../core';
 import { Account, Server } from '../models';
-import { AccountService, DefaultLogger, FileLogger, Logger, LogLevel, StringUtils, Updater } from '../services';
+import { AccountService, censorGuid, DefaultLogger, FileLogger, Logger, LogLevel, Updater } from '../services';
 import { Environment } from './environment';
 import { Versions } from './versions';
 
@@ -37,10 +37,6 @@ export class Runtime {
    */
   readonly resources: ResourceManager;
   /**
-   * The clients which are managed by this runtime.
-   */
-  readonly clients: Map<string, Client>;
-  /**
    * The library manager used by this runtime.
    */
   readonly libraryManager: LibraryManager;
@@ -57,6 +53,10 @@ export class Runtime {
    * A WriteStream which is used for the log file.
    */
   private logStream: WriteStream;
+  /**
+   * The clients which are managed by this runtime.
+   */
+  private readonly clients: Map<string, Client>;
 
   constructor(environment: Environment) {
     this.env = environment;
@@ -87,7 +87,7 @@ export class Runtime {
     }
 
     // force an update.
-    if (args['force-update']) {
+    if (args['force-update'] === true) {
       try {
         await this.updater.performUpdate({ needAssetUpdate: true, needClientUpdate: true });
         Logger.log('Runtime', 'Finished updating!', LogLevel.Success);
@@ -148,9 +148,11 @@ export class Runtime {
     const accounts = this.env.readJSON<Account[]>('accounts.json');
     if (accounts) {
       for (const account of accounts) {
-        this.addClient(account).catch((err) => {
+        try {
+          await this.addClient(account);
+        } catch (err) {
           Logger.log('Runtime', `Error adding account "${account.alias}": ${err.message}`, LogLevel.Error);
-        });
+        }
       }
     }
   }
@@ -162,7 +164,7 @@ export class Runtime {
   addClient(account: Account): Promise<Client> {
     // make sure the client has an alias.
     if (!account.alias) {
-      account.alias = StringUtils.censorGuid(account.guid);
+      account.alias = censorGuid(account.guid);
     }
 
     // make sure it's not already part of this runtime.
@@ -196,6 +198,26 @@ export class Runtime {
       this.clients.set(client.guid, client);
       return client;
     });
+  }
+
+  /**
+   * Removes the client with the given `guid` from this runtime.
+   * @param guid The guid of the client to remove.
+   */
+  removeClient(guid: string): void {
+    // make sure the client is actually in this runtime.
+    if (this.clients.has(guid)) {
+      const alias = this.clients.get(guid).alias;
+      this.clients.get(guid).destroy();
+      this.clients.delete(guid);
+      Logger.log('Runtime', `Removed ${alias}!`, LogLevel.Success);
+    } else {
+      Logger.log(
+        'Runtime',
+        `The client ${censorGuid(guid)} is not part of this runtime.`,
+        LogLevel.Warning,
+      );
+    }
   }
 
   /**
