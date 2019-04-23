@@ -221,6 +221,14 @@ export class Runtime {
   }
 
   /**
+   * Gets a copy of the clients in this runtime.
+   * Modifying this list will not affect the runtime.
+   */
+  getClients(): Client[] {
+    return [...this.clients.values()];
+  }
+
+  /**
    * Updates the build version stored in the versions.json file.
    * @param buildVersion The new build version to store.
    */
