@@ -4,7 +4,7 @@
 import * as http from 'http';
 import * as qs from 'querystring';
 import * as url from 'url';
-import { REQUEST_HEADERS, HttpClient } from './http-client';
+import { HttpClient, REQUEST_HEADERS } from './http-client';
 
 /**
  * A class used internally by the `HttpClient` to work with http urls.
@@ -22,7 +22,7 @@ export class Http {
       hostname: path,
       path: query,
       method: 'GET',
-      headers: REQUEST_HEADERS
+      headers: REQUEST_HEADERS,
     };
     return new Promise((resolve, reject) => {
       const req = http.get(opts, (response) => {
@@ -64,8 +64,8 @@ export class Http {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Content-Length': Buffer.byteLength(postData)
-        }
+          'Content-Length': Buffer.byteLength(postData),
+        },
       };
       const req = http.request(options, (response) => {
         response.setEncoding('utf8');

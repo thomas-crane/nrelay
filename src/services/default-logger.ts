@@ -2,7 +2,7 @@
  * @module services/logging
  */
 import chalk from 'chalk';
-import { LogProvider, LogLevel } from './logger';
+import { LogLevel, LogProvider } from './logger';
 import { StringUtils } from './string-utils';
 
 /**

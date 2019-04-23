@@ -10,9 +10,7 @@ import { LibraryInfo } from './../models/plugin-info';
  *  return new type();
  * }
  */
-export interface Type<T> {
-  new(...args: any[]): T;
-}
+export type Type<T> = new(...args: any[]) => T;
 
 /**
  * A library which has been loaded using the `@Library` decorator.

@@ -19,5 +19,5 @@ export enum Classes {
   Trickster = 804,
   Sorcerer = 805,
   Ninja = 806,
-  Samurai = 785
+  Samurai = 785,
 }

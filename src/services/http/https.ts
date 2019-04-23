@@ -2,9 +2,9 @@
  * @module services/http
  */
 import * as https from 'https';
-import * as url from 'url';
 import * as qs from 'querystring';
-import { REQUEST_HEADERS, HttpClient } from './http-client';
+import * as url from 'url';
+import { HttpClient, REQUEST_HEADERS } from './http-client';
 
 /**
  * A class used internally by the `HttpClient` to work with https urls.
@@ -22,7 +22,7 @@ export class Https {
       hostname: path,
       path: query,
       method: 'GET',
-      headers: REQUEST_HEADERS
+      headers: REQUEST_HEADERS,
     };
     return new Promise((resolve, reject) => {
       const req = https.get(opts, (response) => {
@@ -64,8 +64,8 @@ export class Https {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Content-Length': Buffer.byteLength(postData)
-        }
+          'Content-Length': Buffer.byteLength(postData),
+        },
       };
       const req = https.request(options, (response) => {
         response.setEncoding('utf8');

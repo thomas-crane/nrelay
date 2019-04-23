@@ -30,7 +30,7 @@ export class ResourceManager {
   loadAllResources(): Promise<void> {
     return Promise.all([
       this.loadTileInfo(),
-      this.loadObjects()
+      this.loadObjects(),
     ]).then(() => null);
   }
 
@@ -42,7 +42,7 @@ export class ResourceManager {
     if (!groundTypes) {
       throw new Error('Could not load GroundTypes.json');
     }
-    let tileArray: any[] = groundTypes['Ground'];
+    let tileArray: any[] = groundTypes.Ground;
     for (const tile of tileArray) {
       try {
         this.tiles[+tile.type] = {
@@ -50,7 +50,7 @@ export class ResourceManager {
           id: tile.id,
           sink: (tile.Sink ? true : false),
           speed: (+tile.Speed || 1),
-          noWalk: (tile.NoWalk ? true : false)
+          noWalk: (tile.NoWalk ? true : false),
         };
       } catch {
         Logger.log('ResourceManager', `Failed to load tile: ${tile.type}`, LogLevel.Debug);
@@ -68,7 +68,7 @@ export class ResourceManager {
     let itemCount = 0;
     let enemyCount = 0;
     let petCount = 0;
-    let objectsArray: any[] = objects['Object'];
+    let objectsArray: any[] = objects.Object;
     for (const current of objectsArray) {
       try {
         this.objects[+current.type] = {
@@ -114,19 +114,19 @@ export class ResourceManager {
               frequency: (+current.Projectile[j].Frequency || 0),
               amplitude: (+current.Projectile[j].Amplitude || 0),
               magnitude: (+current.Projectile[j].Magnitude || 0),
-              conditionEffects: []
+              conditionEffects: [],
             };
             if (Array.isArray(current.Projectile[j].ConditionEffect)) {
               for (const effect of current.Projectile[j].ConditionEffect) {
                 this.objects[+current.type].projectiles[j].conditionEffects.push({
                   effectName: effect._,
-                  duration: effect.duration
+                  duration: effect.duration,
                 });
               }
             } else if (typeof current.Projectile[j].ConditionEffect === 'object') {
               this.objects[+current.type].projectiles[j].conditionEffects.push({
                 effectName: current.Projectile[j].ConditionEffect._,
-                duration: current.Projectile[j].ConditionEffect.duration
+                duration: current.Projectile[j].ConditionEffect.duration,
               });
             }
           }
@@ -147,7 +147,7 @@ export class ResourceManager {
             frequency: (+current.Projectile.Frequency || 1),
             amplitude: (+current.Projectile.Amplitude || 0),
             magnitude: (+current.Projectile.Magnitude || 3),
-            conditionEffects: []
+            conditionEffects: [],
           };
           this.objects[+current.type].projectiles.push(this.objects[+current.type].projectile);
         }
@@ -156,10 +156,10 @@ export class ResourceManager {
           // stat bonuses
           if (Array.isArray(current.ActivateOnEquip)) {
             for (const bonus of current.ActivateOnEquip) {
-              if (bonus['_'] === 'IncrementStat') {
+              if (bonus._ === 'IncrementStat') {
                 this.objects[+current.type].activateOnEquip.push({
                   statType: bonus.stat,
-                  amount: bonus.amount
+                  amount: bonus.amount,
                 });
               }
             }
@@ -167,7 +167,7 @@ export class ResourceManager {
             if (current.ActivateOnEquip._ === 'IncrementStat') {
               this.objects[+current.type].activateOnEquip.push({
                 statType: current.ActivateOnEquip.stat,
-                amount: current.ActivateOnEquip.amount
+                amount: current.ActivateOnEquip.amount,
               });
             }
           }

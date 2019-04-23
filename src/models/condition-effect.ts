@@ -48,5 +48,5 @@ export enum ConditionEffect {
   ARMORED = 26,
   ARMORBROKEN = 27,
   HEXED = 28,
-  NINJA_SPEEDY = 29
+  NINJA_SPEEDY = 29,
 }
