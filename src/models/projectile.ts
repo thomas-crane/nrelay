@@ -1,7 +1,7 @@
 /**
  * @module models
  */
-import { Point } from '../services/pathfinding/point';
+import { Point } from '@realmlib/net';
 import { GameObject, ProjectileInfo } from './object';
 
 /**

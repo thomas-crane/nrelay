@@ -2,7 +2,7 @@
  * @module models
  */
 import { ObjectStatusData } from '@realmlib/net';
-import { Point } from '../services/pathfinding/point';
+import { Point } from '@realmlib/net';
 import * as parsers from '../util/parsers';
 import { GameObject } from './object';
 import { PlayerData } from './playerdata';
