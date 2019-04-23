@@ -7,7 +7,8 @@
   "scripts": {
     "compile": "tsc -p .",
     "index": "tsai --path src --exclude stdlib --overwrite",
-    "docs": "typedoc --options ./typedoc.json"
+    "docs": "typedoc --options ./typedoc.json",
+    "lint": "tslint -p ."
   },
   "files": [
     "lib/",
