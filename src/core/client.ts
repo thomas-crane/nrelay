@@ -1,7 +1,7 @@
 /**
  * @module core
  */
-import { AoeAckPacket, AoePacket, CreatePacket, CreateSuccessPacket, DamagePacket, EnemyHitPacket, EnemyShootPacket, FailurePacket, GotoAckPacket, GotoPacket, HelloPacket, LoadPacket, MapInfoPacket, MovePacket, NewTickPacket, Packet, PacketIO, PingPacket, PlayerHitPacket, PlayerShootPacket, PongPacket, ReconnectPacket, ServerPlayerShootPacket, ShootAckPacket, UpdateAckPacket, UpdatePacket, WorldPosData, FailureCode } from '@realmlib/net';
+import { AoeAckPacket, AoePacket, CreatePacket, CreateSuccessPacket, DamagePacket, EnemyHitPacket, EnemyShootPacket, FailureCode, FailurePacket, GotoAckPacket, GotoPacket, HelloPacket, LoadPacket, MapInfoPacket, MovePacket, NewTickPacket, Packet, PacketIO, PingPacket, PlayerHitPacket, PlayerShootPacket, Point, PongPacket, ReconnectPacket, ServerPlayerShootPacket, ShootAckPacket, UpdateAckPacket, UpdatePacket, WorldPosData } from '@realmlib/net';
 import { EventEmitter } from 'events';
 import { Socket } from 'net';
 import * as rsa from '../crypto/rsa';
@@ -9,7 +9,7 @@ import { GameId } from '../models/game-ids';
 import { MapTile } from '../models/map-tile';
 import { Runtime } from '../runtime/runtime';
 import { Logger, LogLevel, Random } from '../services';
-import { NodeUpdate, Pathfinder, Point } from '../services/pathfinding';
+import { NodeUpdate, Pathfinder } from '../services/pathfinding';
 import { createConnection } from '../util/net-util';
 import * as parsers from '../util/parsers';
 import { PacketHook } from './../decorators';
@@ -313,7 +313,6 @@ export class Client {
     }
     if (this.frameUpdateTimer) {
       clearInterval(this.frameUpdateTimer);
-      this.frameUpdateTimer = null;
     }
 
     // resources.
@@ -540,7 +539,7 @@ export class Client {
             pathfinderUpdates.push({
               x: Math.floor(x),
               y: Math.floor(y),
-              walkable: false
+              walkable: false,
             });
           }
         }
@@ -566,7 +565,7 @@ export class Client {
           pathfinderUpdates.push({
             x: Math.floor(tile.x),
             y: Math.floor(tile.y),
-            walkable: false
+            walkable: false,
           });
         }
       }
