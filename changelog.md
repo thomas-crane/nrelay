@@ -1,8 +1,12 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.0.0`
+### Changes:
+ + nrelay is now a module based system. There are a lot of changes, so they won't be listed here. Refer to the [7 to 8 migration guide](/docs/migration/7-to-8.md) and the readme for more info.
+
 ## `7.8.0`
-### Changes
+### Changes:
  + Added stat boosts to player data.
 
 ## `7.7.4`
