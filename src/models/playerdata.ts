@@ -1,7 +1,7 @@
 /**
  * @module models
  */
-import { WorldPosData } from './../networking/data/world-pos-data';
+import { WorldPosData } from '@realmlib/net';
 import { Classes } from './classes';
 import { GuildRank } from './guildrank';
 
@@ -91,25 +91,49 @@ export interface PlayerData {
    */
   atk: number;
   /**
+   * The amount of attack which has been added due to bonuses (e.g. equipping armor).
+   */
+  atkBoost: number;
+  /**
    * The defense stat of this player. This includes stat bonuses from equipped items.
    */
   def: number;
+  /**
+   * The amount of defense which has been added due to bonuses (e.g. equipping armor).
+   */
+  defBoost: number;
   /**
    * The speed stat of this player. This includes stat bonuses from equipped items.
    */
   spd: number;
   /**
+   * The amount of speed which has been added due to bonuses (e.g. equipping armor).
+   */
+  spdBoost: number;
+  /**
    * The dexterity stat of this player. This includes stat bonuses from equipped items.
    */
   dex: number;
+  /**
+   * The amount of dexterity which has been added due to bonuses (e.g. equipping armor).
+   */
+  dexBoost: number;
   /**
    * The wisdom stat of this player. This includes stat bonuses from equipped items.
    */
   wis: number;
   /**
+   * The amount of wisdom which has been added due to bonuses (e.g. equipping armor).
+   */
+  wisBoost: number;
+  /**
    * The vitality stat of this player. This includes stat bonuses from equipped items.
    */
   vit: number;
+  /**
+   * The amount of vitality which has been added due to bonuses (e.g. equipping armor).
+   */
+  vitBoost: number;
   /**
    * The condition flags for this entity. The number itself will be meaningless, as
    * the effects are represented with individual bits of the number.
@@ -147,34 +171,40 @@ export interface PlayerData {
 export function getDefaultPlayerData(): PlayerData {
   return {
     objectId: 0,
-    worldPos: null,
-    name: null,
+    worldPos: undefined,
+    name: undefined,
     level: 0,
     exp: 0,
     currentFame: 0,
     stars: 0,
-    accountId: null,
+    accountId: undefined,
     accountFame: 0,
     gold: 0,
     class: Classes.Wizard,
     nameChosen: false,
-    guildName: null,
+    guildName: undefined,
     guildRank: GuildRank.NoRank,
     maxHP: 0,
     maxMP: 0,
     hp: 0,
     mp: 0,
     atk: 0,
+    atkBoost: 0,
     def: 0,
+    defBoost: 0,
     spd: 0,
+    spdBoost: 0,
     dex: 0,
+    dexBoost: 0,
     wis: 0,
+    wisBoost: 0,
     vit: 0,
+    vitBoost: 0,
     condition: 0,
     hpPots: 0,
     mpPots: 0,
     hasBackpack: false,
     inventory: new Array<number>(20).fill(-1),
-    server: null
+    server: undefined,
   };
 }

@@ -1,144 +1,171 @@
 /**
  * @module core
  */
-import { Logger, LogLevel, Storage } from './../services';
-import { Client } from './client';
+import { Packet } from '@realmlib/net';
 import * as fs from 'fs';
-import { LoadedLib, ManagedLib, HookInfo } from './lib-info';
-import { IncomingPacket } from '../networking';
+import * as path from 'path';
+import { getHooks, getLibs } from '../decorators';
+import { Runtime } from '../runtime/runtime';
+import { Logger, LogLevel } from './../services';
+import { Client } from './client';
+import { HookInfo, LoadedLib, ManagedLib } from './lib-info';
 
-const PLUGIN_REGEX = /^.+\.js$/;
+const PLUGIN_REGEX = /\.js$/;
 
 /**
  * A static singleton class used to load libraries and packet hooks.
  */
 export class LibraryManager {
 
-  static readonly libStore: Map<string, ManagedLib<any>> = new Map();
-  static readonly hookStore: Map<string, Array<HookInfo<any>>> = new Map();
-  static readonly clientHookStore: Map<string, HookInfo<Client>> = new Map();
+  readonly libStore: Map<string, ManagedLib<any>> = new Map();
+  readonly hookStore: Map<string, Array<HookInfo<any>>> = new Map();
+  readonly clientHookStore: Map<string, HookInfo<Client>> = new Map();
+
+  private readonly loadQueue: Map<string, LoadedLib<any>>;
+
+  constructor(readonly runtime: Runtime) {
+    this.libStore = new Map();
+    this.hookStore = new Map();
+    this.clientHookStore = new Map();
+    this.loadQueue = new Map();
+  }
 
   /**
    * Loads and stores all libraries present in the `plugins` folder.
    */
-  static loadPlugins(): void {
-    const folderPath = Storage.makePath('dist', 'plugins');
+  loadPlugins(pluginFolder: string): void {
+    Logger.log('LibraryManager', 'Loading plugins...', LogLevel.Info);
     let files: string[] = [];
     try {
-      files = fs.readdirSync(folderPath);
-    } catch {
-      Logger.log('PluginManager', 'Couldn\'t find plugins directory', LogLevel.Warning);
+      files = fs.readdirSync(this.runtime.env.pathTo(pluginFolder));
+    } catch (err) {
+      if (err.code === 'ENOENT') {
+        Logger.log('LibraryManager', `The directory '${pluginFolder}' does not exist.`, LogLevel.Error);
+      } else {
+        Logger.log('LibraryManager', `Error while reading plugin directory.`, LogLevel.Error);
+        Logger.log('LibraryManager', err.message, LogLevel.Error);
+      }
+      return;
     }
     for (const file of files) {
       try {
-        const relPath = Storage.makePath('dist', 'plugins', file);
+        const relPath = path.join(this.runtime.env.pathTo(pluginFolder, file));
         if (!PLUGIN_REGEX.test(relPath)) {
-          Logger.log('PluginManager', `Skipping ${relPath}`, LogLevel.Debug);
+          Logger.log('LibraryManager', `Skipping ${relPath}`, LogLevel.Debug);
           continue;
         }
         require(relPath);
       } catch (err) {
-        Logger.log('PluginManager', `Error while loading ${file}`, LogLevel.Warning);
-        console.error(err);
+        Logger.log('LibraryManager', `Error while loading ${file}`, LogLevel.Error);
+        Logger.log('LibraryManager', err.message, LogLevel.Error);
       }
     }
-    if (this.afterInitFunctions && this.afterInitFunctions.length > 0) {
-      for (const func of this.afterInitFunctions) {
-        func();
-      }
-      this.afterInitFunctions = null;
-    }
-  }
-
-  /**
-   * Stores the given `info` about the packet hook.
-   * @param info The hook information.
-   */
-  static loadHook<T>(info: HookInfo<T>): void {
-    if (info.target === 'Client') {
-      this.clientHookStore.set(info.packet, info as any);
-    } else {
-      if (!this.hookStore.has(info.packet)) {
-        this.hookStore.set(info.packet, []);
-      }
-      this.hookStore.get(info.packet).push(info);
-    }
-  }
-
-  /**
-   * Creates and stores a `ManagedLib` from the given `lib`.
-   * @param lib The library to load.
-   */
-  static loadLibrary<T>(lib: LoadedLib<T>): void {
-    if (this.libStore.has(lib.target.name)) {
-      const existing = this.libStore.get(lib.target.name);
-      if (existing.info.dependencies.some((v, i) => v !== lib.dependencies[i])) {
-        Logger.log('PluginManager', `A library with the name ${lib.target.name} already exists.`, LogLevel.Error);
+    // load the libraries and hooks.
+    // we use a map here to make dependency fetching easier later.
+    const libs = getLibs();
+    for (const lib of libs) {
+      if (this.loadQueue.has(lib.target.name)) {
+        Logger.log('LibraryManager', `A library with the name ${lib.target.name} already exists.`, LogLevel.Error);
       } else {
-        Logger.log('PluginManager', `The library ${lib.target.name} has already been loaded.`, LogLevel.Warning);
+        this.loadQueue.set(lib.target.name, lib);
       }
-      return;
     }
+    const hooks = getHooks();
+
+    // load each lib
+    for (const [_, lib] of this.loadQueue) {
+      this.loadLib(lib);
+    }
+
+    // load the client hooks.
+    const clientHooks = hooks.filter((hook) => hook.target === 'Client');
+    for (const clientHook of clientHooks) {
+      this.clientHookStore.set(clientHook.packet, clientHook);
+    }
+  }
+
+  loadLib(lib: LoadedLib<any>): boolean {
+    Logger.log('LibraryManager', `Loading ${lib.target.name}...`, LogLevel.Info);
+    // make sure we won't override an existing lib.
+    if (this.libStore.has(lib.target.name)) {
+      Logger.log('LibraryManager', `A library with the name ${lib.target.name} already exists.`, LogLevel.Error);
+      return false;
+    }
+
+    // don't load it if it's disabled.
     if (lib.info.enabled === false) {
-      // unload hooks
-      for (const store of this.hookStore) {
-        this.hookStore.set(store[0], store[1].filter((info) => info.target !== lib.target.name));
-      }
-      return;
+      Logger.log('LibraryManager', `Skipping disabled plugin: ${lib.info.name}`, LogLevel.Debug);
+      return false;
     }
+
+    // get all of the dependencies.
+    const dependencies: any[] = [];
     for (const dep of lib.dependencies) {
-      if (!this.libStore.has(dep)) {
-        const error = new Error(`${lib.target.name} depends on the unloaded library ${dep}.`);
-        error.name = '__DEP';
-        throw error;
+      // check if the dependency is the runtime.
+      if (dep === 'Runtime') {
+        dependencies.push(this.runtime);
+        continue;
+      }
+      // if the dependency is loaded, we're good to go.
+      if (this.libStore.has(dep)) {
+        dependencies.push(this.libStore.get(dep).instance);
+      } else {
+        // get the dependency.
+        const depInfo = getLibs().filter((loadedLib) => loadedLib.target.name === dep)[0];
+        // the dependency might not exist.
+        if (!depInfo) {
+          Logger.log('LibraryManager', `${lib.target.name} depends on the unloaded library ${dep}.`, LogLevel.Error);
+          return false;
+        } else {
+          // load the dependency
+          const depLoaded = this.loadLib(depInfo);
+          if (!depLoaded) {
+            // if the dependency was not loaded, we can't load this lib.
+            // an error was already reported, so no need here.
+            return false;
+          } else {
+            dependencies.push(this.libStore.get(dep).instance);
+          }
+        }
       }
     }
+    // we can now create an instance.
     try {
-      const deps = lib.dependencies.map((dep) => this.libStore.get(dep).instance);
-      const instance = new lib.target(...deps);
+      // instantiate the plugin
+      const instance = new lib.target(...dependencies);
+
+      // save it
       this.libStore.set(lib.target.name, {
         info: lib,
-        instance
+        instance,
       });
-      Logger.log('PluginManager', `Loaded ${lib.info.name} by ${lib.info.author}`, LogLevel.Info);
     } catch (error) {
-      Logger.log('PluginManager', `Error while instantiating ${lib.target.name}`, LogLevel.Error);
-      Logger.log('PluginManager', error.message, LogLevel.Error);
+      Logger.log('LibraryManager', `Error while instantiating ${lib.target.name}`, LogLevel.Error);
+      Logger.log('LibraryManager', error.message, LogLevel.Error);
+      return false;
     }
-  }
 
-  /**
-   * Gets an instance of the specified type from the `libStore`.
-   * @deprecated Use dependency injection instead.
-   */
-  static getInstanceOf<T extends object>(instance: new () => T): T {
-    Logger.log('Deprecation', 'getInstanceOf is deprecated. Use dependency injection instead.', LogLevel.Warning);
-    const lib = this.libStore.get(instance.name);
-    if (lib && lib.instance) {
-      return lib.instance;
-    } else {
-      return null;
+    // load the hooks
+    const libHooks = getHooks().filter((hook) => hook.target === lib.target.name);
+    for (const hook of libHooks) {
+      if (!this.hookStore.has(hook.packet)) {
+        this.hookStore.set(hook.packet, []);
+      }
+      this.hookStore.get(hook.packet).push(hook);
     }
-  }
 
-  /**
-   * Invokes the `method` after all plugins have loaded.
-   * @param method The method to invoke.
-   * @deprecated `loadPlugins` may be called more than once, therefore
-   * it is impossible to tell when "all" plugins have loaded. This method
-   * is only guaranteed to work for the *first* call of `loadPlugins`.
-   */
-  static afterInit(method: () => void): void {
-    if (!this.afterInitFunctions) {
-      this.afterInitFunctions = [];
+    Logger.log('LibraryManager', `Loaded ${lib.info.name} by ${lib.info.author}!`, LogLevel.Success);
+    // remove this lib from the queue if it's in there.
+    if (this.loadQueue.has(lib.target.name)) {
+      this.loadQueue.delete(lib.target.name);
     }
-    this.afterInitFunctions.push(method);
+    return true;
   }
 
   /**
    * Invokes any packet hook methods which are registered for the given packet type.
    */
-  static callHooks(packet: IncomingPacket, client: Client): void {
+  callHooks(packet: Packet, client: Client): void {
     const name = packet.constructor.name;
     if (this.hookStore.has(name)) {
       const hooks = this.hookStore.get(name);
@@ -152,8 +179,8 @@ export class LibraryManager {
             caller.instance[hook.method].call(caller.instance, client, packet);
           }
         } catch (error) {
-          Logger.log('PluginManager', `Error while calling ${hook.target}.${hook.method}()`, LogLevel.Warning);
-          Logger.log('PluginManager', error.message, LogLevel.Warning);
+          Logger.log('LibraryManager', `Error while calling ${hook.target}.${hook.method}()`, LogLevel.Warning);
+          Logger.log('LibraryManager', error.message, LogLevel.Warning);
         }
       }
     }
@@ -165,6 +192,4 @@ export class LibraryManager {
       (client as any)[hook.method].call(client, client, packet);
     }
   }
-
-  private static afterInitFunctions: Array<() => void>;
 }

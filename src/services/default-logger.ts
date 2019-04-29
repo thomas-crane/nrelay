@@ -2,8 +2,8 @@
  * @module services/logging
  */
 import chalk from 'chalk';
-import { LogProvider, LogLevel } from './logger';
-import { StringUtils } from './string-utils';
+import { LogLevel, LogProvider } from './logger';
+import * as stringUtils from './string-utils';
 
 /**
  * The default logger used by the CLI.
@@ -16,8 +16,8 @@ export class DefaultLogger implements LogProvider {
     if (level < this.minLevel) {
       return;
     }
-    const senderString = (`[${StringUtils.getTime()} | ${sender}]`);
-    let printString: string = StringUtils.pad(senderString, 30) + message;
+    const senderString = (`[${stringUtils.getTime()} | ${sender}]`);
+    let printString: string = stringUtils.pad(senderString, 30) + message;
     switch (level) {
       case LogLevel.Debug:
       case LogLevel.Info:
@@ -33,6 +33,7 @@ export class DefaultLogger implements LogProvider {
         printString = chalk.green(printString);
         break;
     }
+    // tslint:disable-next-line: no-console
     console.log(printString);
   }
 }

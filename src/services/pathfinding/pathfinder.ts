@@ -1,10 +1,10 @@
 /**
  * @module services/pathfinding
  */
-import { Node } from './node';
-import { Point } from './point';
-import { Heap } from './heap';
+import { Point } from '@realmlib/net';
 import { HashSet } from './hash-set';
+import { Heap } from './heap';
+import { Node } from './node';
 import { NodeUpdate } from './node-update';
 
 /**
@@ -100,20 +100,20 @@ export class Pathfinder {
       return path.map((p) => {
         return {
           x: p.x,
-          y: p.y
+          y: p.y,
         };
       });
     }
     const waypoints: Point[] = [];
     let lastDirection: Point = {
       x: 0,
-      y: 0
+      y: 0,
     };
 
     for (let i = 1; i < path.length; i++) {
       const direction: Point = {
         x: path[i - 1].x - path[i].x,
-        y: path[i - 1].y - path[i].y
+        y: path[i - 1].y - path[i].y,
       };
       if (direction.x !== lastDirection.x || direction.y !== lastDirection.y) {
         // tslint:disable no-bitwise
@@ -122,18 +122,18 @@ export class Pathfinder {
           if (direction.x !== lastDirection.x) {
             waypoints.push({
               x: path[i - 1].x,
-              y: path[i].y
+              y: path[i].y,
             });
           } else if (direction.y !== lastDirection.y) {
             waypoints.push({
               x: path[i].x,
-              y: path[i - 1].y
+              y: path[i - 1].y,
             });
           }
         } else {
           waypoints.push({
             x: path[i].x,
-            y: path[i].y
+            y: path[i].y,
           });
         }
       }
@@ -141,7 +141,7 @@ export class Pathfinder {
     }
     waypoints.push({
       x: path[path.length - 1].x,
-      y: path[path.length - 1].y
+      y: path[path.length - 1].y,
     });
     return waypoints;
   }

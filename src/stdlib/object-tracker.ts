@@ -1,9 +1,9 @@
 /**
  * @module stdlib
  */
-import { Library, PacketHook, Client } from '../core';
+import { NewTickPacket, ObjectData, UpdatePacket } from '@realmlib/net';
 import { EventEmitter } from 'events';
-import { ObjectData, UpdatePacket, NewTickPacket } from '../networking';
+import { Client, Library, PacketHook } from '../core';
 
 /**
  * An event listener for events emitted by the `ObjectTracker`.
@@ -13,7 +13,7 @@ export type ObjectEventListener = (obj: ObjectData, client: Client) => void;
 @Library({
   name: 'Object Tracker',
   author: 'tcrane',
-  description: 'A utility library for keeping track of objects.'
+  description: 'A utility library for keeping track of objects.',
 })
 export class ObjectTracker {
   private emitter: EventEmitter;

@@ -1,15 +1,15 @@
 /**
  * @module services/http
  */
-import * as url from 'url';
+import { IncomingMessage } from 'http';
 import * as qs from 'querystring';
+import { SocksClient } from 'socks';
+import * as url from 'url';
 import * as zlib from 'zlib';
 import { Proxy } from '../../models';
+import { Logger, LogLevel } from '../logger';
 import { Http } from './http';
 import { Https } from './https';
-import { SocksClient } from 'socks';
-import { Logger, LogLevel } from '../logger';
-import { IncomingMessage } from 'http';
 
 /**
  * The HTTP headers to include in each request.
@@ -19,7 +19,7 @@ export const REQUEST_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
   'Accept-Encoding': 'gzip, deflate',
-  'Connection': 'keep-alive'
+  'Connection': 'keep-alive',
 };
 
 /**
@@ -93,20 +93,13 @@ export class HttpClient {
       return Https.post(endpoint, params);
     }
   }
-
   private static getWithProxy(endpoint: url.Url, proxy: Proxy, query: string): Promise<any> {
     return new Promise((resolve: (data: string) => void, reject: (err: Error) => void) => {
-      let provider = 'Http';
-      let port = 80;
-      if (endpoint.protocol === 'https:') {
-        provider = 'Https';
-        port = 443;
-      }
-      Logger.log(provider, 'Establishing proxy for GET request.', LogLevel.Info);
+      Logger.log('HttpClient', 'Establishing proxy for GET request.', LogLevel.Info);
       SocksClient.createConnection({
         destination: {
           host: endpoint.host,
-          port: port
+          port: 80,
         },
         command: 'connect',
         proxy: {
@@ -114,14 +107,16 @@ export class HttpClient {
           port: proxy.port,
           type: proxy.type,
           userId: proxy.userId,
-          password: proxy.password
-        }
+          password: proxy.password,
+        },
       }).then((info) => {
-        Logger.log(provider, 'Established proxy!', LogLevel.Success);
+        Logger.log('HttpClient', 'Established proxy!', LogLevel.Success);
         let data = '';
         info.socket.setEncoding('utf8');
         info.socket.write(`GET ${endpoint.path}${query} HTTP/1.1\r\n`);
         info.socket.write(`Host: ${endpoint.host}\r\n`);
+        // tslint:disable-next-line:max-line-length
+        info.socket.write('User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36\r\n');
         info.socket.write('Connection: close\r\n\r\n');
         info.socket.on('data', (chunk) => {
           data += chunk.toString('utf8');
@@ -130,7 +125,9 @@ export class HttpClient {
           info.socket.removeAllListeners('data');
           info.socket.removeAllListeners('error');
           info.socket.destroy();
-          resolve(data);
+          if (!err) {
+            resolve(data);
+          }
         });
         info.socket.once('error', (err) => {
           info.socket.removeAllListeners('data');

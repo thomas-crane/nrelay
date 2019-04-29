@@ -10,5 +10,5 @@ export enum GuildRank {
   Member = 10,
   Officer = 20,
   Leader = 30,
-  Founder = 40
+  Founder = 40,
 }

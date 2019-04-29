@@ -152,7 +152,7 @@ export interface ProjectileInfo {
   /**
    * Whether or not this projectile hits multiple entities.
    */
-  multihit: boolean;
+  multiHit: boolean;
   /**
    * Whether or not this projectile passes through obstacles.
    */

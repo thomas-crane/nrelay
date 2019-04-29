@@ -1,6 +1,27 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.0.0`
+### Changes:
+ + nrelay is now a module based system. There are a lot of changes, so they won't be listed here. Refer to the [7 to 8 migration guide](/docs/migration/7-to-8.md) and the readme for more info.
+
+## `7.8.0`
+### Changes:
+ + Added stat boosts to player data.
+
+## `7.7.4`
+### Fixes:
+ + Fixed a bug where valid packet hooks would not be loaded due to `VALID_PACKET_HOOKS` being incomplete.
+
+## `7.7.3`
+### Fixes:
+ + Fixed a bug where reconnect packets would sometimes use the wrong host.
+ + Fixed a race condition in the PacketIO.
+
+## `7.7.2`
+### Fixes:
+ + Fixed a bug where proxies could not be used to make get requests with the `HttpClient`.
+
 ## `7.7.1`
 ### Fixes:
  + Fixed a bug where weapons with single projectiles could not be fired.
