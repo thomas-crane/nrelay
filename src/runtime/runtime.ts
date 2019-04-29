@@ -1,11 +1,11 @@
 import { PacketMap } from '@realmlib/net';
+import { EventEmitter } from 'events';
 import { createWriteStream, WriteStream } from 'fs';
 import { Client, LibraryManager, ResourceManager } from '../core';
 import { Account, Server } from '../models';
 import { AccountService, censorGuid, DefaultLogger, FileLogger, Logger, LogLevel, Updater } from '../services';
 import { Environment } from './environment';
 import { Versions } from './versions';
-import { EventEmitter } from 'events';
 
 /**
  * An object which can be provided to the runtime when running.
