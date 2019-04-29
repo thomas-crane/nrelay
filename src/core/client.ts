@@ -418,6 +418,7 @@ export class Client {
           // hit.
           this.damage(this.projectiles[i].damage, this.projectiles[i].bulletId, this.projectiles[i].ownerObjectId);
           this.projectiles.splice(i, 1);
+          continue;
         }
       } else {
         let closestEnemy: Enemy;
@@ -723,19 +724,18 @@ export class Client {
       return;
     }
     for (let i = 0; i < enemyShootPacket.numShots; i++) {
-      this.projectiles.push(
-        new Projectile(
-          owner.properties.type,
-          this.runtime.resources.objects[owner.properties.type],
-          enemyShootPacket.bulletType,
-          enemyShootPacket.ownerId,
-          (enemyShootPacket.bulletId + i) % 256,
-          enemyShootPacket.angle + i * enemyShootPacket.angleInc,
-          this.getTime(),
-          enemyShootPacket.startingPos,
-        ),
+      const projectile = new Projectile(
+        owner.properties.type,
+        this.runtime.resources.objects[owner.properties.type],
+        enemyShootPacket.bulletType,
+        enemyShootPacket.ownerId,
+        (enemyShootPacket.bulletId + i) % 256,
+        enemyShootPacket.angle + i * enemyShootPacket.angleInc,
+        this.getTime(),
+        enemyShootPacket.startingPos,
       );
-      this.projectiles[this.projectiles.length - 1].setDamage(enemyShootPacket.damage);
+      projectile.setDamage(enemyShootPacket.damage);
+      this.projectiles.push(projectile);
     }
   }
 
