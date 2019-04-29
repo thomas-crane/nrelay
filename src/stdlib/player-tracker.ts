@@ -3,6 +3,8 @@
  */
 import { NewTickPacket, UpdatePacket } from '@realmlib/net';
 import { EventEmitter } from 'events';
+import { Events } from '../models/events';
+import { Runtime } from '../runtime';
 import * as parsers from '../util/parsers';
 import { Client, Library, PacketHook } from './../core';
 import { Classes, PlayerData } from './../models';
@@ -24,10 +26,10 @@ export class PlayerTracker {
     [guid: string]: PlayerData[],
   };
 
-  constructor() {
+  constructor(runtime: Runtime) {
     this.emitter = new EventEmitter();
     this.trackedPlayers = {};
-    Client.on('connect', (client) => {
+    runtime.on(Events.ClientConnect, (client: Client) => {
       this.trackedPlayers[client.guid] = [];
     });
   }

@@ -5,6 +5,7 @@ import { Account, Server } from '../models';
 import { AccountService, censorGuid, DefaultLogger, FileLogger, Logger, LogLevel, Updater } from '../services';
 import { Environment } from './environment';
 import { Versions } from './versions';
+import { EventEmitter } from 'events';
 
 /**
  * An object which can be provided to the runtime when running.
@@ -17,7 +18,7 @@ interface Arguments {
  * The runtime manages clients, resources, plugins and any other services
  * which are used by an nrelay project.
  */
-export class Runtime {
+export class Runtime extends EventEmitter {
 
   /**
    * The environment of this runtime.
@@ -59,6 +60,7 @@ export class Runtime {
   private readonly clients: Map<string, Client>;
 
   constructor(environment: Environment) {
+    super();
     this.env = environment;
     this.updater = new Updater(this.env);
     this.accountService = new AccountService(this.env);
