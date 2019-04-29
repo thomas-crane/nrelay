@@ -2,9 +2,9 @@
  * @module core
  */
 import { AoeAckPacket, AoePacket, CreatePacket, CreateSuccessPacket, DamagePacket, EnemyHitPacket, EnemyShootPacket, FailureCode, FailurePacket, GotoAckPacket, GotoPacket, HelloPacket, LoadPacket, MapInfoPacket, MovePacket, NewTickPacket, Packet, PacketIO, PingPacket, PlayerHitPacket, PlayerShootPacket, Point, PongPacket, ReconnectPacket, ServerPlayerShootPacket, ShootAckPacket, UpdateAckPacket, UpdatePacket, WorldPosData } from '@realmlib/net';
-import { EventEmitter } from 'events';
 import { Socket } from 'net';
 import * as rsa from '../crypto/rsa';
+import { Events } from '../models/events';
 import { GameId } from '../models/game-ids';
 import { MapTile } from '../models/map-tile';
 import { Runtime } from '../runtime/runtime';
@@ -22,28 +22,7 @@ const MAX_ATTACK_FREQ = 0.008;
 const MIN_ATTACK_MULT = 0.5;
 const MAX_ATTACK_MULT = 2;
 
-declare type ClientEvent = 'connect' | 'disconnect' | 'ready';
-
 export class Client {
-
-  /**
-   * Attaches an event listener to the client.
-   * @example
-   * ```
-   * Client.on('disconnect', (client) => {
-   *   delete this.clients[client.alias];
-   * });
-   * ```
-   * @param event The name of the event to listen for.
-   * @param listener The callback to invoke when the event is fired.
-   */
-  static on(event: ClientEvent, listener: (client: Client) => void): EventEmitter {
-    if (!this.emitter) {
-      this.emitter = new EventEmitter();
-    }
-    return this.emitter.on(event, listener);
-  }
-  private static emitter: EventEmitter;
 
   /**
    * The player data of the client.
@@ -188,9 +167,6 @@ export class Client {
    * @param accInfo The account info to connect with.
    */
   constructor(runtime: Runtime, server: Server, accInfo: Account) {
-    if (!Client.emitter) {
-      Client.emitter = new EventEmitter();
-    }
     this.runtime = runtime;
     this.projectiles = [];
     this.enemies = new Map();
@@ -322,7 +298,7 @@ export class Client {
 
     if (this.socketConnected) {
       this.socketConnected = false;
-      Client.emitter.emit('disconnect', this);
+      this.runtime.emit(Events.ClientDisconnect, this);
     }
 
     // client socket.
@@ -352,11 +328,23 @@ export class Client {
   /**
    * Connects the bot to the `server`.
    * @param server The server to connect to.
+   * @param gameId An optional game id to use when connecting. Defaults to the current game id.
    */
-  connectToServer(server: Server): void {
+  connectToServer(server: Server, gameId = this.gameId): void {
     Logger.log(this.alias, `Switching to ${server.name}.`, LogLevel.Info);
     this.internalServer = Object.assign({}, server);
     this.nexusServer = Object.assign({}, server);
+    this.gameId = gameId;
+    this.connect();
+  }
+
+  /**
+   * Connects to the Nexus.
+   */
+  connectToNexus(): void {
+    Logger.log(this.alias, 'Connecting to the Nexus.', LogLevel.Info);
+    this.gameId = GameId.Nexus;
+    this.internalServer = Object.assign({}, this.nexusServer);
     this.connect();
   }
 
@@ -767,7 +755,7 @@ export class Client {
     this.charInfo.charId = createSuccessPacket.charId;
     this.charInfo.nextCharId = this.charInfo.charId + 1;
     this.lastFrameTime = this.getTime();
-    Client.emitter.emit('ready', this);
+    this.runtime.emit(Events.ClientReady, this);
     this.frameUpdateTimer = setInterval(() => {
       const time = this.getTime();
       if (this.nextPos.length > 0) {
@@ -797,7 +785,7 @@ export class Client {
   private onConnect(): void {
     Logger.log(this.alias, `Connected to ${this.internalServer.name}!`, LogLevel.Success);
     this.socketConnected = true;
-    Client.emitter.emit('connect', this);
+    this.runtime.emit(Events.ClientConnect, this);
     this.lastTickTime = 0;
     this.lastAttackTime = 0;
     this.currentTickTime = 0;
@@ -833,7 +821,7 @@ export class Client {
   private onClose(error: boolean): void {
     Logger.log(this.alias, `The connection to ${this.internalServer.name} was closed.`, LogLevel.Warning);
     this.socketConnected = false;
-    Client.emitter.emit('disconnect', this);
+    this.runtime.emit(Events.ClientDisconnect, this);
     this.nextPos.length = 0;
     this.pathfinderTarget = null;
     this.internalServer = Object.assign({}, this.nexusServer);
