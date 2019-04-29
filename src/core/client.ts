@@ -894,9 +894,13 @@ export class Client {
       this.walkTo(this.worldPos.x + Math.cos(angle) * step, this.worldPos.y + Math.sin(angle) * step);
     } else {
       this.walkTo(target.x, target.y);
-      this.nextPos.shift();
-      if (this.nextPos.length === 0 && this.pathfinderTarget) {
-        this.pathfinderTarget = null;
+      const lastPos = this.nextPos.shift();
+      if (this.nextPos.length === 0) {
+        this.runtime.emit(Events.ClientArrived, this, lastPos);
+
+        if (this.pathfinderTarget) {
+          this.pathfinderTarget = null;
+        }
       }
     }
   }
