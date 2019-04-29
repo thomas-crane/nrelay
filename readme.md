@@ -2,7 +2,7 @@
 
 A console based modular client for Realm of the Mad God built with Node.js and TypeScript.
 
-Upgrading to v7? [Check out the migration guide.](docs/migration/6-to-7.md)
+Upgrading to v8? [Check out the migration guide.](docs/migration/7-to-8.md)
 
 ## Contents
 
@@ -15,7 +15,6 @@ Upgrading to v7? [Check out the migration guide.](docs/migration/6-to-7.md)
 + [Run](#run)
 + [Command line arguments](#command-line-arguments)
 + [Build](#build)
-  + [Building without gulp](#building-without-gulp)
 + [Acknowledgements](#acknowledgements)
 
 ## Docs
@@ -31,98 +30,56 @@ There is also extensive inline API documentation, which can be viewed [on the do
 Make sure you have [Nodejs](https://nodejs.org/en/) installed before running nrelay.
 You will also need [Java](https://java.com/en/download/) installed in order for the updater to work.
 
-1. Clone the repo to your computer
+1. Install the nrelay cli.
 
 ```bash
-git clone https://github.com/thomas-crane/nrelay.git/
+npm install -g nrelay-cli
 ```
 
-2. Change directory into the new `nrelay` directory
+2. Create a new nrelay project.
 
 ```bash
-cd nrelay
-```
-
-3. Install the required dependencies
-
-```bash
-npm install
-```
-
-4. Install gulp
-
-```bash
-npm install -g gulp-cli
-```
-
-*If you don't want to install gulp globally, you can still build nrelay without it. See [Building without gulp](#building-without-gulp) for info.*
-
-5. Run the build task to compile the source into JavaScript. This will produce a folder called `dist/`
-
-```bash
-gulp
-```
-
-#### Note
-
-The following steps are optional, but not performing them will restrict how you can run nrelay. See the [Run](#run) section for more info.
-
-6. Install nrelay as an npm module. This will let you use nrelay from any directory in the console.
-
-```bash
-npm install -g
-```
-
-7. Link the installed module to this folder to automatically update the module when any code changes happen.
-
-```bash
-npm link
+nrelay new my-new-project
 ```
 
 ## Setup
 
-Now that nrelay is installed, you will need to set up your `acc-config.json` file. This can be done in a few steps:
+When you create a new nrelay project, you will need to set up your `accounts.json` file. It has been generated for you, but currently only contains an example account.
 
-1. Open the nrelay folder in your file explorer
-2. Rename the file `acc-config-sample.json` to `acc-config.json`. (Note: Depending on your computer's settings you might not see the `.json` part of the file name)
-3. Replace the account info with your own account info.
+The current contents of the file will resemble the following.
 
-```json-with-comments
-// acc-config-sample.json
-{
-    "buildVersion": "X25.1.1",              // The current RotMG build version
-    "accounts": [
-        {
-            "alias": "Main Client",         // The name which appears in logs. This is optional.
-            "guid": "john@email.com",       // Your RotMG account email.
-            "password": "SecretPassWord11", // Your RotMG account password.
-            "serverPref": "AsiaSouthEast"   // The preferred server to connect to.
-        }
-    ]
-}
+```json
+[
+  {
+    "alias": "Main Client",
+    "guid": "example@email.com",
+    "password": "password10",
+    "serverPref": "Australia"
+  }
+]
+
 ```
 
-If you have multiple accounts which you want to run at the same time, you can add them to the `acc-config` by duplicating the segment in the curly braces `{ ... }`. E.g.
+To use your own account, simply replace the `guid` and `password` values with your own account's email and password.
 
-```json-with-comments
-// acc-config-sample.json
-{
-    "buildVersion": "X25.1.1",
-    "accounts": [
-        {
-            "alias": "Main Client",
-            "guid": "first.account@email.com",
-            "password": "SecretPassWord11",
-            "serverPref": "AsiaSouthEast"
-        },
-        {
-            "alias": "Secondary Client",
-            "guid": "second.account@email.com",
-            "password": "Password22",
-            "serverPref": "USSouth"
-        }
-    ]
-}
+If you have multiple accounts which you want to run at the same time, you can add them by duplicating the segment in the curly braces `{ ... }`. E.g.
+
+```json
+[
+  {
+    "alias": "Main Client",
+    "guid": "first.account@email.com",
+    "password": "SecretPassWord11",
+    "serverPref": "AsiaSouthEast"
+  },
+  {
+    "alias": "Secondary Client",
+    "guid": "second.account@email.com",
+    "password": "Password22",
+    "serverPref": "USSouth"
+  }
+]
+
 ```
 
 ### Using proxies
@@ -136,9 +93,11 @@ nrelay supports the use of SOCKSv4, SOCKSv4a, and SOCKSv5 proxies to route clien
     "password": "SecretPassWord11",
     "serverPref": "AsiaSouthEast",
     "proxy": {
-        "host": "127.0.0.1", // The ip of the proxy
-        "port": 8080,        // The port of the proxy. Use a number here, e.g. 8080 not "8080".
-        "type": 5            // The type of the proxy. Use 5 for SOCKSv5 and 4 for SOCKSv4 or SOCKSv4a
+        "host": "127.0.0.1",  // The ip of the proxy.
+        "port": 8080,         // The port of the proxy. Use a number here, e.g. 8080 not "8080".
+        "type": 5,            // The type of the proxy. Use 5 for SOCKSv5 and 4 for SOCKSv4 or SOCKSv4a.
+        "userId": "username", // The username for the proxy, if one is required.
+        "password": "secret"  // The password for the proxy, if one is required.
     }
 }
 ```
@@ -152,7 +111,7 @@ nrelay has a built in Local Server which can be used to transfer data between nr
 
 ## Run
 
-After setting up the `acc-config.json` file, nrelay is ready to go. To run nrelay, simply use the command `nrelay` in the console. If you have setup your `acc-config` properly (and used the correct credentials) you should see an output similar to this
+After setting up the `accounts.json` file, nrelay is ready to go. To run nrelay, use the command `nrelay run` in the console. If you have setup your `accounts.json` properly (and used the correct credentials) you should see an output similar to this
 
 ```bash
 C:\Documents> nrelay
@@ -172,14 +131,6 @@ The `alias` property in the account config is optional. If one is not specified,
 [17:25:26 | f***@e***.com]    Starting connection to AsiaSouthEast
 [17:25:26 | f***@e***.com]    Connected to server!
 ```
-
-You will only be able to use the command `nrelay` if you performed step 6 and 7 during the installation. If you didn't do these steps, you will have to run nrelay by following these steps:
-
-1. Open a console in the nrelay directory
-2. Use the command `npm start` to build the source and run nrelay, or
-3. Use the command `node index` to run nrelay without building the source.
-
-`npm start` will only work if the console is in the nrelay directory, whereas the `nrelay` command can be run anywhere.
 
 ## Command line arguments
 
@@ -223,13 +174,13 @@ Please note that `filepath` should always be an absolute path to either a client
 To start nrelay without checking for updates or log file writing, use
 
 ```bash
-nrelay --no-update --no-log
+nrelay run --no-update --no-log
 ```
 
 To start nrelay and force an update, use
 
 ```bash
-nrelay --force-update
+nrelay run --force-update
 ```
 
 To print the version number, use
@@ -240,25 +191,13 @@ nrelay -v
 
 ## Build
 
-Whenever any changes are made to the TypeScript source files, they will need to be recompiled in order for the changes to take effect.
+Whenever any changes are made to the plugins, they will need to be recompiled in order for the changes to take effect.
 
-To recompile the TypeScript simply use
-
-```bash
-gulp
-```
-
-### Building without gulp
-
-If you don't have gulp globally installed,
+To recompile the plugins simply use
 
 ```bash
-npm run build
+nrelay build
 ```
-
-can be used as an alternative.
-
-This uses the locally installed version of gulp (installed when you run `npm install`), so it will still work even if there is no globally installed version.
 
 ## Acknowledgements
 
