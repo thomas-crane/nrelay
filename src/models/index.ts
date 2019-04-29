@@ -6,6 +6,7 @@ export * from './classes';
 export * from './condition-effect';
 export * from './enemy';
 export * from './environment';
+export * from './events';
 export * from './game-ids';
 export * from './guildrank';
 export * from './map-tile';
