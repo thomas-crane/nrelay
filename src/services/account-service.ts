@@ -89,6 +89,18 @@ export class AccountService {
   }
 
   /**
+   * Updates the cached character info for the account with the `guid`.
+   * @param guid The guid of the account to update the cache of.
+   * @param charInfo The new info to store in the cache.
+   */
+  updateCharInfoCache(guid: string, charInfo: CharacterInfo): void {
+    const cacheUpdate: CharInfoCache = {};
+    cacheUpdate[guid] = charInfo;
+    this.env.updateJSON(cacheUpdate, 'char-info.cache.json');
+    Logger.log('AccountService', 'Character info cache updated!', LogLevel.Success);
+  }
+
+  /**
    * Resolves a proxy hostname to ensure its `host` field
    * is always an IP instead of possibly a hostname.
    * @param proxy The proxy to resolve the hostname of.
