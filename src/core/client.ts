@@ -121,6 +121,18 @@ export class Client {
   get moveMultiplier(): number {
     return this.internalMoveMultiplier;
   }
+
+  /**
+   * A number between 0 and 1 which represents the percentage of health
+   * at which the client will escape to the Nexus.
+   * A value of 0.5 will be 50% of the max health.
+   */
+  set autoNexusThreshold(value: number) {
+    this.autoNexusThreshold = Math.max(0, Math.min(value, 1));
+  }
+  get autoNexusThreshold(): number {
+    return this.internalAutoNexusThreshold;
+  }
   /**
    * Indicates whether or not the client's TCP socket is connected.
    */
@@ -129,6 +141,7 @@ export class Client {
   }
   private socketConnected: boolean;
   private internalMoveMultiplier: number;
+  private internalAutoNexusThreshold: number;
 
   private nexusServer: Server;
   private internalServer: Server;
@@ -179,6 +192,7 @@ export class Client {
     this.playerData.server = server.name;
     this.nextPos = [];
     this.internalMoveMultiplier = 1;
+    this.internalAutoNexusThreshold = 0.3;
     this.currentBulletId = 1;
     this.lastAttackTime = 0;
     this.connectTime = Date.now();
@@ -421,7 +435,7 @@ export class Client {
 
     // apply it and check for autonexusing.
     this.playerData.hp -= actualDamage;
-    if (this.playerData.hp <= this.playerData.maxHP * 0.3) {
+    if (this.playerData.hp <= this.playerData.maxHP * this.internalAutoNexusThreshold) {
       this.connectToNexus();
       const autoNexusPercent = this.playerData.hp / this.playerData.maxHP * 100;
       Logger.log(this.alias, `Auto nexused at ${autoNexusPercent.toFixed(1)}%`, LogLevel.Warning);
