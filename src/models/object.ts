@@ -122,6 +122,10 @@ export interface ProjectileInfo {
    */
   damage: number;
   /**
+   * Whether or not the projectile is armor piercing.
+   */
+  armorPiercing: boolean;
+  /**
    * The minimum damage applied by this projectile, if it is not given by the `damage`.
    */
   minDamage: number;
