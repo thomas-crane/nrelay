@@ -1,7 +1,7 @@
 /**
  * @module core
  */
-import { AoeAckPacket, AoePacket, CreatePacket, CreateSuccessPacket, DamagePacket, EnemyHitPacket, EnemyShootPacket, FailureCode, FailurePacket, GotoAckPacket, GotoPacket, HelloPacket, LoadPacket, MapInfoPacket, MovePacket, NewTickPacket, Packet, PacketIO, PingPacket, PlayerHitPacket, PlayerShootPacket, Point, PongPacket, ReconnectPacket, ServerPlayerShootPacket, ShootAckPacket, UpdateAckPacket, UpdatePacket, WorldPosData } from '@realmlib/net';
+import { AoeAckPacket, AoePacket, CreatePacket, CreateSuccessPacket, DamagePacket, EnemyHitPacket, EnemyShootPacket, FailureCode, FailurePacket, GotoAckPacket, GotoPacket, HelloPacket, LoadPacket, MapInfoPacket, MovePacket, NewTickPacket, Packet, PacketIO, PingPacket, PlayerHitPacket, PlayerShootPacket, Point, PongPacket, ReconnectPacket, ServerPlayerShootPacket, ShootAckPacket, UpdateAckPacket, UpdatePacket, WorldPosData, DeathPacket } from '@realmlib/net';
 import { Socket } from 'net';
 import * as rsa from '../crypto/rsa';
 import { Events } from '../models/events';
@@ -148,6 +148,7 @@ export class Client {
   private moveRecords: MoveRecords;
   private frameUpdateTimer: NodeJS.Timer;
   private reconnectTimer: NodeJS.Timer;
+  private needsNewCharacter: boolean;
 
   // reconnect info
   private key: number[];
@@ -193,6 +194,7 @@ export class Client {
     } else {
       this.charInfo = { charId: 0, nextCharId: 1, maxNumChars: 1 };
     }
+    this.needsNewCharacter = this.charInfo.charId === 0;
     this.internalServer = Object.assign({}, server);
     this.nexusServer = Object.assign({}, server);
 
@@ -391,20 +393,42 @@ export class Client {
     });
   }
 
-  private damage(damage: number, bulletId: number, objectId: number): void {
-    const min = damage * 3 / 20;
-    const actualDamge = Math.max(min, damage - this.playerData.def);
-    this.playerData.hp -= actualDamge;
-    Logger.log(this.alias, `Took ${actualDamge} damage. At ${Math.round(this.playerData.hp)} health.`);
-    if (this.playerData.hp <= this.playerData.maxHP * 0.3) {
-      Logger.log(this.alias, `Auto nexused at ${Math.round(this.playerData.hp)} HP`, LogLevel.Warning);
-      this.clientSocket.destroy();
-      return;
+  /**
+   * Applies some damage and returns whether or not the client should
+   * return to the nexus.
+   * @param amount The amount of damage to apply.
+   * @param armorPiercing Whether or not the damage should be armor piercing.
+   */
+  private applyDamage(amount: number, armorPiercing: boolean): boolean {
+    // if the player is currently invincible, they take no damage.
+    // tslint:disable-next-line: no-bitwise
+    if (ConditionEffects.has(this.playerData.condition, ConditionEffect.INVINCIBLE | ConditionEffect.INVULNERABLE)) {
+      return false;
     }
-    const playerHit = new PlayerHitPacket();
-    playerHit.bulletId = bulletId;
-    playerHit.objectId = objectId;
-    this.io.send(playerHit);
+
+    // work out the defense.
+    let def = this.playerData.def;
+    if (ConditionEffects.has(this.playerData.condition, ConditionEffect.ARMORED)) {
+      def *= 2;
+    }
+    if (armorPiercing || ConditionEffects.has(this.playerData.condition, ConditionEffect.ARMORBROKEN)) {
+      def = 0;
+    }
+
+    // work out the actual damage.
+    const min = amount * 3 / 20;
+    const actualDamage = Math.max(min, amount - def);
+
+    // apply it and check for autonexusing.
+    this.playerData.hp -= actualDamage;
+    if (this.playerData.hp <= this.playerData.maxHP * 0.3) {
+      this.connectToNexus();
+      const autoNexusPercent = this.playerData.hp / this.playerData.maxHP * 100;
+      Logger.log(this.alias, `Auto nexused at ${autoNexusPercent.toFixed(1)}%`, LogLevel.Warning);
+      return true;
+    } else {
+      return false;
+    }
   }
 
   private checkProjectiles(): void {
@@ -415,8 +439,18 @@ export class Client {
       }
       if (this.projectiles[i].damagePlayers) {
         if (this.worldPos.squareDistanceTo(this.projectiles[i].currentPosition) < 0.25) {
-          // hit.
-          this.damage(this.projectiles[i].damage, this.projectiles[i].bulletId, this.projectiles[i].ownerObjectId);
+          // apply the hit damage.
+          const nexused = this.applyDamage(
+            this.projectiles[i].damage,
+            this.projectiles[i].projectileProperties.armorPiercing,
+          );
+          // only reply if we didn't get nexused.
+          if (!nexused) {
+            const playerHit = new PlayerHitPacket();
+            playerHit.bulletId = this.projectiles[i].bulletId;
+            playerHit.objectId = this.projectiles[i].ownerObjectId;
+            this.io.send(playerHit);
+          }
           this.projectiles.splice(i, 1);
           continue;
         }
@@ -476,18 +510,19 @@ export class Client {
 
   @PacketHook()
   private onMapInfo(client: Client, mapInfoPacket: MapInfoPacket): void {
-    if (this.charInfo.charId > 0) {
+    if (this.needsNewCharacter) {
+      const createPacket = new CreatePacket();
+      createPacket.classType = Classes.Wizard;
+      createPacket.skinType = 0;
+      Logger.log(this.alias, 'Creating new character', LogLevel.Info);
+      this.io.send(createPacket);
+      this.needsNewCharacter = false;
+    } else {
       const loadPacket = new LoadPacket();
       loadPacket.charId = this.charInfo.charId;
       loadPacket.isFromArena = false;
       Logger.log(this.alias, `Connecting to ${mapInfoPacket.name}`, LogLevel.Info);
       this.io.send(loadPacket);
-    } else {
-      const createPacket = new CreatePacket();
-      createPacket.classType = Classes.Wizard;
-      createPacket.skinType = 0;
-      Logger.log(this.alias, 'Creating new char', LogLevel.Info);
-      this.io.send(createPacket);
     }
     this.random = new Random(mapInfoPacket.fp);
     this.mapTiles = [];
@@ -495,6 +530,30 @@ export class Client {
     if (this.pathfinderEnabled) {
       this.pathfinder = new Pathfinder(mapInfoPacket.width);
     }
+  }
+
+  @PacketHook()
+  private onDeath(client: Client, deathPacket: DeathPacket): void {
+    // if it isn't us that died, nothing to do.
+    if (deathPacket.accountId !== this.playerData.accountId) {
+      return;
+    }
+
+    Logger.log(this.alias, `The character ${deathPacket.charId} has died.`, LogLevel.Warning);
+
+    // update the char info.
+    this.charInfo.charId = this.charInfo.nextCharId;
+    this.charInfo.nextCharId++;
+    this.needsNewCharacter = true;
+
+    // update the char info cache.
+    this.runtime.accountService.updateCharInfoCache(this.guid, this.charInfo);
+
+    Logger.log(this.alias, 'Connecting to the nexus in 5 seconds.', LogLevel.Info);
+    setTimeout(() => {
+      // reconnect to the nexus.
+      this.connectToNexus();
+    }, 5000);
   }
 
   @PacketHook()
@@ -625,7 +684,22 @@ export class Client {
         this.keyTime = -1;
         break;
       default:
-        Logger.log(this.alias, `Received failure ${failurePacket.errorId}: "${failurePacket.errorDescription}"`, LogLevel.Error);
+        switch (failurePacket.errorDescription) {
+          case 'Character is dead':
+            this.fixCharInfoCache();
+            break;
+          case 'Character not found':
+            Logger.log(this.alias, 'No active characters. Creating new character.', LogLevel.Info);
+            this.needsNewCharacter = true;
+            break;
+          default:
+            Logger.log(
+              this.alias,
+              `Received failure ${failurePacket.errorId}: "${failurePacket.errorDescription}"`,
+              LogLevel.Error,
+            );
+            break;
+        }
         break;
     }
   }
@@ -636,7 +710,7 @@ export class Client {
     aoeAck.time = this.getTime();
     aoeAck.position = this.worldPos.clone();
     if (aoePacket.pos.squareDistanceTo(this.worldPos) < aoePacket.radius ** 2) {
-      this.playerData.hp -= aoePacket.damage;
+      this.applyDamage(aoePacket.damage, aoePacket.armorPiercing);
     }
     this.io.send(aoeAck);
   }
@@ -665,21 +739,11 @@ export class Client {
     this.moveRecords.clear(movePacket.time);
     this.io.send(movePacket);
 
-    // hp.
     const elapsedMS = this.currentTickTime - this.lastTickTime;
-    this.playerData.hp += elapsedMS / 1000 * (1 + 0.12 * this.playerData.vit);
-    if (this.playerData.hp > this.playerData.maxHP) {
-      this.playerData.hp = this.playerData.maxHP;
-    }
 
     for (const status of newTickPacket.statuses) {
       if (status.objectId === this.objectId) {
-        const beforeHP = this.playerData.hp;
         this.playerData = parsers.processStatData(status.stats, this.playerData);
-        // synchronise the client hp if the difference is more than 30% of the HP.
-        if (Math.abs(beforeHP - this.playerData.hp) < this.playerData.maxHP * 0.3) {
-          this.playerData.hp = beforeHP;
-        }
         this.playerData.objectId = this.objectId;
         this.playerData.worldPos = this.worldPos;
         this.playerData.server = this.internalServer.name;
@@ -847,6 +911,21 @@ export class Client {
 
   private onError(error: Error): void {
     Logger.log(this.alias, `Received socket error: ${error.message}`, LogLevel.Error);
+  }
+
+  /**
+   * Fixes the character cache after a dead character has been loaded.
+   */
+  private fixCharInfoCache(): void {
+    Logger.log(this.alias, `Tried to load a dead character. Fixing character info cache...`, LogLevel.Warning);
+
+    // update the char info
+    this.charInfo.charId = this.charInfo.nextCharId;
+    this.charInfo.nextCharId++;
+    this.needsNewCharacter = true;
+
+    // update the cache
+    this.runtime.accountService.updateCharInfoCache(this.guid, this.charInfo);
   }
 
   private connect(): void {
