@@ -25,4 +25,12 @@ export interface Tile {
    * Whether or not this tile can be walked on.
    */
   noWalk: boolean;
+  /**
+   * The minimum amount of damage this tile can cause.
+   */
+  minDamage?: number;
+  /**
+   * The maximum amount of damage this tile can cause.
+   */
+  maxDamage?: number;
 }

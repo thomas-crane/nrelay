@@ -51,6 +51,8 @@ export class ResourceManager {
           sink: (tile.Sink ? true : false),
           speed: (+tile.Speed || 1),
           noWalk: (tile.NoWalk ? true : false),
+          minDamage: (tile.MinDamage ? parseInt(tile.MinDamage, 10) : undefined),
+          maxDamage: (tile.MaxDamage ? parseInt(tile.MaxDamage, 10) : undefined),
         };
       } catch {
         Logger.log('ResourceManager', `Failed to load tile: ${tile.type}`, LogLevel.Debug);
@@ -94,6 +96,7 @@ export class ResourceManager {
           feedPower: (+current.FeedPower || -1),
           fullOccupy: current.FullOccupy === '',
           occupySquare: current.OccupySquare === '',
+          protectFromGroundDamage: current.ProtectFromGroundDamage === '',
         };
         if (Array.isArray(current.Projectile)) {
           this.objects[+current.type].projectiles = new Array<ProjectileInfo>(current.Projectile.length);

@@ -103,6 +103,10 @@ export interface GameObject {
    * Whether or not the object occupies the entire square.
    */
   fullOccupy: boolean;
+  /**
+   * Whether or not the object protects players from ground damage.
+   */
+  protectFromGroundDamage: boolean;
 }
 
 /**
