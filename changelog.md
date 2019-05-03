@@ -1,6 +1,12 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.1.0`
+### Added:
+ + Ground damage support.
+ + Improved death handling and char info caching.
+ + Simplified auto nexus with configurable threshold.
+
 ## `8.0.1`
 ### Fixes:
  + Fixed a critical upstream error which caused enemy projectiles to be handled incorrectly.
