@@ -1,7 +1,7 @@
 /**
  * @module core
  */
-import { AoeAckPacket, AoePacket, CreatePacket, CreateSuccessPacket, DamagePacket, EnemyHitPacket, EnemyShootPacket, FailureCode, FailurePacket, GotoAckPacket, GotoPacket, HelloPacket, LoadPacket, MapInfoPacket, MovePacket, NewTickPacket, Packet, PacketIO, PingPacket, PlayerHitPacket, PlayerShootPacket, Point, PongPacket, ReconnectPacket, ServerPlayerShootPacket, ShootAckPacket, UpdateAckPacket, UpdatePacket, WorldPosData, DeathPacket } from '@realmlib/net';
+import { AoeAckPacket, AoePacket, CreatePacket, CreateSuccessPacket, DamagePacket, EnemyHitPacket, EnemyShootPacket, FailureCode, FailurePacket, GotoAckPacket, GotoPacket, HelloPacket, LoadPacket, MapInfoPacket, MovePacket, NewTickPacket, Packet, PacketIO, PingPacket, PlayerHitPacket, PlayerShootPacket, Point, PongPacket, ReconnectPacket, ServerPlayerShootPacket, ShootAckPacket, UpdateAckPacket, UpdatePacket, WorldPosData, DeathPacket, GroundDamagePacket } from '@realmlib/net';
 import { Socket } from 'net';
 import * as rsa from '../crypto/rsa';
 import { Events } from '../models/events';
@@ -503,6 +503,49 @@ export class Client {
     }
   }
 
+  /**
+   * Checks whether or not the client should take damage from
+   * the tile they are currently standing on.
+   */
+  private checkGroundDamage(): void {
+    const x = Math.floor(this.worldPos.x);
+    const y = Math.floor(this.worldPos.y);
+    const tile = this.mapTiles[y * this.mapInfo.width + x];
+
+    // if there is no tile, return.
+    if (!tile) {
+      return;
+    }
+
+    // don't damage if the last damage was less than 500 ms ago.
+    const now = this.getTime();
+    if (tile.lastDamage + 500 > now) {
+      return;
+    }
+
+    // don't damage if the tile is protected from ground damage.
+    if (tile.protectFromGroundDamage) {
+      return;
+    }
+
+    // if the tile actually does damage.
+    const props = this.runtime.resources.tiles[tile.type];
+    if (props.minDamage !== undefined && props.maxDamage !== undefined) {
+      // get the damage.
+      const damage = this.random.nextIntInRange(props.minDamage, props.maxDamage);
+      tile.lastDamage = now;
+
+      // apply it and only send the response if the client didn't nexus.
+      const nexused = this.applyDamage(damage, true);
+      if (!nexused) {
+        const groundDamage = new GroundDamagePacket();
+        groundDamage.time = now;
+        groundDamage.position = this.worldPos.clone();
+        this.io.send(groundDamage);
+      }
+    }
+  }
+
   @PacketHook()
   private onDamage(client: Client, damage: DamagePacket): void {
     // if the bullet hit an enemy, do damage to that enemy
@@ -594,6 +637,14 @@ export class Client {
             this.mapTiles[index].occupied = true;
           }
         }
+        if (gameObject.protectFromGroundDamage) {
+          const index = Math.floor(obj.status.pos.y) * this.mapInfo.width + Math.floor(obj.status.pos.x);
+          if (!this.mapTiles[index]) {
+            this.mapTiles[index] = { protectFromGroundDamage: true } as MapTile;
+          } else {
+            this.mapTiles[index].protectFromGroundDamage = true;
+          }
+        }
         if (this.pathfinderEnabled) {
           if (gameObject.fullOccupy || gameObject.occupySquare) {
             const x = obj.status.pos.x;
@@ -617,11 +668,15 @@ export class Client {
     for (const tile of updatePacket.tiles) {
       const index = tile.y * this.mapInfo.width + tile.x;
       let occupied = false;
+      let protectFromGroundDamage = false;
       if (this.mapTiles[index]) {
         occupied = this.mapTiles[index].occupied;
+        protectFromGroundDamage = this.mapTiles[index].protectFromGroundDamage;
       }
       this.mapTiles[index] = tile as MapTile;
       this.mapTiles[index].occupied = occupied;
+      this.mapTiles[index].protectFromGroundDamage = protectFromGroundDamage;
+      this.mapTiles[index].lastDamage = 0;
       if (this.pathfinderEnabled) {
         if (this.runtime.resources.tiles[tile.type].noWalk) {
           pathfinderUpdates.push({
@@ -847,6 +902,7 @@ export class Client {
       }
       if (this.worldPos) {
         this.moveRecords.addRecord(time, this.worldPos.x, this.worldPos.y);
+        this.checkGroundDamage();
       }
       if (this.enemies.size > 0) {
         for (const enemy of this.enemies.values()) {
