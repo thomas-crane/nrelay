@@ -30,6 +30,7 @@ export class MoveRecords {
       record.y = y;
       record.time = time;
       this.records.push(record);
+      return;
     }
     const currentRecord = this.records[this.records.length - 1];
     const currentId = this.getId(currentRecord.time);
@@ -39,6 +40,7 @@ export class MoveRecords {
       record.y = y;
       record.time = time;
       this.records.push(record);
+      return;
     }
     const score = this.getScore(id, time);
     const currentScore = this.getScore(currentId, currentRecord.time);

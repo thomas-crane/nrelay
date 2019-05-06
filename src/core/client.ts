@@ -792,7 +792,7 @@ export class Client {
     // reply
     const movePacket = new MovePacket();
     movePacket.tickId = newTickPacket.tickId;
-    movePacket.time = this.getTime();
+    movePacket.time = this.lastFrameTime;
     movePacket.newPosition = this.worldPos;
     movePacket.records = [];
     const lastClear = this.moveRecords.lastClearTime;
@@ -895,9 +895,9 @@ export class Client {
         /**
          * We don't want to move further than we are allowed to, so if the
          * timer was late (which is likely) we should use 1000/30 ms instead
-         * of the real time elapsed.
+         * of the real time elapsed. Math.floor(1000/30) happens to be 33ms.
          */
-        const diff = Math.min(1000 / 30, time - this.lastFrameTime);
+        const diff = Math.min(33, time - this.lastFrameTime);
         this.moveTo(this.nextPos[0], diff);
       }
       if (this.worldPos) {
