@@ -1,9 +1,10 @@
 /**
  * @module core
  */
-import { AoeAckPacket, AoePacket, CreatePacket, CreateSuccessPacket, DamagePacket, EnemyHitPacket, EnemyShootPacket, FailureCode, FailurePacket, GotoAckPacket, GotoPacket, HelloPacket, LoadPacket, MapInfoPacket, MovePacket, NewTickPacket, Packet, PacketIO, PingPacket, PlayerHitPacket, PlayerShootPacket, Point, PongPacket, ReconnectPacket, ServerPlayerShootPacket, ShootAckPacket, UpdateAckPacket, UpdatePacket, WorldPosData, DeathPacket, GroundDamagePacket } from '@realmlib/net';
+import { AoeAckPacket, AoePacket, CreatePacket, CreateSuccessPacket, DamagePacket, DeathPacket, EnemyHitPacket, EnemyShootPacket, FailureCode, FailurePacket, GotoAckPacket, GotoPacket, GroundDamagePacket, GroundTileData, HelloPacket, LoadPacket, MapInfoPacket, MovePacket, NewTickPacket, OtherHitPacket, Packet, PacketIO, PingPacket, PlayerHitPacket, PlayerShootPacket, Point, PongPacket, ReconnectPacket, ServerPlayerShootPacket, ShootAckPacket, UpdateAckPacket, UpdatePacket, WorldPosData } from '@realmlib/net';
 import { Socket } from 'net';
 import * as rsa from '../crypto/rsa';
+import { Entity } from '../models/entity';
 import { Events } from '../models/events';
 import { GameId } from '../models/game-ids';
 import { MapTile } from '../models/map-tile';
@@ -173,6 +174,10 @@ export class Client {
   private projectiles: Projectile[];
   private random: Random;
   private enemies: Map<number, Enemy>;
+  private players: Map<number, Entity>;
+
+  // movement vars
+  private tileMultiplier: number;
 
   /**
    * Creates a new instance of the client and begins the connection process to the specified server.
@@ -184,6 +189,7 @@ export class Client {
     this.runtime = runtime;
     this.projectiles = [];
     this.enemies = new Map();
+    this.players = new Map();
     this.autoAim = true;
     this.key = [];
     this.keyTime = -1;
@@ -192,6 +198,7 @@ export class Client {
     this.playerData.server = server.name;
     this.nextPos = [];
     this.internalMoveMultiplier = 1;
+    this.tileMultiplier = 1;
     this.internalAutoNexusThreshold = 0.3;
     this.currentBulletId = 1;
     this.lastAttackTime = 0;
@@ -452,7 +459,21 @@ export class Client {
         continue;
       }
       if (this.projectiles[i].damagePlayers) {
-        if (this.worldPos.squareDistanceTo(this.projectiles[i].currentPosition) < 0.25) {
+        // check if it hit a wall.
+        const x = Math.floor(this.projectiles[i].currentPosition.x);
+        const y = Math.floor(this.projectiles[i].currentPosition.y);
+        if (this.mapTiles[y * this.mapInfo.width + x] && this.mapTiles[y * this.mapInfo.width + x].occupied) {
+          const otherHit = new OtherHitPacket();
+          otherHit.bulletId = this.projectiles[i].bulletId;
+          otherHit.objectId = this.projectiles[i].ownerObjectId;
+          otherHit.targetId = this.mapTiles[y * this.mapInfo.width + x].occupiedBy;
+          otherHit.time = this.getTime();
+          this.io.send(otherHit);
+          this.projectiles.splice(i, 1);
+          continue;
+        }
+
+        if (this.worldPos.squareDistanceTo(this.projectiles[i].currentPosition) <= 0.25) {
           // apply the hit damage.
           const nexused = this.applyDamage(
             this.projectiles[i].damage,
@@ -467,6 +488,22 @@ export class Client {
           }
           this.projectiles.splice(i, 1);
           continue;
+        }
+
+        // check if it hit another player.
+        if (this.players.size > 0) {
+          for (const player of this.players.values()) {
+            if (player.squareDistanceTo(this.projectiles[i].currentPosition) <= 0.25) {
+              const otherHit = new OtherHitPacket();
+              otherHit.bulletId = this.projectiles[i].bulletId;
+              otherHit.objectId = this.projectiles[i].ownerObjectId;
+              otherHit.targetId = player.objectData.objectId;
+              otherHit.time = this.lastFrameTime;
+              this.io.send(otherHit);
+              this.projectiles.splice(i, 1);
+              break;
+            }
+          }
         }
       } else {
         let closestEnemy: Enemy;
@@ -626,24 +663,35 @@ export class Client {
         this.worldPos = obj.status.pos;
         this.playerData = parsers.processObject(obj);
         this.playerData.server = this.internalServer.name;
+        continue;
+      }
+      if (Classes[obj.objectType]) {
+        const player = new Entity(obj.status);
+        this.players.set(obj.status.objectId, player);
+        continue;
       }
       if (this.runtime.resources.objects[obj.objectType]) {
         const gameObject = this.runtime.resources.objects[obj.objectType];
+        if (gameObject.enemy) {
+          if (!this.enemies.has(obj.status.objectId)) {
+            this.enemies.set(obj.status.objectId, new Enemy(gameObject, obj.status));
+          }
+          continue;
+        }
         if (gameObject.fullOccupy || gameObject.occupySquare) {
           const index = Math.floor(obj.status.pos.y) * this.mapInfo.width + Math.floor(obj.status.pos.x);
           if (!this.mapTiles[index]) {
-            this.mapTiles[index] = { occupied: true } as MapTile;
-          } else {
-            this.mapTiles[index].occupied = true;
+            this.mapTiles[index] = new GroundTileData() as MapTile;
           }
+          this.mapTiles[index].occupied = true;
+          this.mapTiles[index].occupiedBy = obj.status.objectId;
         }
         if (gameObject.protectFromGroundDamage) {
           const index = Math.floor(obj.status.pos.y) * this.mapInfo.width + Math.floor(obj.status.pos.x);
           if (!this.mapTiles[index]) {
-            this.mapTiles[index] = { protectFromGroundDamage: true } as MapTile;
-          } else {
-            this.mapTiles[index].protectFromGroundDamage = true;
+            this.mapTiles[index] = new GroundTileData() as MapTile;
           }
+          this.mapTiles[index].protectFromGroundDamage = true;
         }
         if (this.pathfinderEnabled) {
           if (gameObject.fullOccupy || gameObject.occupySquare) {
@@ -656,27 +704,27 @@ export class Client {
             });
           }
         }
-        if (gameObject.enemy) {
-          if (!this.enemies.has(obj.status.objectId)) {
-            this.enemies.set(obj.status.objectId, new Enemy(gameObject, obj.status));
-          }
-        }
       }
     }
 
     // map tiles
     for (const tile of updatePacket.tiles) {
       const index = tile.y * this.mapInfo.width + tile.x;
-      let occupied = false;
-      let protectFromGroundDamage = false;
-      if (this.mapTiles[index]) {
-        occupied = this.mapTiles[index].occupied;
-        protectFromGroundDamage = this.mapTiles[index].protectFromGroundDamage;
+      if (!this.mapTiles[index]) {
+        this.mapTiles[index] = {
+          ...tile,
+          read: tile.read,
+          write: tile.write,
+          occupied: false,
+          occupiedBy: undefined,
+          lastDamage: 0,
+          protectFromGroundDamage: false,
+        };
+      } else {
+        this.mapTiles[index].x = tile.x;
+        this.mapTiles[index].y = tile.y;
       }
-      this.mapTiles[index] = tile as MapTile;
-      this.mapTiles[index].occupied = occupied;
-      this.mapTiles[index].protectFromGroundDamage = protectFromGroundDamage;
-      this.mapTiles[index].lastDamage = 0;
+
       if (this.pathfinderEnabled) {
         if (this.runtime.resources.tiles[tile.type].noWalk) {
           pathfinderUpdates.push({
@@ -692,6 +740,9 @@ export class Client {
     for (const drop of updatePacket.drops) {
       if (this.enemies.has(drop)) {
         this.enemies.delete(drop);
+      }
+      if (this.players.has(drop)) {
+        this.players.delete(drop);
       }
     }
 
@@ -729,6 +780,9 @@ export class Client {
     }
     if (this.enemies.has(gotoPacket.objectId)) {
       this.enemies.get(gotoPacket.objectId).onGoto(gotoPacket.position.x, gotoPacket.position.y, this.lastFrameTime);
+    }
+    if (this.players.has(gotoPacket.objectId)) {
+      this.players.get(gotoPacket.objectId).onGoto(gotoPacket.position.x, gotoPacket.position.y, this.lastFrameTime);
     }
   }
 
@@ -808,6 +862,15 @@ export class Client {
     this.moveRecords.clear(movePacket.time);
     this.io.send(movePacket);
 
+    const x = Math.floor(this.worldPos.x);
+    const y = Math.floor(this.worldPos.y);
+    if (
+      this.mapTiles[y * this.mapInfo.width + x]
+      && this.runtime.resources.tiles[this.mapTiles[y * this.mapInfo.width + x].type]
+    ) {
+      this.tileMultiplier = this.runtime.resources.tiles[this.mapTiles[y * this.mapInfo.width + x].type].speed;
+    }
+
     const elapsedMS = this.currentTickTime - this.lastTickTime;
 
     for (const status of newTickPacket.statuses) {
@@ -820,6 +883,10 @@ export class Client {
       }
       if (this.enemies.has(status.objectId)) {
         this.enemies.get(status.objectId).onNewTick(status, elapsedMS, newTickPacket.tickId, this.lastFrameTime);
+        continue;
+      }
+      if (this.players.has(status.objectId)) {
+        this.players.get(status.objectId).onNewTick(status, elapsedMS, newTickPacket.tickId, this.lastFrameTime);
       }
     }
 
@@ -907,6 +974,11 @@ export class Client {
       if (this.enemies.size > 0) {
         for (const enemy of this.enemies.values()) {
           enemy.frameTick(this.lastTickId, time);
+        }
+      }
+      if (this.players.size > 0) {
+        for (const player of this.players.values()) {
+          player.frameTick(this.lastTickId, time);
         }
       }
       if (this.projectiles.length > 0) {
@@ -1055,6 +1127,9 @@ export class Client {
   }
 
   private walkTo(x: number, y: number): void {
+    if (ConditionEffects.has(this.playerData.condition, ConditionEffect.PARALYZED)) {
+      return;
+    }
     if (!this.mapTiles[Math.floor(this.worldPos.y) * this.mapInfo.width + Math.floor(x)].occupied) {
       this.worldPos.x = x;
     }
@@ -1076,24 +1151,17 @@ export class Client {
 
   private getSpeed(timeElapsed: number): number {
     if (ConditionEffects.has(this.playerData.condition, ConditionEffect.SLOWED)) {
-      return MIN_MOVE_SPEED;
+      return MIN_MOVE_SPEED * this.tileMultiplier;
     }
+
     let speed = MIN_MOVE_SPEED + this.playerData.spd / 75 * (MAX_MOVE_SPEED - MIN_MOVE_SPEED);
-    const x = Math.floor(this.worldPos.x);
-    const y = Math.floor(this.worldPos.y);
-    let multiplier = 1;
 
-    if (this.mapTiles[y * this.mapInfo.width + x] && this.runtime.resources.tiles[this.mapTiles[y * this.mapInfo.width + x].type]) {
-      multiplier = this.runtime.resources.tiles[this.mapTiles[y * this.mapInfo.width + x].type].speed;
-    }
-
-    // tslint:disable no-bitwise
+    // tslint:disable-next-line: no-bitwise
     if (ConditionEffects.has(this.playerData.condition, ConditionEffect.SPEEDY | ConditionEffect.NINJA_SPEEDY)) {
       speed *= 1.5;
     }
-    // tslint:enable no-bitwise
 
-    return (speed * multiplier * timeElapsed * this.internalMoveMultiplier);
+    return (speed * this.tileMultiplier * timeElapsed * this.internalMoveMultiplier);
   }
 
   private getAttackFrequency(): number {
