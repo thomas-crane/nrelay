@@ -11,6 +11,10 @@ export declare type MapTile = GroundTileData & {
    */
   occupied: boolean,
   /**
+   * The object id of the object which occupies this map tile.
+   */
+  occupiedBy: number | undefined,
+  /**
    * Whether or not this tile protects from ground damage.
    */
   protectFromGroundDamage: boolean,
