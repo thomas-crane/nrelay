@@ -131,7 +131,9 @@ export class Projectile {
       if (this.projectileProperties.amplitude !== 0) {
         const deflection =
           this.projectileProperties.amplitude *
-          Math.sin(phase + time / this.projectileProperties.lifetimeMS * this.projectileProperties.frequency * 2 * Math.PI);
+          Math.sin(
+            phase + time / this.projectileProperties.lifetimeMS * this.projectileProperties.frequency * 2 * Math.PI,
+          );
         point.x += deflection * Math.cos(this.startAngle + Math.PI / 2);
         point.y += deflection * Math.sin(this.startAngle + Math.PI / 2);
       }
