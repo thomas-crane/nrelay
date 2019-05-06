@@ -1,6 +1,13 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.2.0`
+### Added:
+ + OtherHit packet support
+
+### Changes:
+ + Slightly changed movement system to be more consistent with the real client.
+
 ## `8.1.0`
 ### Added:
  + Ground damage support.
