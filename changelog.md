@@ -1,6 +1,12 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.2.1`
+### Fixed:
+ + Made usage of `getTime` and `lastFrameTime` more consistent with the real client.
+ + Fixed the closest player not being chosen for other hit packets.
+ + Made the projectile collision checking more consistent with the real client.
+
 ## `8.2.0`
 ### Added:
  + OtherHit packet support

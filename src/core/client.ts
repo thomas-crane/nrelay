@@ -15,6 +15,7 @@ import { createConnection } from '../util/net-util';
 import * as parsers from '../util/parsers';
 import { PacketHook } from './../decorators';
 import { Account, CharacterInfo, Classes, ConditionEffect, ConditionEffects, Enemy, getDefaultPlayerData, MapInfo, MoveRecords, PlayerData, Projectile, Proxy, Server } from './../models';
+import { insideSquare } from '../util/math-util';
 
 const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
@@ -453,7 +454,8 @@ export class Client {
   }
 
   private checkProjectiles(): void {
-    for (let i = 0; i < this.projectiles.length; i++) {
+    // iterate backwards so that removing an item won't skip any projectiles.
+    for (let i = this.projectiles.length - 1; i >= 0; i--) {
       if (!this.projectiles[i].update(this.getTime())) {
         this.projectiles.splice(i, 1);
         continue;
@@ -462,6 +464,8 @@ export class Client {
         // check if it hit a wall.
         const x = Math.floor(this.projectiles[i].currentPosition.x);
         const y = Math.floor(this.projectiles[i].currentPosition.y);
+
+        // TODO: check the fullOccupy property.
         if (this.mapTiles[y * this.mapInfo.width + x] && this.mapTiles[y * this.mapInfo.width + x].occupied) {
           const otherHit = new OtherHitPacket();
           otherHit.bulletId = this.projectiles[i].bulletId;
@@ -473,7 +477,8 @@ export class Client {
           continue;
         }
 
-        if (this.worldPos.squareDistanceTo(this.projectiles[i].currentPosition) <= 0.25) {
+        // check if it hit the player.
+        if (insideSquare(this.projectiles[i].currentPosition, this.worldPos, 0.5)) {
           // apply the hit damage.
           const nexused = this.applyDamage(
             this.projectiles[i].damage,
@@ -492,48 +497,48 @@ export class Client {
 
         // check if it hit another player.
         if (this.players.size > 0) {
+          // find the closest player.
+          let closestPlayer: [number, Entity] = [Infinity, undefined];
           for (const player of this.players.values()) {
-            if (player.squareDistanceTo(this.projectiles[i].currentPosition) <= 0.25) {
-              const otherHit = new OtherHitPacket();
-              otherHit.bulletId = this.projectiles[i].bulletId;
-              otherHit.objectId = this.projectiles[i].ownerObjectId;
-              otherHit.targetId = player.objectData.objectId;
-              otherHit.time = this.lastFrameTime;
-              this.io.send(otherHit);
-              this.projectiles.splice(i, 1);
-              break;
+            const distance = player.squareDistanceTo(this.projectiles[i].currentPosition);
+            if (distance < closestPlayer[0]) {
+              closestPlayer = [distance, player];
             }
+          }
+          // if the closest player was less than 0.5 tiles away, hit them.
+          // TODO: check multiHit property.
+          if (insideSquare(this.projectiles[i].currentPosition, closestPlayer[1].currentPos, 0.5)) {
+            const otherHit = new OtherHitPacket();
+            otherHit.bulletId = this.projectiles[i].bulletId;
+            otherHit.objectId = this.projectiles[i].ownerObjectId;
+            otherHit.targetId = closestPlayer[1].objectData.objectId;
+            otherHit.time = this.getTime();
+            this.io.send(otherHit);
+            this.projectiles.splice(i, 1);
           }
         }
       } else {
-        let closestEnemy: Enemy;
-        let closestDistance = 10000000;
+        // find the closest enemy.
+        let closestEnemy: [number, Enemy] = [Infinity, undefined];
         for (const enemy of this.enemies.values()) {
           const dist = enemy.squareDistanceTo(this.projectiles[i].currentPosition);
-          if (dist < 0.25) {
-            if (dist < closestDistance) {
-              closestDistance = dist;
-              closestEnemy = enemy;
-            }
+          if (dist < closestEnemy[0]) {
+            closestEnemy = [dist, enemy];
           }
         }
-        if (closestEnemy) {
-          const lastUpdate = (this.getTime() - closestEnemy.lastUpdate);
-          if (lastUpdate > 400) {
-            Logger.log(this.alias, `Preventing EnemyHit. Time since last update: ${lastUpdate}`, LogLevel.Debug);
-            this.projectiles.splice(i, 1);
-            continue;
-          }
+
+        // if the closest enemy was less than 0.5 tiles away, hit them.
+        if (insideSquare(this.projectiles[i].currentPosition, closestEnemy[1].currentPos, 0.5)) {
           const enemyHit = new EnemyHitPacket();
-          const damage = closestEnemy.damage(this.projectiles[i].damage);
+          const damage = closestEnemy[1].damage(this.projectiles[i].damage);
           enemyHit.bulletId = this.projectiles[i].bulletId;
-          enemyHit.targetId = closestEnemy.objectData.objectId;
+          enemyHit.targetId = closestEnemy[1].objectData.objectId;
           enemyHit.time = this.getTime();
-          enemyHit.kill = closestEnemy.objectData.hp <= damage;
+          enemyHit.kill = closestEnemy[1].objectData.hp <= damage;
           this.io.send(enemyHit);
           this.projectiles.splice(i, 1);
           if (enemyHit.kill) {
-            closestEnemy.dead = true;
+            closestEnemy[1].dead = true;
           }
         }
       }
@@ -773,7 +778,7 @@ export class Client {
   @PacketHook()
   private onGotoPacket(client: Client, gotoPacket: GotoPacket): void {
     const ack = new GotoAckPacket();
-    ack.time = this.getTime();
+    ack.time = this.lastFrameTime;
     this.io.send(ack);
     if (gotoPacket.objectId === this.objectId) {
       this.worldPos = gotoPacket.position.clone();
@@ -830,7 +835,7 @@ export class Client {
   @PacketHook()
   private onAoe(client: Client, aoePacket: AoePacket): void {
     const aoeAck = new AoeAckPacket();
-    aoeAck.time = this.getTime();
+    aoeAck.time = this.lastFrameTime;
     aoeAck.position = this.worldPos.clone();
     if (aoePacket.pos.squareDistanceTo(this.worldPos) < aoePacket.radius ** 2) {
       this.applyDamage(aoePacket.damage, aoePacket.armorPiercing);
@@ -914,7 +919,7 @@ export class Client {
   @PacketHook()
   private onEnemyShoot(client: Client, enemyShootPacket: EnemyShootPacket): void {
     const shootAck = new ShootAckPacket();
-    shootAck.time = this.getTime();
+    shootAck.time = this.lastFrameTime;
     const owner = this.enemies.get(enemyShootPacket.ownerId);
     if (!owner || owner.dead) {
       shootAck.time = -1;
@@ -931,7 +936,7 @@ export class Client {
         enemyShootPacket.ownerId,
         (enemyShootPacket.bulletId + i) % 256,
         enemyShootPacket.angle + i * enemyShootPacket.angleInc,
-        this.getTime(),
+        this.lastFrameTime,
         enemyShootPacket.startingPos,
       );
       projectile.setDamage(enemyShootPacket.damage);
@@ -943,7 +948,7 @@ export class Client {
   private onServerPlayerShoot(client: Client, serverPlayerShoot: ServerPlayerShootPacket): void {
     if (serverPlayerShoot.ownerId === this.objectId) {
       const ack = new ShootAckPacket();
-      ack.time = this.getTime();
+      ack.time = this.lastFrameTime;
       this.io.send(ack);
     }
   }
@@ -971,6 +976,9 @@ export class Client {
         this.moveRecords.addRecord(time, this.worldPos.x, this.worldPos.y);
         this.checkGroundDamage();
       }
+      if (this.projectiles.length > 0) {
+        this.checkProjectiles();
+      }
       if (this.enemies.size > 0) {
         for (const enemy of this.enemies.values()) {
           enemy.frameTick(this.lastTickId, time);
@@ -980,9 +988,6 @@ export class Client {
         for (const player of this.players.values()) {
           player.frameTick(this.lastTickId, time);
         }
-      }
-      if (this.projectiles.length > 0) {
-        this.checkProjectiles();
       }
       this.lastFrameTime = time;
     }, 1000 / 30);
