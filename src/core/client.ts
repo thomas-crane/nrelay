@@ -141,6 +141,14 @@ export class Client {
   get connected(): boolean {
     return this.socketConnected;
   }
+
+  /**
+   * The current game id of this client.
+   */
+  get gameId(): GameId {
+    return this.internalGameId;
+  }
+
   private socketConnected: boolean;
   private internalMoveMultiplier: number;
   private internalAutoNexusThreshold: number;
@@ -168,7 +176,7 @@ export class Client {
   // reconnect info
   private key: number[];
   private keyTime: number;
-  private gameId: GameId;
+  private internalGameId: GameId;
   private reconnectCooldown: number;
 
   // enemies/projeciles
@@ -194,7 +202,7 @@ export class Client {
     this.autoAim = true;
     this.key = [];
     this.keyTime = -1;
-    this.gameId = GameId.Nexus;
+    this.internalGameId = GameId.Nexus;
     this.playerData = getDefaultPlayerData();
     this.playerData.server = server.name;
     this.nextPos = [];
@@ -226,6 +234,7 @@ export class Client {
     });
     this.io.on('error', (err: Error) => {
       Logger.log(this.alias, `Received PacketIO error: ${err.message}`, LogLevel.Error);
+      Logger.log(this.alias, err.stack, LogLevel.Debug);
       this.clientSocket.destroy();
     });
 
@@ -354,11 +363,11 @@ export class Client {
    * @param server The server to connect to.
    * @param gameId An optional game id to use when connecting. Defaults to the current game id.
    */
-  connectToServer(server: Server, gameId = this.gameId): void {
+  connectToServer(server: Server, gameId = this.internalGameId): void {
     Logger.log(this.alias, `Switching to ${server.name}.`, LogLevel.Info);
     this.internalServer = Object.assign({}, server);
     this.nexusServer = Object.assign({}, server);
-    this.gameId = gameId;
+    this.internalGameId = gameId;
     this.connect();
   }
 
@@ -367,7 +376,7 @@ export class Client {
    */
   connectToNexus(): void {
     Logger.log(this.alias, 'Connecting to the Nexus.', LogLevel.Info);
-    this.gameId = GameId.Nexus;
+    this.internalGameId = GameId.Nexus;
     this.internalServer = Object.assign({}, this.nexusServer);
     this.connect();
   }
@@ -378,7 +387,7 @@ export class Client {
    */
   changeGameId(gameId: GameId): void {
     Logger.log(this.alias, `Changing gameId to ${gameId}`, LogLevel.Info);
-    this.gameId = gameId;
+    this.internalGameId = gameId;
     this.connect();
   }
 
@@ -412,6 +421,7 @@ export class Client {
       this.nextPos.push(...path.map((p) => new WorldPosData(p.x + 0.5, p.y + 0.5)));
     }).catch((error: Error) => {
       Logger.log(this.alias, `Error finding path: ${error.message}`, LogLevel.Error);
+      Logger.log(this.alias, error.stack, LogLevel.Debug);
     });
   }
 
@@ -769,7 +779,7 @@ export class Client {
     if (reconnectPacket.name !== '') {
       this.internalServer.name = reconnectPacket.name;
     }
-    this.gameId = reconnectPacket.gameId;
+    this.internalGameId = reconnectPacket.gameId;
     this.key = reconnectPacket.key;
     this.keyTime = reconnectPacket.keyTime;
     this.connect();
@@ -808,7 +818,7 @@ export class Client {
       case FailureCode.BadKey:
         Logger.log(this.alias, 'Invalid key used.', LogLevel.Error);
         this.key = [];
-        this.gameId = -2;
+        this.internalGameId = GameId.Nexus;
         this.keyTime = -1;
         break;
       default:
@@ -837,10 +847,15 @@ export class Client {
     const aoeAck = new AoeAckPacket();
     aoeAck.time = this.lastFrameTime;
     aoeAck.position = this.worldPos.clone();
+    let nexused = false;
     if (aoePacket.pos.squareDistanceTo(this.worldPos) < aoePacket.radius ** 2) {
-      this.applyDamage(aoePacket.damage, aoePacket.armorPiercing);
+      // apply the aoe damage if in range.
+      nexused = this.applyDamage(aoePacket.damage, aoePacket.armorPiercing);
     }
-    this.io.send(aoeAck);
+    // only reply if the client didn't nexus.
+    if (!nexused) {
+      this.io.send(aoeAck);
+    }
   }
 
   @PacketHook()
@@ -1011,7 +1026,7 @@ export class Client {
   private sendHello(): void {
     const hp: HelloPacket = new HelloPacket();
     hp.buildVersion = this.buildVersion;
-    hp.gameId = this.gameId;
+    hp.gameId = this.internalGameId;
     hp.guid = rsa.encrypt(this.guid);
     hp.random1 = Math.floor(Math.random() * 1000000000);
     hp.password = rsa.encrypt(this.password);
@@ -1058,6 +1073,7 @@ export class Client {
 
   private onError(error: Error): void {
     Logger.log(this.alias, `Received socket error: ${error.message}`, LogLevel.Error);
+    Logger.log(this.alias, error.stack, LogLevel.Debug);
   }
 
   /**
@@ -1105,8 +1121,9 @@ export class Client {
 
       // perform the connection logic.
       this.onConnect();
-    }).catch((err) => {
+    }).catch((err: Error) => {
       Logger.log(this.alias, `Error while connecting: ${err.message}`, LogLevel.Error);
+      Logger.log(this.alias, err.stack, LogLevel.Debug);
     });
   }
 

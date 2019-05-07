@@ -1,6 +1,12 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.3.0`
+### Added:
+ + Debug statements to the client.
+ + A readonly gameId property to the client class.
+ + Auto nexus checking in the aoe packet handler.
+
 ## `8.2.1`
 ### Fixed:
  + Made usage of `getTime` and `lastFrameTime` more consistent with the real client.
