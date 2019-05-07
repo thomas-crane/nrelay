@@ -8,11 +8,11 @@ import { MapTile } from '../models/map-tile';
 import { Runtime } from '../runtime/runtime';
 import { Logger, LogLevel, Random } from '../services';
 import { NodeUpdate, Pathfinder } from '../services/pathfinding';
+import { insideSquare } from '../util/math-util';
 import { createConnection } from '../util/net-util';
 import * as parsers from '../util/parsers';
 import { PacketHook } from './../decorators';
 import { Account, CharacterInfo, Classes, ConditionEffect, ConditionEffects, Enemy, getDefaultPlayerData, MapInfo, MoveRecords, PlayerData, Projectile, Proxy, Server } from './../models';
-import { insideSquare } from '../util/math-util';
 
 const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
