@@ -84,6 +84,7 @@ export class Runtime extends EventEmitter {
 
     // set up the log file if we have the flag enabled.
     if (args.log) {
+      Logger.log('Runtime', 'Creating a log file.', LogLevel.Info);
       this.createLog();
       Logger.addLogger(new FileLogger(this.logStream));
     }
@@ -139,12 +140,18 @@ export class Runtime extends EventEmitter {
       Logger.log('Runtime', 'Cannot load buildVersion. It will be loaded when a client connects.', LogLevel.Warning);
     }
 
-    // load the plugins. The default is to load plugins from `lib/`, but we can change that with an arg.
-    let pluginFolder = 'lib';
-    if (args.pluginPath && typeof args.pluginPath === 'string') {
-      pluginFolder = args.pluginPath;
+    // if plugin loading is enabled.
+    if (args.plugins !== false) {
+      // load the plugins. The default is to load plugins from `lib/`, but we can change that with an arg.
+      let pluginFolder = 'lib';
+      if (args.pluginPath && typeof args.pluginPath === 'string') {
+        pluginFolder = args.pluginPath;
+        Logger.log('Runtime', `Loading plugins from "${pluginFolder}"`, LogLevel.Debug);
+      }
+      this.libraryManager.loadPlugins(pluginFolder);
+    } else {
+      Logger.log('Runtime', 'Plugin loading disabled.', LogLevel.Info);
     }
-    this.libraryManager.loadPlugins(pluginFolder);
 
     // finally, load any accounts.
     const accounts = this.env.readJSON<Account[]>('accounts.json');

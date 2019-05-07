@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.3.1`
+### Fixed:
+ + Fixed --no-plugins not actually stopping plugins from loading.
+
 ## `8.3.0`
 ### Added:
  + Debug statements to the client.
