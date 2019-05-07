@@ -1,6 +1,3 @@
-/**
- * @module decorators
- */
 import 'reflect-metadata';
 import { LoadedLib } from '../core';
 import { LibraryInfo } from './../models/plugin-info';

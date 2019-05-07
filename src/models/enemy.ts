@@ -1,6 +1,3 @@
-/**
- * @module models
- */
 import { ObjectStatusData, Point } from '@realmlib/net';
 import { Entity } from './entity';
 import { GameObject } from './object';

@@ -1,6 +1,3 @@
-/**
- * @module services/logging
- */
 import chalk from 'chalk';
 import { LogLevel, LogProvider } from './logger';
 import * as stringUtils from './string-utils';

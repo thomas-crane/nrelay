@@ -1,6 +1,3 @@
-/**
- * @module services/http
- */
 import * as https from 'https';
 import * as qs from 'querystring';
 import * as url from 'url';

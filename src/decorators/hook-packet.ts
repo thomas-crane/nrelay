@@ -1,6 +1,3 @@
-/**
- * @module decorators
- */
 import 'reflect-metadata';
 import { HookInfo } from '../core';
 import { Logger, LogLevel } from '../services';

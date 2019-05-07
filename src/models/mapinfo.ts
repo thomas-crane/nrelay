@@ -1,7 +1,4 @@
 /**
- * @module models
- */
-/**
  * A description of a map.
  */
 export interface MapInfo {

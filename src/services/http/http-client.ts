@@ -1,6 +1,3 @@
-/**
- * @module services/http
- */
 import { IncomingMessage } from 'http';
 import * as qs from 'querystring';
 import { SocksClient } from 'socks';

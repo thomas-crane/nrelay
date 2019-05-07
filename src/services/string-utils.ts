@@ -1,7 +1,4 @@
 /**
- * @module services
- */
-/**
  * A regular expression which matches the local part and domain of an email address.
  */
 const EMAIL_REPLACE_REGEX = /.+?(.+?)(?:@|\+\d+).+?(.+?)\./;

@@ -1,6 +1,3 @@
-/**
- * @module services/pathfinding
- */
 import { Point } from '@realmlib/net';
 import { HashSet } from './hash-set';
 import { Heap } from './heap';

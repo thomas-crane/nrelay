@@ -1,6 +1,3 @@
-/**
- * @module models
- */
 import { Point } from '@realmlib/net';
 import { GameObject, ProjectileInfo } from './object';
 

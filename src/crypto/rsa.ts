@@ -1,6 +1,3 @@
-/**
- * @module crypto
- */
 import NodeRSA from 'node-rsa';
 
 const PUBLIC_KEY =

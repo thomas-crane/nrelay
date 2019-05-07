@@ -1,6 +1,3 @@
-/**
- * @module services
- */
 import * as dns from 'dns';
 import * as net from 'net';
 import { Logger, LogLevel } from '../core';

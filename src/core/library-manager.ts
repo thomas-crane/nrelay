@@ -1,6 +1,3 @@
-/**
- * @module core
- */
 import { Packet } from '@realmlib/net';
 import * as fs from 'fs';
 import * as path from 'path';

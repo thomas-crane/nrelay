@@ -1,6 +1,3 @@
-/**
- * @module services/pathfinding
- */
 import { HeapItem } from './heap-item';
 
 /**

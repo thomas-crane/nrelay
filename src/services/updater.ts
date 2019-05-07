@@ -1,6 +1,3 @@
-/**
- * @module services
- */
 import * as resx from '@realmlib/resx';
 import * as fs from 'fs';
 import { Logger, LogLevel } from '../core';

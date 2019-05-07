@@ -1,7 +1,4 @@
 /**
- * @module models
- */
-/**
  * A server which can be connected to.
  */
 export interface Server {

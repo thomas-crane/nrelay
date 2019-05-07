@@ -1,7 +1,4 @@
 /**
- * @module models
- */
-/**
  * A game tile.
  */
 export interface Tile {

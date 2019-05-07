@@ -1,6 +1,3 @@
-/**
- * @module core
- */
 import { AoeAckPacket, AoePacket, CreatePacket, CreateSuccessPacket, DamagePacket, DeathPacket, EnemyHitPacket, EnemyShootPacket, FailureCode, FailurePacket, GotoAckPacket, GotoPacket, GroundDamagePacket, GroundTileData, HelloPacket, LoadPacket, MapInfoPacket, MovePacket, NewTickPacket, OtherHitPacket, Packet, PacketIO, PingPacket, PlayerHitPacket, PlayerShootPacket, Point, PongPacket, ReconnectPacket, ServerPlayerShootPacket, ShootAckPacket, UpdateAckPacket, UpdatePacket, WorldPosData } from '@realmlib/net';
 import { Socket } from 'net';
 import * as rsa from '../crypto/rsa';

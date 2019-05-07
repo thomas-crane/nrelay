@@ -1,6 +1,3 @@
-/**
- * @module services
- */
 import { ServerList } from '../runtime/server-list';
 import { CharacterInfo } from './../models';
 

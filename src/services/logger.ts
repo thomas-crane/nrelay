@@ -1,6 +1,3 @@
-/**
- * @module services/logging
- */
 import chalk from 'chalk';
 
 /**

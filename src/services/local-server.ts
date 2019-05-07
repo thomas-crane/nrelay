@@ -1,9 +1,6 @@
-/**
- * @module services
- */
 import { EventEmitter } from 'events';
 import { createServer, Server, Socket } from 'net';
-import { environment, SocketWrapper } from '../models';
+import { SocketWrapper } from '../models';
 import { Logger, LogLevel } from './logger';
 
 const DEFAULT_PORT = 5680;

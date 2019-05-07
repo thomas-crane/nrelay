@@ -1,6 +1,3 @@
-/**
- * @module stdlib
- */
 import { NewTickPacket, UpdatePacket } from '@realmlib/net';
 import { EventEmitter } from 'events';
 import { Events } from '../models/events';

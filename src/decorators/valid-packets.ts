@@ -1,6 +1,3 @@
-/**
- * @module decorators
- */
 import * as incomingPackets from '@realmlib/net/lib/packets/incoming';
 
 /**

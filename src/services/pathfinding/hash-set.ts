@@ -1,6 +1,3 @@
-/**
- * @module services/pathfinding
- */
 import { Hashable } from './hashable';
 
 /**

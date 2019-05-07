@@ -1,6 +1,3 @@
-/**
- * @module models
- */
 import { WorldPosData } from '@realmlib/net';
 import { Classes } from './classes';
 import { GuildRank } from './guildrank';

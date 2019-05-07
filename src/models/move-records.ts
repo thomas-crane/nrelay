@@ -1,6 +1,3 @@
-/**
- * @module models
- */
 import { MoveRecord } from '@realmlib/net';
 
 /**

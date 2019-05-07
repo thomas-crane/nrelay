@@ -1,6 +1,3 @@
-/**
- * @module core
- */
 import { Environment } from '../runtime/environment';
 import { GameObject, ProjectileInfo, Tile } from './../models';
 import { Logger, LogLevel } from './../services';

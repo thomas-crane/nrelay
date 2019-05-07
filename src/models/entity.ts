@@ -1,6 +1,3 @@
-/**
- * @module models
- */
 import { ObjectStatusData, Point } from '@realmlib/net';
 import * as parsers from '../util/parsers';
 import { PlayerData } from './playerdata';
