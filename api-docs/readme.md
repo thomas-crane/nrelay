@@ -7,8 +7,8 @@ It uses the inline JSDoc comments that are written in the nrelay source, so it i
 
 Some of the notable classes which are used commonly by plugins include:
 
-+ [Client](https://docs.nrelay.net//classes/client.html)
-+ [Runtime](https://docs.nrelay.net//classes/runtime.html)
-+ [PlayerTracker](https://docs.nrelay.net//classes/playertracker.html)
++ [Client](https://docs.nrelay.net/classes/client.html)
++ [Runtime](https://docs.nrelay.net/classes/runtime.html)
++ [PlayerTracker](https://docs.nrelay.net/classes/playertracker.html)
 
 If you are looking for a specific interface or class, the best way to find it is to use the search bar at the top of this page.
