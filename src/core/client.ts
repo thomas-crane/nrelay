@@ -1,4 +1,4 @@
-import { AoeAckPacket, AoePacket, CreatePacket, CreateSuccessPacket, DamagePacket, DeathPacket, EnemyHitPacket, EnemyShootPacket, FailureCode, FailurePacket, GotoAckPacket, GotoPacket, GroundDamagePacket, GroundTileData, HelloPacket, LoadPacket, MapInfoPacket, MovePacket, NewTickPacket, OtherHitPacket, Packet, PacketIO, PingPacket, PlayerHitPacket, PlayerShootPacket, Point, PongPacket, ReconnectPacket, ServerPlayerShootPacket, ShootAckPacket, UpdateAckPacket, UpdatePacket, WorldPosData } from '@realmlib/net';
+import { AoeAckPacket, AoePacket, CreatePacket, CreateSuccessPacket, DamagePacket, DeathPacket, EnemyHitPacket, EnemyShootPacket, FailureCode, FailurePacket, GotoAckPacket, GotoPacket, GroundDamagePacket, GroundTileData, HelloPacket, LoadPacket, MapInfoPacket, MovePacket, NewTickPacket, OtherHitPacket, Packet, PacketIO, PacketType, PingPacket, PlayerHitPacket, PlayerShootPacket, Point, PongPacket, ReconnectPacket, ServerPlayerShootPacket, ShootAckPacket, UpdateAckPacket, UpdatePacket, WorldPosData } from '@realmlib/net';
 import { Socket } from 'net';
 import * as rsa from '../crypto/rsa';
 import { Entity } from '../models/entity';
@@ -12,7 +12,7 @@ import { insideSquare } from '../util/math-util';
 import { createConnection } from '../util/net-util';
 import * as parsers from '../util/parsers';
 import { PacketHook } from './../decorators';
-import { Account, CharacterInfo, Classes, ConditionEffect, ConditionEffects, Enemy, getDefaultPlayerData, MapInfo, MoveRecords, PlayerData, Projectile, Proxy, Server } from './../models';
+import { Account, CharacterInfo, Classes, hasEffect, Enemy, getDefaultPlayerData, MapInfo, MoveRecords, PlayerData, Projectile, Proxy, Server, ConditionEffect } from './../models';
 
 const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
@@ -244,7 +244,7 @@ export class Client {
    * @param angle The angle in radians to shoot towards.
    */
   shoot(angle: number): boolean {
-    if (ConditionEffects.has(this.playerData.condition, ConditionEffect.STUNNED)) {
+    if (hasEffect(this.playerData.condition, ConditionEffect.STUNNED)) {
       return false;
     }
     const time = this.getTime();
@@ -431,16 +431,16 @@ export class Client {
   private applyDamage(amount: number, armorPiercing: boolean): boolean {
     // if the player is currently invincible, they take no damage.
     // tslint:disable-next-line: no-bitwise
-    if (ConditionEffects.has(this.playerData.condition, ConditionEffect.INVINCIBLE | ConditionEffect.INVULNERABLE)) {
+    if (hasEffect(this.playerData.condition, ConditionEffect.INVINCIBLE | ConditionEffect.INVULNERABLE)) {
       return false;
     }
 
     // work out the defense.
     let def = this.playerData.def;
-    if (ConditionEffects.has(this.playerData.condition, ConditionEffect.ARMORED)) {
+    if (hasEffect(this.playerData.condition, ConditionEffect.ARMORED)) {
       def *= 2;
     }
-    if (armorPiercing || ConditionEffects.has(this.playerData.condition, ConditionEffect.ARMORBROKEN)) {
+    if (armorPiercing || hasEffect(this.playerData.condition, ConditionEffect.ARMORBROKEN)) {
       def = 0;
     }
 
@@ -1146,7 +1146,7 @@ export class Client {
   }
 
   private walkTo(x: number, y: number): void {
-    if (ConditionEffects.has(this.playerData.condition, ConditionEffect.PARALYZED)) {
+    if (hasEffect(this.playerData.condition, ConditionEffect.PARALYZED)) {
       return;
     }
     if (!this.mapTiles[Math.floor(this.worldPos.y) * this.mapInfo.width + Math.floor(x)].occupied) {
@@ -1158,25 +1158,25 @@ export class Client {
   }
 
   private getAttackMultiplier(): number {
-    if (ConditionEffects.has(this.playerData.condition, ConditionEffect.WEAK)) {
+    if (hasEffect(this.playerData.condition, ConditionEffect.WEAK)) {
       return MIN_ATTACK_MULT;
     }
     let attackMultiplier = MIN_ATTACK_MULT + this.playerData.atk / 75 * (MAX_ATTACK_MULT - MIN_ATTACK_MULT);
-    if (ConditionEffects.has(this.playerData.condition, ConditionEffect.DAMAGING)) {
+    if (hasEffect(this.playerData.condition, ConditionEffect.DAMAGING)) {
       attackMultiplier *= 1.5;
     }
     return attackMultiplier;
   }
 
   private getSpeed(timeElapsed: number): number {
-    if (ConditionEffects.has(this.playerData.condition, ConditionEffect.SLOWED)) {
+    if (hasEffect(this.playerData.condition, ConditionEffect.SLOWED)) {
       return MIN_MOVE_SPEED * this.tileMultiplier;
     }
 
     let speed = MIN_MOVE_SPEED + this.playerData.spd / 75 * (MAX_MOVE_SPEED - MIN_MOVE_SPEED);
 
     // tslint:disable-next-line: no-bitwise
-    if (ConditionEffects.has(this.playerData.condition, ConditionEffect.SPEEDY | ConditionEffect.NINJA_SPEEDY)) {
+    if (hasEffect(this.playerData.condition, ConditionEffect.SPEEDY | ConditionEffect.NINJA_SPEEDY)) {
       speed *= 1.5;
     }
 
@@ -1184,11 +1184,11 @@ export class Client {
   }
 
   private getAttackFrequency(): number {
-    if (ConditionEffects.has(this.playerData.condition, ConditionEffect.DAZED)) {
+    if (hasEffect(this.playerData.condition, ConditionEffect.DAZED)) {
       return MIN_ATTACK_FREQ;
     }
     let atkFreq = MIN_ATTACK_FREQ + this.playerData.dex / 75 * (MAX_ATTACK_FREQ - MIN_ATTACK_FREQ);
-    if (ConditionEffects.has(this.playerData.condition, ConditionEffect.BERSERK)) {
+    if (hasEffect(this.playerData.condition, ConditionEffect.BERSERK)) {
       atkFreq *= 1.5;
     }
     return atkFreq;
