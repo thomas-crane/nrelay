@@ -244,7 +244,8 @@ export class Client {
    * @param angle The angle in radians to shoot towards.
    */
   shoot(angle: number): boolean {
-    if (hasEffect(this.playerData.condition, ConditionEffect.STUNNED)) {
+    // tslint:disable-next-line: no-bitwise
+    if (hasEffect(this.playerData.condition, ConditionEffect.STUNNED | ConditionEffect.PAUSED)) {
       return false;
     }
     const time = this.getTime();
@@ -255,7 +256,7 @@ export class Client {
       return false;
     }
     this.lastAttackTime = time;
-    const arcRads = item.arcGap / 180 * Math.PI;
+    const arcRads = item.arcGap * Math.PI / 180;
     let totalArc = arcRads * (numProjectiles - 1);
     if (arcRads <= 0) {
       totalArc = 0;
@@ -298,7 +299,6 @@ export class Client {
       this.projectiles[this.projectiles.length - 1].setDamage(damage * this.getAttackMultiplier());
     }
 
-    this.checkProjectiles();
     return true;
   }
 
@@ -431,7 +431,8 @@ export class Client {
   private applyDamage(amount: number, armorPiercing: boolean): boolean {
     // if the player is currently invincible, they take no damage.
     // tslint:disable-next-line: no-bitwise
-    if (hasEffect(this.playerData.condition, ConditionEffect.INVINCIBLE | ConditionEffect.INVULNERABLE)) {
+    const invincible = ConditionEffect.INVINCIBLE | ConditionEffect.INVULNERABLE | ConditionEffect.PAUSED;
+    if (hasEffect(this.playerData.condition, invincible)) {
       return false;
     }
 
@@ -450,6 +451,7 @@ export class Client {
 
     // apply it and check for autonexusing.
     this.playerData.hp -= actualDamage;
+    Logger.log(this.alias, `Took ${actualDamage} damage. At ${this.playerData.hp.toFixed(0)} health.`);
     if (this.playerData.hp <= this.playerData.maxHP * this.internalAutoNexusThreshold) {
       this.connectToNexus();
       const autoNexusPercent = this.playerData.hp / this.playerData.maxHP * 100;
@@ -481,6 +483,7 @@ export class Client {
           otherHit.time = this.getTime();
           this.io.send(otherHit);
           this.projectiles.splice(i, 1);
+          Logger.log(this.alias, 'Sent OtherHit for object.', LogLevel.Debug);
           continue;
         }
 
@@ -497,6 +500,7 @@ export class Client {
             playerHit.bulletId = this.projectiles[i].bulletId;
             playerHit.objectId = this.projectiles[i].ownerObjectId;
             this.io.send(playerHit);
+            Logger.log(this.alias, 'Sent PlayerHit.', LogLevel.Debug);
           }
           this.projectiles.splice(i, 1);
           continue;
@@ -508,7 +512,7 @@ export class Client {
           let closestPlayer: [number, Entity] = [Infinity, undefined];
           for (const player of this.players.values()) {
             const distance = player.squareDistanceTo(this.projectiles[i].currentPosition);
-            if (distance < closestPlayer[0]) {
+            if (distance < closestPlayer[0] && !hasEffect(player.objectData.condition, ConditionEffect.PAUSED)) {
               closestPlayer = [distance, player];
             }
           }
@@ -524,6 +528,7 @@ export class Client {
               otherHit.time = this.getTime();
               this.io.send(otherHit);
               this.projectiles.splice(i, 1);
+              Logger.log(this.alias, `Sent OtherHit for player: ${closestPlayer[1].objectData.name}`, LogLevel.Debug);
             }
           }
         }
@@ -532,7 +537,7 @@ export class Client {
         let closestEnemy: [number, Enemy] = [Infinity, undefined];
         for (const enemy of this.enemies.values()) {
           const dist = enemy.squareDistanceTo(this.projectiles[i].currentPosition);
-          if (dist < closestEnemy[0]) {
+          if (dist < closestEnemy[0] && !enemy.dead) {
             closestEnemy = [dist, enemy];
           }
         }
@@ -542,12 +547,18 @@ export class Client {
           // ...and they are less than 0.5 tiles away, hit them.
           if (insideSquare(this.projectiles[i].currentPosition, closestEnemy[1].currentPos, 0.5)) {
             const enemyHit = new EnemyHitPacket();
-            const damage = closestEnemy[1].damage(this.projectiles[i].damage);
+            const piercing = this.projectiles[i].projectileProperties.armorPiercing;
+            const damage = closestEnemy[1].damage(this.projectiles[i].damage, piercing);
             enemyHit.bulletId = this.projectiles[i].bulletId;
             enemyHit.targetId = closestEnemy[1].objectData.objectId;
             enemyHit.time = this.getTime();
             enemyHit.kill = closestEnemy[1].objectData.hp <= damage;
             this.io.send(enemyHit);
+            Logger.log(
+              this.alias,
+              `Sent EnemyHit (kill = ${enemyHit.kill}) (id = ${enemyHit.targetId})`,
+              LogLevel.Debug,
+            );
             this.projectiles.splice(i, 1);
             if (enemyHit.kill) {
               closestEnemy[1].dead = true;
@@ -994,9 +1005,6 @@ export class Client {
         this.moveRecords.addRecord(time, this.worldPos.x, this.worldPos.y);
         this.checkGroundDamage();
       }
-      if (this.projectiles.length > 0) {
-        this.checkProjectiles();
-      }
       if (this.enemies.size > 0) {
         for (const enemy of this.enemies.values()) {
           enemy.frameTick(this.lastTickId, time);
@@ -1006,6 +1014,9 @@ export class Client {
         for (const player of this.players.values()) {
           player.frameTick(this.lastTickId, time);
         }
+      }
+      if (this.projectiles.length > 0) {
+        this.checkProjectiles();
       }
       this.lastFrameTime = time;
     }, 1000 / 30);
@@ -1057,8 +1068,13 @@ export class Client {
     if (this.pathfinder) {
       this.pathfinder.destroy();
     }
-    this.projectiles = [];
-    this.enemies = new Map();
+
+    // do this on the next tick in case checkProjectiles is still working.
+    process.nextTick(() => {
+      this.projectiles = [];
+      this.enemies = new Map();
+    });
+
     if (this.frameUpdateTimer) {
       clearInterval(this.frameUpdateTimer);
       this.frameUpdateTimer = null;
@@ -1105,9 +1121,6 @@ export class Client {
       clearInterval(this.frameUpdateTimer);
       this.frameUpdateTimer = null;
     }
-    if (this.projectiles.length > 0) {
-      this.projectiles = [];
-    }
 
     if (this.proxy) {
       Logger.log(this.alias, 'Establishing proxy', LogLevel.Info);
@@ -1152,7 +1165,8 @@ export class Client {
   }
 
   private walkTo(x: number, y: number): void {
-    if (hasEffect(this.playerData.condition, ConditionEffect.PARALYZED)) {
+    // tslint:disable-next-line: no-bitwise
+    if (hasEffect(this.playerData.condition, ConditionEffect.PARALYZED | ConditionEffect.PAUSED)) {
       return;
     }
     if (!this.mapTiles[Math.floor(this.worldPos.y) * this.mapInfo.width + Math.floor(x)].occupied) {
