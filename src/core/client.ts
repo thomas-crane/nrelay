@@ -512,16 +512,19 @@ export class Client {
               closestPlayer = [distance, player];
             }
           }
-          // if the closest player was less than 0.5 tiles away, hit them.
-          // TODO: check multiHit property.
-          if (insideSquare(this.projectiles[i].currentPosition, closestPlayer[1].currentPos, 0.5)) {
-            const otherHit = new OtherHitPacket();
-            otherHit.bulletId = this.projectiles[i].bulletId;
-            otherHit.objectId = this.projectiles[i].ownerObjectId;
-            otherHit.targetId = closestPlayer[1].objectData.objectId;
-            otherHit.time = this.getTime();
-            this.io.send(otherHit);
-            this.projectiles.splice(i, 1);
+          // if there is a player...
+          if (closestPlayer[1] !== undefined) {
+            // ...and they are less than 0.5 tiles away, hit them.
+            // TODO: check multiHit property.
+            if (insideSquare(this.projectiles[i].currentPosition, closestPlayer[1].currentPos, 0.5)) {
+              const otherHit = new OtherHitPacket();
+              otherHit.bulletId = this.projectiles[i].bulletId;
+              otherHit.objectId = this.projectiles[i].ownerObjectId;
+              otherHit.targetId = closestPlayer[1].objectData.objectId;
+              otherHit.time = this.getTime();
+              this.io.send(otherHit);
+              this.projectiles.splice(i, 1);
+            }
           }
         }
       } else {
@@ -534,18 +537,21 @@ export class Client {
           }
         }
 
-        // if the closest enemy was less than 0.5 tiles away, hit them.
-        if (insideSquare(this.projectiles[i].currentPosition, closestEnemy[1].currentPos, 0.5)) {
-          const enemyHit = new EnemyHitPacket();
-          const damage = closestEnemy[1].damage(this.projectiles[i].damage);
-          enemyHit.bulletId = this.projectiles[i].bulletId;
-          enemyHit.targetId = closestEnemy[1].objectData.objectId;
-          enemyHit.time = this.getTime();
-          enemyHit.kill = closestEnemy[1].objectData.hp <= damage;
-          this.io.send(enemyHit);
-          this.projectiles.splice(i, 1);
-          if (enemyHit.kill) {
-            closestEnemy[1].dead = true;
+        // if there is an enemy...
+        if (closestEnemy[1] !== undefined) {
+          // ...and they are less than 0.5 tiles away, hit them.
+          if (insideSquare(this.projectiles[i].currentPosition, closestEnemy[1].currentPos, 0.5)) {
+            const enemyHit = new EnemyHitPacket();
+            const damage = closestEnemy[1].damage(this.projectiles[i].damage);
+            enemyHit.bulletId = this.projectiles[i].bulletId;
+            enemyHit.targetId = closestEnemy[1].objectData.objectId;
+            enemyHit.time = this.getTime();
+            enemyHit.kill = closestEnemy[1].objectData.hp <= damage;
+            this.io.send(enemyHit);
+            this.projectiles.splice(i, 1);
+            if (enemyHit.kill) {
+              closestEnemy[1].dead = true;
+            }
           }
         }
       }

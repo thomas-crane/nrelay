@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.3.2`
+### Fixed:
+ + Fixed a crash which would occur when the client shot while there were no known enemies.
+
 ## `8.3.1`
 ### Fixed:
  + Fixed --no-plugins not actually stopping plugins from loading.
