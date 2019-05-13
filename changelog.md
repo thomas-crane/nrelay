@@ -1,6 +1,18 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.3.3`
+### Fixed:
+ + Fixed a race condition with projectile handling which would result in a crash.
+ + Corrected the order of operations for updating entities.
+ + Stopped sending multiple enemy hit packets for dead enemies.
+ + The PAUSE condition effect is now accounted for when moving and shooting.
+ + Invincible enemies are not hit.
+
+### Added:
+ + Several debug messages to the client.
+ + A regular log message to log enemy hits.
+
 ## `8.3.2`
 ### Fixed:
  + Fixed a crash which would occur when the client shot while there were no known enemies.
