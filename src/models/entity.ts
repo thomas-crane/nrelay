@@ -1,4 +1,4 @@
-import { ObjectStatusData, Point } from '@realmlib/net';
+import { ObjectStatusData, Point, StatType } from '@realmlib/net';
 import * as parsers from '../util/parsers';
 import { PlayerData } from './playerdata';
 
@@ -34,11 +34,18 @@ export class Entity {
    * The current position of the entity.
    */
   currentPos: Point;
+  /**
+   * Whether or not this entity is dead.
+   */
+  dead: boolean;
+  private deadCounter: number;
 
   constructor(status: ObjectStatusData) {
     this.objectData = parsers.processObjectStatus(status);
     this.lastUpdate = 0;
     this.lastTickId = -1;
+    this.deadCounter = 0;
+    this.dead = false;
     this.currentPos = status.pos.clone();
     this.tickPos = {
       x: this.currentPos.x,
@@ -62,6 +69,14 @@ export class Entity {
    * @param clientTime The client time of this tick.
    */
   onNewTick(objectStatus: ObjectStatusData, tickTime: number, tickId: number, clientTime: number): void {
+    for (const status of objectStatus.stats) {
+      if (status.statType === StatType.HP_STAT) {
+        if (this.dead && status.statValue > 1 && ++this.deadCounter >= 2) {
+          this.dead = false;
+        }
+        break;
+      }
+    }
     this.objectData = parsers.processObjectStatus(objectStatus, this.objectData);
     if (this.lastTickId < tickId) {
       this.moveTo(this.tickPos.x, this.tickPos.y);
