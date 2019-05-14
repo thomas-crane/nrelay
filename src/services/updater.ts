@@ -67,6 +67,7 @@ export class Updater {
     const groundTypesStream = fs.createWriteStream(this.env.pathTo('resources', 'GroundTypes.json'));
     const objectsStream = fs.createWriteStream(this.env.pathTo('resources', 'Objects.json'));
 
+    Logger.log('Updater', 'Downloading assets...', LogLevel.Info);
     return Promise.all([
       resx.getAssetVersion(),
       resx.getGroundTypes(groundTypesStream),
@@ -86,15 +87,15 @@ export class Updater {
     let clientVersion: string;
     const filePath = this.env.pathTo('temp', 'client.swf');
     const fileStream = fs.createWriteStream(filePath);
+    Logger.log('Updater', 'Fetching client version...', LogLevel.Info);
     return resx.getClientVersion().then((version) => {
       clientVersion = version;
+      Logger.log('Updater', 'Downloading client...', LogLevel.Info);
       return resx.getClient(version, fileStream);
     }).then(() => {
-      return resx.unpackSwf(filePath);
-    }).then((decompiledPath) => {
-      const gscPath = resx.makeGSCPath(decompiledPath);
-      const gscContents = fs.readFileSync(gscPath, { encoding: 'utf8' });
-      const packets = resx.extractPacketInfo(gscContents);
+      Logger.log('Updater', 'Extracting packets...', LogLevel.Info);
+      return resx.extractPackets(filePath);
+    }).then((packets) => {
       this.env.writeJSON(packets, 'packets.json');
       this.env.updateJSON({ clientVersion }, 'versions.json');
       this.env.rmTempDir();

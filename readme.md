@@ -28,7 +28,6 @@ There is also extensive inline API documentation, which can be viewed [on the do
 ### Prerequisites
 
 Make sure you have [Nodejs](https://nodejs.org/en/) installed before running nrelay.
-You will also need [Java](https://java.com/en/download/) installed in order for the updater to work.
 
 1. Install the nrelay cli.
 
