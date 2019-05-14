@@ -1,6 +1,13 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.3.4`
+### Fixed:
+ + Stop client trying to walk onto unknown tiles.
+
+### Changes:
+ + Use new version of @realmlib/resx which speeds up the update process and removes the Java dependency.
+
 ## `8.3.3`
 ### Fixed:
  + Fixed a race condition with projectile handling which would result in a crash.

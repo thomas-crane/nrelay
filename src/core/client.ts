@@ -1169,10 +1169,12 @@ export class Client {
     if (hasEffect(this.playerData.condition, ConditionEffect.PARALYZED | ConditionEffect.PAUSED)) {
       return;
     }
-    if (!this.mapTiles[Math.floor(this.worldPos.y) * this.mapInfo.width + Math.floor(x)].occupied) {
+    const xTile = this.mapTiles[Math.floor(this.worldPos.y) * this.mapInfo.width + Math.floor(x)];
+    if (xTile && !xTile.occupied) {
       this.worldPos.x = x;
     }
-    if (!this.mapTiles[Math.floor(y) * this.mapInfo.width + Math.floor(this.worldPos.x)].occupied) {
+    const yTile = this.mapTiles[Math.floor(y) * this.mapInfo.width + Math.floor(this.worldPos.x)];
+    if (yTile && !yTile.occupied) {
       this.worldPos.y = y;
     }
   }
