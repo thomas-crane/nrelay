@@ -4,7 +4,9 @@ import { createWriteStream, WriteStream } from 'fs';
 import { isIP } from 'net';
 import { Client, LibraryManager, ResourceManager } from '../core';
 import { Account, Server } from '../models';
+import { AccountInUseError, ACCOUNT_IN_USE } from '../models/account-in-use-error';
 import { AccountService, censorGuid, DefaultLogger, FileLogger, Logger, LogLevel, Updater } from '../services';
+import { delay } from '../util/misc-util';
 import { Environment } from './environment';
 import { Versions } from './versions';
 
@@ -13,6 +15,24 @@ import { Versions } from './versions';
  */
 interface Arguments {
   [argName: string]: unknown;
+}
+
+/**
+ * An account which was initially added, but failed for some reason.
+ */
+interface FailedAccount {
+  /**
+   * The account which failed to load.
+   */
+  account: Account;
+  /**
+   * The number of times this account has tried to be loaded.
+   */
+  retryCount: number;
+  /**
+   * The number of seconds to wait before trying to load this account again.
+   */
+  timeout: number;
 }
 
 /**
@@ -157,12 +177,57 @@ export class Runtime extends EventEmitter {
     // finally, load any accounts.
     const accounts = this.env.readJSON<Account[]>('accounts.json');
     if (accounts) {
+      const failures: FailedAccount[] = [];
       for (const account of accounts) {
         try {
           await this.addClient(account);
         } catch (err) {
           Logger.log('Runtime', `Error adding account "${account.alias}": ${err.message}`, LogLevel.Error);
+          const failure = {
+            account,
+            retryCount: 1,
+            timeout: 1,
+          };
+          if (err.name === ACCOUNT_IN_USE) {
+            failure.timeout = (err as AccountInUseError).timeout;
+          }
+          failures.push(failure);
         }
+      }
+      // try to load the failed accounts.
+      for (const failure of failures) {
+        // perform the work in a promise so it doesn't block.
+        new Promise(async (resolve, reject) => {
+          while (failure.retryCount <= 10) {
+            Logger.log(
+              'Runtime',
+              `Retrying "${failure.account.alias}" in ${failure.timeout} seconds. (${failure.retryCount}/10)`,
+              LogLevel.Info,
+            );
+            // wait for the timeout then try to add the client.
+            await delay(failure.timeout * 1000);
+            try {
+              await this.addClient(failure.account);
+              resolve();
+            } catch (err) {
+              // if it failed, increase the timeout on a logarithmic scale.
+              Logger.log('Runtime', `Error adding account "${failure.account.alias}": ${err.message}`, LogLevel.Error);
+              if (err.name === ACCOUNT_IN_USE) {
+                failure.timeout = (err as AccountInUseError).timeout;
+              } else {
+                failure.timeout = Math.floor(Math.log10(1 + failure.retryCount) / 2 * 100);
+              }
+              failure.retryCount++;
+            }
+          }
+          reject();
+        }).catch(() => {
+          Logger.log(
+            'Runtime',
+            `Failed to load "${failure.account.alias}" after 10 retries. Not retrying.`,
+            LogLevel.Error,
+          );
+        });
       }
     }
   }
