@@ -1,4 +1,4 @@
-import { AoeAckPacket, AoePacket, CreatePacket, CreateSuccessPacket, DamagePacket, DeathPacket, EnemyHitPacket, EnemyShootPacket, FailureCode, FailurePacket, GotoAckPacket, GotoPacket, GroundDamagePacket, GroundTileData, HelloPacket, LoadPacket, MapInfoPacket, MovePacket, NewTickPacket, OtherHitPacket, Packet, PacketIO, PacketType, PingPacket, PlayerHitPacket, PlayerShootPacket, Point, PongPacket, ReconnectPacket, ServerPlayerShootPacket, ShootAckPacket, UpdateAckPacket, UpdatePacket, WorldPosData } from '@realmlib/net';
+import { AoeAckPacket, AoePacket, CreatePacket, CreateSuccessPacket, DamagePacket, DeathPacket, EnemyHitPacket, EnemyShootPacket, FailureCode, FailurePacket, GotoAckPacket, GotoPacket, GroundDamagePacket, GroundTileData, HelloPacket, LoadPacket, MapInfoPacket, MovePacket, NewTickPacket, OtherHitPacket, Packet, PacketIO, PingPacket, PlayerHitPacket, PlayerShootPacket, Point, PongPacket, ReconnectPacket, ServerPlayerShootPacket, ShootAckPacket, UpdateAckPacket, UpdatePacket, WorldPosData } from '@realmlib/net';
 import { Socket } from 'net';
 import * as rsa from '../crypto/rsa';
 import { Entity } from '../models/entity';
@@ -6,13 +6,15 @@ import { Events } from '../models/events';
 import { GameId } from '../models/game-ids';
 import { MapTile } from '../models/map-tile';
 import { Runtime } from '../runtime/runtime';
+import { getWaitTime } from '../runtime/scheduler';
 import { Logger, LogLevel, Random } from '../services';
 import { NodeUpdate, Pathfinder } from '../services/pathfinding';
 import { insideSquare } from '../util/math-util';
+import { delay } from '../util/misc-util';
 import { createConnection } from '../util/net-util';
 import * as parsers from '../util/parsers';
 import { PacketHook } from './../decorators';
-import { Account, CharacterInfo, Classes, hasEffect, Enemy, getDefaultPlayerData, MapInfo, MoveRecords, PlayerData, Projectile, Proxy, Server, ConditionEffect } from './../models';
+import { Account, CharacterInfo, Classes, ConditionEffect, Enemy, getDefaultPlayerData, hasEffect, MapInfo, MoveRecords, PlayerData, Projectile, Proxy, Server } from './../models';
 
 const MIN_MOVE_SPEED = 0.004;
 const MAX_MOVE_SPEED = 0.0096;
@@ -20,6 +22,7 @@ const MIN_ATTACK_FREQ = 0.0015;
 const MAX_ATTACK_FREQ = 0.008;
 const MIN_ATTACK_MULT = 0.5;
 const MAX_ATTACK_MULT = 2;
+const ACC_IN_USE = /Account in use \((\d+) seconds? until timeout\)/;
 
 export class Client {
 
@@ -181,6 +184,7 @@ export class Client {
   private random: Random;
   private enemies: Map<number, Enemy>;
   private players: Map<number, Entity>;
+  private hasPet: boolean;
 
   // movement vars
   private tileMultiplier: number;
@@ -208,6 +212,7 @@ export class Client {
     this.internalAutoNexusThreshold = 0.3;
     this.currentBulletId = 1;
     this.lastAttackTime = 0;
+    this.hasPet = false;
     this.connectTime = Date.now();
     this.socketConnected = false;
     this.guid = accInfo.guid;
@@ -215,6 +220,7 @@ export class Client {
     this.buildVersion = this.runtime.buildVersion;
     this.alias = accInfo.alias;
     this.proxy = accInfo.proxy;
+    this.reconnectCooldown = getWaitTime(this.proxy ? this.proxy.host : '');
     this.pathfinderEnabled = accInfo.pathfinder || false;
     if (accInfo.charInfo) {
       this.charInfo = accInfo.charInfo;
@@ -286,7 +292,7 @@ export class Client {
           y: shootPacket.startingPos.y,
         },
       );
-      this.projectiles.push(newProj);
+      this.projectiles.unshift(newProj);
       if (arcRads > 0) {
         angle += arcRads;
       }
@@ -310,7 +316,7 @@ export class Client {
     // packet io.
     if (this.io) {
       this.io.detach();
-      this.io = null;
+      this.io = undefined;
     }
 
     // timers.
@@ -322,9 +328,9 @@ export class Client {
     }
 
     // resources.
-    this.mapTiles = null;
-    this.projectiles = null;
-    this.enemies = null;
+    this.mapTiles = undefined;
+    this.projectiles = undefined;
+    this.enemies = undefined;
 
     if (this.socketConnected) {
       this.socketConnected = false;
@@ -333,10 +339,9 @@ export class Client {
 
     // client socket.
     if (this.clientSocket) {
-      this.clientSocket.removeAllListeners('connect');
+      this.clientSocket.destroy();
       this.clientSocket.removeAllListeners('close');
       this.clientSocket.removeAllListeners('error');
-      this.clientSocket.destroy();
     }
   }
 
@@ -409,7 +414,7 @@ export class Client {
     to.y = Math.floor(to.y);
     this.pathfinder.findPath(this.worldPos, to).then((path) => {
       if (path.length === 0) {
-        this.pathfinderTarget = null;
+        this.pathfinderTarget = undefined;
         this.nextPos.length = 0;
         return;
       }
@@ -672,11 +677,9 @@ export class Client {
     // update the char info cache.
     this.runtime.accountService.updateCharInfoCache(this.guid, this.charInfo);
 
-    Logger.log(this.alias, 'Connecting to the nexus in 5 seconds.', LogLevel.Info);
-    setTimeout(() => {
-      // reconnect to the nexus.
-      this.connectToNexus();
-    }, 5000);
+    Logger.log(this.alias, 'Connecting to the nexus.', LogLevel.Info);
+    // reconnect to the nexus.
+    this.connectToNexus();
   }
 
   @PacketHook()
@@ -693,6 +696,12 @@ export class Client {
         this.playerData = parsers.processObject(obj);
         this.playerData.server = this.internalServer.name;
         continue;
+      }
+      if (obj.status.objectId === this.objectId + 1) {
+        if (this.runtime.resources.pets[obj.objectType] !== undefined) {
+          Logger.log(this.alias, 'Detected pet.', LogLevel.Debug);
+          this.hasPet = true;
+        }
       }
       if (Classes[obj.objectType]) {
         const player = new Entity(obj.status);
@@ -850,6 +859,12 @@ export class Client {
               `Received failure ${failurePacket.errorId}: "${failurePacket.errorDescription}"`,
               LogLevel.Error,
             );
+            if (ACC_IN_USE.test(failurePacket.errorDescription)) {
+              const timeout: any = ACC_IN_USE.exec(failurePacket.errorDescription)[1];
+              if (!isNaN(timeout)) {
+                this.reconnectCooldown = parseInt(timeout, 10) * 1000;
+              }
+            }
             break;
         }
         break;
@@ -969,7 +984,7 @@ export class Client {
         enemyShootPacket.startingPos,
       );
       projectile.setDamage(enemyShootPacket.damage);
-      this.projectiles.push(projectile);
+      this.projectiles.unshift(projectile);
     }
   }
 
@@ -977,7 +992,11 @@ export class Client {
   private onServerPlayerShoot(client: Client, serverPlayerShoot: ServerPlayerShootPacket): void {
     if (serverPlayerShoot.ownerId === this.objectId) {
       const ack = new ShootAckPacket();
-      ack.time = this.lastFrameTime;
+      if (this.hasPet) {
+        ack.time = this.lastFrameTime;
+      } else {
+        ack.time = -1;
+      }
       this.io.send(ack);
     }
   }
@@ -1005,14 +1024,14 @@ export class Client {
         this.moveRecords.addRecord(time, this.worldPos.x, this.worldPos.y);
         this.checkGroundDamage();
       }
-      if (this.enemies.size > 0) {
-        for (const enemy of this.enemies.values()) {
-          enemy.frameTick(this.lastTickId, time);
-        }
-      }
       if (this.players.size > 0) {
         for (const player of this.players.values()) {
           player.frameTick(this.lastTickId, time);
+        }
+      }
+      if (this.enemies.size > 0) {
+        for (const enemy of this.enemies.values()) {
+          enemy.frameTick(this.lastTickId, time);
         }
       }
       if (this.projectiles.length > 0) {
@@ -1031,6 +1050,7 @@ export class Client {
     this.currentTickTime = 0;
     this.lastTickId = -1;
     this.currentBulletId = 1;
+    this.hasPet = false;
     this.enemies = new Map();
     this.projectiles = [];
     this.moveRecords = new MoveRecords();
@@ -1058,13 +1078,14 @@ export class Client {
     return bId;
   }
 
-  private onClose(error: boolean): void {
-    Logger.log(this.alias, `The connection to ${this.internalServer.name} was closed.`, LogLevel.Warning);
+  private onClose(): void {
+    Logger.log(this.alias, `The connection to ${this.nexusServer.name} was closed.`, LogLevel.Warning);
     this.socketConnected = false;
     this.runtime.emit(Events.ClientDisconnect, this);
     this.nextPos.length = 0;
-    this.pathfinderTarget = null;
-    this.internalServer = Object.assign({}, this.nexusServer);
+    this.pathfinderTarget = undefined;
+    this.io.detach();
+    this.clientSocket = undefined;
     if (this.pathfinder) {
       this.pathfinder.destroy();
     }
@@ -1077,17 +1098,12 @@ export class Client {
 
     if (this.frameUpdateTimer) {
       clearInterval(this.frameUpdateTimer);
-      this.frameUpdateTimer = null;
+      this.frameUpdateTimer = undefined;
     }
-    let reconnectTime = 5;
-    if (this.reconnectCooldown) {
-      reconnectTime = this.reconnectCooldown;
-      this.reconnectCooldown = null;
+    if (this.reconnectCooldown <= 0) {
+      this.reconnectCooldown = getWaitTime(this.proxy ? this.proxy.host : '');
     }
-    Logger.log(this.alias, `Reconnecting in ${reconnectTime} seconds`);
-    this.reconnectTimer = setTimeout(() => {
-      this.connect();
-    }, reconnectTime * 1000);
+    this.connect();
   }
 
   private onError(error: Error): void {
@@ -1110,22 +1126,26 @@ export class Client {
     this.runtime.accountService.updateCharInfoCache(this.guid, this.charInfo);
   }
 
-  private connect(): void {
+  private async connect(): Promise<void> {
     if (this.clientSocket) {
-      this.io.detach();
-      this.clientSocket.removeAllListeners('close');
-      this.clientSocket.removeAllListeners('error');
       this.clientSocket.destroy();
+      return;
     }
     if (this.frameUpdateTimer) {
       clearInterval(this.frameUpdateTimer);
-      this.frameUpdateTimer = null;
+      this.frameUpdateTimer = undefined;
     }
 
-    if (this.proxy) {
-      Logger.log(this.alias, 'Establishing proxy', LogLevel.Info);
+    if (this.reconnectCooldown > 0) {
+      Logger.log(this.alias, `Connecting in ${(this.reconnectCooldown / 1000).toFixed(1)} seconds.`, LogLevel.Info);
+      await delay(this.reconnectCooldown);
+      this.reconnectCooldown = 0;
     }
-    createConnection(this.internalServer.address, 2050, this.proxy).then((socket) => {
+    try {
+      if (this.proxy) {
+        Logger.log(this.alias, 'Establishing proxy', LogLevel.Info);
+      }
+      const socket = await createConnection(this.internalServer.address, 2050, this.proxy);
       this.clientSocket = socket;
 
       // attach the packetio
@@ -1137,10 +1157,12 @@ export class Client {
 
       // perform the connection logic.
       this.onConnect();
-    }).catch((err: Error) => {
+    } catch (err) {
       Logger.log(this.alias, `Error while connecting: ${err.message}`, LogLevel.Error);
       Logger.log(this.alias, err.stack, LogLevel.Debug);
-    });
+      this.reconnectCooldown = getWaitTime(this.proxy ? this.proxy.host : '');
+      this.connect();
+    }
   }
 
   private moveTo(target: WorldPosData, timeElapsed: number): void {
@@ -1158,7 +1180,7 @@ export class Client {
         this.runtime.emit(Events.ClientArrived, this, lastPos);
 
         if (this.pathfinderTarget) {
-          this.pathfinderTarget = null;
+          this.pathfinderTarget = undefined;
         }
       }
     }
