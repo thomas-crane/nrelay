@@ -1,6 +1,7 @@
 import { PacketMap } from '@realmlib/net';
 import { EventEmitter } from 'events';
 import { createWriteStream, WriteStream } from 'fs';
+import { isIP } from 'net';
 import { Client, LibraryManager, ResourceManager } from '../core';
 import { Account, Server } from '../models';
 import { AccountService, censorGuid, DefaultLogger, FileLogger, Logger, LogLevel, Updater } from '../services';
@@ -195,12 +196,19 @@ export class Runtime extends EventEmitter {
       if (servers[account.serverPref]) {
         server = servers[account.serverPref];
       } else {
-        const keys = Object.keys(servers);
-        if (keys.length === 0) {
-          throw new Error('Server list is empty.');
+        if (isIP(account.serverPref) !== 0) {
+          server = {
+            address: account.serverPref,
+            name: `IP: ${account.serverPref}`,
+          };
+        } else {
+          const keys = Object.keys(servers);
+          if (keys.length === 0) {
+            throw new Error('Server list is empty.');
+          }
+          server = servers[keys[Math.floor(Math.random() * keys.length)]];
+          Logger.log(account.alias, `Preferred server not found. Using ${server.name} instead.`, LogLevel.Warning);
         }
-        server = servers[keys[Math.floor(Math.random() * keys.length)]];
-        Logger.log(account.alias, `Preferred server not found. Using ${server.name} instead.`, LogLevel.Warning);
       }
       Logger.log('Runtime', `Loaded ${account.alias}!`, LogLevel.Success);
       const client = new Client(this, server, account);
