@@ -1,6 +1,19 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.4.0`
+### Added:
+ + Connection scheduling to ensure two clients will not connect within a period of time which is too short.
+ + A retry mechanism to the runtime when initially loading accounts.
+
+### Changes:
+ + The client no longer connects back to the nexus when the connection is closed.
+ + The client will try to reconnect if it encounters an error while connecting.
+ + The client will wait the full amount of time before reconnecting after an account in use error.
+
+### Fixed:
+ + Added pet detection to make the ServerPlayerShoot response more consistent with the client.
+
 ## `8.3.4`
 ### Fixed:
  + Stop client trying to walk onto unknown tiles.
