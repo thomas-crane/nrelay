@@ -2,6 +2,7 @@ import * as dns from 'dns';
 import * as net from 'net';
 import { Logger, LogLevel } from '../core';
 import { CharacterInfo, Proxy, SERVER_ENDPOINT } from '../models';
+import { AccountInUseError } from '../models/account-in-use-error';
 import { Environment } from '../runtime/environment';
 import { ServerList } from '../runtime/server-list';
 import { HttpClient } from './http';
@@ -125,8 +126,7 @@ export class AccountService {
     // check for acc in use.
     const accInUse = ACCOUNT_IN_USE_REGEX.exec(response);
     if (accInUse) {
-      const error = new Error(`Account in use. (${accInUse[1]} until timeout)`);
-      error.name = 'ACCOUNT_IN_USE';
+      const error = new AccountInUseError(parseInt(accInUse[1], 10));
       return error;
     }
     // check for the generic <Error>some error</Error>
