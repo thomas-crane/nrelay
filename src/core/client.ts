@@ -13,7 +13,7 @@ import { insideSquare } from '../util/math-util';
 import { delay } from '../util/misc-util';
 import { createConnection } from '../util/net-util';
 import * as parsers from '../util/parsers';
-import { PacketHook } from './../decorators';
+import { getHooks, PacketHook } from './../decorators';
 import { Account, CharacterInfo, Classes, ConditionEffect, Enemy, getDefaultPlayerData, hasEffect, MapInfo, MoveRecords, PlayerData, Projectile, Proxy, Server } from './../models';
 
 const MIN_MOVE_SPEED = 0.004;
@@ -232,9 +232,14 @@ export class Client {
     this.nexusServer = Object.assign({}, server);
 
     this.io = new PacketIO({ packetMap: this.runtime.packetMap });
-    this.io.on('packet', (data: Packet) => {
-      this.runtime.libraryManager.callHooks(data, this);
-    });
+
+    // use a set here to eliminate duplicates.
+    const requiredHooks = new Set(getHooks().map((hook) => hook.packet));
+    for (const type of requiredHooks) {
+      this.io.on(type, (data: Packet) => {
+        this.runtime.libraryManager.callHooks(data, this);
+      });
+    }
     this.io.on('error', (err: Error) => {
       Logger.log(this.alias, `Received PacketIO error: ${err.message}`, LogLevel.Error);
       Logger.log(this.alias, err.stack, LogLevel.Debug);
@@ -1009,36 +1014,38 @@ export class Client {
     this.charInfo.nextCharId = this.charInfo.charId + 1;
     this.lastFrameTime = this.getTime();
     this.runtime.emit(Events.ClientReady, this);
-    this.frameUpdateTimer = setInterval(() => {
-      const time = this.getTime();
-      if (this.nextPos.length > 0) {
-        /**
-         * We don't want to move further than we are allowed to, so if the
-         * timer was late (which is likely) we should use 1000/30 ms instead
-         * of the real time elapsed. Math.floor(1000/30) happens to be 33ms.
-         */
-        const diff = Math.min(33, time - this.lastFrameTime);
-        this.moveTo(this.nextPos[0], diff);
+    this.frameUpdateTimer = setInterval(this.onFrame.bind(this), 1000 / 30);
+  }
+
+  private onFrame() {
+    const time = this.getTime();
+    if (this.nextPos.length > 0) {
+      /**
+       * We don't want to move further than we are allowed to, so if the
+       * timer was late (which is likely) we should use 1000/30 ms instead
+       * of the real time elapsed. Math.floor(1000/30) happens to be 33ms.
+       */
+      const diff = Math.min(33, time - this.lastFrameTime);
+      this.moveTo(this.nextPos[0], diff);
+    }
+    if (this.worldPos) {
+      this.moveRecords.addRecord(time, this.worldPos.x, this.worldPos.y);
+      this.checkGroundDamage();
+    }
+    if (this.players.size > 0) {
+      for (const player of this.players.values()) {
+        player.frameTick(this.lastTickId, time);
       }
-      if (this.worldPos) {
-        this.moveRecords.addRecord(time, this.worldPos.x, this.worldPos.y);
-        this.checkGroundDamage();
+    }
+    if (this.enemies.size > 0) {
+      for (const enemy of this.enemies.values()) {
+        enemy.frameTick(this.lastTickId, time);
       }
-      if (this.players.size > 0) {
-        for (const player of this.players.values()) {
-          player.frameTick(this.lastTickId, time);
-        }
-      }
-      if (this.enemies.size > 0) {
-        for (const enemy of this.enemies.values()) {
-          enemy.frameTick(this.lastTickId, time);
-        }
-      }
-      if (this.projectiles.length > 0) {
-        this.checkProjectiles();
-      }
-      this.lastFrameTime = time;
-    }, 1000 / 30);
+    }
+    if (this.projectiles.length > 0) {
+      this.checkProjectiles();
+    }
+    this.lastFrameTime = time;
   }
 
   private onConnect(): void {
