@@ -41,8 +41,12 @@ export class Logger {
         logger.log(sender, message, level);
       } catch (error) {
         // console.log is the only reliable logger at this point.
-        console.log(`${chalk.bgRedBright('ERROR')} while calling log() on the logger class: ${logger.constructor.name}.`);
+        // tslint:disable: no-console
+        console.log(
+          `${chalk.bgRedBright('ERROR')} while calling log() on the logger class: ${logger.constructor.name}.`,
+        );
         console.error(error);
+        // tslint:enable: no-console
       }
     }
   }

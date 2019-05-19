@@ -17,7 +17,8 @@ export const GITHUB_CONTENT_ENDPOINT = 'https://api.github.com/repos/thomas-cran
 export const CLIENT_VERSION_ENDPOINT = 'https://www.realmofthemadgod.com/version.txt';
 
 /**
- * The endpoint used to retrieve the latest client. `{{version}}` needs to be replaced with the current version before use.
+ * The endpoint used to retrieve the latest client.
+ * `{{version}}` needs to be replaced with the current version before use.
  * @example
  * const downloadPath = CLIENT_DL_ENDPOINT.replace('{{version}}', currentVersion);
  */

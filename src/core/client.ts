@@ -1,3 +1,4 @@
+// tslint:disable-next-line: max-line-length
 import { AoeAckPacket, AoePacket, CreatePacket, CreateSuccessPacket, DamagePacket, DeathPacket, EnemyHitPacket, EnemyShootPacket, FailureCode, FailurePacket, GotoAckPacket, GotoPacket, GroundDamagePacket, GroundTileData, HelloPacket, LoadPacket, MapInfoPacket, MovePacket, NewTickPacket, OtherHitPacket, Packet, PacketIO, PingPacket, PlayerHitPacket, PlayerShootPacket, Point, PongPacket, ReconnectPacket, ServerPlayerShootPacket, ShootAckPacket, UpdateAckPacket, UpdatePacket, WorldPosData } from '@realmlib/net';
 import { Socket } from 'net';
 import * as rsa from '../crypto/rsa';
@@ -14,6 +15,7 @@ import { delay } from '../util/misc-util';
 import { createConnection } from '../util/net-util';
 import * as parsers from '../util/parsers';
 import { getHooks, PacketHook } from './../decorators';
+// tslint:disable-next-line: max-line-length
 import { Account, CharacterInfo, Classes, ConditionEffect, Enemy, getDefaultPlayerData, hasEffect, MapInfo, MoveRecords, PlayerData, Projectile, Proxy, Server } from './../models';
 
 const MIN_MOVE_SPEED = 0.004;
@@ -949,7 +951,9 @@ export class Client {
       const distance = projectile.lifetimeMS * (projectile.speed / 10000);
       for (const enemy of this.enemies.values()) {
         if (enemy.squareDistanceTo(this.worldPos) < distance ** 2) {
-          const angle = Math.atan2(enemy.objectData.worldPos.y - this.worldPos.y, enemy.objectData.worldPos.x - this.worldPos.x);
+          const x = enemy.objectData.worldPos.x - this.worldPos.x;
+          const y = enemy.objectData.worldPos.y - this.worldPos.y;
+          const angle = Math.atan2(y, x);
           this.shoot(angle);
         }
       }
