@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.4.1`
+### Fixed:
+ + Fixed a bug where the client packet hooks would not load if nrelay was run with `--no-plugins`.
+
 ## `8.4.0`
 ### Added:
  + Connection scheduling to ensure two clients will not connect within a period of time which is too short.
