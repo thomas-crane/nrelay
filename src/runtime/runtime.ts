@@ -4,7 +4,7 @@ import { createWriteStream, WriteStream } from 'fs';
 import { isIP } from 'net';
 import { Client, LibraryManager, ResourceManager } from '../core';
 import { Account, Server } from '../models';
-import { AccountInUseError, ACCOUNT_IN_USE } from '../models/account-in-use-error';
+import { ACCOUNT_IN_USE, AccountInUseError } from '../models/account-in-use-error';
 import { AccountService, censorGuid, DefaultLogger, FileLogger, Logger, LogLevel, Updater } from '../services';
 import { delay } from '../util/misc-util';
 import { Environment } from './environment';
@@ -160,6 +160,9 @@ export class Runtime extends EventEmitter {
     } else {
       Logger.log('Runtime', 'Cannot load buildVersion. It will be loaded when a client connects.', LogLevel.Warning);
     }
+
+    // load the client hooks.
+    this.libraryManager.loadClientHooks();
 
     // if plugin loading is enabled.
     if (args.plugins !== false) {

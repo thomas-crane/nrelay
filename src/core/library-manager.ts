@@ -28,6 +28,17 @@ export class LibraryManager {
   }
 
   /**
+   * Loads the client hooks.
+   */
+  loadClientHooks(): void {
+    // load the client hooks.
+    const clientHooks = getHooks().filter((hook) => hook.target === 'Client');
+    for (const clientHook of clientHooks) {
+      this.clientHookStore.set(clientHook.packet, clientHook);
+    }
+  }
+
+  /**
    * Loads and stores all libraries present in the `plugins` folder.
    */
   loadPlugins(pluginFolder: string): void {
@@ -67,17 +78,10 @@ export class LibraryManager {
         this.loadQueue.set(lib.target.name, lib);
       }
     }
-    const hooks = getHooks();
 
     // load each lib
-    for (const [_, lib] of this.loadQueue) {
+    for (const [, lib] of this.loadQueue) {
       this.loadLib(lib);
-    }
-
-    // load the client hooks.
-    const clientHooks = hooks.filter((hook) => hook.target === 'Client');
-    for (const clientHook of clientHooks) {
-      this.clientHookStore.set(clientHook.packet, clientHook);
     }
   }
 
@@ -163,9 +167,8 @@ export class LibraryManager {
    * Invokes any packet hook methods which are registered for the given packet type.
    */
   callHooks(packet: Packet, client: Client): void {
-    const name = packet.constructor.name;
-    if (this.hookStore.has(name)) {
-      const hooks = this.hookStore.get(name);
+    if (this.hookStore.has(packet.type)) {
+      const hooks = this.hookStore.get(packet.type);
       for (const hook of hooks) {
         if (!packet.propagate) {
           return;
@@ -184,8 +187,8 @@ export class LibraryManager {
     if (!packet.propagate) {
       return;
     }
-    if (this.clientHookStore.has(name)) {
-      const hook = this.clientHookStore.get(name);
+    if (this.clientHookStore.has(packet.type)) {
+      const hook = this.clientHookStore.get(packet.type);
       (client as any)[hook.method].call(client, client, packet);
     }
   }
