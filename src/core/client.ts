@@ -245,7 +245,6 @@ export class Client {
     this.io.on('error', (err: Error) => {
       Logger.log(this.alias, `Received PacketIO error: ${err.message}`, LogLevel.Error);
       Logger.log(this.alias, err.stack, LogLevel.Debug);
-      this.clientSocket.destroy();
     });
 
     Logger.log(this.alias, `Starting connection to ${server.name}`, LogLevel.Info);
@@ -284,7 +283,7 @@ export class Client {
       shootPacket.startingPos = this.worldPos.clone();
       shootPacket.startingPos.x += (Math.cos(angle) * 0.3);
       shootPacket.startingPos.y += (Math.sin(angle) * 0.3);
-      this.io.send(shootPacket);
+      this.send(shootPacket);
       const containerProps = this.runtime.resources.objects[item.type];
       const newProj = new Projectile(
         item.type,
@@ -493,7 +492,7 @@ export class Client {
           otherHit.objectId = this.projectiles[i].ownerObjectId;
           otherHit.targetId = this.mapTiles[y * this.mapInfo.width + x].occupiedBy;
           otherHit.time = this.getTime();
-          this.io.send(otherHit);
+          this.send(otherHit);
           this.projectiles.splice(i, 1);
           Logger.log(this.alias, 'Sent OtherHit for object.', LogLevel.Debug);
           continue;
@@ -511,7 +510,7 @@ export class Client {
             const playerHit = new PlayerHitPacket();
             playerHit.bulletId = this.projectiles[i].bulletId;
             playerHit.objectId = this.projectiles[i].ownerObjectId;
-            this.io.send(playerHit);
+            this.send(playerHit);
             Logger.log(this.alias, 'Sent PlayerHit.', LogLevel.Debug);
           }
           this.projectiles.splice(i, 1);
@@ -538,7 +537,7 @@ export class Client {
               otherHit.objectId = this.projectiles[i].ownerObjectId;
               otherHit.targetId = closestPlayer[1].objectData.objectId;
               otherHit.time = this.getTime();
-              this.io.send(otherHit);
+              this.send(otherHit);
               this.projectiles.splice(i, 1);
               Logger.log(this.alias, `Sent OtherHit for player: ${closestPlayer[1].objectData.name}`, LogLevel.Debug);
             }
@@ -565,7 +564,7 @@ export class Client {
             enemyHit.targetId = closestEnemy[1].objectData.objectId;
             enemyHit.time = this.getTime();
             enemyHit.kill = closestEnemy[1].objectData.hp <= damage;
-            this.io.send(enemyHit);
+            this.send(enemyHit);
             Logger.log(
               this.alias,
               `Sent EnemyHit (kill = ${enemyHit.kill}) (id = ${enemyHit.targetId})`,
@@ -619,7 +618,7 @@ export class Client {
         const groundDamage = new GroundDamagePacket();
         groundDamage.time = now;
         groundDamage.position = this.worldPos.clone();
-        this.io.send(groundDamage);
+        this.send(groundDamage);
       }
     }
   }
@@ -650,14 +649,14 @@ export class Client {
       createPacket.classType = Classes.Wizard;
       createPacket.skinType = 0;
       Logger.log(this.alias, 'Creating new character', LogLevel.Info);
-      this.io.send(createPacket);
+      this.send(createPacket);
       this.needsNewCharacter = false;
     } else {
       const loadPacket = new LoadPacket();
       loadPacket.charId = this.charInfo.charId;
       loadPacket.isFromArena = false;
       Logger.log(this.alias, `Connecting to ${mapInfoPacket.name}`, LogLevel.Info);
-      this.io.send(loadPacket);
+      this.send(loadPacket);
     }
     this.random = new Random(mapInfoPacket.fp);
     this.mapTiles = [];
@@ -693,7 +692,7 @@ export class Client {
   private onUpdate(client: Client, updatePacket: UpdatePacket): void {
     // reply
     const updateAck = new UpdateAckPacket();
-    this.io.send(updateAck);
+    this.send(updateAck);
 
     const pathfinderUpdates: NodeUpdate[] = [];
     // playerdata
@@ -819,7 +818,7 @@ export class Client {
   private onGotoPacket(client: Client, gotoPacket: GotoPacket): void {
     const ack = new GotoAckPacket();
     ack.time = this.lastFrameTime;
-    this.io.send(ack);
+    this.send(ack);
     if (gotoPacket.objectId === this.objectId) {
       this.worldPos = gotoPacket.position.clone();
     }
@@ -890,7 +889,7 @@ export class Client {
     }
     // only reply if the client didn't nexus.
     if (!nexused) {
-      this.io.send(aoeAck);
+      this.send(aoeAck);
     }
   }
 
@@ -916,7 +915,7 @@ export class Client {
       }
     }
     this.moveRecords.clear(movePacket.time);
-    this.io.send(movePacket);
+    this.send(movePacket);
 
     const x = Math.floor(this.worldPos.x);
     const y = Math.floor(this.worldPos.y);
@@ -966,7 +965,7 @@ export class Client {
     const pongPacket = new PongPacket();
     pongPacket.serial = pingPacket.serial;
     pongPacket.time = this.getTime();
-    this.io.send(pongPacket);
+    this.send(pongPacket);
   }
 
   @PacketHook()
@@ -977,7 +976,7 @@ export class Client {
     if (!owner || owner.dead) {
       shootAck.time = -1;
     }
-    this.io.send(shootAck);
+    this.send(shootAck);
     if (!owner || owner.dead) {
       return;
     }
@@ -1006,7 +1005,7 @@ export class Client {
       } else {
         ack.time = -1;
       }
-      this.io.send(ack);
+      this.send(ack);
     }
   }
 
@@ -1080,7 +1079,7 @@ export class Client {
     hp.key = this.key;
     hp.gameNet = 'rotmg';
     hp.playPlatform = 'rotmg';
-    this.io.send(hp);
+    this.send(hp);
   }
 
   private getBulletId(): number {
@@ -1247,5 +1246,17 @@ export class Client {
       atkFreq *= 1.5;
     }
     return atkFreq;
+  }
+
+  /**
+   * Sends a packet only if the client is currently connected.
+   * @param packet The packet to send.
+   */
+  private send(packet: Packet): void {
+    if (!this.clientSocket.destroyed) {
+      this.io.send(packet);
+    } else {
+      Logger.log(this.alias, `Not connected. Cannot send ${packet.type}.`, LogLevel.Debug);
+    }
   }
 }
