@@ -1,5 +1,6 @@
-import * as dns from 'dns';
-import * as net from 'net';
+import { randomBytes } from 'crypto';
+import { lookup as dnsLookup } from 'dns';
+import { isIP } from 'net';
 import { Logger, LogLevel } from '../core';
 import { CharacterInfo, Proxy, SERVER_ENDPOINT } from '../models';
 import { AccountInUseError } from '../models/account-in-use-error';
@@ -31,7 +32,13 @@ export class AccountService {
       return Promise.resolve(cachedServerList);
     } else {
       // if there is no cache, fetch the servers.
-      return HttpClient.get(SERVER_ENDPOINT).then((response) => {
+      // use a random guid here to avoid triggering an internal error.
+      const guid = randomBytes(6).toString('hex');
+      return HttpClient.get(SERVER_ENDPOINT, {
+        query: {
+          guid,
+        },
+      }).then((response) => {
         // check for errors.
         const maybeError = this.getError(response);
         if (maybeError) {
@@ -104,10 +111,10 @@ export class AccountService {
    * @param proxy The proxy to resolve the hostname of.
    */
   resolveProxyHostname(proxy: Proxy): Promise<void> {
-    if (net.isIP(proxy.host) === 0) {
+    if (isIP(proxy.host) === 0) {
       Logger.log('AccountService', 'Resolving proxy hostname.', LogLevel.Info);
       return new Promise((resolve, reject) => {
-        dns.lookup(proxy.host, (err, address) => {
+        dnsLookup(proxy.host, (err, address) => {
           if (err) {
             reject(err);
             return;
