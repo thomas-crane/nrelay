@@ -83,22 +83,17 @@ export class Updater {
    * and extracting the packet ids.
    */
   private updateClient(): Promise<void> {
-    this.env.mkTempDir();
     let clientVersion: string;
-    const filePath = this.env.pathTo('temp', 'client.swf');
-    const fileStream = fs.createWriteStream(filePath);
     Logger.log('Updater', 'Fetching client version...', LogLevel.Info);
     return resx.getClientVersion().then((version) => {
       clientVersion = version;
       Logger.log('Updater', 'Downloading client...', LogLevel.Info);
-      return resx.getClient(version, fileStream);
-    }).then(() => {
+      return resx.getClient(version);
+    }).then((clientBuffer) => {
       Logger.log('Updater', 'Extracting packets...', LogLevel.Info);
-      return resx.extractPackets(filePath);
-    }).then((packets) => {
+      const packets = resx.extractPackets(clientBuffer);
       this.env.writeJSON(packets, 'packets.json');
       this.env.updateJSON({ clientVersion }, 'versions.json');
-      this.env.rmTempDir();
       Logger.log('Updater', 'Updated client!', LogLevel.Success);
     });
   }
