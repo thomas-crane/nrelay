@@ -5,7 +5,7 @@ import { getHooks, getLibs } from '../decorators';
 import { Runtime } from '../runtime/runtime';
 import { Logger, LogLevel } from './../services';
 import { Client } from './client';
-import { HookInfo, LoadedLib, ManagedLib } from './lib-info';
+import { HookInfo, HookParamType, LoadedLib, ManagedLib } from './lib-info';
 
 const PLUGIN_REGEX = /\.js$/;
 
@@ -168,15 +168,28 @@ export class LibraryManager {
    */
   callHooks(packet: Packet, client: Client): void {
     if (this.hookStore.has(packet.type)) {
+      // get the hooks for this packet type.
       const hooks = this.hookStore.get(packet.type);
       for (const hook of hooks) {
         if (!packet.propagate) {
           return;
         }
         try {
+          // find the plugin instance to call the method on.
           const caller = this.libStore.get(hook.target);
           if (caller && caller.instance) {
-            caller.instance[hook.method].call(caller.instance, client, packet);
+            // create the args according to the hook's signature.
+            const args = hook.signature.map((argType) => {
+              switch (argType) {
+                case HookParamType.Packet:
+                  return packet;
+                case HookParamType.Client:
+                  return client;
+                default:
+                  return undefined;
+              }
+            });
+            caller.instance[hook.method].apply(caller.instance, args);
           }
         } catch (error) {
           Logger.log('LibraryManager', `Error while calling ${hook.target}.${hook.method}()`, LogLevel.Warning);
@@ -189,7 +202,18 @@ export class LibraryManager {
     }
     if (this.clientHookStore.has(packet.type)) {
       const hook = this.clientHookStore.get(packet.type);
-      (client as any)[hook.method].call(client, client, packet);
+      // create the args according to the hook's signature.
+      const args = hook.signature.map((argType) => {
+        switch (argType) {
+          case HookParamType.Packet:
+            return packet;
+          case HookParamType.Client:
+            return client;
+          default:
+            return undefined;
+        }
+      });
+      (client as any)[hook.method].apply(client, args);
     }
   }
 }

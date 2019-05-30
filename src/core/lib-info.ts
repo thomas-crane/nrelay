@@ -33,4 +33,14 @@ export interface HookInfo<T> {
   target: string;
   method: string;
   packet: string;
+  signature: HookParamType[];
+}
+
+/**
+ * The types which can be used as hook method parameters.
+ */
+export const enum HookParamType {
+  Other,
+  Packet,
+  Client,
 }

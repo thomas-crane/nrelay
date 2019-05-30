@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { HookInfo } from '../core';
+import { HookInfo, HookParamType } from '../core';
 import { Logger, LogLevel } from '../services';
 import { VALID_PACKET_HOOKS } from './valid-packets';
 
@@ -10,44 +10,56 @@ const hooks: Array<HookInfo<any>> = [];
  */
 export function PacketHook(): MethodDecorator {
   return (target, key) => {
-    const params = Reflect.getMetadata('design:paramtypes', target, key) || [];
-    const paramNames = params.map((param: any) => param.name);
-    // make sure there are enough parameters.
-    if (paramNames.length < 2) {
-      Logger.log('PacketHook', `${getDescription(target, key, paramNames)} requires two parameters.`, LogLevel.Error);
-    } else if (paramNames.length > 2) {
+    const params: Array<new (...args: any[]) => any> = Reflect.getMetadata('design:paramtypes', target, key) || [];
+    const paramNames = params.map((param) => param.name);
+
+    // find the packet parameter
+    const packetParam = params.find((param) => VALID_PACKET_HOOKS.indexOf(param.name) !== -1);
+    if (packetParam === undefined) {
+      const desc = getDescription(target, key, paramNames);
       Logger.log(
         'PacketHook',
-        `${getDescription(target, key, paramNames)} only requires 2 parameters.`,
+        `${desc} will never be called, because it does not hook an incoming packet.`,
         LogLevel.Warning,
       );
-    }
-    // make sure the first parameter is the client.
-    if (paramNames[0] !== 'Client') {
-      Logger.log(
-        'PacketHook',
-        `${getDescription(target, key, paramNames)} requires a Client as the first parameter`,
-        LogLevel.Error,
-      );
-      return;
-    }
-    // make sure the packet hook is hooking an incoming packet.
-    if (VALID_PACKET_HOOKS.indexOf(paramNames[1]) === -1) {
-      Logger.log('PacketHook', `${getDescription(target, key, paramNames)} will never be called.`, LogLevel.Error);
       return;
     }
 
+    // work out the type signature
+    const signature: HookParamType[] = params.map((param) => {
+      if (param === packetParam) {
+        return HookParamType.Packet;
+      }
+      switch (param.name) {
+        case 'Client':
+          return HookParamType.Client;
+        default:
+          return HookParamType.Other;
+      }
+    });
+
+    // warn if there are other params
+    if (signature.some((arg) => arg === HookParamType.Other)) {
+      const desc = getDescription(target, key, paramNames);
+      Logger.log(
+        'PacketHook',
+        `${desc} has parameters that will always be undefined because their type is not Client or Packet.`,
+        LogLevel.Warning,
+      );
+    }
+
     // get the type of the packet.
-    const packetInstance = new params[1]();
+    const packetInstance = new packetParam();
     const packetType = packetInstance.type;
     // sanity check.
     if (typeof packetType !== 'string') {
-      throw new Error(`Cannot get packet type of the packet "${paramNames[1]}"`);
+      throw new Error(`Cannot get packet type of the packet "${packetParam.name}"`);
     }
     hooks.push({
       target: target.constructor.name,
       method: key.toString(),
       packet: packetType,
+      signature,
     });
   };
 }

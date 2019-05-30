@@ -626,7 +626,7 @@ export class Client {
   }
 
   @PacketHook()
-  private onDamage(client: Client, damage: DamagePacket): void {
+  private onDamage(damage: DamagePacket): void {
     // if the bullet hit an enemy, do damage to that enemy
     if (this.enemies.has(damage.targetId)) {
       const enemy = this.enemies.get(damage.targetId);
@@ -645,7 +645,7 @@ export class Client {
   }
 
   @PacketHook()
-  private onMapInfo(client: Client, mapInfoPacket: MapInfoPacket): void {
+  private onMapInfo(mapInfoPacket: MapInfoPacket): void {
     if (this.needsNewCharacter) {
       const createPacket = new CreatePacket();
       createPacket.classType = Classes.Wizard;
@@ -669,7 +669,7 @@ export class Client {
   }
 
   @PacketHook()
-  private onDeath(client: Client, deathPacket: DeathPacket): void {
+  private onDeath(deathPacket: DeathPacket): void {
     // if it isn't us that died, nothing to do.
     if (deathPacket.accountId !== this.playerData.accountId) {
       return;
@@ -691,7 +691,7 @@ export class Client {
   }
 
   @PacketHook()
-  private onUpdate(client: Client, updatePacket: UpdatePacket): void {
+  private onUpdate(updatePacket: UpdatePacket): void {
     // reply
     const updateAck = new UpdateAckPacket();
     this.send(updateAck);
@@ -801,7 +801,7 @@ export class Client {
   }
 
   @PacketHook()
-  private onReconnectPacket(client: Client, reconnectPacket: ReconnectPacket): void {
+  private onReconnectPacket(reconnectPacket: ReconnectPacket): void {
     // if there is a new host, then switch to it.
     if (reconnectPacket.host !== '') {
       this.internalServer.address = reconnectPacket.host;
@@ -817,7 +817,7 @@ export class Client {
   }
 
   @PacketHook()
-  private onGotoPacket(client: Client, gotoPacket: GotoPacket): void {
+  private onGotoPacket(gotoPacket: GotoPacket): void {
     const ack = new GotoAckPacket();
     ack.time = this.lastFrameTime;
     this.send(ack);
@@ -833,7 +833,7 @@ export class Client {
   }
 
   @PacketHook()
-  private onFailurePacket(client: Client, failurePacket: FailurePacket): void {
+  private onFailurePacket(failurePacket: FailurePacket): void {
     switch (failurePacket.errorId) {
       case FailureCode.IncorrectVersion:
         Logger.log(this.alias, 'buildVersion out of date. Updating and reconnecting...');
@@ -880,7 +880,7 @@ export class Client {
   }
 
   @PacketHook()
-  private onAoe(client: Client, aoePacket: AoePacket): void {
+  private onAoe(aoePacket: AoePacket): void {
     const aoeAck = new AoeAckPacket();
     aoeAck.time = this.lastFrameTime;
     aoeAck.position = this.worldPos.clone();
@@ -896,7 +896,7 @@ export class Client {
   }
 
   @PacketHook()
-  private onNewTick(client: Client, newTickPacket: NewTickPacket): void {
+  private onNewTick(newTickPacket: NewTickPacket): void {
     this.lastTickTime = this.currentTickTime;
     this.lastTickId = newTickPacket.tickId;
     this.currentTickTime = this.getTime();
@@ -962,7 +962,7 @@ export class Client {
   }
 
   @PacketHook()
-  private onPing(client: Client, pingPacket: PingPacket): void {
+  private onPing(pingPacket: PingPacket): void {
     // reply
     const pongPacket = new PongPacket();
     pongPacket.serial = pingPacket.serial;
@@ -971,7 +971,7 @@ export class Client {
   }
 
   @PacketHook()
-  private onEnemyShoot(client: Client, enemyShootPacket: EnemyShootPacket): void {
+  private onEnemyShoot(enemyShootPacket: EnemyShootPacket): void {
     const shootAck = new ShootAckPacket();
     shootAck.time = this.lastFrameTime;
     const owner = this.enemies.get(enemyShootPacket.ownerId);
@@ -999,7 +999,7 @@ export class Client {
   }
 
   @PacketHook()
-  private onServerPlayerShoot(client: Client, serverPlayerShoot: ServerPlayerShootPacket): void {
+  private onServerPlayerShoot(serverPlayerShoot: ServerPlayerShootPacket): void {
     if (serverPlayerShoot.ownerId === this.objectId) {
       const ack = new ShootAckPacket();
       if (this.hasPet) {
@@ -1012,7 +1012,7 @@ export class Client {
   }
 
   @PacketHook()
-  private onCreateSuccess(client: Client, createSuccessPacket: CreateSuccessPacket): void {
+  private onCreateSuccess(createSuccessPacket: CreateSuccessPacket): void {
     Logger.log(this.alias, 'Connected!', LogLevel.Success);
     this.objectId = createSuccessPacket.objectId;
     this.charInfo.charId = createSuccessPacket.charId;
