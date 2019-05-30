@@ -1,5 +1,12 @@
 # Changelog
+
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
+
+## `8.4.2`
+### Fixed
+ + (Hopefully) fixed a rare race condition that results in resources being used after a client has been destroyed.
+ + Stopped the client from attempting to send packets while disconnected, which prevents occasional "Socket not attached" errors.
+ + Upgraded to the latest @realmlib/resx package which should fix permission issues when running the updater on Linux.
 
 ## `8.4.1`
 ### Fixed:
