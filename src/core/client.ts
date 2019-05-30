@@ -172,7 +172,6 @@ export class Client {
   private pathfinderTarget: Point;
   private moveRecords: MoveRecords;
   private frameUpdateTimer: NodeJS.Timer;
-  private reconnectTimer: NodeJS.Timer;
   private needsNewCharacter: boolean;
 
   // reconnect info
@@ -322,21 +321,12 @@ export class Client {
     // packet io.
     if (this.io) {
       this.io.detach();
-      this.io = undefined;
     }
 
     // timers.
-    if (this.reconnectTimer) {
-      clearTimeout(this.reconnectTimer);
-    }
     if (this.frameUpdateTimer) {
       clearInterval(this.frameUpdateTimer);
     }
-
-    // resources.
-    this.mapTiles = undefined;
-    this.projectiles = undefined;
-    this.enemies = undefined;
 
     if (this.socketConnected) {
       this.socketConnected = false;
@@ -345,10 +335,22 @@ export class Client {
 
     // client socket.
     if (this.clientSocket) {
-      this.clientSocket.destroy();
       this.clientSocket.removeAllListeners('close');
       this.clientSocket.removeAllListeners('error');
+      this.clientSocket.destroy();
     }
+
+    // resources.
+    // if we're unlucky, a packet hook, or onFrame was called and preempted this method.
+    // to avoid a nasty race condition, release these resources on the next tick after
+    // the io has been detached and the frame timers have been stopped.
+    process.nextTick(() => {
+      this.mapTiles = undefined;
+      this.projectiles = undefined;
+      this.enemies = undefined;
+      this.io = undefined;
+      this.clientSocket = undefined;
+    });
   }
 
   /**
@@ -1061,7 +1063,8 @@ export class Client {
     this.lastTickId = -1;
     this.currentBulletId = 1;
     this.hasPet = false;
-    this.enemies = new Map();
+    this.enemies.clear();
+    this.players.clear();
     this.projectiles = [];
     this.moveRecords = new MoveRecords();
     this.sendHello();
@@ -1099,12 +1102,6 @@ export class Client {
     if (this.pathfinder) {
       this.pathfinder.destroy();
     }
-
-    // do this on the next tick in case checkProjectiles is still working.
-    process.nextTick(() => {
-      this.projectiles = [];
-      this.enemies = new Map();
-    });
 
     if (this.frameUpdateTimer) {
       clearInterval(this.frameUpdateTimer);
@@ -1253,7 +1250,7 @@ export class Client {
    * @param packet The packet to send.
    */
   private send(packet: Packet): void {
-    if (!this.clientSocket.destroyed) {
+    if (!this.clientSocket.destroyed && this.io) {
       this.io.send(packet);
     } else {
       Logger.log(this.alias, `Not connected. Cannot send ${packet.type}.`, LogLevel.Debug);
