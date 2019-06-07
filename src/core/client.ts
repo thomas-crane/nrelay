@@ -1,5 +1,5 @@
 // tslint:disable-next-line: max-line-length
-import { AoeAckPacket, AoePacket, CreatePacket, CreateSuccessPacket, DamagePacket, DeathPacket, EnemyHitPacket, EnemyShootPacket, FailureCode, FailurePacket, GotoAckPacket, GotoPacket, GroundDamagePacket, GroundTileData, HelloPacket, LoadPacket, MapInfoPacket, MovePacket, NewTickPacket, OtherHitPacket, Packet, PacketIO, PingPacket, PlayerHitPacket, PlayerShootPacket, Point, PongPacket, ReconnectPacket, ServerPlayerShootPacket, ShootAckPacket, UpdateAckPacket, UpdatePacket, WorldPosData } from '@realmlib/net';
+import { AoeAckPacket, AoePacket, CreatePacket, CreateSuccessPacket, DamagePacket, DeathPacket, EnemyHitPacket, EnemyShootPacket, FailureCode, FailurePacket, GotoAckPacket, GotoPacket, GroundDamagePacket, GroundTileData, HelloPacket, LoadPacket, MapInfoPacket, MovePacket, NewTickPacket, NotificationPacket, OtherHitPacket, Packet, PacketIO, PingPacket, PlayerHitPacket, PlayerShootPacket, Point, PongPacket, ReconnectPacket, ServerPlayerShootPacket, ShootAckPacket, StatType, UpdateAckPacket, UpdatePacket, WorldPosData } from '@realmlib/net';
 import { Socket } from 'net';
 import * as rsa from '../crypto/rsa';
 import { Entity } from '../models/entity';
@@ -132,7 +132,7 @@ export class Client {
    * A value of 0.5 will be 50% of the max health.
    */
   set autoNexusThreshold(value: number) {
-    this.autoNexusThreshold = Math.max(0, Math.min(value, 1));
+    this.internalAutoNexusThreshold = Math.max(0, Math.min(value, 1));
   }
   get autoNexusThreshold(): number {
     return this.internalAutoNexusThreshold;
@@ -190,6 +190,11 @@ export class Client {
   // movement vars
   private tileMultiplier: number;
 
+  // client hp vars
+  private clientHP: number;
+  private hpLog: number;
+  private safeMap: boolean;
+
   /**
    * Creates a new instance of the client and begins the connection process to the specified server.
    * @param server The server to connect to.
@@ -214,6 +219,9 @@ export class Client {
     this.currentBulletId = 1;
     this.lastAttackTime = 0;
     this.hasPet = false;
+    this.safeMap = true;
+    this.hpLog = 0;
+    this.clientHP = 0;
     this.connectTime = Date.now();
     this.socketConnected = false;
     this.guid = accInfo.guid;
@@ -441,7 +449,11 @@ export class Client {
    * @param amount The amount of damage to apply.
    * @param armorPiercing Whether or not the damage should be armor piercing.
    */
-  private applyDamage(amount: number, armorPiercing: boolean): boolean {
+  private applyDamage(amount: number, armorPiercing: boolean, time: number): boolean {
+    if (time === -1) {
+      time = this.getTime();
+    }
+
     // if the player is currently invincible, they take no damage.
     // tslint:disable-next-line: no-bitwise
     const invincible = ConditionEffect.INVINCIBLE | ConditionEffect.INVULNERABLE | ConditionEffect.PAUSED;
@@ -463,19 +475,13 @@ export class Client {
     const actualDamage = Math.max(min, amount - def);
 
     // apply it and check for autonexusing.
+    Logger.log(this.alias, `Took ${actualDamage.toFixed(0)} damage. At ${this.clientHP.toFixed(0)} health.`);
     this.playerData.hp -= actualDamage;
-    Logger.log(this.alias, `Took ${actualDamage} damage. At ${this.playerData.hp.toFixed(0)} health.`);
-    if (this.playerData.hp <= this.playerData.maxHP * this.internalAutoNexusThreshold) {
-      this.connectToNexus();
-      const autoNexusPercent = this.playerData.hp / this.playerData.maxHP * 100;
-      Logger.log(this.alias, `Auto nexused at ${autoNexusPercent.toFixed(1)}%`, LogLevel.Warning);
-      return true;
-    } else {
-      return false;
-    }
+    this.clientHP -= actualDamage;
+    return this.checkHealth(time);
   }
 
-  private checkProjectiles(): void {
+  private checkProjectiles(time: number): void {
     // iterate backwards so that removing an item won't skip any projectiles.
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       if (!this.projectiles[i].update(this.getTime())) {
@@ -506,6 +512,7 @@ export class Client {
           const nexused = this.applyDamage(
             this.projectiles[i].damage,
             this.projectiles[i].projectileProperties.armorPiercing,
+            time,
           );
           // only reply if we didn't get nexused.
           if (!nexused) {
@@ -586,7 +593,7 @@ export class Client {
    * Checks whether or not the client should take damage from
    * the tile they are currently standing on.
    */
-  private checkGroundDamage(): void {
+  private checkGroundDamage(time: number): void {
     const x = Math.floor(this.worldPos.x);
     const y = Math.floor(this.worldPos.y);
     const tile = this.mapTiles[y * this.mapInfo.width + x];
@@ -615,7 +622,7 @@ export class Client {
       tile.lastDamage = now;
 
       // apply it and only send the response if the client didn't nexus.
-      const nexused = this.applyDamage(damage, true);
+      const nexused = this.applyDamage(damage, true, time);
       if (!nexused) {
         const groundDamage = new GroundDamagePacket();
         groundDamage.time = now;
@@ -627,25 +634,23 @@ export class Client {
 
   @PacketHook()
   private onDamage(damage: DamagePacket): void {
+    // remove the projectile if it's in our list.
+    // TODO: handle multi hit
+    this.projectiles = this.projectiles
+      .filter((p) => damage.objectId !== p.ownerObjectId || damage.bulletId !== p.bulletId);
+
     // if the bullet hit an enemy, do damage to that enemy
     if (this.enemies.has(damage.targetId)) {
       const enemy = this.enemies.get(damage.targetId);
-      enemy.objectData.hp -= damage.damageAmount;
-      // remove the enemy if it's dead.
-      if (enemy.objectData.hp < 0 || damage.kill) {
-        this.enemies.delete(damage.targetId);
+      if (damage.kill) {
+        enemy.dead = true;
       }
-      return;
-    }
-    // if an enemy was the target of the damage, remove the projectile.
-    // TODO: handle multi-hit projectiles.
-    if (this.enemies.has(damage.objectId)) {
-      this.projectiles = this.projectiles.filter((p) => p.ownerObjectId !== damage.objectId);
     }
   }
 
   @PacketHook()
   private onMapInfo(mapInfoPacket: MapInfoPacket): void {
+    this.safeMap = mapInfoPacket.name === 'Nexus';
     if (this.needsNewCharacter) {
       const createPacket = new CreatePacket();
       createPacket.classType = Classes.Wizard;
@@ -691,6 +696,22 @@ export class Client {
   }
 
   @PacketHook()
+  private onNotification(notification: NotificationPacket): void {
+    if (notification.objectId !== this.objectId) {
+      return;
+    }
+    try {
+      const json = JSON.parse(notification.message);
+      if (json.key === 'server.plus_symbol' && notification.color === 0x00ff00) {
+        const healAmount = parseInt(json.tokens.amount, 10);
+        this.addHealth(healAmount);
+      }
+    } catch {
+      Logger.log(this.alias, `Received non-json notification: "${notification.message}"`, LogLevel.Debug);
+    }
+  }
+
+  @PacketHook()
   private onUpdate(updatePacket: UpdatePacket): void {
     // reply
     const updateAck = new UpdateAckPacket();
@@ -700,6 +721,12 @@ export class Client {
     // playerdata
     for (const obj of updatePacket.newObjects) {
       if (obj.status.objectId === this.objectId) {
+        for (const stat of obj.status.stats) {
+          if (stat.statType === StatType.HP_STAT) {
+            this.clientHP = stat.statValue;
+            break;
+          }
+        }
         this.worldPos = obj.status.pos;
         this.playerData = parsers.processObject(obj);
         this.playerData.server = this.internalServer.name;
@@ -887,7 +914,7 @@ export class Client {
     let nexused = false;
     if (aoePacket.pos.squareDistanceTo(this.worldPos) < aoePacket.radius ** 2) {
       // apply the aoe damage if in range.
-      nexused = this.applyDamage(aoePacket.damage, aoePacket.armorPiercing);
+      nexused = this.applyDamage(aoePacket.damage, aoePacket.armorPiercing, this.getTime());
     }
     // only reply if the client didn't nexus.
     if (!nexused) {
@@ -1024,6 +1051,11 @@ export class Client {
 
   private onFrame() {
     const time = this.getTime();
+    const delta = time - this.lastFrameTime;
+    this.calcHealth(delta);
+    if (this.checkHealth(time)) {
+      return;
+    }
     if (this.nextPos.length > 0) {
       /**
        * We don't want to move further than we are allowed to, so if the
@@ -1035,7 +1067,7 @@ export class Client {
     }
     if (this.worldPos) {
       this.moveRecords.addRecord(time, this.worldPos.x, this.worldPos.y);
-      this.checkGroundDamage();
+      this.checkGroundDamage(time);
     }
     if (this.players.size > 0) {
       for (const player of this.players.values()) {
@@ -1048,7 +1080,7 @@ export class Client {
       }
     }
     if (this.projectiles.length > 0) {
-      this.checkProjectiles();
+      this.checkProjectiles(time);
     }
     this.lastFrameTime = time;
   }
@@ -1254,6 +1286,56 @@ export class Client {
       this.io.send(packet);
     } else {
       Logger.log(this.alias, `Not connected. Cannot send ${packet.type}.`, LogLevel.Debug);
+    }
+  }
+
+  private calcHealth(delta: number): void {
+    const interval = delta * 0.001;
+    const bleeding = hasEffect(this.playerData.condition, ConditionEffect.BLEEDING);
+    if (!hasEffect(this.playerData.condition, ConditionEffect.SICK) && !bleeding) {
+      const vitPerSecond = 1 + 0.12 * this.playerData.vit;
+      this.hpLog += vitPerSecond * interval;
+      if (hasEffect(this.playerData.condition, ConditionEffect.HEALING)) {
+        this.hpLog += 20 * interval;
+      }
+    } else if (bleeding) {
+      this.hpLog -= 20 * interval;
+    }
+
+    const hpToAdd = Math.trunc(this.hpLog);
+    const leftovers = this.hpLog - hpToAdd;
+    this.hpLog = leftovers;
+    this.clientHP += hpToAdd;
+    if (this.clientHP > this.playerData.maxHP) {
+      this.clientHP = this.playerData.maxHP;
+    }
+  }
+
+  private checkHealth(time: number = -1): boolean {
+    if (time === -1) {
+      time = this.getTime();
+    }
+
+    if (!this.safeMap) {
+      if (this.internalAutoNexusThreshold === 0) {
+        return false;
+      }
+      const threshold = this.playerData.maxHP * this.internalAutoNexusThreshold;
+      const minHp = Math.min(this.clientHP, this.playerData.hp);
+      if (minHp < threshold) {
+        const autoNexusPercent = minHp / this.playerData.maxHP * 100;
+        Logger.log(this.alias, `Auto nexused at ${autoNexusPercent.toFixed(1)}%`, LogLevel.Warning);
+        this.connectToNexus();
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private addHealth(amount: number): void {
+    this.clientHP += amount;
+    if (this.clientHP >= this.playerData.maxHP) {
+      this.clientHP = this.playerData.maxHP;
     }
   }
 }
