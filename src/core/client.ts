@@ -475,9 +475,9 @@ export class Client {
     const actualDamage = Math.max(min, amount - def);
 
     // apply it and check for autonexusing.
-    Logger.log(this.alias, `Took ${actualDamage.toFixed(0)} damage. At ${this.clientHP.toFixed(0)} health.`);
     this.playerData.hp -= actualDamage;
     this.clientHP -= actualDamage;
+    Logger.log(this.alias, `Took ${actualDamage.toFixed(0)} damage. At ${this.clientHP.toFixed(0)} health.`);
     return this.checkHealth(time);
   }
 
