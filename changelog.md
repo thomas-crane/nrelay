@@ -2,6 +2,11 @@
 
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.6.0`
+### Added:
+ + Added an `args` property to the runtime which is a yargs arguments object containing the command line arguments which were passed to nrelay when it was run.
+ + Multi hit projectiles are now handled properly. This should result in less disconnects for bots in realms.
+
 ## `8.5.1`
 ### Fixed:
  + Fixed a bug where trying to change the client's auto nexus threshold would crash nrelay.
