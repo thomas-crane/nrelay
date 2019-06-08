@@ -2,6 +2,17 @@
 
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.5.1`
+### Fixed:
+ + Fixed a bug where trying to change the client's auto nexus threshold would crash nrelay.
+
+### Added:
+ + Added a client HP system. It is a bit "conservative", so it may cause the client to nexus in some situations where it actually didn't need to, but it should also prevent a lot of deaths.
+
+## `8.5.0`
+### Changed:
+ + Packet hooks are now less restrictive. The only requirement is that the method has an incoming packet as one of its parameters. A client parameter is optional, and the order of the parameters no longer matters.
+
 ## `8.4.3`
 ### Fixed:
  + Prevent the account service from triggering an internal error when it tries to fetch the server list.
