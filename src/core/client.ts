@@ -493,8 +493,10 @@ export class Client {
         const x = Math.floor(this.projectiles[i].currentPosition.x);
         const y = Math.floor(this.projectiles[i].currentPosition.y);
 
-        // TODO: check the fullOccupy property.
-        if (this.mapTiles[y * this.mapInfo.width + x] && this.mapTiles[y * this.mapInfo.width + x].occupied) {
+        const tileOccupied =
+          this.mapTiles[y * this.mapInfo.width + x]
+          && this.mapTiles[y * this.mapInfo.width + x].occupied;
+        if (tileOccupied && !this.projectiles[i].projectileProperties.passesCover) {
           const otherHit = new OtherHitPacket();
           otherHit.bulletId = this.projectiles[i].bulletId;
           otherHit.objectId = this.projectiles[i].ownerObjectId;
@@ -508,22 +510,32 @@ export class Client {
 
         // check if it hit the player.
         if (insideSquare(this.projectiles[i].currentPosition, this.worldPos, 0.5)) {
-          // apply the hit damage.
-          const nexused = this.applyDamage(
-            this.projectiles[i].damage,
-            this.projectiles[i].projectileProperties.armorPiercing,
-            time,
-          );
-          // only reply if we didn't get nexused.
-          if (!nexused) {
-            const playerHit = new PlayerHitPacket();
-            playerHit.bulletId = this.projectiles[i].bulletId;
-            playerHit.objectId = this.projectiles[i].ownerObjectId;
-            this.send(playerHit);
-            Logger.log(this.alias, 'Sent PlayerHit.', LogLevel.Debug);
+          // make sure we aren't applying damage twice.
+          const alreadyHit =
+            this.projectiles[i].projectileProperties.multiHit
+            && this.projectiles[i].multiHit.has(this.objectId);
+          if (!alreadyHit) {
+            // apply the hit damage.
+            const nexused = this.applyDamage(
+              this.projectiles[i].damage,
+              this.projectiles[i].projectileProperties.armorPiercing,
+              time,
+            );
+            // only reply if we didn't get nexused.
+            if (!nexused) {
+              const playerHit = new PlayerHitPacket();
+              playerHit.bulletId = this.projectiles[i].bulletId;
+              playerHit.objectId = this.projectiles[i].ownerObjectId;
+              this.send(playerHit);
+              Logger.log(this.alias, 'Sent PlayerHit.', LogLevel.Debug);
+            }
+            if (this.projectiles[i].projectileProperties.multiHit) {
+              this.projectiles[i].multiHit.add(this.objectId);
+            } else {
+              this.projectiles.splice(i, 1);
+            }
+            continue;
           }
-          this.projectiles.splice(i, 1);
-          continue;
         }
 
         // check if it hit another player.
@@ -531,6 +543,12 @@ export class Client {
           // find the closest player.
           let closestPlayer: [number, Entity] = [Infinity, undefined];
           for (const player of this.players.values()) {
+            const alreadyHit =
+              this.projectiles[i].projectileProperties.multiHit
+              && this.projectiles[i].multiHit.has(player.objectData.objectId);
+            if (alreadyHit) {
+              continue;
+            }
             const distance = player.squareDistanceTo(this.projectiles[i].currentPosition);
             if (distance < closestPlayer[0] && !hasEffect(player.objectData.condition, ConditionEffect.PAUSED)) {
               closestPlayer = [distance, player];
@@ -541,14 +559,18 @@ export class Client {
             // ...and they are less than 0.5 tiles away, hit them.
             // TODO: check multiHit property.
             if (insideSquare(this.projectiles[i].currentPosition, closestPlayer[1].currentPos, 0.5)) {
-              const otherHit = new OtherHitPacket();
-              otherHit.bulletId = this.projectiles[i].bulletId;
-              otherHit.objectId = this.projectiles[i].ownerObjectId;
-              otherHit.targetId = closestPlayer[1].objectData.objectId;
-              otherHit.time = this.getTime();
-              this.send(otherHit);
-              this.projectiles.splice(i, 1);
-              Logger.log(this.alias, `Sent OtherHit for player: ${closestPlayer[1].objectData.name}`, LogLevel.Debug);
+              if (this.projectiles[i].projectileProperties.multiHit) {
+                this.projectiles[i].multiHit.add(closestPlayer[1].objectData.objectId);
+              } else {
+                const otherHit = new OtherHitPacket();
+                otherHit.bulletId = this.projectiles[i].bulletId;
+                otherHit.objectId = this.projectiles[i].ownerObjectId;
+                otherHit.targetId = closestPlayer[1].objectData.objectId;
+                otherHit.time = this.getTime();
+                this.send(otherHit);
+                this.projectiles.splice(i, 1);
+                Logger.log(this.alias, `Sent OtherHit for player: ${closestPlayer[1].objectData.name}`, LogLevel.Debug);
+              }
             }
           }
         }
@@ -556,6 +578,12 @@ export class Client {
         // find the closest enemy.
         let closestEnemy: [number, Enemy] = [Infinity, undefined];
         for (const enemy of this.enemies.values()) {
+          const alreadyHit =
+            this.projectiles[i].projectileProperties.multiHit
+            && this.projectiles[i].multiHit.has(enemy.objectData.objectId);
+          if (alreadyHit) {
+            continue;
+          }
           const dist = enemy.squareDistanceTo(this.projectiles[i].currentPosition);
           if (dist < closestEnemy[0] && !enemy.dead) {
             closestEnemy = [dist, enemy];
@@ -579,7 +607,11 @@ export class Client {
               `Sent EnemyHit (kill = ${enemyHit.kill}) (id = ${enemyHit.targetId})`,
               LogLevel.Debug,
             );
-            this.projectiles.splice(i, 1);
+            if (this.projectiles[i].projectileProperties.multiHit) {
+              this.projectiles[i].multiHit.add(closestEnemy[1].objectData.objectId);
+            } else {
+              this.projectiles.splice(i, 1);
+            }
             if (enemyHit.kill) {
               closestEnemy[1].dead = true;
             }

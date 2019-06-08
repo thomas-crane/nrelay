@@ -60,6 +60,8 @@ export class Projectile {
    */
   currentPosition: Point;
 
+  readonly multiHit: Set<number>;
+
   constructor(
     containerType: number,
     containerProps: any,
@@ -82,6 +84,7 @@ export class Projectile {
     this.damagePlayers = this.containerProperties.enemy;
     this.damageEnemies = !this.damagePlayers;
     this.damage = 0;
+    this.multiHit = new Set();
   }
 
   setDamage(damage: number): void {
