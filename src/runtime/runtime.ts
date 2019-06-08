@@ -70,6 +70,13 @@ export class Runtime extends EventEmitter {
    * The build version to use when creating new clients.
    */
   buildVersion: string;
+  /**
+   * The last arguments which were passed to this runtime.
+   *
+   * Note that this may be `undefined`, and it may also contain arguments which
+   * were not passed by the user (such as the `update` and `plugin-path` args).
+   */
+  args: Arguments;
 
   /**
    * A WriteStream which is used for the log file.
@@ -95,6 +102,7 @@ export class Runtime extends EventEmitter {
    * @param args The arguments to start the runtime with.
    */
   async run(args: Arguments): Promise<void> {
+    this.args = args;
 
     // set up the logging.
     let minLevel = LogLevel.Info;
