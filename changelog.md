@@ -2,6 +2,11 @@
 
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.7.0`
+### Added:
+ + Added more properties to the `PlayerData` interface. View the docs page for more info.
+ + Added the `PetTracker` library to the stdlib. It has an API extremely similar to that of the player tracker, and performs basically the same task except for pets.
+
 ## `8.6.1`
 ### Changed:
  + Bumped @realmlib/net version.
