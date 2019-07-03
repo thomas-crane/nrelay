@@ -72,9 +72,17 @@ export interface PlayerData {
    */
   maxHP: number;
   /**
+   * The increase in max HP which has been added due to bonuses (e.g. equipping a ring)
+   */
+  maxHPBoost: number;
+  /**
    * The maximum MP of the player.
    */
   maxMP: number;
+  /**
+   * The increase in max MP which has been added due to bonuses (e.g. equipping a ring)
+   */
+  maxMPBoost: number;
   /**
    * The current HP of the entity.
    */
@@ -159,6 +167,46 @@ export interface PlayerData {
    * by the Player Tracker component. For **any** other use, this is unreliable.
    */
   server: string;
+  /**
+   * The size of this player.
+   */
+  size: number;
+  /**
+   * The amount of EXP required to advance to the next level.
+   */
+  nextLevelExp: number;
+  /**
+   * The clothing dye of this player.
+   */
+  clothingDye: number;
+  /**
+   * The accessory dye of this player.
+   */
+  accessoryDye: number;
+  /**
+   * The amount of fame required to achieve the next class quest.
+   */
+  nextClassQuestFame: number;
+  /**
+   * > Unknown.
+   */
+  legendaryRank: number;
+  /**
+   * Whether or not this player has an active XP booster.
+   */
+  xpBoosted: boolean;
+  /**
+   * The amount of time left of this player's XP booster.
+   */
+  xpBoostTime: number;
+  /**
+   * The skin of this player.
+   */
+  texture: number;
+  /**
+   * The number of fortune tokens this player has.
+   */
+  fortuneTokens: number;
 }
 
 /**
@@ -182,7 +230,9 @@ export function getDefaultPlayerData(): PlayerData {
     guildName: undefined,
     guildRank: GuildRank.NoRank,
     maxHP: 0,
+    maxHPBoost: 0,
     maxMP: 0,
+    maxMPBoost: 0,
     hp: 0,
     mp: 0,
     atk: 0,
@@ -203,5 +253,15 @@ export function getDefaultPlayerData(): PlayerData {
     hasBackpack: false,
     inventory: new Array<number>(20).fill(-1),
     server: undefined,
+    size: 0,
+    nextLevelExp: 0,
+    clothingDye: 0,
+    accessoryDye: 0,
+    nextClassQuestFame: 0,
+    legendaryRank: 0,
+    xpBoosted: false,
+    xpBoostTime: 0,
+    texture: 0,
+    fortuneTokens: 0,
   };
 }

@@ -131,6 +131,42 @@ export function processStatData(stats: StatData[], currentData?: PlayerData): Pl
       case StatType.GUILD_RANK_STAT:
         playerData.guildRank = stat.statValue;
         continue;
+      case StatType.SIZE_STAT:
+        playerData.size = stat.statValue;
+        continue;
+      case StatType.NEXT_LEVEL_EXP_STAT:
+        playerData.nextLevelExp = stat.statValue;
+        continue;
+      case StatType.TEX1_STAT:
+        playerData.clothingDye = stat.statValue;
+        continue;
+      case StatType.TEX2_STAT:
+        playerData.accessoryDye = stat.statValue;
+        continue;
+      case StatType.MAX_HP_BOOST_STAT:
+        playerData.maxHPBoost = stat.statValue;
+        continue;
+      case StatType.MAX_MP_BOOST_STAT:
+        playerData.maxMPBoost = stat.statValue;
+        continue;
+      case StatType.NEXT_CLASS_QUEST_FAME_STAT:
+        playerData.nextClassQuestFame = stat.statValue;
+        continue;
+      case StatType.LEGENDARY_RANK_STAT:
+        playerData.legendaryRank = stat.statValue;
+        continue;
+      case StatType.XP_BOOSTED_STAT:
+        playerData.xpBoosted = stat.statValue === 1;
+        continue;
+      case StatType.XP_TIMER_STAT:
+        playerData.xpBoostTime = stat.statValue;
+        continue;
+      case StatType.TEXTURE_STAT:
+        playerData.texture = stat.statValue;
+        continue;
+      case StatType.FORTUNE_TOKEN_STAT:
+        playerData.fortuneTokens = stat.statValue;
+        continue;
       default:
         if (stat.statType >= StatType.INVENTORY_0_STAT && stat.statType <= StatType.INVENTORY_11_STAT) {
           playerData.inventory[stat.statType - 8] = stat.statValue;
