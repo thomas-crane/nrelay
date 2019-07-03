@@ -2,6 +2,10 @@
 
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.6.1`
+### Changed:
+ + Bumped @realmlib/net version.
+
 ## `8.6.0`
 ### Added:
  + Added an `args` property to the runtime which is a yargs arguments object containing the command line arguments which were passed to nrelay when it was run.
