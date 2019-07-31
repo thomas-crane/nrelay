@@ -315,7 +315,7 @@ export class Client {
       if (time > this.moveRecords.lastClearTime + 600) {
         damage = 0;
       }
-      this.projectiles[this.projectiles.length - 1].setDamage(damage * this.getAttackMultiplier());
+      newProj.setDamage(damage * this.getAttackMultiplier());
     }
 
     return true;
