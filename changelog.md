@@ -2,6 +2,13 @@
 
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.7.1`
+### Added:
+ + Added the `PetAbilities` enum (thanks to @zigzag2002).
+
+### Fixed:
+ + Fixed a bug where projectiles fired by the player would not have the right damage applied to them.
+
 ## `8.7.0`
 ### Added:
  + Added more properties to the `PlayerData` interface. View the docs page for more info.
