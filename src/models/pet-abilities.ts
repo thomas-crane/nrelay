@@ -1,3 +1,6 @@
+/**
+ * The values corresponding to abilities that pets can have.
+ */
 export enum PetAbilities {
     AttackClose = 0x192,
     AttackFar = 0x195,
@@ -7,5 +10,5 @@ export enum PetAbilities {
     Heal = 0x197,
     MagicHeal = 0x198,
     RisingFury = 0x19b,
-    Savage = 0x199
+    Savage = 0x199,
   }
