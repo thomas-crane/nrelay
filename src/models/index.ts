@@ -15,6 +15,7 @@ export * from './map-tile';
 export * from './mapinfo';
 export * from './move-records';
 export * from './object';
+export * from './pet-abilities';
 export * from './pet-data';
 export * from './playerdata';
 export * from './plugin-info';
