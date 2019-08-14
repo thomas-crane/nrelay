@@ -90,5 +90,6 @@ export class HelloPacket implements OutgoingPacket {
     buffer.writeString(this.playPlatform);
     buffer.writeString(this.platformToken);
     buffer.writeString(this.userToken);
+    buffer.writeString("XTeP7hERdchV5jrBZEYNebAqDPU6tKU6");
   }
 }
