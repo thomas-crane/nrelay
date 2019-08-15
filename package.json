@@ -28,7 +28,7 @@
     "run-sequence": "^2.2.0",
     "tsai": "^2.0.0",
     "tslint": "^5.7.0",
-    "typedoc": "^0.14.2",
+    "typedoc": "^0.15.0",
     "typedoc-plugin-external-module-name": "^1.1.3",
     "typescript": "^2.5.2"
   },
