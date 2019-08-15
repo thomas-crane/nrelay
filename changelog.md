@@ -2,6 +2,10 @@
 
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.7.2`
+### Changed:
+ + Bumped @realmlib/net version.
+
 ## `8.7.1`
 ### Added:
  + Added the `PetAbilities` enum (thanks to @zigzag2002).
