@@ -1,6 +1,10 @@
 # Changelog
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `7.8.2`
+### Fixes:
+ + Add missing field to Hello packet.
+
 ## `7.8.1`
 ### Changes
  + Added hp and mp boosts to player data.
