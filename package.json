@@ -29,7 +29,7 @@
     "typescript": "^3.3.4000"
   },
   "dependencies": {
-    "@realmlib/net": "^3.1.5",
+    "@realmlib/net": "^3.1.6",
     "@realmlib/resx": "^4.0.0",
     "chalk": "^2.3.0",
     "node-rsa": "^0.4.2",
