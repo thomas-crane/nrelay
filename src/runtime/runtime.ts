@@ -71,6 +71,10 @@ export class Runtime extends EventEmitter {
    */
   buildVersion: string;
   /**
+   * The client token to use when connecting to a server.
+   */
+  clientToken: string;
+  /**
    * The last arguments which were passed to this runtime.
    *
    * Note that this may be `undefined`, and it may also contain arguments which
@@ -167,6 +171,13 @@ export class Runtime extends EventEmitter {
       Logger.log('Runtime', `Using build version "${this.buildVersion}"`, LogLevel.Info);
     } else {
       Logger.log('Runtime', 'Cannot load buildVersion. It will be loaded when a client connects.', LogLevel.Warning);
+    }
+
+    if (versions && versions.clientToken) {
+      this.clientToken = versions.clientToken;
+      Logger.log('Runtime', `Using client token "${this.clientToken}"`, LogLevel.Info);
+    } else {
+      Logger.log('Runtime', 'Cannot load clientToken. Clients may not be able to connect.', LogLevel.Warning);
     }
 
     // load the client hooks.

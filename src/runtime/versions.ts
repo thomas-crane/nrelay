@@ -14,4 +14,8 @@ export interface Versions {
    * The build version used by this project.
    */
   buildVersion: string;
+  /**
+   * The client token used by this project.
+   */
+  clientToken: string;
 }

@@ -1146,6 +1146,7 @@ export class Client {
     hp.key = this.key;
     hp.gameNet = 'rotmg';
     hp.playPlatform = 'rotmg';
+    hp.trailer = this.runtime.clientToken;
     this.send(hp);
   }
 
