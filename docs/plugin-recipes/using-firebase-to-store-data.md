@@ -8,7 +8,7 @@ This recipe will demonstrate how to use Firebase to store and retrieve data. To 
 Start by creating a new TypeScript file in the `src/plugins` folder. We will start with the [plugin template](../creating-plugins.md#plugin-template) provided in the `creating-plugins` doc, but will remove the `Update` packet hook since we don't need it. We will also import `Logger` and `LogLevel` from the core import, since we will use those later.
 
 ```typescript
-import { Library, PacketHook, Client, Logger, LogLevel } from './../core';
+import { Library, PacketHook, Client, Logger, LogLevel } from 'nrelay';
 
 @Library({
   name: 'Server Monitor',
@@ -27,7 +27,7 @@ In order to use Firebase to store data in a plugin, you need to have a Firebase 
 Once you have the project set up, Go to the Project Overview, and click on `Add Firebase to your web app`. In the dialogue box, copy the `var config = { ... }` segment and put it in a `const` variable in the plugin.
 
 ```typescript
-import { Library, PacketHook, Client, Logger, LogLevel } from './../core';
+import { Library, PacketHook, Client, Logger, LogLevel } from 'nrelay';
 
 const firebaseConfig = {
   apiKey: 'your-apiKey',
@@ -50,7 +50,7 @@ npm install firebase
 Firebase can now be imported into the plugin.
 
 ```typescript
-import { Library, PacketHook, Client, Logger, LogLevel } from './../core';
+import { Library, PacketHook, Client, Logger, LogLevel } from 'nrelay';
 import * as firebase from 'firebase';
 ```
 
@@ -68,7 +68,7 @@ class ServerMonitor {
 Since we are monitoring players, we also need to inject the `PlayerTracker` library into our plugin.
 
 ```typescript
-import { Library, PacketHook, Client, Logger, LogLevel } from './../core';
+import { Library, PacketHook, Client, Logger, LogLevel } from 'nrelay';
 import * as firebase from 'firebase';
 import { PlayerTracker } from '../stdlib/player-tracker';
 
@@ -291,7 +291,7 @@ Now that the rules allow reading and writing to the database, you can start the 
 Now that the plugin is finished, it should look like the following code. This plugin can be extended to log extra information, or log it in a different way such as on a per-server basis.
 
 ```typescript
-import { Library, PacketHook, Client, Logger, LogLevel } from './../core';
+import { Library, PacketHook, Client, Logger, LogLevel } from 'nrelay';
 import * as firebase from 'firebase';
 import { PlayerTracker } from '../stdlib/player-tracker';
 import { PlayerData } from './../models';
