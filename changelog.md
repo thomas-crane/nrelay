@@ -2,6 +2,10 @@
 
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.8.0`
+### Added:
+ + The client token is now configurable via the `versions.json` file. This token will be appended to the end of the hello packet when connection attempts are made.
+
 ## `8.7.2`
 ### Changed:
  + Bumped @realmlib/net version.
