@@ -1,18 +1,33 @@
 /**
- * @module models
- */
-/**
- * A static helper class for determining if a condition number has a particular `effect`.
- * @example
- * const isDazed = ConditionEffects.has(this.condition, ConditionEffect.DAZED);
+ * @deprecated Use the exported function `hasEffect` instead.
  */
 export class ConditionEffects {
+  /**
+   * @deprecated Use the exported function `hasEffect` instead.
+   */
   static has(condition: number, effect: ConditionEffect): boolean {
     // tslint:disable no-bitwise
     const effectBit = 1 << effect - 1;
     return (condition & effectBit) === 1;
     // tslint:enable no-bitwise
   }
+}
+
+/**
+ * Determines whether or not the given `condition` value has the
+ * `effect` bit set.
+ *
+ * @example
+ * const isDazed = hasEffect(this.condition, ConditionEffect.DAZED);
+ *
+ * @param condition The condition stat to check.
+ * @param effect The effect to determine if the condition value has or not.
+ */
+export function hasEffect(condition: number, effect: ConditionEffect): boolean {
+  // tslint:disable no-bitwise
+  const effectBit = 1 << effect - 1;
+  return (condition & effectBit) === 1;
+  // tslint:enable no-bitwise
 }
 
 /**
@@ -48,5 +63,5 @@ export enum ConditionEffect {
   ARMORED = 26,
   ARMORBROKEN = 27,
   HEXED = 28,
-  NINJA_SPEEDY = 29
+  NINJA_SPEEDY = 29,
 }

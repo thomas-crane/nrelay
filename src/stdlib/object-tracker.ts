@@ -1,9 +1,6 @@
-/**
- * @module stdlib
- */
-import { Library, PacketHook, Client } from '../core';
+import { NewTickPacket, ObjectData, UpdatePacket } from '@realmlib/net';
 import { EventEmitter } from 'events';
-import { ObjectData, UpdatePacket, NewTickPacket } from '../networking';
+import { Client, Library, PacketHook } from '../core';
 
 /**
  * An event listener for events emitted by the `ObjectTracker`.
@@ -13,20 +10,18 @@ export type ObjectEventListener = (obj: ObjectData, client: Client) => void;
 @Library({
   name: 'Object Tracker',
   author: 'tcrane',
-  description: 'A utility library for keeping track of objects.'
+  description: 'A utility library for keeping track of objects.',
 })
 export class ObjectTracker {
   private emitter: EventEmitter;
-  private readonly trackedTypes: {
-    [type: number]: boolean;
-  };
+  private readonly trackedTypes: Set<number>;
   private readonly trackedObjects: {
     [guid: string]: ObjectData[];
   };
 
   constructor() {
     this.emitter = new EventEmitter();
-    this.trackedTypes = {};
+    this.trackedTypes = new Set();
     this.trackedObjects = {};
   }
 
@@ -47,7 +42,7 @@ export class ObjectTracker {
    * @param listener An optional event listener to attach.
    */
   startTracking(objectType: number, listener?: ObjectEventListener): this {
-    this.trackedTypes[objectType] = true;
+    this.trackedTypes.add(objectType);
     if (listener) {
       this.on(objectType, listener);
     }
@@ -63,14 +58,14 @@ export class ObjectTracker {
     if (!this.trackedTypes.hasOwnProperty(objectType)) {
       return;
     }
-    delete this.trackedTypes[objectType];
+    this.trackedTypes.delete(objectType);
     this.emitter.removeAllListeners(objectType.toString());
   }
 
   @PacketHook()
   private onUpdate(client: Client, update: UpdatePacket): void {
     for (const obj of update.newObjects) {
-      if (this.trackedTypes[obj.objectType]) {
+      if (this.trackedTypes.has(obj.objectType)) {
         if (!this.trackedObjects.hasOwnProperty(client.guid)) {
           this.trackedObjects[client.guid] = [];
         }

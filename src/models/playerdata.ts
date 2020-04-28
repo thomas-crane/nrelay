@@ -1,7 +1,4 @@
-/**
- * @module models
- */
-import { WorldPosData } from './../networking/data/world-pos-data';
+import { WorldPosData } from '@realmlib/net';
 import { Classes } from './classes';
 import { GuildRank } from './guildrank';
 
@@ -75,7 +72,7 @@ export interface PlayerData {
    */
   maxHP: number;
   /**
-   * The amount of HP which has been added due to bonuses (e.g. equipping armor).
+   * The increase in max HP which has been added due to bonuses (e.g. equipping a ring)
    */
   maxHPBoost: number;
   /**
@@ -83,7 +80,7 @@ export interface PlayerData {
    */
   maxMP: number;
   /**
-   * The amount of MP which has been added due to bonuses (e.g. equipping armor).
+   * The increase in max MP which has been added due to bonuses (e.g. equipping a ring)
    */
   maxMPBoost: number;
   /**
@@ -170,6 +167,46 @@ export interface PlayerData {
    * by the Player Tracker component. For **any** other use, this is unreliable.
    */
   server: string;
+  /**
+   * The size of this player.
+   */
+  size: number;
+  /**
+   * The amount of EXP required to advance to the next level.
+   */
+  nextLevelExp: number;
+  /**
+   * The clothing dye of this player.
+   */
+  clothingDye: number;
+  /**
+   * The accessory dye of this player.
+   */
+  accessoryDye: number;
+  /**
+   * The amount of fame required to achieve the next class quest.
+   */
+  nextClassQuestFame: number;
+  /**
+   * > Unknown.
+   */
+  legendaryRank: number;
+  /**
+   * Whether or not this player has an active XP booster.
+   */
+  xpBoosted: boolean;
+  /**
+   * The amount of time left of this player's XP booster.
+   */
+  xpBoostTime: number;
+  /**
+   * The skin of this player.
+   */
+  texture: number;
+  /**
+   * The number of fortune tokens this player has.
+   */
+  fortuneTokens: number;
 }
 
 /**
@@ -179,18 +216,18 @@ export interface PlayerData {
 export function getDefaultPlayerData(): PlayerData {
   return {
     objectId: 0,
-    worldPos: null,
-    name: null,
+    worldPos: undefined,
+    name: undefined,
     level: 0,
     exp: 0,
     currentFame: 0,
     stars: 0,
-    accountId: null,
+    accountId: undefined,
     accountFame: 0,
     gold: 0,
     class: Classes.Wizard,
     nameChosen: false,
-    guildName: null,
+    guildName: undefined,
     guildRank: GuildRank.NoRank,
     maxHP: 0,
     maxHPBoost: 0,
@@ -215,6 +252,16 @@ export function getDefaultPlayerData(): PlayerData {
     mpPots: 0,
     hasBackpack: false,
     inventory: new Array<number>(20).fill(-1),
-    server: null
+    server: undefined,
+    size: 0,
+    nextLevelExp: 0,
+    clothingDye: 0,
+    accessoryDye: 0,
+    nextClassQuestFame: 0,
+    legendaryRank: 0,
+    xpBoosted: false,
+    xpBoostTime: 0,
+    texture: 0,
+    fortuneTokens: 0,
   };
 }

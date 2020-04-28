@@ -1,7 +1,4 @@
 /**
- * @module services/pathfinding
- */
-/**
  * An update to a pathfinder node.
  */
 export interface NodeUpdate {

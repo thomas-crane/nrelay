@@ -1,10 +1,7 @@
-/**
- * @module services
- */
-import { createServer, Server, Socket } from 'net';
-import { Logger, LogLevel } from './logger';
-import { SocketWrapper, environment } from '../models';
 import { EventEmitter } from 'events';
+import { createServer, Server, Socket } from 'net';
+import { SocketWrapper } from '../models';
+import { Logger, LogLevel } from './logger';
 
 const DEFAULT_PORT = 5680;
 /**

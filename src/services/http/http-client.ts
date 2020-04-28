@@ -1,25 +1,23 @@
-/**
- * @module services/http
- */
-import * as url from 'url';
+import { IncomingMessage } from 'http';
 import * as qs from 'querystring';
+import { SocksClient } from 'socks';
+import * as url from 'url';
 import * as zlib from 'zlib';
 import { Proxy } from '../../models';
+import { Logger, LogLevel } from '../logger';
 import { Http } from './http';
 import { Https } from './https';
-import { SocksClient } from 'socks';
-import { Logger, LogLevel } from '../logger';
-import { IncomingMessage } from 'http';
 
 /**
  * The HTTP headers to include in each request.
  */
 export const REQUEST_HEADERS = {
   'Cache-Control': 'max-age=0',
+  // tslint:disable-next-line: max-line-length
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
   'Accept-Encoding': 'gzip, deflate',
-  'Connection': 'keep-alive'
+  'Connection': 'keep-alive',
 };
 
 /**
@@ -99,7 +97,7 @@ export class HttpClient {
       SocksClient.createConnection({
         destination: {
           host: endpoint.host,
-          port: 80
+          port: 80,
         },
         command: 'connect',
         proxy: {
@@ -107,8 +105,8 @@ export class HttpClient {
           port: proxy.port,
           type: proxy.type,
           userId: proxy.userId,
-          password: proxy.password
-        }
+          password: proxy.password,
+        },
       }).then((info) => {
         Logger.log('HttpClient', 'Established proxy!', LogLevel.Success);
         let data = '';

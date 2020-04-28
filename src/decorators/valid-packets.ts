@@ -1,7 +1,4 @@
-/**
- * @module decorators
- */
-import * as incomingPackets from '../networking/packets/incoming';
+import * as incomingPackets from '@realmlib/net/lib/packets/incoming';
 
 /**
  * A list of all packet types that are valid for a packet hook.

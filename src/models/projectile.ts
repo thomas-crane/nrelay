@@ -1,9 +1,5 @@
-/**
- * @module models
- */
+import { Point } from '@realmlib/net';
 import { GameObject, ProjectileInfo } from './object';
-import { ResourceManager } from '../core/resource-manager';
-import { Point } from '../services/pathfinding/point';
 
 /**
  * A projectile entity.
@@ -64,14 +60,17 @@ export class Projectile {
    */
   currentPosition: Point;
 
+  readonly multiHit: Set<number>;
+
   constructor(
     containerType: number,
+    containerProps: any,
     bulletType: number,
     ownerObjectId: number,
     bulletId: number,
     startAngle: number,
     startTime: number,
-    startPosition: Point
+    startPosition: Point,
   ) {
     this.containerType = containerType;
     this.bulletType = bulletType;
@@ -80,11 +79,12 @@ export class Projectile {
     this.startAngle = startAngle;
     this.startTime = startTime;
     this.startPosition = startPosition;
-    this.containerProperties = ResourceManager.objects[containerType];
+    this.containerProperties = containerProps;
     this.projectileProperties = this.containerProperties.projectiles[bulletType];
     this.damagePlayers = this.containerProperties.enemy;
     this.damageEnemies = !this.damagePlayers;
     this.damage = 0;
+    this.multiHit = new Set();
   }
 
   setDamage(damage: number): void {
@@ -103,7 +103,7 @@ export class Projectile {
   private getPositionAt(time: number): Point {
     const point: Point = {
       x: this.startPosition.x,
-      y: this.startPosition.y
+      y: this.startPosition.y,
     };
     let distanceTravelled = time * (this.projectileProperties.speed / 10000);
     const phase = this.bulletId % 2 === 0 ? 0 : Math.PI;
@@ -131,7 +131,9 @@ export class Projectile {
       if (this.projectileProperties.amplitude !== 0) {
         const deflection =
           this.projectileProperties.amplitude *
-          Math.sin(phase + time / this.projectileProperties.lifetimeMS * this.projectileProperties.frequency * 2 * Math.PI);
+          Math.sin(
+            phase + time / this.projectileProperties.lifetimeMS * this.projectileProperties.frequency * 2 * Math.PI,
+          );
         point.x += deflection * Math.cos(this.startAngle + Math.PI / 2);
         point.y += deflection * Math.sin(this.startAngle + Math.PI / 2);
       }

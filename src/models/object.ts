@@ -1,7 +1,4 @@
 /**
- * @module models
- */
-/**
  * An object loaded from the Objects resource
  */
 export interface GameObject {
@@ -103,6 +100,10 @@ export interface GameObject {
    * Whether or not the object occupies the entire square.
    */
   fullOccupy: boolean;
+  /**
+   * Whether or not the object protects players from ground damage.
+   */
+  protectFromGroundDamage: boolean;
 }
 
 /**
@@ -121,6 +122,10 @@ export interface ProjectileInfo {
    * The damage applied by this projectile, if it is not given by a range.
    */
   damage: number;
+  /**
+   * Whether or not the projectile is armor piercing.
+   */
+  armorPiercing: boolean;
   /**
    * The minimum damage applied by this projectile, if it is not given by the `damage`.
    */
@@ -152,7 +157,7 @@ export interface ProjectileInfo {
   /**
    * Whether or not this projectile hits multiple entities.
    */
-  multihit: boolean;
+  multiHit: boolean;
   /**
    * Whether or not this projectile passes through obstacles.
    */

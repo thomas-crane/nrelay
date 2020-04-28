@@ -1,7 +1,4 @@
 /**
- * @module models
- */
-/**
  * A description of a library.
  */
 export interface LibraryInfo {

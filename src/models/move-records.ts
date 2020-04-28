@@ -1,7 +1,4 @@
-/**
- * @module models
- */
-import { MoveRecord } from '../networking/data/move-record';
+import { MoveRecord } from '@realmlib/net';
 
 /**
  * This code is mostly ported from the RotMG game client. It's
@@ -30,6 +27,7 @@ export class MoveRecords {
       record.y = y;
       record.time = time;
       this.records.push(record);
+      return;
     }
     const currentRecord = this.records[this.records.length - 1];
     const currentId = this.getId(currentRecord.time);
@@ -39,6 +37,7 @@ export class MoveRecords {
       record.y = y;
       record.time = time;
       this.records.push(record);
+      return;
     }
     const score = this.getScore(id, time);
     const currentScore = this.getScore(currentId, currentRecord.time);

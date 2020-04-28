@@ -1,17 +1,19 @@
 {
   "name": "nrelay",
-  "version": "7.8.2",
+  "version": "8.8.2",
   "description": "A console based modular client for Realm of the Mad God built with Node.js and TypeScript.",
-  "main": "index.js",
-  "bin": {
-    "nrelay": "./index.js"
-  },
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
-    "build": "gulp",
-    "start": "gulp && node index",
-    "index": "tsai --path src --exclude plugins updater-assets stdlib",
-    "docs": "typedoc --options ./typedoc.json"
+    "compile": "tsc -p .",
+    "index": "tsai --path src --exclude stdlib --overwrite",
+    "docs": "typedoc --options ./typedoc.json",
+    "lint": "tslint -p ."
   },
+  "files": [
+    "lib/",
+    "license.md"
+  ],
   "author": "thomas-crane",
   "license": "MIT",
   "repository": {
@@ -19,23 +21,19 @@
     "url": "https://github.com/thomas-crane/nrelay"
   },
   "devDependencies": {
-    "@types/node": "^8.0.28",
+    "@types/node": "^8.10.60",
     "@types/node-rsa": "^0.4.0",
-    "del": "^3.0.0",
-    "gulp": "^3.9.1",
-    "gulp-typescript": "^3.2.3",
-    "gulp-watch": "^4.3.11",
-    "run-sequence": "^2.2.0",
     "tsai": "^2.0.0",
-    "tslint": "^5.7.0",
-    "typedoc": "^0.15.0",
-    "typedoc-plugin-external-module-name": "^1.1.3",
-    "typescript": "^2.5.2"
+    "tslint": "^5.20.1",
+    "typedoc": "^0.15.8",
+    "typescript": "^3.8.3"
   },
   "dependencies": {
+    "@realmlib/net": "^3.3.1",
+    "@realmlib/resx": "^4.1.2",
     "chalk": "^2.3.0",
     "node-rsa": "^0.4.2",
     "reflect-metadata": "^0.1.12",
-    "socks": "^2.1.2"
+    "socks": "^2.3.3"
   }
 }

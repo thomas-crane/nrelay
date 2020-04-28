@@ -1,8 +1,5 @@
-/**
- * @module services/pathfinding
- */
-import { HeapItem } from './heap-item';
 import { Hashable } from './hashable';
+import { HeapItem } from './heap-item';
 
 /**
  * A pathfinder node for the A* pathfinding algorithm.

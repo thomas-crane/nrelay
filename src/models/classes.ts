@@ -1,7 +1,4 @@
 /**
- * @module models
- */
-/**
  * The object types of all classes in the game.
  */
 export enum Classes {
@@ -19,5 +16,5 @@ export enum Classes {
   Trickster = 804,
   Sorcerer = 805,
   Ninja = 806,
-  Samurai = 785
+  Samurai = 785,
 }

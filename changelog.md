@@ -1,16 +1,136 @@
 # Changelog
+
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
-## `7.8.2`
-### Fixes:
- + Add missing field to Hello packet.
+## `8.8.0`
+### Added:
+ + The client token is now configurable via the `versions.json` file. This token will be appended to the end of the hello packet when connection attempts are made.
 
-## `7.8.1`
-### Changes
- + Added hp and mp boosts to player data.
+## `8.7.2`
+### Changed:
+ + Bumped @realmlib/net version.
+
+## `8.7.1`
+### Added:
+ + Added the `PetAbilities` enum (thanks to @zigzag2002).
+
+### Fixed:
+ + Fixed a bug where projectiles fired by the player would not have the right damage applied to them.
+
+## `8.7.0`
+### Added:
+ + Added more properties to the `PlayerData` interface. View the docs page for more info.
+ + Added the `PetTracker` library to the stdlib. It has an API extremely similar to that of the player tracker, and performs basically the same task except for pets.
+
+## `8.6.1`
+### Changed:
+ + Bumped @realmlib/net version.
+
+## `8.6.0`
+### Added:
+ + Added an `args` property to the runtime which is a yargs arguments object containing the command line arguments which were passed to nrelay when it was run.
+ + Multi hit projectiles are now handled properly. This should result in less disconnects for bots in realms.
+
+## `8.5.1`
+### Fixed:
+ + Fixed a bug where trying to change the client's auto nexus threshold would crash nrelay.
+
+### Added:
+ + Added a client HP system. It is a bit "conservative", so it may cause the client to nexus in some situations where it actually didn't need to, but it should also prevent a lot of deaths.
+
+## `8.5.0`
+### Changed:
+ + Packet hooks are now less restrictive. The only requirement is that the method has an incoming packet as one of its parameters. A client parameter is optional, and the order of the parameters no longer matters.
+
+## `8.4.3`
+### Fixed:
+ + Prevent the account service from triggering an internal error when it tries to fetch the server list.
+
+## `8.4.2`
+### Fixed:
+ + (Hopefully) fixed a rare race condition that results in resources being used after a client has been destroyed.
+ + Stopped the client from attempting to send packets while disconnected, which prevents occasional "Socket not attached" errors.
+ + Upgraded to the latest @realmlib/resx package which should fix permission issues when running the updater on Linux.
+
+## `8.4.1`
+### Fixed:
+ + Fixed a bug where the client packet hooks would not load if nrelay was run with `--no-plugins`.
+
+## `8.4.0`
+### Added:
+ + Connection scheduling to ensure two clients will not connect within a period of time which is too short.
+ + A retry mechanism to the runtime when initially loading accounts.
+
+### Changes:
+ + The client no longer connects back to the nexus when the connection is closed.
+ + The client will try to reconnect if it encounters an error while connecting.
+ + The client will wait the full amount of time before reconnecting after an account in use error.
+
+### Fixed:
+ + Added pet detection to make the ServerPlayerShoot response more consistent with the client.
+
+## `8.3.4`
+### Fixed:
+ + Stop client trying to walk onto unknown tiles.
+
+### Changes:
+ + Use new version of @realmlib/resx which speeds up the update process and removes the Java dependency.
+
+## `8.3.3`
+### Fixed:
+ + Fixed a race condition with projectile handling which would result in a crash.
+ + Corrected the order of operations for updating entities.
+ + Stopped sending multiple enemy hit packets for dead enemies.
+ + The PAUSE condition effect is now accounted for when moving and shooting.
+ + Invincible enemies are not hit.
+
+### Added:
+ + Several debug messages to the client.
+ + A regular log message to log enemy hits.
+
+## `8.3.2`
+### Fixed:
+ + Fixed a crash which would occur when the client shot while there were no known enemies.
+
+## `8.3.1`
+### Fixed:
+ + Fixed --no-plugins not actually stopping plugins from loading.
+
+## `8.3.0`
+### Added:
+ + Debug statements to the client.
+ + A readonly gameId property to the client class.
+ + Auto nexus checking in the aoe packet handler.
+
+## `8.2.1`
+### Fixed:
+ + Made usage of `getTime` and `lastFrameTime` more consistent with the real client.
+ + Fixed the closest player not being chosen for other hit packets.
+ + Made the projectile collision checking more consistent with the real client.
+
+## `8.2.0`
+### Added:
+ + OtherHit packet support
+
+### Changes:
+ + Slightly changed movement system to be more consistent with the real client.
+
+## `8.1.0`
+### Added:
+ + Ground damage support.
+ + Improved death handling and char info caching.
+ + Simplified auto nexus with configurable threshold.
+
+## `8.0.1`
+### Fixes:
+ + Fixed a critical upstream error which caused enemy projectiles to be handled incorrectly.
+
+## `8.0.0`
+### Changes:
+ + nrelay is now a module based system. There are a lot of changes, so they won't be listed here. Refer to the [7 to 8 migration guide](/docs/migration/7-to-8.md) and the readme for more info.
 
 ## `7.8.0`
-### Changes
+### Changes:
  + Added stat boosts to player data.
 
 ## `7.7.4`

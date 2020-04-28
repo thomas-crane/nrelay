@@ -1,6 +1,3 @@
-/**
- * @module models
- */
 import { Socket } from 'net';
 
 /**

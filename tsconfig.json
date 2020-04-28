@@ -1,22 +1,25 @@
 {
-    "include": [
-        "src/**/*"
-    ],
-    "compilerOptions": {
-        "module": "commonjs",
-        "target": "es6",
-        "experimentalDecorators": true,
-        "emitDecoratorMetadata": true,
-        "noImplicitAny": true,
-        "moduleResolution": "node",
-        "allowJs": false,
-        "sourceMap": true,
-        "outDir": "dist",
-        "baseUrl": ".",
-        "paths": {
-            "*": [
-                "node_modules/*"
-            ]
-        }
-    }
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "commonjs",
+    "resolveJsonModule": true,
+    "declaration": true,
+    "strict": true,
+    "strictNullChecks": false,
+    "noFallthroughCasesInSwitch": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "incremental": true,
+    "esModuleInterop": true,
+    "rootDir": "./src",
+    "outDir": "./lib",
+    "lib": ["es2017"]
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "lib",
+    "node_modules"
+  ]
 }
