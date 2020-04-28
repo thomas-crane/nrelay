@@ -1091,16 +1091,16 @@ export class Client {
     if (this.checkHealth(time)) {
       return;
     }
-    if (this.nextPos.length > 0) {
-      /**
-       * We don't want to move further than we are allowed to, so if the
-       * timer was late (which is likely) we should use 1000/30 ms instead
-       * of the real time elapsed. Math.floor(1000/30) happens to be 33ms.
-       */
-      const diff = Math.min(33, time - this.lastFrameTime);
-      this.moveTo(this.nextPos[0], diff);
-    }
     if (this.worldPos) {
+      if (this.nextPos.length > 0) {
+        /**
+         * We don't want to move further than we are allowed to, so if the
+         * timer was late (which is likely) we should use 1000/30 ms instead
+         * of the real time elapsed. Math.floor(1000/30) happens to be 33ms.
+         */
+        const diff = Math.min(33, time - this.lastFrameTime);
+        this.moveTo(this.nextPos[0], diff);
+      }
       this.moveRecords.addRecord(time, this.worldPos.x, this.worldPos.y);
       this.checkGroundDamage(time);
     }
