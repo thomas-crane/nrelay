@@ -171,7 +171,7 @@ export class LibraryManager {
       // get the hooks for this packet type.
       const hooks = this.hookStore.get(packet.type);
       for (const hook of hooks) {
-        if (!packet.propagate) {
+        if (packet.propagate === false) {
           return;
         }
         try {
@@ -197,7 +197,7 @@ export class LibraryManager {
         }
       }
     }
-    if (!packet.propagate) {
+    if (packet.propagate === false) {
       return;
     }
     if (this.clientHookStore.has(packet.type)) {
