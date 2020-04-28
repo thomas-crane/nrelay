@@ -1,5 +1,5 @@
 // tslint:disable-next-line: max-line-length
-import { AoeAckPacket, AoePacket, CreatePacket, CreateSuccessPacket, DamagePacket, DeathPacket, EnemyHitPacket, EnemyShootPacket, FailureCode, FailurePacket, GotoAckPacket, GotoPacket, GroundDamagePacket, GroundTileData, HelloPacket, LoadPacket, MapInfoPacket, MovePacket, NewTickPacket, NotificationPacket, OtherHitPacket, Packet, PacketIO, PingPacket, PlayerHitPacket, PlayerShootPacket, Point, PongPacket, ReconnectPacket, ServerPlayerShootPacket, ShootAckPacket, StatType, UpdateAckPacket, UpdatePacket, WorldPosData } from '@realmlib/net';
+import { AoeAckPacket, AoePacket, CreatePacket, CreateSuccessPacket, DamagePacket, DeathPacket, EnemyHitPacket, EnemyShootPacket, FailureCode, FailurePacket, GotoAckPacket, GotoPacket, GroundDamagePacket, GroundTileData, HelloPacket, LoadPacket, MapInfoPacket, MovePacket, NewTickPacket, NotificationPacket, OtherHitPacket, Packet, PacketIO, PacketMap, PingPacket, PlayerHitPacket, PlayerShootPacket, Point, PongPacket, ReconnectPacket, ServerPlayerShootPacket, ShootAckPacket, StatType, UpdateAckPacket, UpdatePacket, WorldPosData } from '@realmlib/net';
 import { Socket } from 'net';
 import * as rsa from '../crypto/rsa';
 import { Entity } from '../models/entity';
@@ -175,6 +175,7 @@ export class Client {
   private needsNewCharacter: boolean;
 
   // reconnect info
+  private connectionGuid: string;
   private key: number[];
   private keyTime: number;
   private internalGameId: GameId;
@@ -209,6 +210,7 @@ export class Client {
     this.autoAim = true;
     this.key = [];
     this.keyTime = -1;
+    this.connectionGuid = '';
     this.internalGameId = GameId.Nexus;
     this.playerData = getDefaultPlayerData();
     this.playerData.server = server.name;
@@ -245,11 +247,11 @@ export class Client {
     // use a set here to eliminate duplicates.
     const requiredHooks = new Set(getHooks().map((hook) => hook.packet));
     for (const type of requiredHooks) {
-      this.io.on(type, (data: Packet) => {
-        this.runtime.libraryManager.callHooks(data, this);
+      this.io.on(type, (data) => {
+        this.runtime.libraryManager.callHooks(data as Packet, this);
       });
     }
-    this.io.on('error', (err: Error) => {
+    this.io.on('error', (err) => {
       Logger.log(this.alias, `Received PacketIO error: ${err.message}`, LogLevel.Error);
       Logger.log(this.alias, err.stack, LogLevel.Debug);
     });
@@ -682,6 +684,7 @@ export class Client {
 
   @PacketHook()
   private onMapInfo(mapInfoPacket: MapInfoPacket): void {
+    this.connectionGuid = mapInfoPacket.connectionGuid;
     this.safeMap = mapInfoPacket.name === 'Nexus';
     if (this.needsNewCharacter) {
       const createPacket = new CreatePacket();
@@ -1146,6 +1149,7 @@ export class Client {
     hp.key = this.key;
     hp.gameNet = 'rotmg';
     hp.playPlatform = 'rotmg';
+    hp.previousConnectionGuid = this.connectionGuid;
     hp.trailer = this.runtime.clientToken;
     this.send(hp);
   }
@@ -1225,7 +1229,7 @@ export class Client {
 
       // add the event listeners.
       this.clientSocket.on('close', this.onClose.bind(this));
-      this.clientSocket.on('error', this.onError.bind(this));
+      // this.clientSocket.on('error', this.onError.bind(this));
 
       // perform the connection logic.
       this.onConnect();
