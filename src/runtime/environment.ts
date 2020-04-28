@@ -100,7 +100,7 @@ export class Environment {
    */
   writeJSON<T>(json: T, ...relativePath: string[]): void {
     const filePath = this.pathTo(...relativePath);
-    fs.writeFileSync(filePath, JSON.stringify(json));
+    fs.writeFileSync(filePath, JSON.stringify(json, undefined, 2));
   }
 
   /**
