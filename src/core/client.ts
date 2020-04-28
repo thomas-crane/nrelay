@@ -1229,7 +1229,7 @@ export class Client {
 
       // add the event listeners.
       this.clientSocket.on('close', this.onClose.bind(this));
-      // this.clientSocket.on('error', this.onError.bind(this));
+      this.clientSocket.on('error', this.onError.bind(this));
 
       // perform the connection logic.
       this.onConnect();
