@@ -238,7 +238,7 @@ export class Client {
     } else {
       this.charInfo = { charId: 0, nextCharId: 1, maxNumChars: 1 };
     }
-    this.needsNewCharacter = this.charInfo.charId === 0;
+    this.needsNewCharacter = this.charInfo.charId < 1;
     this.internalServer = Object.assign({}, server);
     this.nexusServer = Object.assign({}, server);
 
@@ -687,12 +687,17 @@ export class Client {
     this.connectionGuid = mapInfoPacket.connectionGuid;
     this.safeMap = mapInfoPacket.name === 'Nexus';
     if (this.needsNewCharacter) {
+      // create the character.
       const createPacket = new CreatePacket();
       createPacket.classType = Classes.Wizard;
       createPacket.skinType = 0;
       Logger.log(this.alias, 'Creating new character', LogLevel.Info);
       this.send(createPacket);
       this.needsNewCharacter = false;
+      // update the char info cache.
+      this.charInfo.charId = this.charInfo.nextCharId;
+      this.charInfo.nextCharId += 1;
+      this.runtime.accountService.updateCharInfoCache(this.guid, this.charInfo);
     } else {
       const loadPacket = new LoadPacket();
       loadPacket.charId = this.charInfo.charId;
