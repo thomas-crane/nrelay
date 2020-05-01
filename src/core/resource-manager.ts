@@ -93,7 +93,7 @@ export class ResourceManager {
           numProjectiles: isNaN(current.NumProjectiles) ? 1 : +current.NumProjectiles,
           arcGap: isNaN(current.ArcGap) ? 11.25 : +current.ArcGap,
           fameBonus: isNaN(current.FameBonus) ? 0 : +current.FameBonus,
-          feedPower: isNaN(current.FeedPower) ? 0 : +current.FeedPower,
+          feedPower: isNaN(current.feedPower) ? 0 : +current.feedPower,
           fullOccupy: current.FullOccupy === '',
           occupySquare: current.OccupySquare === '',
           protectFromGroundDamage: current.ProtectFromGroundDamage === '',
