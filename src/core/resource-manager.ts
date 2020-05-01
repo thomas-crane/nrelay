@@ -69,6 +69,9 @@ export class ResourceManager {
     let petCount = 0;
     let objectsArray: any[] = objects.Object;
     for (const current of objectsArray) {
+      if (this.objects[+current.type] != null) {
+        continue;
+      }
       try {
         this.objects[+current.type] = {
           type: +current.type,
