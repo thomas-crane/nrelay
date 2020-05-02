@@ -2,6 +2,11 @@
 
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.8.6`
+### Fixed:
+  + Fixed a bug where the resource manager would overwrite object data with stripped versions that appear later in Objects.json.
+  + Replaced `FeedPower` with `feedPower` to match Objects.json.
+
 ## `8.8.0`
 ### Added:
  + The client token is now configurable via the `versions.json` file. This token will be appended to the end of the hello packet when connection attempts are made.
