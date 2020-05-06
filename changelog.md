@@ -2,6 +2,11 @@
 
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.8.7`
+### Fixed:
+  + The exit code is now 1 when an exit occurs.
+  + A default client token is used if one is not present.
+
 ## `8.8.6`
 ### Fixed:
   + Fixed a bug where the resource manager would overwrite object data with stripped versions that appear later in Objects.json.
