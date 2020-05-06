@@ -19,82 +19,85 @@ export class Updater {
    * Checks if the client or assets need updating and returns
    * an update check result which can be passed to `performUpdate`.
    */
-  checkForUpdates(): Promise<UpdateCheckResult> {
+  async checkForUpdates(): Promise<UpdateCheckResult> {
     Logger.log('Updater', 'Checking for new versions...', LogLevel.Info);
-    return resx.getVersions().then((versions) => {
-      const localVersion = this.env.readJSON<Versions>('versions.json');
-      if (!localVersion) {
-        return {
-          needClientUpdate: true,
-          needAssetUpdate: true,
-        };
-      } else {
-        return {
-          needClientUpdate: localVersion.clientVersion !== versions.clientVersion,
-          needAssetUpdate: localVersion.assetVersion !== versions.assetVersion,
-        };
-      }
-    });
+    const versions = await resx.getVersions();
+    const localVersion = this.env.readJSON<Versions>('versions.json');
+    if (!localVersion) {
+      return {
+        needClientUpdate: true,
+        needAssetUpdate: true,
+      };
+    } else {
+      return {
+        needClientUpdate: localVersion.clientVersion !== versions.clientVersion,
+        needAssetUpdate: localVersion.assetVersion !== versions.assetVersion,
+      };
+    }
   }
 
   /**
    * Performs the necessary updates according to the update info.
    * @param updateInfo The update check result to use when performing the update.
    */
-  performUpdate(updateInfo: UpdateCheckResult): Promise<void> {
+  async performUpdate(updateInfo: UpdateCheckResult): Promise<void> {
     if (updateInfo.needAssetUpdate && updateInfo.needClientUpdate) {
       Logger.log('Updater', 'Updating client and assets...', LogLevel.Info);
-      return Promise.all([
+      await Promise.all([
         this.updateAssets(),
         this.updateClient(),
-      ]).then(() => undefined);
+      ]);
+    } else {
+      if (updateInfo.needAssetUpdate) {
+        Logger.log('Updater', 'Updating assets...', LogLevel.Info);
+        return this.updateAssets();
+      }
+      if (updateInfo.needClientUpdate) {
+        Logger.log('Updater', 'Updating client...', LogLevel.Info);
+        return this.updateClient();
+      }
     }
-    if (updateInfo.needAssetUpdate) {
-      Logger.log('Updater', 'Updating assets...', LogLevel.Info);
-      return this.updateAssets();
-    }
-    if (updateInfo.needClientUpdate) {
-      Logger.log('Updater', 'Updating client...', LogLevel.Info);
-      return this.updateClient();
-    }
-    return Promise.resolve();
   }
 
   /**
    * Downloads the latest assets into the resources directory.
    */
-  private updateAssets(): Promise<void> {
+  private async updateAssets(): Promise<void> {
     const groundTypesStream = fs.createWriteStream(this.env.pathTo('resources', 'GroundTypes.json'));
     const objectsStream = fs.createWriteStream(this.env.pathTo('resources', 'Objects.json'));
 
     Logger.log('Updater', 'Downloading assets...', LogLevel.Info);
-    return Promise.all([
+    const [assetVersion] = await Promise.all([
       resx.getAssetVersion(),
       resx.getGroundTypes(groundTypesStream),
       resx.getObjects(objectsStream),
-    ]).then(([assetVersion]) => {
-      Logger.log('Updater', 'Updated assets!', LogLevel.Success);
-      this.env.updateJSON({ assetVersion }, 'versions.json');
-    });
+    ]);
+    Logger.log('Updater', 'Updated assets!', LogLevel.Success);
+    this.env.updateJSON<Versions>({ assetVersion }, 'versions.json');
   }
 
   /**
-   * Updates the packets.json file by downloaded the latest client
-   * and extracting the packet ids.
+   * Updates the packets.json file and the client version
+   * by downloading the latest client and extracting the info.
    */
-  private updateClient(): Promise<void> {
-    let clientVersion: string;
+  private async updateClient(): Promise<void> {
     Logger.log('Updater', 'Fetching client version...', LogLevel.Info);
-    return resx.getClientVersion().then((version) => {
-      clientVersion = version;
-      Logger.log('Updater', 'Downloading client...', LogLevel.Info);
-      return resx.getClient(version);
-    }).then((clientBuffer) => {
-      Logger.log('Updater', 'Extracting packets...', LogLevel.Info);
-      const packets = resx.extractPackets(clientBuffer);
-      this.env.writeJSON(packets, 'packets.json');
-      this.env.updateJSON({ clientVersion }, 'versions.json');
-      Logger.log('Updater', 'Updated client!', LogLevel.Success);
-    });
+    const version = await resx.getClientVersion();
+    Logger.log('Updater', 'Downloading client...', LogLevel.Info);
+    const clientBuffer = await resx.getClient(version);
+
+    const extractor = new resx.Extractor(clientBuffer);
+    Logger.log('Updater', 'Extracting packets...', LogLevel.Info);
+    const packets = extractor.packets();
+    Logger.log('Updater', 'Extracting parameters...', LogLevel.Info);
+    const params = extractor.parameters();
+    extractor.free();
+
+    this.env.writeJSON(packets, 'packets.json');
+    this.env.updateJSON<Versions>({
+      clientVersion: version,
+      buildVersion: params.version,
+    }, 'versions.json');
+    Logger.log('Updater', 'Updated packets and version!', LogLevel.Success);
   }
 }

@@ -109,7 +109,7 @@ export class Environment {
    * @param json The object to use when updating.
    * @param relativePath The path of the file to update.
    */
-  updateJSON<T>(json: T, ...relativePath: string[]): void {
+  updateJSON<T>(json: Partial<T>, ...relativePath: string[]): void {
     const existing: T = this.readJSON(...relativePath) || {} as T;
     for (const prop in json) {
       if (json.hasOwnProperty(prop)) {

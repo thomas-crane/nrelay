@@ -149,14 +149,14 @@ export class Runtime extends EventEmitter {
     } catch (error) {
       Logger.log('Runtime', 'Error while loading resources.', LogLevel.Error);
       Logger.log('Runtime', error.message, LogLevel.Error);
-      process.exit(0);
+      process.exit(1);
     }
 
     // load the packets
     const packets: PacketMap = this.env.readJSON('packets.json');
     if (!packets) {
       Logger.log('Runtime', 'Cannot load packets.json', LogLevel.Error);
-      process.exit(0);
+      process.exit(1);
     } else {
       this.packetMap = packets;
       // the length is divided by 2 because the map is bidirectional.
@@ -164,20 +164,26 @@ export class Runtime extends EventEmitter {
       Logger.log('Runtime', `Mapped ${size} packet ids.`, LogLevel.Info);
     }
 
-    // load the buildVersion.
+    // load the version info.
     const versions = this.env.readJSON<Versions>('versions.json');
-    if (versions && versions.buildVersion) {
-      this.buildVersion = versions.buildVersion;
-      Logger.log('Runtime', `Using build version "${this.buildVersion}"`, LogLevel.Info);
+    if (versions !== undefined) {
+      if (versions.buildVersion) {
+        this.buildVersion = versions.buildVersion;
+        Logger.log('Runtime', `Using build version "${this.buildVersion}"`, LogLevel.Info);
+      } else {
+        Logger.log('Runtime', 'Cannot load buildVersion. Clients may not be able to connect.', LogLevel.Warning);
+      }
+      if (versions.clientToken) {
+        this.clientToken = versions.clientToken;
+        Logger.log('Runtime', `Using client token "${this.clientToken}"`, LogLevel.Info);
+      } else {
+        Logger.log('Runtime', 'Cannot load clientToken. Inserting the default value.', LogLevel.Warning);
+        this.clientToken = 'XTeP7hERdchV5jrBZEYNebAqDPU6tKU6';
+        this.env.updateJSON<Versions>({ clientToken: this.clientToken }, 'versions.json');
+      }
     } else {
-      Logger.log('Runtime', 'Cannot load buildVersion. It will be loaded when a client connects.', LogLevel.Warning);
-    }
-
-    if (versions && versions.clientToken) {
-      this.clientToken = versions.clientToken;
-      Logger.log('Runtime', `Using client token "${this.clientToken}"`, LogLevel.Info);
-    } else {
-      Logger.log('Runtime', 'Cannot load clientToken. Clients may not be able to connect.', LogLevel.Warning);
+      Logger.log('Runtime', 'Cannot load versions.json', LogLevel.Error);
+      process.exit(1);
     }
 
     // load the client hooks.
@@ -337,7 +343,7 @@ export class Runtime extends EventEmitter {
    * @param buildVersion The new build version to store.
    */
   updateBuildVersion(buildVersion: string): void {
-    this.env.updateJSON<Versions>({ buildVersion } as Versions, 'versions.json');
+    this.env.updateJSON<Versions>({ buildVersion }, 'versions.json');
   }
 
   /**
