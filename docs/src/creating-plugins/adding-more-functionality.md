@@ -123,4 +123,4 @@ Success! If we send our bot "hello" again, we can see that it now uses the new m
 
 ## The next step
 
-So far we've been using `console.log` whenever we need to print stuff to the console. This is quick, and works, but it's not very fancy. In the logging guide, we'll go over how to use nrelay's logging system to get fancy looking output, and other functionality such as writing logs to a file.
+So far we've been using `console.log` whenever we need to print stuff to the console. This is quick, and works, but it's not very fancy. In the [logging guide](../logging-guide/using-the-logger.md), we'll go over how to use nrelay's logging system to get fancy looking output, and other functionality such as writing logs to a file.
