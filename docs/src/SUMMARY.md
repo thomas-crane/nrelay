@@ -2,6 +2,7 @@
 
 [The nrelay user guide](readme.md)
 
+- [Getting started](getting-started/readme.md)
 - [Creating plugins](creating-plugins/creating-a-plugin.md)
   - [Declaring the plugin class](creating-plugins/declaring-the-plugin-class.md)
   - [Adding packet hooks](creating-plugins/adding-packet-hooks.md)

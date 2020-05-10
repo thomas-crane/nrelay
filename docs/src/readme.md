@@ -2,7 +2,7 @@
 
 This book aims to be the go to resource for nrelay documentation.
 
-If you've never used nrelay before, start with the [Getting started]() chapter.
+If you've never used nrelay before, start with the [Getting started](getting-started/readme.md) chapter.
 
 If you've already got nrelay installed and are keen to write your first plugin, check out the [Creating plugins](creating-plugins/creating-a-plugin.md) chapter.
 
