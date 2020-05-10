@@ -1,0 +1,11 @@
+{
+  "hosting": {
+    "site": "nrelay-book",
+    "public": "book",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}
