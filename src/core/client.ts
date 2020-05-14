@@ -430,6 +430,7 @@ export class Client {
     }
     to.x = Math.floor(to.x);
     to.y = Math.floor(to.y);
+    const clientPos = new WorldPosData(Math.floor(this.worldPos.x), Math.floor(this.worldPos.y));
     this.pathfinder.findPath(this.worldPos, to).then((path) => {
       if (path.length === 0) {
         this.pathfinderTarget = undefined;
