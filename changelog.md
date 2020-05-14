@@ -2,6 +2,10 @@
 
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.8.8`
+### Fixed:
+  + Fixed a bug where the pathfinder would not choose the correct starting node.
+
 ## `8.8.7`
 ### Fixed:
   + The exit code is now 1 when an exit occurs.
