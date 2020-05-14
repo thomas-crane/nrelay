@@ -10,6 +10,10 @@ api-docs/public
 api-docs/firebase-debug.log
 api-docs/.firebase/
 
+# Other docs stuff
+docs/firebase-debug.log
+docs/.firebase/
+
 # User prefs
 .vscode/
 
