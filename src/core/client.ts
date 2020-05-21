@@ -292,6 +292,8 @@ export class Client {
       shootPacket.startingPos = this.worldPos.clone();
       shootPacket.startingPos.x += (Math.cos(angle) * 0.3);
       shootPacket.startingPos.y += (Math.sin(angle) * 0.3);
+      shootPacket.speedMult = this.playerData.projSpeedMult;
+      shootPacket.lifeMult = this.playerData.projLifeMult;
       this.send(shootPacket);
       const containerProps = this.runtime.resources.objects[item.type];
       const newProj = new Projectile(

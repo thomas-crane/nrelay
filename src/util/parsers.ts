@@ -167,6 +167,12 @@ export function processStatData(stats: StatData[], currentData?: PlayerData): Pl
       case StatType.FORTUNE_TOKEN_STAT:
         playerData.fortuneTokens = stat.statValue;
         continue;
+      case StatType.PROJECTILE_SPEED_MULT:
+        playerData.projSpeedMult = stat.statValue;
+        continue;
+      case StatType.PROJECTILE_LIFE_MULT:
+        playerData.projLifeMult = stat.statValue;
+        continue;
       default:
         if (stat.statType >= StatType.INVENTORY_0_STAT && stat.statType <= StatType.INVENTORY_11_STAT) {
           playerData.inventory[stat.statType - 8] = stat.statValue;
