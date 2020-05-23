@@ -2,6 +2,10 @@
 
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.8.9`
+### Fixed:
+  + Added the projectile speed and lifetime multipliers
+
 ## `8.8.8`
 ### Fixed:
   + Fixed a bug where the pathfinder would not choose the correct starting node.
