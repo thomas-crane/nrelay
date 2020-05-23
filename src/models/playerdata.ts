@@ -207,6 +207,14 @@ export interface PlayerData {
    * The number of fortune tokens this player has.
    */
   fortuneTokens: number;
+  /**
+   * The multiplier for projectile speed for shots from this player.
+   */
+  projSpeedMult: number;
+  /**
+   * The multiplier for projectile lifetime for shots from this player.
+   */
+  projLifeMult: number;
 }
 
 /**
@@ -263,5 +271,7 @@ export function getDefaultPlayerData(): PlayerData {
     xpBoostTime: 0,
     texture: 0,
     fortuneTokens: 0,
+    projSpeedMult: 0,
+    projLifeMult: 0
   };
 }
