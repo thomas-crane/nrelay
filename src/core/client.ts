@@ -1237,6 +1237,7 @@ export class Client {
       Logger.log(this.alias, `Error while connecting: ${err.message}`, LogLevel.Error);
       Logger.log(this.alias, err.stack, LogLevel.Debug);
       this.reconnectCooldown = getWaitTime(this.proxy ? this.proxy.host : '');
+      this.runtime.emit(Events.ClientConnectError, this, err);
       this.connect();
     }
   }

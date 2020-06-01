@@ -2,6 +2,10 @@
 
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.9.0`
+### Added:
+ + Added client connection error event, when the client could not connect to the game server.
+
 ## `8.8.0`
 ### Added:
  + The client token is now configurable via the `versions.json` file. This token will be appended to the end of the hello packet when connection attempts are made.
