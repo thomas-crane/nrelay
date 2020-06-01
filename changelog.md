@@ -2,6 +2,10 @@
 
 This changelog uses [Semantic Versioning 2.0.0](https://semver.org/).
 
+## `8.9.0`
+### Added:
+ + Added client connection error event, when the client could not connect to the game server.
+
 ## `8.8.9`
 ### Fixed:
   + Added the projectile speed and lifetime multipliers
