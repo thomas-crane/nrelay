@@ -974,6 +974,7 @@ export class Client {
     const movePacket = new MovePacket();
     movePacket.tickId = newTickPacket.tickId;
     movePacket.time = this.lastFrameTime;
+    movePacket.serverRealTimeMS = newTickPacket.serverRealTimeMS;
     movePacket.newPosition = this.worldPos;
     movePacket.records = [];
     const lastClear = this.moveRecords.lastClearTime;
