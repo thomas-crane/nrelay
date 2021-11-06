@@ -1,6 +1,6 @@
 {
   "name": "nrelay",
-  "version": "8.8.7",
+  "version": "8.9.0",
   "description": "A console based modular client for Realm of the Mad God built with Node.js and TypeScript.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -29,7 +29,7 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
-    "@realmlib/net": "^3.3.1",
+    "@realmlib/net": "^3.3.3",
     "@realmlib/resx": "^5.0.0",
     "chalk": "^2.3.0",
     "node-rsa": "^0.4.2",

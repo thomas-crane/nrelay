@@ -292,6 +292,8 @@ export class Client {
       shootPacket.startingPos = this.worldPos.clone();
       shootPacket.startingPos.x += (Math.cos(angle) * 0.3);
       shootPacket.startingPos.y += (Math.sin(angle) * 0.3);
+      shootPacket.speedMult = this.playerData.projSpeedMult;
+      shootPacket.lifeMult = this.playerData.projLifeMult;
       this.send(shootPacket);
       const containerProps = this.runtime.resources.objects[item.type];
       const newProj = new Projectile(
@@ -430,7 +432,8 @@ export class Client {
     }
     to.x = Math.floor(to.x);
     to.y = Math.floor(to.y);
-    this.pathfinder.findPath(this.worldPos, to).then((path) => {
+    const clientPos = new WorldPosData(Math.floor(this.worldPos.x), Math.floor(this.worldPos.y));
+    this.pathfinder.findPath(clientPos, to).then((path) => {
       if (path.length === 0) {
         this.pathfinderTarget = undefined;
         this.nextPos.length = 0;
@@ -1242,6 +1245,7 @@ export class Client {
       Logger.log(this.alias, `Error while connecting: ${err.message}`, LogLevel.Error);
       Logger.log(this.alias, err.stack, LogLevel.Debug);
       this.reconnectCooldown = getWaitTime(this.proxy ? this.proxy.host : '');
+      this.runtime.emit(Events.ClientConnectError, this, err);
       this.connect();
     }
   }

@@ -18,4 +18,8 @@ export enum Events {
    * The event raised when the client has drained its move queue.
    */
   ClientArrived = 'client_arrived',
+  /**
+   * The event raised when the client could not connect to the game server.
+   */
+  ClientConnectError = 'client_connect_error',
 }

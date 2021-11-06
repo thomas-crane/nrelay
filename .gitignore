@@ -1,3 +1,6 @@
+# WebStorm workspace configuration
+.idea/
+
 # Node modules
 node_modules/
 
